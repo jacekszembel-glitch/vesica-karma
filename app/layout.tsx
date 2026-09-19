@@ -61,7 +61,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="container">
             <p style={{ fontSize: "0.78rem", textAlign: "center", color: "#6e8292" }}>
               © {new Date().getFullYear()} VesicaKarma — narzędzie rozwojowe i edukacyjne,
-              nie zastępuje porady medycznej, prawnej ani finansowej i niczego nie przepowiada.
+              nie zastępuje porady medycznej, prawnej ani finansowej. Niczego nie przepowiadamy —
+              wskazujemy drogę.
             </p>
           </div>
         </footer>
