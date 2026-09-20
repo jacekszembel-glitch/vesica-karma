@@ -6,19 +6,25 @@
  */
 const IMG_W = 1260, IMG_H = 761;
 
+/** Współrzędne zmierzone bezpośrednio z pikseli referencji projektowej
+ *  (public/brand/nowa- kolo-karmy.jpg — analiza plam jasności / connected
+ *  components, nie „na oko"), przeliczone do lokalnego układu viewBox
+ *  przez SEGMENT_GAPY.astrologia. Metoda pomiaru: patrz git history tego
+ *  pliku (skrypt scripts/_measure_stars.mjs, usunięty po użyciu). */
 const GWIAZDY = [
-  { x: 62, y: 10, s: 5.5 },
-  { x: 86, y: 18, s: 4 },
-  { x: 57, y: 45, s: 7 },
-  { x: 36, y: 53, s: 4 },
-  { x: 16, y: 45, s: 3 },
-  { x: 80, y: 45, s: 3.5 },
-  { x: 94, y: 50, s: 3 },
-  { x: 50, y: 5, s: 3 },
-  { x: 74, y: 57, s: 3 },
-  { x: 8, y: 17, s: 2.8 },
-  { x: 96, y: 31, s: 3.2 },
-  { x: 70, y: 30, s: 2.5 },
+  { x: 62.6, y: 34.8, s: 7.5 },
+  { x: 19.6, y: 33.0, s: 5.9 },
+  { x: 51.6, y: 22.7, s: 4.3 },
+  { x: 83.7, y: 30.9, s: 3.9 },
+  { x: 50.7, y: 49.7, s: 2.6 },
+  { x: 27.3, y: 16.7, s: 2.1 },
+  { x: 60.5, y: 9.6, s: 2.0 },
+  { x: 43.6, y: 8.2, s: 1.8 },
+  { x: 74.5, y: 17.0, s: 1.6 },
+  { x: 30.3, y: 44.7, s: 1.8 },
+  { x: 72.4, y: 43.3, s: 1.8 },
+  { x: 10.1, y: 43.7, s: 1.6 },
+  { x: 92.0, y: 45.4, s: 1.8 },
 ];
 
 function Iskra({ x, y, s }: { x: number; y: number; s: number }) {
@@ -51,14 +57,15 @@ export default function MoonStars({ box, zlote = false, puls = false }: {
         pointerEvents: "none",
       }}
     >
-      {/* półksiężyc — duży, dominujący, po lewej stronie kompozycji; koło
-          z odjętym przesuniętym kołem (maska) */}
+      {/* półksiężyc — środek i rozmiar zmierzone tak samo jak gwiazdy
+          (bbox 26×35 w przestrzeni referencji), kształt (koło minus
+          przesunięte koło) dobrany do tych proporcji */}
       <mask id="ks-mask">
         <rect x="0" y="0" width="100" height="60" fill="black" />
-        <circle cx="32" cy="30" r="19" fill="white" />
-        <circle cx="39" cy="25" r="15.5" fill="black" />
+        <circle cx="37.4" cy="31.2" r="13" fill="white" />
+        <circle cx="42" cy="27.9" r="10.2" fill="black" />
       </mask>
-      <circle cx="32" cy="30" r="19" fill="currentColor" mask="url(#ks-mask)" />
+      <circle cx="37.4" cy="31.2" r="13" fill="currentColor" mask="url(#ks-mask)" />
       {GWIAZDY.map((g, i) => <Iskra key={i} {...g} />)}
     </svg>
   );
