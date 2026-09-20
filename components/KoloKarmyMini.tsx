@@ -11,10 +11,15 @@ export default function KoloKarmyMini({ ukonczone = new Set<SystemKarmy>(), maxW
   ukonczone?: Set<SystemKarmy>;
   maxWidth?: number;
 }) {
+  // Jak w KoloKarmy.tsx: przy komplecie (3/3) wracamy do oryginalnej, w pełni
+  // złotej grafiki — łącznie z zewnętrznym pierścieniem Karmy i Związkami.
+  const wszystkoZlote = ukonczone.size >= 3;
+
   return (
     <div aria-hidden="true" style={{ position: "relative", width: "100%", maxWidth, margin: "0 auto" }}>
-      <img src="/brand/kolo-karmy-taupe.png" alt="" style={{ display: "block", width: "100%", height: "auto" }} />
-      {(["astrologia", "hiromancja", "numerologia"] as const).filter((id) => ukonczone.has(id)).map((id) => (
+      <img src={wszystkoZlote ? "/brand/kolo-karmy.png" : "/brand/kolo-karmy-taupe.png"} alt=""
+        style={{ display: "block", width: "100%", height: "auto" }} />
+      {!wszystkoZlote && (["astrologia", "hiromancja", "numerologia"] as const).filter((id) => ukonczone.has(id)).map((id) => (
         <img key={id} src={`/brand/fill-${id}-gold.png`} alt=""
           style={{
             position: "absolute", left: 0, top: 0, width: "100%", height: "100%",

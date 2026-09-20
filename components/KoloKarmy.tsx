@@ -115,7 +115,13 @@ const TIP_W = 168;
 // Typ w lib/koloKarmyGeometria.ts (re-export tutaj dla wygody importujących).
 export type { SystemKarmy };
 
-export default function KoloKarmy({ ukonczone = new Set<SystemKarmy>() }: { ukonczone?: Set<SystemKarmy> }) {
+/** Jedyne obecne użycie tego komponentu to strona główna (hub nawigacyjny) —
+ *  ta ma zostać zawsze w pełnym złocie, jak przed reskinem (potwierdzone:
+ *  wskaźnik postępu taupe→złoto to język Mojego Panelu i jego breadcrumbów
+ *  na podstronach — KoloKarmyMini.tsx — nie strony głównej). */
+const WSZYSTKIE_SYSTEMY = new Set<SystemKarmy>(["astrologia", "hiromancja", "numerologia"]);
+
+export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone?: Set<SystemKarmy> }) {
   const [aktywny, setAktywny] = useState<string | null>(null);
   const [tip, setTip] = useState<{ label: string; left: number; top: number } | null>(null);
   const [hoverTytul, setHoverTytul] = useState(false);
@@ -135,17 +141,24 @@ export default function KoloKarmy({ ukonczone = new Set<SystemKarmy>() }: { ukon
     document.body,
   ) : null;
 
+  // Gdy wszystkie trzy systemy są „ukończone" (domyślny stan na stronie
+  // głównej), wracamy do oryginalnej, w pełni złotej grafiki — łącznie
+  // z zewnętrznym pierścieniem Karmy i Związkami, których warstwy taupe/gold
+  // nie obejmują (dotyczą tylko trzech wewnętrznych pętli-systemów).
+  const wszystkoZlote = ukonczone.size >= 3;
+
   return (
     <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
       <img
-        src="/brand/kolo-karmy-taupe.png"
+        src={wszystkoZlote ? "/brand/kolo-karmy.png" : "/brand/kolo-karmy-taupe.png"}
         alt="Koło Karmy — Astrologia, Numerologia i Chiromancja wokół Twojego Panelu, z Astrokartografią, Mahadashami i Karmą jako punktami wyjścia"
         style={{ display: "block", width: "100%", height: "auto" }}
       />
 
       {/* pętle „ukończonych" systemów — złote wypełnienie zamiast domyślnego
-          taupe, z miękką poświatą (drop-shadow), Faza 1: stan na sztywno z propa */}
-      {(["astrologia", "hiromancja", "numerologia"] as const).filter((id) => ukonczone.has(id)).map((id) => (
+          taupe, z miękką poświatą (drop-shadow), Faza 1: stan na sztywno z propa.
+          Pominięte, gdy baza już jest w pełni złota (patrz wyżej). */}
+      {!wszystkoZlote && (["astrologia", "hiromancja", "numerologia"] as const).filter((id) => ukonczone.has(id)).map((id) => (
         <img key={`fill-${id}`} src={`/brand/fill-${id}-gold.png`} alt=""
           style={{
             position: "absolute", left: 0, top: 0, width: "100%", height: "100%",

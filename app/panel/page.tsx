@@ -34,8 +34,26 @@ function Kafelek({ id, label, href, gotowe }: { id: SystemKarmy; label: string; 
   );
 }
 
+/** Strzałka od podpowiedzi do pierwszego nieukończonego kafelka — narysowana
+ *  pod pozycję lewego (pierwszego) kafelka w rzędzie, tak jak w referencji.
+ *  Faza 1: układ na sztywno pod demo-stan (Chiromancja zawsze pierwsza). */
+function StrzalkaDoKafelka() {
+  return (
+    <svg width="70" height="110" viewBox="0 0 70 110" aria-hidden="true"
+      style={{ position: "absolute", left: -10, top: -96, overflow: "visible" }}>
+      <defs>
+        <marker id="grot" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 Z" fill="var(--sand)" />
+        </marker>
+      </defs>
+      <path d="M 58 105 C 15 105, 8 55, 28 8" fill="none" stroke="var(--sand)" strokeWidth="2" markerEnd="url(#grot)" />
+    </svg>
+  );
+}
+
 export default function Page() {
   const brakujace = SYSTEMY.filter((s) => !UKONCZONE_DEMO.has(s.id));
+  const strzalkaPasuje = brakujace.length > 0 && brakujace[0].id === SYSTEMY[0].id;
 
   return (
     <div className="container section" style={{ maxWidth: 640, textAlign: "center" }}>
@@ -52,16 +70,39 @@ export default function Page() {
 
       <div className="ornament" style={{ margin: "36px 0 20px" }} />
 
-      {brakujace.length > 0 ? (
-        <p style={{ color: "var(--sand)", fontFamily: "var(--font-serif)", fontSize: "1.2rem" }}>
-          Już prawie gotowe! Jeszcze tylko {brakujace.map((s) => s.label).join(" i ")}{" "}
-          i zaczynamy analizę!
+      <div style={{ position: "relative", display: "inline-block" }}>
+        {strzalkaPasuje && <StrzalkaDoKafelka />}
+        {brakujace.length > 0 ? (
+          <p style={{ color: "var(--sand)", fontFamily: "var(--font-serif)", fontSize: "1.2rem" }}>
+            Już prawie gotowe! Jeszcze tylko {brakujace.map((s) => s.label).join(" i ")}{" "}
+            i zaczynamy analizę!
+          </p>
+        ) : (
+          <p style={{ color: "var(--sand)", fontFamily: "var(--font-serif)", fontSize: "1.2rem" }}>
+            Wszystkie trzy systemy gotowe — czas na pełną analizę Twojego Koła Karmy.
+          </p>
+        )}
+      </div>
+
+      <div className="ornament" style={{ margin: "36px 0 20px" }} />
+
+      <div style={{ textAlign: "left" }}>
+        <p className="eyebrow" style={{ marginBottom: 10 }}>Vesica Karma</p>
+        <p className="muted" style={{ fontSize: "0.92rem", lineHeight: 1.75 }}>
+          Jest zestawieniem trzech systemów, które każdy w inny sposób opisuje każdego z nas
+          od samego urodzenia. Każdy z nas, aby mógł przyjść na ten świat, musiał spełnić trzy
+          warunki: miejsce, czas oraz ciało. Te trzy bezwzględne warunki mają swoje odpowiedniki
+          w astrologii, numerologii i chiromancji — pierwsza metoda opisuje za pomocą miejsca,
+          daty i godziny, druga metoda używa daty oraz imienia i nazwiska, trzecia zaś korzysta
+          z samego ciała, na którym zapisana jest — tak samo jak w gwiazdach — nasza karma.
+          Musimy ją tylko odnaleźć i korzystać z jej dobrodziejstw.
         </p>
-      ) : (
-        <p style={{ color: "var(--sand)", fontFamily: "var(--font-serif)", fontSize: "1.2rem" }}>
-          Wszystkie trzy systemy gotowe — czas na pełną analizę Twojego Koła Karmy.
+        <p className="muted" style={{ fontSize: "0.92rem", lineHeight: 1.75, marginTop: 16 }}>
+          Cały system został zaprojektowany na znaku Vesica Piscis — potrójmy wymiar istnienia:
+          symbolizuje spójność trzech przenikających się stref — ciała, umysłu i duszy; czasu
+          (przeszłości, teraźniejszości i przyszłości).
         </p>
-      )}
+      </div>
     </div>
   );
 }
