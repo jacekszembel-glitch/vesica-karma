@@ -53,6 +53,7 @@ import GodloPlanety from "@/components/GodloPlanety";
 import HeksDomu from "@/components/HeksDomu";
 import { BHAVAS } from "@/lib/astro/constants";
 import { odblokuj } from "@/lib/collection";
+import { IconOsoba } from "@/components/icons";
 
 type StylWykresu = "polnocny" | "poludniowy";
 const KLUCZ_STYLU = "9dom_styl_wykresu";
@@ -303,7 +304,7 @@ export default function KosmogramPage() {
                     style={{ position: "absolute", top: 4, right: 6, fontSize: "0.8rem", color: "var(--muted)", cursor: "pointer", lineHeight: 1, padding: 4 }}>
                     ✕
                   </span>
-                  <span style={{ fontSize: "1.6rem" }}>👤</span>
+                  <IconOsoba size={32} />
                   <span style={{ fontSize: "0.86rem" }}>{o.name || o.date}</span>
                 </button>
               ))}
