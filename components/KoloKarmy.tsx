@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import MoonStars from "./MoonStars";
+import { SEGMENT_GAPY, type SystemKarmy } from "@/lib/koloKarmyGeometria";
 
 /**
  * Koło Karmy — gotowa grafika (public/brand/kolo-karmy.png) BEZ satelitów
@@ -46,9 +47,9 @@ const KSZTALTNE = new Set([
 ]);
 
 const HOTSPOTY: Hotspot[] = [
-  { id: "astrologia", x: 598, y: 175, r: 85, href: "/kosmogram", label: "Astrologia", gap: [428, 85, 765, 254] },
-  { id: "hiromancja", x: 415, y: 470, r: 85, href: "/hiromancja", label: "Chiromancja", gap: [325, 300, 559, 605] },
-  { id: "numerologia", x: 775, y: 470, r: 85, href: "/numerologia", label: "Numerologia", gap: [633, 301, 867, 606] },
+  { id: "astrologia", x: 598, y: 175, r: 85, href: "/kosmogram", label: "Astrologia", gap: SEGMENT_GAPY.astrologia },
+  { id: "hiromancja", x: 415, y: 470, r: 85, href: "/hiromancja", label: "Chiromancja", gap: SEGMENT_GAPY.hiromancja },
+  { id: "numerologia", x: 775, y: 470, r: 85, href: "/numerologia", label: "Numerologia", gap: SEGMENT_GAPY.numerologia },
   { id: "panel", x: 596, y: 367, r: 60, href: "/panel", label: "Mój Panel" },
   { id: "zwiazki", x: 1012, y: 645, r: 80, glowR: 90, href: "/dopasowanie", label: "Związki" },
 ];
@@ -108,12 +109,13 @@ function pctY(v: number) { return `${(v / IMG_H) * 100}%`; }
 
 const TIP_W = 168;
 
-/** Systemy, które mogą mieć stan „ukończony" — wtedy ich pętla świeci
- *  złotem zamiast domyślnego taupe (Faza 1 reskinu: stan na sztywno z
- *  propa, bez prawdziwego śledzenia postępu — to osobna, późniejsza faza). */
-export type SystemKarmy = "astrologia" | "hiromancja" | "numerologia";
+// SystemKarmy — systemy, które mogą mieć stan „ukończony" (wtedy ich pętla
+// świeci złotem zamiast domyślnego taupe; Faza 1 reskinu: stan na sztywno
+// z propa, bez prawdziwego śledzenia postępu — to osobna, późniejsza faza).
+// Typ w lib/koloKarmyGeometria.ts (re-export tutaj dla wygody importujących).
+export type { SystemKarmy };
 
-export default function KoloKarmy({ ukonczone = new Set() }: { ukonczone?: Set<SystemKarmy> }) {
+export default function KoloKarmy({ ukonczone = new Set<SystemKarmy>() }: { ukonczone?: Set<SystemKarmy> }) {
   const [aktywny, setAktywny] = useState<string | null>(null);
   const [tip, setTip] = useState<{ label: string; left: number; top: number } | null>(null);
   const [hoverTytul, setHoverTytul] = useState(false);
@@ -150,7 +152,7 @@ export default function KoloKarmy({ ukonczone = new Set() }: { ukonczone?: Set<S
             filter: "drop-shadow(0 0 14px rgba(230, 196, 138, 0.55))",
           }} />
       ))}
-      <MoonStars box={HOTSPOTY.find((h) => h.id === "astrologia")!.gap!} zlote={ukonczone.has("astrologia")} />
+      <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} />
 
       {/* poświata pól o nieregularnym kształcie */}
       {[...KSZTALTNE].map((id) => (
