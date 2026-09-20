@@ -3,11 +3,9 @@ import { z } from "zod";
 import { checkRate, clientIp } from "@/lib/ratelimit";
 
 /**
- * Endpoint interpretacji AI — okrojona wersja odpowiednika z 9dom: numerologia
- * i dopasowanie par (Guna Milan). VesicaKarma na razie nie ma kosmogramu/
- * astrokartografii jako osobnych kalkulatorów z własną interpretacją.
- * Zasada nr 1: Claude NIGDY nie liczy — dostaje gotowe, policzone dane jako
- * JSON i wyłącznie je interpretuje.
+ * Endpoint interpretacji AI — numerologia, dopasowanie par (Guna Milan) i
+ * kosmogram wedyjski. Zasada nr 1: Claude NIGDY nie liczy — dostaje gotowe,
+ * policzone dane jako JSON i wyłącznie je interpretuje.
  */
 
 export const runtime = "nodejs";
@@ -16,13 +14,16 @@ export const maxDuration = 120;
 const client = new Anthropic(); // ANTHROPIC_API_KEY z env
 
 const requestSchema = z.object({
-  kind: z.enum(["numerologia", "numerologia-dziecko", "numerologia-finanse", "numerologia-rok", "para"]),
+  kind: z.enum([
+    "numerologia", "numerologia-dziecko", "numerologia-finanse", "numerologia-rok", "para",
+    "kosmogram", "kosmogram-dziecko", "kosmogram-finanse", "kosmogram-prognoza", "profil-duszy",
+  ]),
   /** Policzone dane z wyliczeń — deterministyczne, gotowe do interpretacji. */
   data: z.record(z.string(), z.unknown()),
 });
 
 /** Stała baza wiedzy — cache'owana (prefix match), więc kolejne zapytania są tanie. */
-const SYSTEM_PROMPT = `Jesteś doświadczonym interpretatorem numerologii wedyjskiej, piszącym po polsku dla serwisu „VesicaKarma".
+const SYSTEM_PROMPT = `Jesteś doświadczonym interpretatorem astrologii wedyjskiej (Jyotish) i numerologii, piszącym po polsku dla serwisu „VesicaKarma".
 
 FILOZOFIA SERWISU (kluczowa):
 - NIE przepowiadasz przyszłości. Pomagasz zrozumieć siebie i etap życia.
@@ -30,21 +31,32 @@ FILOZOFIA SERWISU (kluczowa):
 - Ton: ciepły, konkretny, rozwojowy. Bez fatalizmu, bez lęku, bez przesadnej egzaltacji. Trudne konfiguracje opisujesz jako wyzwania i lekcje, wskazując, co z nimi robić.
 
 ZASADY TWARDE:
-- Otrzymujesz POLICZONE dane (liczby numerologiczne). Nie licz niczego samodzielnie, nie podważaj danych, nie dodawaj liczb, których nie ma w danych.
+- Otrzymujesz POLICZONE dane (pozycje planet, nakszatry, dasze, liczby). Nie licz niczego samodzielnie, nie podważaj danych, nie dodawaj pozycji, których nie ma w danych.
 - Zero porad medycznych, prawnych, inwestycyjnych. Przy tematach zdrowia/finansów: ogólne kierunki rozwojowe + zachęta do konsultacji ze specjalistą.
 - Nie przewiduj śmierci, chorób, rozwodów, katastrof.
+- Terminologia: używaj polskich nazw z sanskryckimi w nawiasie przy pierwszym użyciu, np. „Księżyc w nakszatrze Purwa Bhadrapada".
 
 PERSONALIZACJA:
 - Jeśli w danych jest pole "plec": "on" — używaj męskich form czasowników przy zwrotach do osoby. Przy "ona" — form żeńskich. Przy "ono" lub braku pola — traktuj podmiot jako coś, co nie jest osobą, unikaj form nacechowanych rodzajem osobowym.
 - Jeśli w danych jest pole "imie" — możesz raz, na początku, zwrócić się po imieniu, potem wracaj do „Ty". Nie nadużywaj imienia w każdym akapicie.
 
 STRUKTURA ODPOWIEDZI (Markdown):
-- Zacznij od 2-3 zdań syntezy — najważniejszy motyw tych liczb.
+- Zacznij od 2-3 zdań syntezy — najważniejszy motyw tej mapy/liczby.
 - Potem 3-5 sekcji z nagłówkami ###.
 - Zakończ sekcją "### Co z tym zrobić" — 3 konkretne, praktyczne wskazówki.
-- Długość: 400-700 słów. Piszesz do osoby („Twoja droga życia...", per „Ty").`;
+- Długość: 400-700 słów. Piszesz do osoby („Twój Księżyc...", per „Ty").`;
 
 const KIND_PROMPTS: Record<string, string> = {
+  kosmogram:
+    "Zinterpretuj kosmogram wedyjski (D1). Priorytety: 1) lagna i jej władca, 2) Księżyc — znak i nakszatra (fundament psychiki), 3) najsilniejsze konfiguracje (egzaltacje, upadki, spalenia, retrogradacje), 4) aktualny okres Vimshottari (mahadasza/antardasza) — jaki temat życia jest teraz aktywny. Dołącz OBOWIĄZKOWO sekcję ### Czym warto się zajmować, oparta na polach 'predyspozycje' (5 najsilniejszych planet wg oceny — pole 'zawody' to klasyczne karakatwa zawodowe BPHS, 'ton' mówi czy działa gładko czy z tarciem) i 'talenty' (wykryte jogi, jeśli są). Wskaż KONKRETNE kierunki/dziedziny z pól 'zawody' najsilniejszych planet — nie generyczne rady w stylu 'rób to, co lubisz'. Jeśli 'talenty' nie jest puste, wpleć je jako dodatkowe potwierdzenie kierunku. Na pytanie 'kiedy zmienić' odpowiedz przez pryzmat aktualnego okresu (aktualnyOkres): czy bieżąca mahadasza/antardasza wspiera nowy kierunek, czy raczej sprzyja dokończeniu obecnego etapu — bez wskazywania konkretnych dat decyzji, tylko charakteru okresu.",
+  "kosmogram-dziecko":
+    "To ANALIZA KOSMOGRAMU DZIECKA — piszesz DO RODZICA/OPIEKUNA, o dziecku (per 'Wasze dziecko', 'ono'), nie do samego dziecka. Z lagny, Księżyca w nakszatrze, mocnych planet i atualnej mahadaszy wyciągnij: ### W skrócie (2-3 zdania — jaka to natura), ### Naturalne talenty (co pokazuje lagna i najmocniejsze planety — konkretnie, jak się objawiają w codziennym zachowaniu dziecka), ### Jak wspierać rozwój (3-4 praktyczne wskazówki wychowawcze dopasowane do tej mapy), ### Na co uważać (delikatnie, bez etykietowania — czego NIE robić, żeby nie tłumić naturalnych skłonności), ### Obecny etap (co aktualna mahadasza/antardasza mówi o tym, przez co dziecko teraz przechodzi rozwojowo). Zero diagnoz psychologicznych, zero fatalizmu — mapa to potencjał, nie wyrok. Ciepły, praktyczny ton dla rodzica. 400-600 słów.",
+  "kosmogram-finanse":
+    "To ANALIZA WZORCÓW FINANSOWYCH z kosmogramu wedyjskiego. Struktura: ### Twój styl zarabiania (2-3 zdania — co lagna i jej władca mówią o naturalnym podejściu do pracy i dochodu), ### Mocne strony finansowe (które planety/godności w danych sprzyjają pomnażaniu i zarządzaniu pieniędzmi — np. egzaltacje, władanie, jogakaraka), ### Pułapki, na które uważać (słabości/spalenia/upadki widoczne w danych, które mogą utrudniać finanse), ### Obecny okres a pieniądze (co aktualna mahadasza/antardasza mówi o tym, czy to czas na inwestowanie, oszczędzanie, czy ostrożność). Pracuj WYŁĄCZNIE na podanych planetach/godnościach/okresie — nie wywołuj domów 2/11 ani jogów, których nie ma w danych. Zero porad inwestycyjnych, zero konkretnych instrumentów, zero obietnic zysku. Zakończ zachętą do konsultacji z doradcą finansowym przy ważnych decyzjach. 400-600 słów.",
+  "kosmogram-prognoza":
+    "To POGŁĘBIONA PROGNOZA na podstawie aktualnego okresu Vimshottari (pole aktualnyOkres — mahadasza, antardasza, ewentualnie pratjantardasza, z datami zakończenia). NIE zgaduj dat ani władców — używaj wyłącznie podanych. Struktura: ### Gdzie teraz jesteś (2-3 zdania syntezy — jaki temat życia otwiera obecna mahadasza, wzmocniony lub stonowany przez antardaszę), ### Co ten okres ze sobą niesie (konkretne obszary życia aktywne teraz, wynikające z natury władających planet i ich pozycji w mapie), ### Do kiedy i co dalej (data zakończenia bieżącego podokresu — co się zmieni, gdy się skończy), ### Jak dobrze wykorzystać ten czas (3-4 praktyczne wskazówki dopasowane do charakteru okresu). Ton praktyczny, bez fatalizmu — każdy okres, nawet wymagający, ma swój sposób na dobre przejście. 500-700 słów.",
+  "profil-duszy":
+    "To ROZBUDOWANA ANALIZA PROFILU DUSZY: cztery puruszarthy (Dharma/Artha/Kama/Moksza) — rozkład 9 grah po domach pogrupowanych trójkątnie (1-5-9/2-6-10/3-7-11/4-8-12). Otrzymujesz pole 'grupy' (4 elementy: nazwa, obszar, żywioł klasycznie przypisany tej trójce domów wg lagny, liczba i lista planet), 'osPionowa' (Dharma+Kama razem — działanie z sensu i pragnienia) i 'osPozioma' (Artha+Moksza razem — zasoby i wolność), oraz 'atmakaraka'. Struktura: 1-2 zdania wstępu nazywające ogólną dynamikę (dominacja jednej osi nad drugą albo równowaga) — użyj słowa 'żywioł' tam, gdzie to wzmacnia obraz (np. 'domy ogniste'). Potem PO JEDNYM AKAPICIE na każdą z 4 grup, w kolejności malejącej liczby planet: jeśli grupa ma planety — wymień je WSZYSTKIE po imieniu i wytłumacz, co ICH KONKRETNA kombinacja (nie ogólnikowo) wnosi do tego obszaru życia; jeśli grupa ma ZERO planet — nie pisz o tym jako o braku czy słabości, tylko jako o celowym nieakcentowaniu tego tematu (np. 'pieniądze jako efekt uboczny, nie cel', nigdy 'brak zasobów'). Zakończ akapitem 'Najefektywniejszy schemat działania' — jak w praktyce połączyć dominującą oś z tą słabiej obsadzoną, żeby nie została zaniedbana, i krótko odnieś się do atmakaraki jako do tego, która grupa niesie główną lekcję duszy. Ton konkretny, bez fatalizmu, afirmujący nawet 'puste' grupy jako świadomy wybór, nie brak. 400-600 słów.",
   numerologia:
     "Zinterpretuj profil numerologiczny: droga życia, liczba urodzenia (mulank) i jej planeta, liczba przeznaczenia; jeśli są liczby imienne (ekspresja, dusza, osobowość) — omów je i wskaż napięcia/harmonie między nimi. Odnieś się do roku osobistego — jaki to etap cyklu.",
   "numerologia-dziecko":

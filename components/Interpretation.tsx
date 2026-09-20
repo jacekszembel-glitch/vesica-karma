@@ -92,7 +92,8 @@ function PieczecOdslaniania() {
 }
 
 interface Props {
-  kind: "numerologia" | "numerologia-dziecko" | "numerologia-finanse" | "numerologia-rok" | "para";
+  kind: "numerologia" | "numerologia-dziecko" | "numerologia-finanse" | "numerologia-rok" | "para"
+    | "kosmogram" | "kosmogram-dziecko" | "kosmogram-finanse" | "kosmogram-prognoza" | "profil-duszy";
   /** Policzone dane do interpretacji. Zmiana obiektu nie uruchamia automatycznie — user klika. */
   data: Record<string, unknown> | null;
   /** Podpis w historii konta, np. „Mapa życia — Jacek”. */
