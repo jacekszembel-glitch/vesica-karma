@@ -13,8 +13,8 @@ const IMG_W = 1260, IMG_H = 761;
  *  pliku (skrypt scripts/_measure_stars.mjs, usunięty po użyciu). */
 const GWIAZDY = [
   { x: 62.6, y: 34.8, s: 7.5 },
-  { x: 19.6, y: 33.0, s: 5.9 },
-  { x: 51.6, y: 22.7, s: 4.3 },
+  { x: 16.6, y: 33.3, s: 5.9 },
+  { x: 54.0, y: 21.3, s: 4.3 },
   { x: 83.7, y: 30.9, s: 3.9 },
   { x: 50.7, y: 49.7, s: 2.6 },
   { x: 27.3, y: 16.7, s: 2.1 },
