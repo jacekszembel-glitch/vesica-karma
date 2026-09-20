@@ -1,6 +1,6 @@
 import Link from "next/link";
 import KoloKarmyMini from "@/components/KoloKarmyMini";
-import type { SystemKarmy } from "@/lib/koloKarmyGeometria";
+import { UKONCZONE_DEMO, type SystemKarmy } from "@/lib/koloKarmyGeometria";
 
 /**
  * Mój Panel — status trzech systemów (Chiromancja/Astrologia/Numerologia)
@@ -13,8 +13,6 @@ const SYSTEMY: { id: SystemKarmy; label: string; href: string }[] = [
   { id: "astrologia", label: "Astrologia", href: "/kosmogram" },
   { id: "numerologia", label: "Numerologia", href: "/numerologia" },
 ];
-
-const UKONCZONE_DEMO = new Set<SystemKarmy>(["astrologia", "numerologia"]);
 
 function Kafelek({ id, label, href, gotowe }: { id: SystemKarmy; label: string; href: string; gotowe: boolean }) {
   return (

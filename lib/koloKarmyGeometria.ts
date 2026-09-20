@@ -13,3 +13,8 @@ export const SEGMENT_GAPY: Record<SystemKarmy, readonly [number, number, number,
   hiromancja: [325, 300, 559, 605],
   numerologia: [633, 301, 867, 606],
 };
+
+/** Faza 1 reskinu: przykładowy/testowy stan postępu, wspólny dla Mojego
+ *  Panelu i mini-nagłówków na stronach systemów — jeden punkt do podmiany
+ *  w Fazie 2 na prawdziwe śledzenie zapisanych danych. */
+export const UKONCZONE_DEMO = new Set<SystemKarmy>(["astrologia", "numerologia"]);

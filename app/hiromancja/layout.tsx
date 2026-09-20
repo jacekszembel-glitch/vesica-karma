@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import KoloKarmyMini from "@/components/KoloKarmyMini";
+import { UKONCZONE_DEMO } from "@/lib/koloKarmyGeometria";
 
 /** Metadane trasy — strona jest komponentem klienckim i nie może ich eksportować. */
 export const metadata: Metadata = {
@@ -8,5 +10,12 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <div className="container" style={{ paddingTop: 36 }}>
+        <KoloKarmyMini ukonczone={UKONCZONE_DEMO} maxWidth={160} />
+      </div>
+      {children}
+    </>
+  );
 }
