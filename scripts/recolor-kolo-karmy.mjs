@@ -45,18 +45,40 @@ const RINGS = {
 };
 const FEATHER = 4;
 
+/** Stary kompas (piktogram Astrologii, wypalony w kolo-karmy.png) — wycinany
+ *  do przezroczystości, żeby zastąpić go MoonStars.tsx (gwiazdy+księżyc).
+ *  Sam dorysowany kompas był niewidoczny (nakładałem gwiazdy OBOK niego,
+ *  nigdy go nie usuwając), więc w praktyce nic się nie zmieniało. Krąg
+ *  mieści się w całości wewnątrz wewnętrznego promienia pierścienia
+ *  Astrologii (odległość środek-środek ~85 < rInner 170), więc nie dotyka
+ *  złotej linii pierścienia. Promień domierzony wizualnie z icon-astrologia.png
+ *  (kompas prawie wypełnia swój kwadrat 150×150, z małym zapasem od pierścienia
+ *  w rogu). */
+const KOMPAS_DZIURA = { cx: 600, cy: 166, r: 78, feather: 6 };
+
 async function tauped(input) {
   return sharp(input).tint({ r: 0x8d, g: 0x81, b: 0x75 }).modulate({ brightness: 0.82 });
 }
 
+async function wytnijKompas(input) {
+  const { cx, cy, r, feather } = KOMPAS_DZIURA;
+  const svg = `<svg width="${IMG_W}" height="${IMG_H}" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff"/>
+  </svg>`;
+  const mask = await sharp(Buffer.from(svg)).blur(feather).png().toBuffer();
+  return sharp(await input.toBuffer()).composite([{ input: mask, blend: "dest-out" }]);
+}
+
 async function main() {
-  await tauped(basePath).then((s) => s.toFile(path.join(dir, "kolo-karmy-taupe.png")));
+  await wytnijKompas(await tauped(basePath)).then((s) => s.toFile(path.join(dir, "kolo-karmy-taupe.png")));
+  await wytnijKompas(sharp(basePath)).then((s) => s.toFile(path.join(dir, "kolo-karmy-gold-clean.png")));
 
   // icon-<id>.png (nakładki do pulsowania na hover, KoloKarmy.tsx
   // PIKTOGRAMY_PULSUJACE) leżą ZAWSZE w DOM, nie tylko na hover — w spoczynku
   // były niewidoczne, bo pokrywały się piksel w piksel ze złotym tłem. Odkąd
   // tło jest taupe, potrzebują własnej taupe wersji na domyślny stan.
-  for (const id of Object.keys(RINGS)) {
+  // Astrologia pominięta — kompas usunięty, zastąpiony przez MoonStars.tsx.
+  for (const id of Object.keys(RINGS).filter((s) => s !== "astrologia")) {
     const iconPath = path.join(dir, `icon-${id}.png`);
     await tauped(iconPath).then((s) => s.toFile(path.join(dir, `icon-${id}-taupe.png`)));
   }
@@ -75,7 +97,8 @@ async function main() {
 
   console.log("Gotowe:", [
     "kolo-karmy-taupe.png",
-    ...Object.keys(RINGS).map((s) => `icon-${s}-taupe.png`),
+    "kolo-karmy-gold-clean.png",
+    ...Object.keys(RINGS).filter((s) => s !== "astrologia").map((s) => `icon-${s}-taupe.png`),
     ...Object.keys(RINGS).map((s) => `fill-${s}-gold.png`),
   ].join(", "));
 }

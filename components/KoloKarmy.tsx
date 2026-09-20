@@ -98,8 +98,9 @@ const SATELITY = [
  *  na tych samych pikselach co w tle, więc w spoczynku są nie do odróżnienia;
  *  dopiero na hover dostają puls (transform:scale), którego nie da się zrobić
  *  na płaskim tle. Prostokąt wycinka w przestrzeni pliku. */
+// Astrologia pominięta — jej piktogram (kompas) wycięty z grafiki, zastąpiony
+// przez <MoonStars> (osobny puls, patrz aktywny === "astrologia" niżej).
 const PIKTOGRAMY_PULSUJACE = [
-  { id: "astrologia", box: [525, 80, 675, 230] as const },
   { id: "hiromancja", box: [340, 385, 490, 555] as const },
   { id: "numerologia", box: [715, 400, 870, 550] as const },
 ];
@@ -150,7 +151,7 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
   return (
     <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
       <img
-        src={wszystkoZlote ? "/brand/kolo-karmy.png" : "/brand/kolo-karmy-taupe.png"}
+        src={wszystkoZlote ? "/brand/kolo-karmy-gold-clean.png" : "/brand/kolo-karmy-taupe.png"}
         alt="Koło Karmy — Astrologia, Numerologia i Chiromancja wokół Twojego Panelu, z Astrokartografią, Mahadashami i Karmą jako punktami wyjścia"
         style={{ display: "block", width: "100%", height: "auto" }}
       />
@@ -165,7 +166,7 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
             filter: "drop-shadow(0 0 14px rgba(230, 196, 138, 0.55))",
           }} />
       ))}
-      <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} />
+      <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} puls={aktywny === "astrologia"} />
 
       {/* poświata pól o nieregularnym kształcie */}
       {[...KSZTALTNE].map((id) => (

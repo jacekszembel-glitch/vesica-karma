@@ -14,6 +14,27 @@ const SYSTEMY: { id: SystemKarmy; label: string; href: string }[] = [
   { id: "numerologia", label: "Numerologia", href: "/numerologia" },
 ];
 
+/** Astrologia nie ma już icon-astrologia.png (kompas wycięty, zastąpiony
+ *  gwiazdami+księżycem w KoloKarmy/KoloKarmyMini) — ten sam motyw, tylko
+ *  skalowany do kwadratowego kafelka. */
+function IkonaAstrologiiKafelek({ gotowe }: { gotowe: boolean }) {
+  return (
+    <svg viewBox="0 0 46 46" width="46" height="46" aria-hidden="true"
+      style={{ color: gotowe ? "var(--sand)" : "var(--taupe)" }}>
+      <mask id="kafelek-ks-mask">
+        <rect x="0" y="0" width="46" height="46" fill="black" />
+        <circle cx="23" cy="23" r="10" fill="white" />
+        <circle cx="27" cy="19" r="8.5" fill="black" />
+      </mask>
+      <circle cx="23" cy="23" r="10" fill="currentColor" mask="url(#kafelek-ks-mask)" />
+      {[[36, 12, 3], [8, 30, 2.6], [34, 34, 2]].map(([x, y, s], i) => (
+        <path key={i} fill="currentColor"
+          d={`M ${x} ${y - s} L ${x + s * 0.28} ${y - s * 0.28} L ${x + s} ${y} L ${x + s * 0.28} ${y + s * 0.28} L ${x} ${y + s} L ${x - s * 0.28} ${y + s * 0.28} L ${x - s} ${y} L ${x - s * 0.28} ${y - s * 0.28} Z`} />
+      ))}
+    </svg>
+  );
+}
+
 function Kafelek({ id, label, href, gotowe }: { id: SystemKarmy; label: string; href: string; gotowe: boolean }) {
   return (
     <Link href={href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textDecoration: "none" }}>
@@ -24,7 +45,9 @@ function Kafelek({ id, label, href, gotowe }: { id: SystemKarmy; label: string; 
         boxShadow: gotowe ? "0 0 18px rgba(230, 196, 138, 0.45)" : "none",
         transition: "border-color 0.3s, box-shadow 0.3s",
       }}>
-        <img src={`/brand/icon-${id}${gotowe ? "" : "-taupe"}.png`} alt="" style={{ width: 46, height: 46 }} />
+        {id === "astrologia"
+          ? <IkonaAstrologiiKafelek gotowe={gotowe} />
+          : <img src={`/brand/icon-${id}${gotowe ? "" : "-taupe"}.png`} alt="" style={{ width: 46, height: 46 }} />}
       </span>
       <span style={{ color: "var(--text)", fontSize: "0.95rem" }}>{label}</span>
       <span className="eyebrow" style={{ color: gotowe ? "var(--gold)" : "var(--muted)", fontSize: "0.68rem" }}>
