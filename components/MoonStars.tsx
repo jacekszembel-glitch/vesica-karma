@@ -7,12 +7,18 @@
 const IMG_W = 1260, IMG_H = 761;
 
 const GWIAZDY = [
-  { x: 60, y: 18, s: 5 },
-  { x: 92, y: 44, s: 4 },
-  { x: 18, y: 52, s: 4 },
-  { x: 78, y: 82, s: 3.5 },
-  { x: 32, y: 86, s: 3.5 },
-  { x: 8, y: 22, s: 3 },
+  { x: 62, y: 10, s: 5.5 },
+  { x: 86, y: 18, s: 4 },
+  { x: 57, y: 45, s: 7 },
+  { x: 36, y: 53, s: 4 },
+  { x: 16, y: 45, s: 3 },
+  { x: 80, y: 45, s: 3.5 },
+  { x: 94, y: 50, s: 3 },
+  { x: 50, y: 5, s: 3 },
+  { x: 74, y: 57, s: 3 },
+  { x: 8, y: 17, s: 2.8 },
+  { x: 96, y: 31, s: 3.2 },
+  { x: 70, y: 30, s: 2.5 },
 ];
 
 function Iskra({ x, y, s }: { x: number; y: number; s: number }) {
@@ -45,14 +51,15 @@ export default function MoonStars({ box, zlote = false, puls = false }: {
         pointerEvents: "none",
       }}
     >
-      {GWIAZDY.map((g, i) => <Iskra key={i} {...g} />)}
-      {/* półksiężyc — koło z odjętym przesuniętym kołem (maska) */}
+      {/* półksiężyc — duży, dominujący, po lewej stronie kompozycji; koło
+          z odjętym przesuniętym kołem (maska) */}
       <mask id="ks-mask">
         <rect x="0" y="0" width="100" height="60" fill="black" />
-        <circle cx="50" cy="30" r="13" fill="white" />
-        <circle cx="56" cy="26" r="11" fill="black" />
+        <circle cx="32" cy="30" r="19" fill="white" />
+        <circle cx="39" cy="25" r="15.5" fill="black" />
       </mask>
-      <circle cx="50" cy="30" r="13" fill="currentColor" mask="url(#ks-mask)" />
+      <circle cx="32" cy="30" r="19" fill="currentColor" mask="url(#ks-mask)" />
+      {GWIAZDY.map((g, i) => <Iskra key={i} {...g} />)}
     </svg>
   );
 }
