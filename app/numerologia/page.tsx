@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import Interpretation from "@/components/Interpretation";
 import { numerology, personalMonths, type NumerologyResult } from "@/lib/astro/numerology";
 import { SceneNumerologia } from "@/components/infographics";
@@ -111,6 +112,12 @@ export default function NumerologiaPage() {
         Indyjski system numerologii — każda liczba ma swoją planetę. Mulank (liczba urodzenia) i
         bhagyank (liczba przeznaczenia) liczymy zawsze z daty urodzenia; imię i nazwisko dodaje
         liczby ekspresji, duszy i osobowości, a całość domyka siatka Lo Shu.
+      </p>
+
+      <p style={{ textAlign: "center", marginTop: "-20px", marginBottom: 30 }}>
+        <Link href="/godziny-lustrzane" className="muted" style={{ fontSize: "0.88rem" }}>
+          Ciągle widzisz 11:11 albo 21:21? → sprawdź znaki czasu
+        </Link>
       </p>
 
       <div className="numerologia-uklad">
