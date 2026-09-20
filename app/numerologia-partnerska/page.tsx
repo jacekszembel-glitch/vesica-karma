@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { numerologiaPartnerska, type NumPartnerResult } from "@/lib/astro/numerologia-partnerska";
 import { SceneRelacje } from "@/components/infographics";
 import ParyNav from "@/components/ParyNav";
@@ -110,9 +111,9 @@ export default function NumerologiaPartnerskaPage() {
               pozycje Księżyców obojga — 8 wymiarów zgodności, 36 punktów:
               temperament, instynkty, umysły i energia życiowa.
             </p>
-            <a href="https://9dom.pl/dopasowanie" className="btn btn-primary">
+            <Link href="/dopasowanie" className="btn btn-primary">
               Pełna analiza pary (Guna Milan) →
-            </a>
+            </Link>
           </div>
         </div>
       )}

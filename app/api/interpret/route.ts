@@ -3,11 +3,11 @@ import { z } from "zod";
 import { checkRate, clientIp } from "@/lib/ratelimit";
 
 /**
- * Endpoint interpretacji AI — okrojona wersja odpowiednika z 9dom, tylko
- * dla numerologii (VesicaKarma na razie nie ma kosmogramu/astrokartografii
- * jako osobnych kalkulatorów z własną interpretacją). Zasada nr 1: Claude
- * NIGDY nie liczy — dostaje gotowe, policzone dane jako JSON i wyłącznie
- * je interpretuje.
+ * Endpoint interpretacji AI — okrojona wersja odpowiednika z 9dom: numerologia
+ * i dopasowanie par (Guna Milan). VesicaKarma na razie nie ma kosmogramu/
+ * astrokartografii jako osobnych kalkulatorów z własną interpretacją.
+ * Zasada nr 1: Claude NIGDY nie liczy — dostaje gotowe, policzone dane jako
+ * JSON i wyłącznie je interpretuje.
  */
 
 export const runtime = "nodejs";
@@ -16,7 +16,7 @@ export const maxDuration = 120;
 const client = new Anthropic(); // ANTHROPIC_API_KEY z env
 
 const requestSchema = z.object({
-  kind: z.enum(["numerologia", "numerologia-dziecko", "numerologia-finanse", "numerologia-rok"]),
+  kind: z.enum(["numerologia", "numerologia-dziecko", "numerologia-finanse", "numerologia-rok", "para"]),
   /** Policzone dane z wyliczeń — deterministyczne, gotowe do interpretacji. */
   data: z.record(z.string(), z.unknown()),
 });
@@ -53,6 +53,8 @@ const KIND_PROMPTS: Record<string, string> = {
     "To ANALIZA WZORCÓW FINANSOWYCH z liczb numerologicznych (droga życia, liczba urodzenia, przeznaczenie, rok osobisty). Struktura: ### Twój styl zarabiania (2-3 zdania — jak te liczby przekładają się na naturalny sposób budowania dochodu: praca etatowa, przedsiębiorczość, praca twórcza itd.), ### Mocne strony finansowe (co w tych liczbach sprzyja pomnażaniu i zarządzaniu pieniędzmi), ### Pułapki, na które uważać (typowe wzorce/nawyki finansowe wynikające z tych liczb, których warto pilnować), ### Rok osobisty a pieniądze (co obecny rok osobisty mówi o tym, czy to czas na inwestowanie, oszczędzanie, czy ostrożność — konkretnie). Zero porad inwestycyjnych, zero konkretnych instrumentów finansowych, zero obietnic zysku — to mapa skłonności i wzorców, nie porada finansowa. Zakończ jednym zdaniem zachęty do konsultacji z doradcą finansowym przy ważnych decyzjach. 400-600 słów.",
   "numerologia-rok":
     "To PROGNOZA ROCZNA miesiąc po miesiącu, na podstawie POLICZONYCH liczb miesięcy osobistych (pole miesiaceOsobiste — 12 liczb, styczeń do grudnia) oraz roku osobistego jako tła całego roku. NIE zgaduj liczb miesięcy — używaj wyłącznie tych podanych. Struktura: 2-3 zdania wstępu o charakterze całego roku (z liczby roku osobistego), potem TABELA/LISTA miesiąc po miesiącu w formacie 'Styczeń (liczba X): jedno zwięzłe zdanie, jaki to typ miesiąca i na czym się skupić' — po jednym zdaniu na każdy z 12 miesięcy, w kolejności styczeń→grudzień. Na końcu ### Najlepsze miesiące na ważne decyzje (wskaż 2-3 miesiące o najkorzystniejszych liczbach i dlaczego) oraz ### Miesiące na spokojniejsze tempo (2-3 miesiące, gdzie liczby sugerują odpoczynek/domykanie spraw zamiast nowych początków). Ton praktyczny, bez fatalizmu — każdy miesiąc ma swój sposób na dobre przejście. 500-700 słów.",
+  para:
+    "To jest analiza DOPASOWANIA PARY (Guna Milan). Otrzymujesz dane obu osób (Księżyce, nakszatry) i wynik 8 kut z punktacją. Struktura: ### Wasza para w skrócie (2-3 zdania o dynamice tych dwóch nakszatr), ### Co Was łączy (najlepiej punktowane kuty — konkretnie, jak to się objawia na co dzień), ### Nad czym pracować (najsłabsze kuty i doshas — bez straszenia: każdą trudność opisz jako obszar do świadomej pracy z KONKRETNĄ wskazówką jak), ### Praktyczne rady dla Was (4-5 punktów: komunikacja, decyzje, przestrzeń, bliskość — dopasowane do wyników kut). Pisz do obojga (per 'Wy'). Wynik punktowy interpretuj z klasą: niski wynik to NIE wyrok — to mapa pracy; wysoki to potencjał, nie gwarancja. Zero porad prawnych/medycznych. 500-700 słów.",
 };
 
 export async function POST(req: Request) {
