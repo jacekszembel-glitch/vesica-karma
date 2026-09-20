@@ -168,8 +168,11 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
       ))}
       <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} puls={aktywny === "astrologia"} />
 
-      {/* poświata pól o nieregularnym kształcie */}
-      {[...KSZTALTNE].map((id) => (
+      {/* poświata pól o nieregularnym kształcie — astrologia pominięta: ta
+          maska to flood-fill WNĘTRZA starego kompasu (już wyciętego z bazy),
+          na przezroczystej dziurze dawała widoczny „cień"; hover-feedback
+          dla astrologii daje teraz puls <MoonStars> (patrz wyżej) */}
+      {[...KSZTALTNE].filter((id) => id !== "astrologia").map((id) => (
         <img key={`glow-${id}`} src={`/brand/glow-${id}.png`} alt=""
           className={`kk-glow-ksztalt${aktywny === id ? " kk-glow-aktywny" : ""}`}
           style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
