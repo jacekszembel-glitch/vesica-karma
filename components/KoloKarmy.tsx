@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import MoonStars from "./MoonStars";
 
 /**
  * Koło Karmy — gotowa grafika (public/brand/kolo-karmy.png) BEZ satelitów
@@ -107,7 +108,12 @@ function pctY(v: number) { return `${(v / IMG_H) * 100}%`; }
 
 const TIP_W = 168;
 
-export default function KoloKarmy() {
+/** Systemy, które mogą mieć stan „ukończony" — wtedy ich pętla świeci
+ *  złotem zamiast domyślnego taupe (Faza 1 reskinu: stan na sztywno z
+ *  propa, bez prawdziwego śledzenia postępu — to osobna, późniejsza faza). */
+export type SystemKarmy = "astrologia" | "hiromancja" | "numerologia";
+
+export default function KoloKarmy({ ukonczone = new Set() }: { ukonczone?: Set<SystemKarmy> }) {
   const [aktywny, setAktywny] = useState<string | null>(null);
   const [tip, setTip] = useState<{ label: string; left: number; top: number } | null>(null);
   const [hoverTytul, setHoverTytul] = useState(false);
@@ -130,10 +136,21 @@ export default function KoloKarmy() {
   return (
     <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
       <img
-        src="/brand/kolo-karmy.png"
+        src="/brand/kolo-karmy-taupe.png"
         alt="Koło Karmy — Astrologia, Numerologia i Chiromancja wokół Twojego Panelu, z Astrokartografią, Mahadashami i Karmą jako punktami wyjścia"
         style={{ display: "block", width: "100%", height: "auto" }}
       />
+
+      {/* pętle „ukończonych" systemów — złote wypełnienie zamiast domyślnego
+          taupe, z miękką poświatą (drop-shadow), Faza 1: stan na sztywno z propa */}
+      {(["astrologia", "hiromancja", "numerologia"] as const).filter((id) => ukonczone.has(id)).map((id) => (
+        <img key={`fill-${id}`} src={`/brand/fill-${id}-gold.png`} alt=""
+          style={{
+            position: "absolute", left: 0, top: 0, width: "100%", height: "100%",
+            filter: "drop-shadow(0 0 14px rgba(230, 196, 138, 0.55))",
+          }} />
+      ))}
+      <MoonStars box={HOTSPOTY.find((h) => h.id === "astrologia")!.gap!} zlote={ukonczone.has("astrologia")} />
 
       {/* poświata pól o nieregularnym kształcie */}
       {[...KSZTALTNE].map((id) => (
@@ -151,9 +168,11 @@ export default function KoloKarmy() {
         );
       })()}
 
-      {/* piktogramy, które pulsują po najechaniu — leżą idealnie na tle, widać tylko puls */}
+      {/* piktogramy, które pulsują po najechaniu — leżą idealnie na tle (taupe
+          albo złote, zależnie od stanu), widać tylko puls */}
       {PIKTOGRAMY_PULSUJACE.map((p) => (
-        <img key={`ikona-${p.id}`} src={`/brand/icon-${p.id}.png`} alt=""
+        <img key={`ikona-${p.id}`}
+          src={`/brand/icon-${p.id}${ukonczone.has(p.id as SystemKarmy) ? "" : "-taupe"}.png`} alt=""
           className={`kk-ikona-puls${aktywny === p.id ? " kk-ikona-puls-aktywna" : ""}`}
           style={{
             left: pctX(p.box[0]), top: pctY(p.box[1]),
