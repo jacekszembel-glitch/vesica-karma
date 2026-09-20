@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { DateTime } from "luxon";
 import BirthForm, { type BirthInput } from "@/components/BirthForm";
+import { loadOsoby, saveOsoba, usunOsobe, type Osoba } from "@/lib/osobyStore";
 import NorthChart from "@/components/NorthChart";
 import SouthChart from "@/components/SouthChart";
 import Interpretation from "@/components/Interpretation";
@@ -50,52 +52,21 @@ import {
 import GodloPlanety from "@/components/GodloPlanety";
 import HeksDomu from "@/components/HeksDomu";
 import { BHAVAS } from "@/lib/astro/constants";
-import { IconRaportPortret, IconRaportDziecko, IconRaportFinanse, IconRaportRok } from "@/components/icons";
 import { odblokuj } from "@/lib/collection";
 
 type StylWykresu = "polnocny" | "poludniowy";
 const KLUCZ_STYLU = "9dom_styl_wykresu";
 
-type RodzajRaportu = "portret" | "dziecko" | "finanse" | "prognoza";
-
-const RAPORTY: { id: RodzajRaportu; label: string; kind: "kosmogram" | "kosmogram-dziecko" | "kosmogram-finanse" | "kosmogram-prognoza"; Icon: (p: { size?: number; className?: string }) => React.ReactElement }[] = [
-  { id: "portret", label: "Portret ogólny", kind: "kosmogram", Icon: IconRaportPortret },
-  { id: "dziecko", label: "Dla dziecka", kind: "kosmogram-dziecko", Icon: IconRaportDziecko },
-  { id: "finanse", label: "Finanse", kind: "kosmogram-finanse", Icon: IconRaportFinanse },
-  { id: "prognoza", label: "Prognoza (okres)", kind: "kosmogram-prognoza", Icon: IconRaportRok },
-];
-
 /**
- * Ktore sekcje strony widac przy danym Rodzaju odczytu. Wczesniej "Rodzaj
- * odczytu" zmienial tylko tekst AI na dole strony, a caly kosmogram ponizej
- * wygladal identycznie niezaleznie od wyboru (mylace: ktos wybiera "Finanse",
- * a widzi tez Predyspozycje, Technike...). "portret" pokazuje
- * wszystko (jak dawniej) - pozostale trzy to faktycznie WASKIE, tematyczne
- * podzbiory, nie tylko inny tekst na dole.
- *   techniczne   - diagramy D1/D9, tabele pozycji, warga, karaki, Asztakawarga, Szadbala
- *   czasGleboko  - Os Zycia, Jogi i szczescie, Mapa Czasu Jog/Dosz, 12 domow
- *   dusza        - Profil Duszy
- *   predyspozycje- ranking Predyspozycje/Na co uwazac (z mozliwymi zawodami), Talenty, Wrazliwosc duchowa
- *   finanse/zdrowie - odpowiednie sekcje RankingDomeny
- *   tranzyty     - Tranzyty teraz (Gochara)
- * Poza tym zestawem zawsze widac: skrot faktow, Panchang urodzenia, Synteze
- * kosmogramu, Planety w skrocie, Dasze (lekka wersja) i "Dziewiec grah" -
- * to baza potrzebna, zeby OKREM raport mial jakikolwiek kontekst.
+ * VesicaKarma nie ma "Rodzaju odczytu" (Portret/Dziecko/Finanse/Prognoza) —
+ * zamiast tego kafelki to zapisane OSOBY (patrz lib/osobyStore.ts), a każda
+ * pokazuje zawsze CAŁY kosmogram, wszystkie sekcje naraz (dawny tryb
+ * "portret"). Finanse i inne wątki tematyczne trafiają do jednej, wspólnej
+ * interpretacji AI na dole, zamiast osobnego, węższego raportu.
  */
 type SekcjaKosmogramu = "techniczne" | "czasGleboko" | "dusza" | "predyspozycje" | "finanse" | "zdrowie" | "tranzyty";
-const WIDOCZNE_SEKCJE: Record<RodzajRaportu, Record<SekcjaKosmogramu, boolean>> = {
-  portret:  { techniczne: true,  czasGleboko: true,  dusza: true,  predyspozycje: true,  finanse: true,  zdrowie: true,  tranzyty: true },
-  dziecko:  { techniczne: false, czasGleboko: false, dusza: true,  predyspozycje: true,  finanse: false, zdrowie: false, tranzyty: false },
-  finanse:  { techniczne: false, czasGleboko: false, dusza: false, predyspozycje: false, finanse: true,  zdrowie: false, tranzyty: false },
-  prognoza: { techniczne: false, czasGleboko: true,  dusza: false, predyspozycje: false, finanse: false, zdrowie: false, tranzyty: true },
-};
-
-/** Etykiety formularza zależne od raportu — żeby było jasne, CZYJE dane wpisać. */
-const FORM_COPY: Record<RodzajRaportu, { dateLabel: string; nameLabel: string; namePlaceholder: string }> = {
-  portret: { dateLabel: "Twoja data urodzenia", nameLabel: "Imię i nazwisko (opcjonalnie)", namePlaceholder: "np. Jacek Kowalski" },
-  dziecko: { dateLabel: "Data urodzenia dziecka", nameLabel: "Imię dziecka (opcjonalnie)", namePlaceholder: "np. Zosia Kowalska" },
-  finanse: { dateLabel: "Twoja data urodzenia", nameLabel: "Imię i nazwisko (opcjonalnie)", namePlaceholder: "np. Jacek Kowalski" },
-  prognoza: { dateLabel: "Twoja data urodzenia", nameLabel: "Imię i nazwisko (opcjonalnie)", namePlaceholder: "np. Jacek Kowalski" },
+const WSZYSTKIE_SEKCJE: Record<SekcjaKosmogramu, boolean> = {
+  techniczne: true, czasGleboko: true, dusza: true, predyspozycje: true, finanse: true, zdrowie: true, tranzyty: true,
 };
 
 /**
@@ -118,8 +89,10 @@ export default function KosmogramPage() {
   const [chart, setChart] = useState<VedicChart | null>(null);
   const [birthInput, setBirthInput] = useState<BirthInput | null>(null);
   const [styl, setStyl] = useState<StylWykresu>("polnocny");
-  const [raport, setRaport] = useState<RodzajRaportu>("portret");
   const [tryb, setTryb] = useState<TrybKosmogramu>("poczatkujacy");
+  const [osoby, setOsoby] = useState<Osoba[]>([]);
+  const [wybranaOsobaId, setWybranaOsobaId] = useState<string | null>(null);
+  const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
     const s = localStorage.getItem(KLUCZ_STYLU);
@@ -128,6 +101,8 @@ export default function KosmogramPage() {
     if (s === "polnocny" || s === "poludniowy") setStyl(s);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- jw.
     if (t === "poczatkujacy" || t === "zaawansowany") setTryb(t);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- jw., lista zapisanych osób
+    setOsoby(loadOsoby());
   }, []);
 
   function zmienStyl(s: StylWykresu) {
@@ -151,6 +126,55 @@ export default function KosmogramPage() {
       }),
     );
     odblokuj("kosmogram");
+  }
+
+  /** Nowa osoba z formularza — zapisujemy na liście kafelków i od razu liczymy. */
+  function handleDodajOsobe(input: BirthInput) {
+    const nowa: Osoba = {
+      id: crypto.randomUUID(),
+      date: input.isoDate,
+      time: input.localTime,
+      timeKnown: input.timeKnown,
+      place: input.place,
+      plec: input.plec,
+      name: input.name,
+    };
+    saveOsoba(nowa);
+    setOsoby((lista) => [...lista, nowa]);
+    setWybranaOsobaId(nowa.id);
+    setFormKey((k) => k + 1); // reset formularza pod kolejną osobę
+    handleSubmit(input);
+  }
+
+  /** Kliknięcie zapisanego kafelka — odtwarza chwilę urodzenia z zapisanych danych. */
+  function wybierzOsobe(o: Osoba) {
+    const effectiveTime = o.timeKnown ? o.time : "12:00";
+    const local = DateTime.fromISO(`${o.date}T${effectiveTime}`, { zone: o.place.tz });
+    if (!local.isValid) return;
+    setWybranaOsobaId(o.id);
+    handleSubmit({
+      utc: local.toUTC().toJSDate(),
+      latitude: o.place.lat,
+      longitude: o.place.lon,
+      timeKnown: o.timeKnown,
+      isoDate: o.date,
+      placeName: o.place.name,
+      localTime: effectiveTime,
+      plec: o.plec ?? "ona",
+      name: o.name,
+      place: o.place,
+    });
+  }
+
+  function usunKafelek(e: React.MouseEvent, id: string) {
+    e.stopPropagation();
+    usunOsobe(id);
+    setOsoby((lista) => lista.filter((o) => o.id !== id));
+    if (wybranaOsobaId === id) {
+      setWybranaOsobaId(null);
+      setChart(null);
+      setBirthInput(null);
+    }
   }
 
   /** Kompaktowe dane dla AI — tylko to, co potrzebne do interpretacji. */
@@ -249,51 +273,60 @@ export default function KosmogramPage() {
   const zdrowie = zdrowotne?.planety ?? [];
   const lifePhases = useMemo(() => (chart ? fazyZycia(chart, chart.birth.date) : []), [chart]);
 
-  const w = WIDOCZNE_SEKCJE[raport];
-  /** Czy "Pełne dane" ma cokolwiek do pokazania przy tym raporcie — jeśli nie,
-      przełącznik trybu nie ma sensu (patrz uzycie nizej). */
-  const maPelneDane = w.techniczne || w.czasGleboko;
+  const w = WSZYSTKIE_SEKCJE;
+  const maPelneDane = true;
 
   return (
     <div className="container section">
       <div className="fade-up" style={{ maxWidth: 340, margin: "0 auto 10px" }}><SceneKosmogram /></div>
       <h1 style={{ textAlign: "center" }}>Kosmogram wedyjski</h1>
       <p className="section-sub">
-        Mapa nieba z chwili Twojego urodzenia w zodiaku syderycznym (ayanamsa Lahiri) —
+        Mapa nieba z chwili urodzenia w zodiaku syderycznym (ayanamsa Lahiri) —
         <Term k="lagna">lagna</Term>, <Term k="graha">9 grah</Term>, <Term k="dom">domy</Term>,{" "}
         <Term k="nakszatra">nakszatry</Term> i <Term k="dasza">okresy planetarne</Term>.
       </p>
 
       <div className="numerologia-uklad">
         <div className="card">
-          <p className="eyebrow" style={{ marginBottom: 12 }}>Rodzaj odczytu</p>
-          <div className="bf-plec numerologia-raporty" role="radiogroup" aria-label="Rodzaj odczytu kosmogramu">
-            {RAPORTY.map((r) => (
-              <button key={r.id} type="button" role="radio" aria-checked={raport === r.id}
-                className={`bf-plec-opcja${raport === r.id ? " bf-plec-opcja-aktywna" : ""}`}
-                style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px" }}
-                onClick={() => setRaport(r.id)}>
-                <r.Icon size={78} />
-                {r.label}
-              </button>
-            ))}
-          </div>
+          <p className="eyebrow" style={{ marginBottom: 12 }}>Osoby</p>
+          {osoby.length > 0 ? (
+            <div className="bf-plec numerologia-raporty" role="radiogroup" aria-label="Wybierz osobę do analizy">
+              {osoby.map((o) => (
+                <button key={o.id} type="button" role="radio" aria-checked={wybranaOsobaId === o.id}
+                  className={`bf-plec-opcja${wybranaOsobaId === o.id ? " bf-plec-opcja-aktywna" : ""}`}
+                  style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px" }}
+                  onClick={() => wybierzOsobe(o)}>
+                  <span
+                    role="button" tabIndex={0} aria-label={`Usuń ${o.name || "tę osobę"}`}
+                    onClick={(e) => usunKafelek(e, o.id)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); usunKafelek(e as unknown as React.MouseEvent, o.id); } }}
+                    style={{ position: "absolute", top: 4, right: 6, fontSize: "0.8rem", color: "var(--muted)", cursor: "pointer", lineHeight: 1, padding: 4 }}>
+                    ✕
+                  </span>
+                  <span style={{ fontSize: "1.6rem" }}>👤</span>
+                  <span style={{ fontSize: "0.86rem" }}>{o.name || o.date}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="muted" style={{ fontSize: "0.85rem" }}>
+              Nie masz jeszcze zapisanych osób — dodaj pierwszą w formularzu obok.
+            </p>
+          )}
           <p className="muted" style={{ fontSize: "0.82rem", marginTop: 10 }}>
-            {raport === "portret" && "Ogólny profil na podstawie policzonej mapy."}
-            {raport === "dziecko" && "Talenty i wskazówki wychowawcze — wpisz dane DZIECKA w formularzu."}
-            {raport === "finanse" && "Wzorce finansowe wynikające z mapy — nie porada inwestycyjna."}
-            {raport === "prognoza" && "Pogłębiona interpretacja aktualnej mahadashy/antardaszy."}
+            Kliknij kafelek, żeby zobaczyć kosmogram tej osoby. Każda ma swój pełny profil —
+            techniczne dane, dasze, jogi i dosze, predyspozycje i interpretację AI.
           </p>
         </div>
 
         <BirthForm
-          key={raport === "dziecko" ? "dziecko" : "self"}
-          onSubmit={handleSubmit}
-          submitLabel="Postaw kosmogram"
-          persist={raport !== "dziecko"}
-          dateLabel={FORM_COPY[raport].dateLabel}
-          nameLabel={FORM_COPY[raport].nameLabel}
-          namePlaceholder={FORM_COPY[raport].namePlaceholder}
+          key={formKey}
+          onSubmit={handleDodajOsobe}
+          submitLabel="Dodaj osobę i policz kosmogram"
+          persist={false}
+          dateLabel="Data urodzenia"
+          nameLabel="Imię (żeby rozpoznać kafelek)"
+          namePlaceholder="np. Jacek, Zosia, Mama…"
         />
       </div>
 
@@ -347,10 +380,8 @@ export default function KosmogramPage() {
 
           {/* poczatkujacy/zaawansowany — poczatkujacy pokazuje tylko interpretacyjne rankingi
               (Predyspozycje/Finanse/Zdrowie), zaawansowany cala reszte (diagramy, tabele, warga,
-              Asztakawarga, Szadbala, Dasza, Karaki, Jogi, Dosze, glosariusze). Przelacznik ma sens
-              tylko przy raporcie "portret" (jedyny, ktory ma cokolwiek w Pelnych danych) — inaczej
-              "Pelne dane" bylyby pusta strona, wiec dla waskich raportow (dziecko/finanse/prognoza
-              bez czasGleboko) w ogole go nie pokazujemy. */}
+              Asztakawarga, Szadbala, Dasza, Karaki, Jogi, Dosze, glosariusze). Kazda osoba ma
+              zawsze pelny kosmogram, wiec ten przelacznik jest zawsze widoczny (maPelneDane = true). */}
           {maPelneDane && (
           <div className="card poziom-blok" style={{ marginBottom: 24 }}>
             <p className="eyebrow" style={{ marginBottom: 14 }}>Wybierz poziom szczegółowości</p>
@@ -583,10 +614,8 @@ export default function KosmogramPage() {
           <SzadbalaSekcja chart={chart} />
           </>}
 
-          {/* predyspozycje + na co uwazac — jedna wspolna rozwijana karta. Renderuje sie tez gdy
-              !maPelneDane (raport waski bez zadnej tresci w "Pelnych danych"), zeby przelacznik
-              trybu, ktorego wtedy w ogole nie pokazujemy, nie ukrywal tego bloku niepotrzebnie
-              gdy tryb w localStorage zostal wczesniej ustawiony na "zaawansowany". */}
+          {/* predyspozycje + na co uwazac — jedna wspolna rozwijana karta, widoczna w trybie
+              poczatkujacym (maPelneDane jest zawsze true, wiec warunek sprowadza sie do trybu). */}
           {(tryb === "poczatkujacy" || !maPelneDane) && <>
           {/* mandala syntezy — sam szczyt trybu poczatkujacego, zanim ktokolwiek zacznie przewijac dalej */}
           <SyntezaKosmogramu chart={chart} />
@@ -806,9 +835,9 @@ export default function KosmogramPage() {
           </>}
 
           <Interpretation
-            kind={RAPORTY.find((r) => r.id === raport)!.kind}
+            kind="kosmogram"
             data={aiData}
-            label={`Kosmogram — ${RAPORTY.find((r) => r.id === raport)!.label}${birthInput?.name ? ` — ${birthInput.name}` : ""}`}
+            label={`Kosmogram${birthInput?.name ? ` — ${birthInput.name}` : ""}`}
           />
           <Rozmowa mapa={aiData} tytul="Zapytaj o swój kosmogram" />
         </div>

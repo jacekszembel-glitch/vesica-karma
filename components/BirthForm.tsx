@@ -30,6 +30,8 @@ export interface BirthInput {
   plec: Plec;
   /** Opcjonalne — do podpisu raportów i historii. */
   name?: string;
+  /** Pełny obiekt miejsca (ze strefą czasową) — do zapisu jako osobny profil. */
+  place: Place;
 }
 
 interface Props {
@@ -100,6 +102,7 @@ export default function BirthForm({
       localTime: effectiveTime,
       plec,
       name: nazwaOsoby || undefined,
+      place,
     });
   }
 
