@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
-import Link from "next/link";
 import Nebula from "@/components/Nebula";
+import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
 /**
- * Layout na start — same fonty i zmienne CSS (--bg/--sand/--gold) co w
- * 9dom (spójna paleta), bez SiteHeader/NightSky/DoGory z tamtego repo —
- * te są zrobione pod strukturę nawigacji 9dom. Nagłówek i stopka
- * VesicaKarma do zaprojektowania osobno, na razie minimalne, żeby dało
- * się nawigować i przetestować logowanie.
+ * Layout — fonty i zmienne CSS w duchu 9dom, ale własna (fioletowa) paleta
+ * i własny minimalny nagłówek (SiteHeader: wordmark + hamburger).
  */
 const cormorant = Cormorant_Garamond({
   subsets: ["latin", "latin-ext"],
@@ -47,17 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pl" className={`${cormorant.variable} ${inter.variable}`}>
       <body>
         <Nebula />
-        <header style={{ padding: "20px 0" }}>
-          <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Link href="/" style={{ fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--sand)", letterSpacing: "0.12em", fontWeight: 700 }}>
-              VESICA KARMA
-            </Link>
-            <nav style={{ display: "flex", gap: 18, fontSize: "0.85rem" }}>
-              <Link href="/konto" className="muted">Moje konto</Link>
-              <Link href="/logowanie" className="muted">Zaloguj</Link>
-            </nav>
-          </div>
-        </header>
+        <SiteHeader />
         <main>{children}</main>
         <footer style={{ background: "var(--navy)", marginTop: 90, padding: "40px 0" }}>
           <div className="container">

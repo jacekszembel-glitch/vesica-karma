@@ -1,15 +1,16 @@
-/* ═══════════════ 9 DOM · Mapa Czasu Duszy — design system wg brandbooka ═══════════════
-   Paleta: granat #0D1B2A / #162E3D · turkus #11A7B6 · złoto piaskowe #E6C48A · tło #F7F6F2
+/* ═══════════════ VesicaKarma — design system (odgałęzienie od 9dom) ═══════════════
+   Paleta: fiolet #170F28 / #1F1636 · turkus #11A7B6 (tylko mandala w tle) ·
+   złoto #E6C48A/#C39A3B · taupe #8D8175 (stan „nieukończony" Koła Karmy)
    Typografia: Cormorant Garamond (nagłówki) + Inter (treść)
    Zasady ikon: geometria i prostota, jednolita grubość linii, harmonia i równowaga. */
 
 :root {
-  --bg: #0d1b2a;
-  --bg-2: #0a1521;
-  --surface: #14283a;
-  --surface-2: #1a3145;
-  --navy: #0d1b2a;
-  --navy-2: #162e3d;
+  --bg: #170f28;
+  --bg-2: #110a1f;
+  --surface: #241a3d;
+  --surface-2: #2c2049;
+  --navy: #170f28;
+  --navy-2: #1f1636;
   --teal: #11a7b6;
   --teal-soft: #7fd0d8;
   --sand: #e6c48a;
@@ -18,14 +19,17 @@
   --primary-soft: #e6c48a;
   --primary-glow: rgba(195, 154, 59, 0.3);
   --accent: #11a7b6;
-  --sacred: #162e3d;
+  --sacred: #1f1636;
   --text: #e8eef2;
-  --muted: #93a6b3;
+  --muted: #9c93ab;
   --success: #6fbf9f;
   --warn: #e08a63;
   --line: rgba(127, 208, 216, 0.22);
   --line-soft: rgba(127, 208, 216, 0.1);
   --line-gold: rgba(195, 154, 59, 0.4);
+  /* stan „nieukończony" Koła Karmy i kafelków w Panelu (Faza 1: reskin) */
+  --taupe: #8d8175;
+  --taupe-soft: rgba(141, 129, 117, 0.4);
   --radius: 16px;
   --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
   --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
@@ -216,7 +220,7 @@ p { color: var(--text); }
   flex-direction: column;
   gap: 4px;
   padding: 12px 24px 22px;
-  background: rgba(13, 27, 42, 0.99);
+  background: rgba(23, 15, 40, 0.99);
   border-bottom: 1px solid var(--line-soft);
 }
 .nav-mobile a { padding: 13px 14px; border-radius: 12px; color: #e8eef2; font-size: 1.05rem; border: 1px solid transparent; }
@@ -227,6 +231,11 @@ p { color: var(--text); }
   .nav-burger { display: flex; }
   .nav-mobile.open { display: flex; }
 }
+
+/* VesicaKarma: hamburger to JEDYNA nawigacja (bez paska nav-desktop z 9dom),
+   więc widoczny na każdej szerokości, nie tylko poniżej 900px. */
+.nav-burger { display: flex; }
+.nav-mobile.open { display: flex; }
 
 /* ═══ karty ═══ */
 .card {
