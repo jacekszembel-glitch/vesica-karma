@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import Link from "next/link";
+import Nebula from "@/components/Nebula";
 import "./globals.css";
 
 /**
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pl" className={`${cormorant.variable} ${inter.variable}`}>
       <body>
+        <Nebula />
         <header style={{ padding: "20px 0" }}>
           <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Link href="/" style={{ fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--sand)", letterSpacing: "0.12em", fontWeight: 700 }}>

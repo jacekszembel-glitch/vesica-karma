@@ -49,18 +49,59 @@ body {
   overflow-x: hidden;
 }
 
-/* tło: bardzo subtelne poświaty turkusu i złota */
+/* tło: pionowy spadek granatu, baza pod mgławicą */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: -2;
-  background:
-    radial-gradient(ellipse 70% 50% at 50% -12%, rgba(17, 167, 182, 0.12), transparent 70%),
-    radial-gradient(ellipse 45% 40% at 90% 25%, rgba(230, 196, 138, 0.07), transparent 70%),
-    radial-gradient(ellipse 50% 45% at 5% 80%, rgba(17, 167, 182, 0.06), transparent 70%),
-    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  z-index: -3;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
 }
+
+/* ═══ mgławica — oddychające, wolno dryfujące poświaty tła (całej strony) ═══ */
+.nebula { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; }
+.nebula-blob { position: absolute; border-radius: 50%; filter: blur(6px); will-change: transform, opacity; }
+.nebula-1 {
+  width: 70vw; height: 70vw; left: 12%; top: -32%;
+  background: radial-gradient(ellipse, rgba(17, 167, 182, 0.14), transparent 70%);
+  animation: nebula-drift-1 46s ease-in-out infinite;
+}
+.nebula-2 {
+  width: 56vw; height: 56vw; left: 62%; top: 2%;
+  background: radial-gradient(ellipse, rgba(230, 196, 138, 0.09), transparent 70%);
+  animation: nebula-drift-2 61s ease-in-out infinite;
+}
+.nebula-3 {
+  width: 62vw; height: 62vw; left: -14%; top: 58%;
+  background: radial-gradient(ellipse, rgba(17, 167, 182, 0.08), transparent 70%);
+  animation: nebula-drift-3 68s ease-in-out infinite;
+}
+.nebula-4 {
+  width: 42vw; height: 42vw; left: 42%; top: 38%;
+  background: radial-gradient(ellipse, rgba(127, 208, 216, 0.07), transparent 70%);
+  animation: nebula-drift-4 53s ease-in-out infinite;
+}
+@keyframes nebula-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.75; }
+  50% { transform: translate(6%, 7%) scale(1.15); opacity: 1; }
+}
+@keyframes nebula-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  50% { transform: translate(-7%, 5%) scale(0.88); opacity: 0.95; }
+}
+@keyframes nebula-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.65; }
+  50% { transform: translate(5%, -6%) scale(1.1); opacity: 1; }
+}
+@keyframes nebula-drift-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  50% { transform: translate(4%, 4%) scale(1.22); opacity: 0.85; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nebula-blob { animation: none; }
+}
+/* treść ponad mgławicą */
+main, header, footer { position: relative; z-index: 1; }
 
 /* ── typografia ── */
 h1, h2, h3, h4 {
