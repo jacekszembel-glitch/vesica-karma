@@ -289,35 +289,44 @@ export default function KosmogramPage() {
 
       <div className="numerologia-uklad">
         <div className="card">
-          <p className="eyebrow" style={{ marginBottom: 12 }}>Osoby</p>
-          {osoby.length > 0 ? (
-            <div className="bf-plec numerologia-raporty" role="radiogroup" aria-label="Wybierz osobę do analizy">
-              {osoby.map((o) => (
-                <button key={o.id} type="button" role="radio" aria-checked={wybranaOsobaId === o.id}
-                  className={`bf-plec-opcja${wybranaOsobaId === o.id ? " bf-plec-opcja-aktywna" : ""}`}
-                  style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px" }}
-                  onClick={() => wybierzOsobe(o)}>
-                  <span
-                    role="button" tabIndex={0} aria-label={`Usuń ${o.name || "tę osobę"}`}
-                    onClick={(e) => usunKafelek(e, o.id)}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); usunKafelek(e as unknown as React.MouseEvent, o.id); } }}
-                    style={{ position: "absolute", top: 4, right: 6, fontSize: "0.8rem", color: "var(--muted)", cursor: "pointer", lineHeight: 1, padding: 4 }}>
-                    ✕
-                  </span>
-                  <IconOsoba size={32} />
-                  <span style={{ fontSize: "0.86rem" }}>{o.name || o.date}</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="muted" style={{ fontSize: "0.85rem" }}>
-              Nie masz jeszcze zapisanych osób — dodaj pierwszą w formularzu obok.
-            </p>
-          )}
-          <p className="muted" style={{ fontSize: "0.82rem", marginTop: 10 }}>
-            Kliknij kafelek, żeby zobaczyć kosmogram tej osoby. Każda ma swój pełny profil —
-            techniczne dane, dasze, jogi i dosze, predyspozycje i interpretację AI.
+          <p className="eyebrow" style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            Osoby
+            <Term term={{
+              title: "Osoby",
+              text: "Kliknij kafelek, żeby zobaczyć kosmogram tej osoby. Każda ma swój pełny profil — techniczne dane, dasze, jogi i dosze, predyspozycje i interpretację AI.",
+            }}>
+              <span aria-hidden="true" style={{
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                width: 16, height: 16, borderRadius: "50%", border: "1px solid var(--muted)",
+                color: "var(--muted)", fontSize: "0.68rem", fontStyle: "italic", cursor: "help",
+              }}>i</span>
+            </Term>
           </p>
+          <div className="bf-plec numerologia-raporty" role="radiogroup" aria-label="Wybierz osobę do analizy">
+            {osoby.map((o) => (
+              <button key={o.id} type="button" role="radio" aria-checked={wybranaOsobaId === o.id}
+                className={`bf-plec-opcja${wybranaOsobaId === o.id ? " bf-plec-opcja-aktywna" : ""}`}
+                style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px" }}
+                onClick={() => wybierzOsobe(o)}>
+                <span
+                  role="button" tabIndex={0} aria-label={`Usuń ${o.name || "tę osobę"}`}
+                  onClick={(e) => usunKafelek(e, o.id)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); usunKafelek(e as unknown as React.MouseEvent, o.id); } }}
+                  style={{ position: "absolute", top: 4, right: 6, fontSize: "0.8rem", color: "var(--muted)", cursor: "pointer", lineHeight: 1, padding: 4 }}>
+                  ✕
+                </span>
+                <IconOsoba size={32} />
+                <span style={{ fontSize: "0.86rem" }}>{o.name || o.date}</span>
+              </button>
+            ))}
+            <button type="button"
+              className="bf-plec-opcja"
+              style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "14px 8px", borderStyle: "dashed", opacity: 0.75 }}
+              onClick={() => document.getElementById("bf-name")?.focus()}>
+              <span style={{ fontSize: "1.6rem", lineHeight: 1 }}>+</span>
+              <span style={{ fontSize: "0.86rem" }}>Dodaj osobę</span>
+            </button>
+          </div>
         </div>
 
         <BirthForm
