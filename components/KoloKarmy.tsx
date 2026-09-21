@@ -166,7 +166,7 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
             filter: "drop-shadow(0 0 14px rgba(230, 196, 138, 0.55))",
           }} />
       ))}
-      <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} puls={aktywny === "astrologia"} />
+      <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} />
 
       {/* poświata pól o nieregularnym kształcie — astrologia/hiromancja/
           numerologia pominięte: hover-feedback dla wszystkich trzech daje
@@ -187,13 +187,15 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
         );
       })()}
 
-      {/* piktogramy, które pulsują po najechaniu — leżą idealnie na tle (taupe
-          albo złote, zależnie od stanu), widać tylko puls */}
+      {/* piktogramy — leżą idealnie na tle (taupe albo złote, zależnie od
+          stanu). Bez pulsu na hover — animacja transform:scale przy okazji
+          nakładała się na złoty pierścień w tle i wyglądała jak zmiana
+          koloru pierścienia. */}
       {PIKTOGRAMY_PULSUJACE.map((p) => (
         <img key={`ikona-${p.id}`}
           src={`/brand/icon-${p.id}${ukonczone.has(p.id as SystemKarmy) ? "" : "-taupe"}.png`} alt=""
-          className={`kk-ikona-puls${aktywny === p.id ? " kk-ikona-puls-aktywna" : ""}`}
           style={{
+            position: "absolute", pointerEvents: "none",
             left: pctX(p.box[0]), top: pctY(p.box[1]),
             width: pctX(p.box[2] - p.box[0]), height: pctY(p.box[3] - p.box[1]),
           }} />

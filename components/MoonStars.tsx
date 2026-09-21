@@ -36,8 +36,8 @@ function Iskra({ x, y, s }: { x: number; y: number; s: number }) {
   );
 }
 
-export default function MoonStars({ box, zlote = false, puls = false }: {
-  box: readonly [number, number, number, number]; zlote?: boolean; puls?: boolean;
+export default function MoonStars({ box, zlote = false }: {
+  box: readonly [number, number, number, number]; zlote?: boolean;
 }) {
   const [x0, y0, x1, y1] = box;
   return (
@@ -45,7 +45,6 @@ export default function MoonStars({ box, zlote = false, puls = false }: {
       viewBox="0 0 100 60"
       preserveAspectRatio="xMidYMid meet"
       aria-hidden="true"
-      className={`kk-ikona-puls${puls ? " kk-ikona-puls-aktywna" : ""}`}
       style={{
         position: "absolute",
         left: `${(x0 / IMG_W) * 100}%`,

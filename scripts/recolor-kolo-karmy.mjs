@@ -70,11 +70,15 @@ const DLON_MASKA = path.join(dir, "erase-hiromancja-mask.png");
  *  okazał się NIE być pixel-aligned ze swoim odpowiednikiem w kolo-karmy.png
  *  (osobno wyeksportowany asset, inna skala/pozycja) — próba budowy maski
  *  z jego kształtu (jak przy dłoni) dawała tylko częściowe wycięcie
- *  ("duchy" starych cyfr). Zamiast tego: prosta elipsa (jak KOMPAS_DZIURA)
- *  obejmująca bbox cyfr [18,11,104,121] zmierzony BEZPOŚREDNIO z
- *  kolo-karmy.png (nie z icon-numerologia.png) w przestrzeni pudełka
- *  [715,400,870,550], + margines 30px. */
-const NUMERY_DZIURA = { cx: 776, cy: 466, rx: 73, ry: 85, feather: 6 };
+ *  ("duchy" starych cyfr). Próbna elipsa obejmująca cały obszar była za
+ *  duża i ucinała kawałek sąsiedniego pierścienia. Ostateczna wersja:
+ *  dokładny kształt cyfr zmierzony BEZPOŚREDNIO z kolo-karmy.png (blob-y
+ *  nie dotykające krawędzi pudełka [715,400,870,550] — odrzuca fragmenty
+ *  pierścienia w rogach), z poprawną dylatacją: blur tworzy miękką otoczkę
+ *  wokół KAŻDEGO kształtu niezależnie od jego grubości (cienkie kreski typu
+ *  "1" też dostają otoczkę), próg zamienia otoczkę z powrotem w twardy,
+ *  powiększony kształt — bez tego cienkie kreski zostawały nietknięte. */
+const NUMERY_MASKA = path.join(dir, "erase-numerologia-mask.png");
 
 async function tauped(input) {
   return sharp(input).tint({ r: 0x8d, g: 0x81, b: 0x75 }).modulate({ brightness: 0.82 });
@@ -98,12 +102,7 @@ async function wytnijDlon(input) {
 }
 
 async function wytnijNumery(input) {
-  const { cx, cy, rx, ry, feather } = NUMERY_DZIURA;
-  const svg = `<svg width="${IMG_W}" height="${IMG_H}" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#fff"/>
-  </svg>`;
-  const mask = await sharp(Buffer.from(svg)).blur(feather).png().toBuffer();
-  return wytnijMaska(input, mask);
+  return wytnijMaska(input, NUMERY_MASKA);
 }
 
 async function main() {
