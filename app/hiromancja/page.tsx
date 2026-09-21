@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { SceneHiromancja } from "@/components/infographics";
 import Term from "@/components/Term";
 import HiromancjaZdjecie, { type ZdjecieDane } from "@/components/HiromancjaZdjecie";
 import HiromancjaKalibracja from "@/components/HiromancjaKalibracja";
@@ -133,7 +132,6 @@ export default function HiromancjaPage() {
 
   return (
     <div className="container section">
-      <div className="fade-up" style={{ maxWidth: 340, margin: "0 auto 10px" }}><SceneHiromancja /></div>
       <h1 style={{ textAlign: "center" }}><Term k="hiromancja">Chiromancja</Term></h1>
       <p className="section-sub">
         Prześlij zdjęcia obu dłoni — Claude spojrzy na nie i jakościowo opisze kształt dłoni oraz
