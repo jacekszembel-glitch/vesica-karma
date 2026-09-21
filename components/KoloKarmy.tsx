@@ -168,12 +168,11 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
       ))}
       <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} puls={aktywny === "astrologia"} />
 
-      {/* poświata pól o nieregularnym kształcie — astrologia i hiromancja
-          pominięte: te maski to flood-fill WNĘTRZA starych piktogramów
-          (kompas/dłoń, już wyciętych z bazy), na przezroczystej dziurze
-          dawały widoczny „cień"; hover-feedback dla obu daje teraz puls
-          (MoonStars / icon-hiromancja przez PIKTOGRAMY_PULSUJACE) */}
-      {[...KSZTALTNE].filter((id) => id !== "astrologia" && id !== "hiromancja").map((id) => (
+      {/* poświata pól o nieregularnym kształcie — astrologia/hiromancja/
+          numerologia pominięte: hover-feedback dla wszystkich trzech daje
+          już puls piktogramu (MoonStars / PIKTOGRAMY_PULSUJACE), stara
+          poświata dawała niespójny, zbędny efekt w tle */}
+      {[...KSZTALTNE].filter((id) => !["astrologia", "hiromancja", "numerologia"].includes(id)).map((id) => (
         <img key={`glow-${id}`} src={`/brand/glow-${id}.png`} alt=""
           className={`kk-glow-ksztalt${aktywny === id ? " kk-glow-aktywny" : ""}`}
           style={{ left: 0, top: 0, width: "100%", height: "100%" }} />

@@ -66,6 +66,16 @@ const KOMPAS_DZIURA = { cx: 600, cy: 166, r: 78, feather: 6 };
  *  (scripts/_extract_hand_mask.mjs, usunięty po użyciu). */
 const DLON_MASKA = path.join(dir, "erase-hiromancja-mask.png");
 
+/** Stare cyfry „375"/„1" (piktogram Numerologii) — WAŻNE: icon-numerologia.png
+ *  okazał się NIE być pixel-aligned ze swoim odpowiednikiem w kolo-karmy.png
+ *  (osobno wyeksportowany asset, inna skala/pozycja) — próba budowy maski
+ *  z jego kształtu (jak przy dłoni) dawała tylko częściowe wycięcie
+ *  ("duchy" starych cyfr). Zamiast tego: prosta elipsa (jak KOMPAS_DZIURA)
+ *  obejmująca bbox cyfr [18,11,104,121] zmierzony BEZPOŚREDNIO z
+ *  kolo-karmy.png (nie z icon-numerologia.png) w przestrzeni pudełka
+ *  [715,400,870,550], + margines 30px. */
+const NUMERY_DZIURA = { cx: 776, cy: 466, rx: 73, ry: 85, feather: 6 };
+
 async function tauped(input) {
   return sharp(input).tint({ r: 0x8d, g: 0x81, b: 0x75 }).modulate({ brightness: 0.82 });
 }
@@ -87,9 +97,18 @@ async function wytnijDlon(input) {
   return wytnijMaska(input, DLON_MASKA);
 }
 
+async function wytnijNumery(input) {
+  const { cx, cy, rx, ry, feather } = NUMERY_DZIURA;
+  const svg = `<svg width="${IMG_W}" height="${IMG_H}" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#fff"/>
+  </svg>`;
+  const mask = await sharp(Buffer.from(svg)).blur(feather).png().toBuffer();
+  return wytnijMaska(input, mask);
+}
+
 async function main() {
-  await wytnijDlon(await wytnijKompas(await tauped(basePath))).then((s) => s.toFile(path.join(dir, "kolo-karmy-taupe.png")));
-  await wytnijDlon(await wytnijKompas(sharp(basePath))).then((s) => s.toFile(path.join(dir, "kolo-karmy-gold-clean.png")));
+  await wytnijNumery(await wytnijDlon(await wytnijKompas(await tauped(basePath)))).then((s) => s.toFile(path.join(dir, "kolo-karmy-taupe.png")));
+  await wytnijNumery(await wytnijDlon(await wytnijKompas(sharp(basePath)))).then((s) => s.toFile(path.join(dir, "kolo-karmy-gold-clean.png")));
 
   // icon-<id>.png (nakładki do pulsowania na hover, KoloKarmy.tsx
   // PIKTOGRAMY_PULSUJACE) leżą ZAWSZE w DOM, nie tylko na hover — w spoczynku
