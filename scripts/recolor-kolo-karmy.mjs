@@ -136,18 +136,30 @@ async function main() {
     await tauped(iconPath).then((s) => s.toFile(path.join(dir, `icon-${id}-taupe.png`)));
   }
 
-  // UWAGA: dwie próby "naprawy" plecionki na skrzyżowaniach pierścieni
-  // zostały COFNIĘTE — (1) wycinanie całego nachodzącego pasma robiło
-  // duże dziury, (2) małe precyzyjne wcięcia w punktach przecięcia same
-  // wyglądały jak defekt (rozmyta plama), nie jak naturalne przejście.
-  // Referencja użytkownika (public/brand/chiromancja-1.jpg) pokazuje
-  // pierścień systemu jako W PEŁNI CIĄGŁY — zostaje przy prostej wersji,
-  // bez żadnych wycięć/wyjątków na skrzyżowaniach.
+  // Trzecia próba plecionki na skrzyżowaniach — zgodnie z dokładnym zoomem
+  // od użytkownika: pierścień ma być CAŁKOWICIE i OSTRO przecięty tam,
+  // gdzie fizycznie przechodzi pod sąsiednim pierścieniem (bez rozmycia,
+  // bez okrągłej plamy). Odejmowane jest PRAWDZIWE nachodzące pasmo
+  // (nie okrąg-notka jak w drugiej próbie) TYLKO dwóch sąsiednich pętli
+  // systemów — BEZ zewnętrznego pierścienia Karmy (jego bardzo gruby,
+  // 60px pas dawał ogromne dziury w pierwszej próbie, stąd pominięty).
+  // Ostra krawędź wycięcia: bez dodatkowego rozmycia ponad wspólny FEATHER
+  // już użyty na głównym kształcie pierścienia.
   for (const [id, { cx, cy, rOuter, rInner }] of Object.entries(RINGS)) {
     const strokeW = rOuter - rInner;
     const r = (rOuter + rInner) / 2;
+    const sasiedzi = Object.entries(RINGS).filter(([innyId]) => innyId !== id).map(([, ring]) => ring);
+    const wykluczenia = sasiedzi.map((s) => {
+      const sw = s.rOuter - s.rInner;
+      const sr = (s.rOuter + s.rInner) / 2;
+      return `<circle cx="${s.cx}" cy="${s.cy}" r="${sr}" fill="none" stroke="#000" stroke-width="${sw}"/>`;
+    }).join("");
     const svg = `<svg width="${IMG_W}" height="${IMG_H}" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#fff" stroke-width="${strokeW}"/>
+      <mask id="m">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#fff" stroke-width="${strokeW}"/>
+        ${wykluczenia}
+      </mask>
+      <rect x="0" y="0" width="${IMG_W}" height="${IMG_H}" fill="#fff" mask="url(#m)"/>
     </svg>`;
     const mask = await sharp(Buffer.from(svg)).blur(FEATHER).png().toBuffer();
     await sharp(basePath)
