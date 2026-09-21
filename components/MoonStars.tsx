@@ -7,24 +7,23 @@
 const IMG_W = 1260, IMG_H = 761;
 
 /** Współrzędne zmierzone bezpośrednio z pikseli referencji projektowej
- *  (public/brand/nowa- kolo-karmy.jpg — analiza plam jasności / connected
- *  components, nie „na oko"), przeliczone do lokalnego układu viewBox
- *  przez SEGMENT_GAPY.astrologia. Metoda pomiaru: patrz git history tego
- *  pliku (skrypt scripts/_measure_stars.mjs, usunięty po użyciu). */
+ *  (public/brand/astonomia.jpg — dedykowany, czystszy kadr niż poprzedni
+ *  — analiza plam jasności / connected components, przeliczone proporcjonalnie
+ *  x/szerokość, y/wysokość do lokalnego układu viewBox 0-100/0-60). */
 const GWIAZDY = [
-  { x: 62.6, y: 34.8, s: 7.5 },
-  { x: 16.6, y: 33.3, s: 5.9 },
-  { x: 54.0, y: 21.3, s: 4.3 },
-  { x: 83.7, y: 30.9, s: 3.9 },
-  { x: 50.7, y: 49.7, s: 2.6 },
-  { x: 27.3, y: 16.7, s: 2.1 },
-  { x: 60.5, y: 9.6, s: 2.0 },
-  { x: 43.6, y: 8.2, s: 1.8 },
-  { x: 74.5, y: 17.0, s: 1.6 },
-  { x: 30.3, y: 44.7, s: 1.8 },
-  { x: 72.4, y: 43.3, s: 1.8 },
-  { x: 10.1, y: 43.7, s: 1.6 },
-  { x: 92.0, y: 45.4, s: 1.8 },
+  { x: 58.8, y: 34.7, s: 7.5 },
+  { x: 28.8, y: 33.6, s: 6.0 },
+  { x: 51.1, y: 27.4, s: 4.8 },
+  { x: 73.3, y: 32.1, s: 4.4 },
+  { x: 50.5, y: 43.4, s: 3.8 },
+  { x: 65.4, y: 39.8, s: 2.9 },
+  { x: 45.5, y: 18.5, s: 2.9 },
+  { x: 36.0, y: 40.6, s: 2.9 },
+  { x: 79.3, y: 41.1, s: 2.9 },
+  { x: 57.1, y: 19.6, s: 2.9 },
+  { x: 22.4, y: 40.0, s: 2.9 },
+  { x: 67.1, y: 24.0, s: 2.8 },
+  { x: 34.2, y: 23.8, s: 2.8 },
 ];
 
 function Iskra({ x, y, s }: { x: number; y: number; s: number }) {
@@ -56,15 +55,14 @@ export default function MoonStars({ box, zlote = false }: {
         pointerEvents: "none",
       }}
     >
-      {/* półksiężyc — środek i rozmiar zmierzone tak samo jak gwiazdy
-          (bbox 26×35 w przestrzeni referencji), kształt (koło minus
-          przesunięte koło) dobrany do tych proporcji */}
+      {/* półksiężyc — środek i rozmiar zmierzone tak samo jak gwiazdy,
+          kształt (koło minus przesunięte koło) dobrany do tych proporcji */}
       <mask id="ks-mask">
         <rect x="0" y="0" width="100" height="60" fill="black" />
-        <circle cx="37.4" cy="31.2" r="13" fill="white" />
-        <circle cx="42" cy="27.9" r="10.2" fill="black" />
+        <circle cx="41.2" cy="32.3" r="7.5" fill="white" />
+        <circle cx="43.85" cy="30.4" r="5.88" fill="black" />
       </mask>
-      <circle cx="37.4" cy="31.2" r="13" fill="currentColor" mask="url(#ks-mask)" />
+      <circle cx="41.2" cy="32.3" r="7.5" fill="currentColor" mask="url(#ks-mask)" />
       {GWIAZDY.map((g, i) => <Iskra key={i} {...g} />)}
     </svg>
   );
