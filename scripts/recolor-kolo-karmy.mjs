@@ -56,8 +56,22 @@ const FEATHER = 4;
  *  w rogu). */
 const KOMPAS_DZIURA = { cx: 600, cy: 166, r: 78, feather: 6 };
 
+/** Stara dłoń (piktogram Chiromancji) — wycinana tym samym sposobem co
+ *  kompas, ale maską o dokładnym kształcie dłoni (nie okręgiem — dłoń nie
+ *  jest okrągła), zapisaną raz jako erase-hiromancja-mask.png. Ta maska to
+ *  największa spójna plama pikseli ze STAREGO icon-hiromancja.png (przed
+ *  podmianą na nową dłoń z public/brand/dlon.jpg) — odrzuca małe fragmenty
+ *  złotego pierścienia w rogach kadru, które inaczej zostałyby błędnie
+ *  wycięte razem z dłonią. Metoda: patrz git history tego pliku
+ *  (scripts/_extract_hand_mask.mjs, usunięty po użyciu). */
+const DLON_MASKA = path.join(dir, "erase-hiromancja-mask.png");
+
 async function tauped(input) {
   return sharp(input).tint({ r: 0x8d, g: 0x81, b: 0x75 }).modulate({ brightness: 0.82 });
+}
+
+async function wytnijMaska(input, maskPathOrBuffer) {
+  return sharp(await input.toBuffer()).composite([{ input: maskPathOrBuffer, blend: "dest-out" }]);
 }
 
 async function wytnijKompas(input) {
@@ -66,12 +80,16 @@ async function wytnijKompas(input) {
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff"/>
   </svg>`;
   const mask = await sharp(Buffer.from(svg)).blur(feather).png().toBuffer();
-  return sharp(await input.toBuffer()).composite([{ input: mask, blend: "dest-out" }]);
+  return wytnijMaska(input, mask);
+}
+
+async function wytnijDlon(input) {
+  return wytnijMaska(input, DLON_MASKA);
 }
 
 async function main() {
-  await wytnijKompas(await tauped(basePath)).then((s) => s.toFile(path.join(dir, "kolo-karmy-taupe.png")));
-  await wytnijKompas(sharp(basePath)).then((s) => s.toFile(path.join(dir, "kolo-karmy-gold-clean.png")));
+  await wytnijDlon(await wytnijKompas(await tauped(basePath))).then((s) => s.toFile(path.join(dir, "kolo-karmy-taupe.png")));
+  await wytnijDlon(await wytnijKompas(sharp(basePath))).then((s) => s.toFile(path.join(dir, "kolo-karmy-gold-clean.png")));
 
   // icon-<id>.png (nakładki do pulsowania na hover, KoloKarmy.tsx
   // PIKTOGRAMY_PULSUJACE) leżą ZAWSZE w DOM, nie tylko na hover — w spoczynku
