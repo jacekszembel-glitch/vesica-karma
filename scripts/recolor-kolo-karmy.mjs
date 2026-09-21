@@ -136,49 +136,18 @@ async function main() {
     await tauped(iconPath).then((s) => s.toFile(path.join(dir, `icon-${id}-taupe.png`)));
   }
 
-  // UWAGA: próba "naprawy" plecionki na skrzyżowaniach (wycinanie z maski
-  // obszarów nachodzących na CAŁE pasmo innego pierścienia) została
-  // COFNIĘTA — dwa pasma o zbliżonym promieniu, krzyżujące się pod
-  // płytkim kątem, dają DŁUGI łuk nakładania się, nie mały punkt, więc
-  // wycięcie całego pasma robiło duże dziury zamiast małej plecionki.
-  //
-  // Zamiast tego: MAŁE, precyzyjne wcięcia dokładnie w punktach, gdzie
-  // przecinają się linie środkowe (promień r) dwóch sąsiednich pierścieni
-  // — tam, i tylko tam, oryginalna grafika pokazuje jeden pierścień pod
-  // drugim. Punkty policzone analitycznie (przecięcie dwóch okręgów
-  // o promieniu r=(rOuter+rInner)/2, środki z RINGS) — wzór:
-  // d = odległość środków, h = sqrt(r²-(d/2)²), punkty = środek_odcinka ± h·prostopadła.
-  function przeciecia(a, b) {
-    const ra = (a.rOuter + a.rInner) / 2, rb = (b.rOuter + b.rInner) / 2;
-    const dx = b.cx - a.cx, dy = b.cy - a.cy;
-    const d = Math.hypot(dx, dy);
-    const ux = dx / d, uy = dy / d;
-    const px = -uy, py = ux; // prostopadła
-    const aBase = (ra * ra - rb * rb + d * d) / (2 * d);
-    const h = Math.sqrt(Math.max(0, ra * ra - aBase * aBase));
-    const mx = a.cx + ux * aBase, my = a.cy + uy * aBase;
-    return [[mx + px * h, my + py * h], [mx - px * h, my - py * h]];
-  }
-  const PARY = [["astrologia", "hiromancja"], ["hiromancja", "numerologia"], ["astrologia", "numerologia"]];
-  const WCIECIA = { astrologia: [], hiromancja: [], numerologia: [] };
-  for (const [a, b] of PARY) {
-    for (const p of przeciecia(RINGS[a], RINGS[b])) {
-      WCIECIA[a].push(p);
-      WCIECIA[b].push(p);
-    }
-  }
-  const PROMIEN_WCIECIA = 30;
-
+  // UWAGA: dwie próby "naprawy" plecionki na skrzyżowaniach pierścieni
+  // zostały COFNIĘTE — (1) wycinanie całego nachodzącego pasma robiło
+  // duże dziury, (2) małe precyzyjne wcięcia w punktach przecięcia same
+  // wyglądały jak defekt (rozmyta plama), nie jak naturalne przejście.
+  // Referencja użytkownika (public/brand/chiromancja-1.jpg) pokazuje
+  // pierścień systemu jako W PEŁNI CIĄGŁY — zostaje przy prostej wersji,
+  // bez żadnych wycięć/wyjątków na skrzyżowaniach.
   for (const [id, { cx, cy, rOuter, rInner }] of Object.entries(RINGS)) {
     const strokeW = rOuter - rInner;
     const r = (rOuter + rInner) / 2;
-    const wciecia = WCIECIA[id].map(([px, py]) => `<circle cx="${px}" cy="${py}" r="${PROMIEN_WCIECIA}" fill="#000"/>`).join("");
     const svg = `<svg width="${IMG_W}" height="${IMG_H}" xmlns="http://www.w3.org/2000/svg">
-      <mask id="m">
-        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#fff" stroke-width="${strokeW}"/>
-        ${wciecia}
-      </mask>
-      <rect x="0" y="0" width="${IMG_W}" height="${IMG_H}" fill="#fff" mask="url(#m)"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#fff" stroke-width="${strokeW}"/>
     </svg>`;
     const mask = await sharp(Buffer.from(svg)).blur(FEATHER).png().toBuffer();
     await sharp(basePath)
