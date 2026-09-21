@@ -80,8 +80,25 @@ const DLON_MASKA = path.join(dir, "erase-hiromancja-mask.png");
  *  powiększony kształt — bez tego cienkie kreski zostawały nietknięte. */
 const NUMERY_MASKA = path.join(dir, "erase-numerologia-mask.png");
 
+/** Ikony "wspólnych danych" (dom/klepsydra/gwiazda w trójkącie/postać) mają
+ *  zostać złote ZAWSZE, niezależnie od stanu pierścieni — potwierdzone
+ *  porównaniem z plikami referencyjnymi (nie należą do żadnego z trzech
+ *  systemów z osobna). Maska: scripts/generate-shared-icons-mask.mjs. */
+const SHARED_ICONS_MASKA = path.join(dir, "shared-icons-mask.png");
+
 async function tauped(input) {
   return sharp(input).tint({ r: 0x8d, g: 0x81, b: 0x75 }).modulate({ brightness: 0.82 });
+}
+
+/** Przywraca oryginalne (złote) piksele kolo-karmy.png na wierzchu
+ *  odbarwionego `input`, dokładnie w miejscach wskazanych przez
+ *  SHARED_ICONS_MASKA (dest-in na kopii oryginału, potem zwykłe "over"). */
+async function przywrocWspolneIkony(input) {
+  const oryginalneWMasce = await sharp(basePath)
+    .composite([{ input: SHARED_ICONS_MASKA, blend: "dest-in" }])
+    .png()
+    .toBuffer();
+  return sharp(await input.toBuffer()).composite([{ input: oryginalneWMasce, blend: "over" }]);
 }
 
 async function wytnijMaska(input, maskPathOrBuffer) {
@@ -106,7 +123,7 @@ async function wytnijNumery(input) {
 }
 
 async function main() {
-  await wytnijNumery(await wytnijDlon(await wytnijKompas(await tauped(basePath)))).then((s) => s.toFile(path.join(dir, "kolo-karmy-taupe.png")));
+  await przywrocWspolneIkony(await wytnijNumery(await wytnijDlon(await wytnijKompas(await tauped(basePath))))).then((s) => s.toFile(path.join(dir, "kolo-karmy-taupe.png")));
   await wytnijNumery(await wytnijDlon(await wytnijKompas(sharp(basePath)))).then((s) => s.toFile(path.join(dir, "kolo-karmy-gold-clean.png")));
 
   // icon-<id>.png (nakładki do pulsowania na hover, KoloKarmy.tsx
