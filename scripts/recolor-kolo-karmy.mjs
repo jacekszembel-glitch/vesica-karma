@@ -43,6 +43,10 @@ const RINGS = {
   hiromancja: { cx: 495, cy: 439, rOuter: 208, rInner: 170 },
   numerologia: { cx: 701, cy: 439, rOuter: 208, rInner: 170 },
 };
+/** Zewnętrzny duży pierścień Karmy (z KoloKarmy.tsx: CX=596,CY=378,
+ *  RING_R=322.5,RING_W=60) — jego pasmo też geometrycznie nachodzi na
+ *  pętle systemów, patrz WYKLUCZENIA niżej. */
+const OUTER_RING = { cx: 596, cy: 378, rOuter: 322.5 + 30, rInner: 322.5 - 30 };
 const FEATHER = 4;
 
 /** Stary kompas (piktogram Astrologii, wypalony w kolo-karmy.png) — wycinany
@@ -119,15 +123,38 @@ async function main() {
     await tauped(iconPath).then((s) => s.toFile(path.join(dir, `icon-${id}-taupe.png`)));
   }
 
-  for (const [id, { cx, cy, rOuter, rInner }] of Object.entries(RINGS)) {
+  // Pierścienie w oryginalnej grafice WPLATAJĄ SIĘ nawzajem (naprzemienne
+  // nad/pod na skrzyżowaniach) — pojedynczy płaski nadruk pierścienia
+  // systemu na wierzchu taupe bazy łamie tę plecionkę tam, gdzie w
+  // oryginale ma być POD sąsiednim pierścieniem (widoczny "babol" na
+  // skrzyżowaniu, zgłoszone przez użytkownika ze zrzutem). Naprawa: z maski
+  // wypełnienia danego systemu WYCINA się obszary, w których nachodzi ona
+  // na pas KTÓREGOKOLWIEK innego pierścienia (sąsiednie systemy + duży
+  // zewnętrzny pierścień Karmy) — na tych stykach zamiast złota zostaje
+  // widoczna (poprawna) taupe baza, bo tam faktycznie inny pierścień jest
+  // na wierzchu.
+  function annulusSvg(cx, cy, rOuter, rInner, fill) {
     const strokeW = rOuter - rInner;
     const r = (rOuter + rInner) / 2;
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${fill}" stroke-width="${strokeW}"/>`;
+  }
+
+  for (const [id, ring] of Object.entries(RINGS)) {
+    const inne = Object.entries(RINGS).filter(([innyId]) => innyId !== id).map(([, r]) => r).concat([OUTER_RING]);
     const svg = `<svg width="${IMG_W}" height="${IMG_H}" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#fff" stroke-width="${strokeW}"/>
+      ${annulusSvg(ring.cx, ring.cy, ring.rOuter, ring.rInner, "#fff")}
     </svg>`;
-    const mask = await sharp(Buffer.from(svg)).blur(FEATHER).png().toBuffer();
+    let mask = sharp(await sharp(Buffer.from(svg)).blur(FEATHER).png().toBuffer());
+    for (const innyRing of inne) {
+      const wykluczSvg = `<svg width="${IMG_W}" height="${IMG_H}" xmlns="http://www.w3.org/2000/svg">
+        ${annulusSvg(innyRing.cx, innyRing.cy, innyRing.rOuter, innyRing.rInner, "#fff")}
+      </svg>`;
+      const wykluczMask = await sharp(Buffer.from(wykluczSvg)).blur(FEATHER).png().toBuffer();
+      mask = sharp(await mask.toBuffer()).composite([{ input: wykluczMask, blend: "dest-out" }]);
+    }
+    const finalMask = await mask.png().toBuffer();
     await sharp(basePath)
-      .composite([{ input: mask, blend: "dest-in" }])
+      .composite([{ input: finalMask, blend: "dest-in" }])
       .toFile(path.join(dir, `fill-${id}-gold.png`));
   }
 
