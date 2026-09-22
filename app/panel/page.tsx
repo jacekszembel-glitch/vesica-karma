@@ -42,8 +42,7 @@ function Kafelek({ id, label, href, gotowe }: { id: SystemKarmy; label: string; 
         width: 92, height: 92, borderRadius: "50%",
         display: "grid", placeItems: "center",
         border: `2px solid ${gotowe ? "var(--gold)" : "var(--taupe)"}`,
-        boxShadow: gotowe ? "0 0 18px rgba(230, 196, 138, 0.45)" : "none",
-        transition: "border-color 0.3s, box-shadow 0.3s",
+        transition: "border-color 0.3s",
       }}>
         {id === "astrologia"
           ? <IkonaAstrologiiKafelek gotowe={gotowe} />

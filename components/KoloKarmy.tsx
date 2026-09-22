@@ -102,7 +102,7 @@ const SATELITY = [
 // przez <MoonStars> (osobny puls, patrz aktywny === "astrologia" niżej).
 const PIKTOGRAMY_PULSUJACE = [
   { id: "hiromancja", box: [340, 385, 490, 555] as const },
-  { id: "numerologia", box: [715, 400, 870, 550] as const },
+  { id: "numerologia", box: [708, 387, 863, 537] as const },
 ];
 
 function pctX(v: number) { return `${(v / IMG_W) * 100}%`; }
@@ -157,14 +157,11 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
       />
 
       {/* pętle „ukończonych" systemów — złote wypełnienie zamiast domyślnego
-          taupe, z miękką poświatą (drop-shadow), Faza 1: stan na sztywno z propa.
-          Pominięte, gdy baza już jest w pełni złota (patrz wyżej). */}
+          taupe, bez poświaty (ostra krawędź, jak reszta grafiki). Pominięte,
+          gdy baza już jest w pełni złota (patrz wyżej). */}
       {!wszystkoZlote && (["astrologia", "hiromancja", "numerologia"] as const).filter((id) => ukonczone.has(id)).map((id) => (
         <img key={`fill-${id}`} src={`/brand/fill-${id}-gold.png`} alt=""
-          style={{
-            position: "absolute", left: 0, top: 0, width: "100%", height: "100%",
-            filter: "drop-shadow(0 0 14px rgba(230, 196, 138, 0.55))",
-          }} />
+          style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }} />
       ))}
       <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} />
 

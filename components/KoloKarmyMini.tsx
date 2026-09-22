@@ -21,10 +21,7 @@ export default function KoloKarmyMini({ ukonczone = new Set<SystemKarmy>(), maxW
         style={{ display: "block", width: "100%", height: "auto" }} />
       {!wszystkoZlote && (["astrologia", "hiromancja", "numerologia"] as const).filter((id) => ukonczone.has(id)).map((id) => (
         <img key={id} src={`/brand/fill-${id}-gold.png`} alt=""
-          style={{
-            position: "absolute", left: 0, top: 0, width: "100%", height: "100%",
-            filter: "drop-shadow(0 0 10px rgba(230, 196, 138, 0.5))",
-          }} />
+          style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }} />
       ))}
       <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} />
     </div>

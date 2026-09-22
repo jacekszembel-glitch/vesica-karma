@@ -21,7 +21,6 @@ export default function MoonStars({ box, zlote = false }: {
         top: `${(y0 / IMG_H) * 100}%`,
         width: `${((x1 - x0) / IMG_W) * 100}%`,
         height: `${((y1 - y0) / IMG_H) * 100}%`,
-        filter: zlote ? "drop-shadow(0 0 6px rgba(230, 196, 138, 0.65))" : undefined,
         pointerEvents: "none",
       }}
     />
