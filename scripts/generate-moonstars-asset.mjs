@@ -96,7 +96,7 @@ const goldAsset = await sharp({ create: { width: BOX_W, height: BOX_H, channels:
   .toBuffer();
 await sharp(goldAsset).toFile(path.join(dir, "moonstars-gold.png"));
 
-const taupeAsset = await sharp(goldAsset).tint({ r: 0x8d, g: 0x81, b: 0x75 }).modulate({ brightness: 0.82 }).png().toBuffer();
+const taupeAsset = await sharp(goldAsset).tint({ r: 0x47, g: 0x41, b: 0x3b }).modulate({ brightness: 0.41 }).png().toBuffer();
 await sharp(taupeAsset).toFile(path.join(dir, "moonstars-taupe.png"));
 
 console.log("written moonstars-gold.png + moonstars-taupe.png", { outW, outH, left, top });

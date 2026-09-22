@@ -1,9 +1,9 @@
 /**
- * Ikony "wspólnych danych" (dom=gdzie, klepsydra=kiedy, trójkąt+gwiazda w
- * środku, postać=kto — DANE_WSPOLNE + Panel w KoloKarmy.tsx) mają zostać
- * ZŁOTE ZAWSZE, niezależnie od stanu pierścieni systemów (potwierdzone
- * porównaniem z plikami referencyjnymi użytkownika — te ikony to dane
- * wspólne dla wszystkich trzech systemów, nie należą do żadnego z osobna).
+ * Ikony "wspólnych danych" (dom=gdzie, postać=kto — DANE_WSPOLNE w
+ * KoloKarmy.tsx) mają zostać ZŁOTE ZAWSZE, niezależnie od stanu pierścieni
+ * systemów. Klepsydra (kiedy) i trójkąt+gwiazda (panel, środek) NIE są już
+ * tu wliczane — mają iść razem z resztą koła (taupe, gdy pierścienie nie są
+ * ukończone).
  *
  * kolo-karmy-taupe.png tintuje CAŁY obraz jednolicie, więc te 4 elementy
  * też wychodziły taupe — błąd. Ten skrypt: izoluje kształt każdej ikony
@@ -22,8 +22,6 @@ const IMG_W = 1260, IMG_H = 761;
 
 const BOXY = {
   gdzie: [429, 267, 560, 389],
-  kiedy: [632, 267, 764, 391],
-  panel: [536, 307, 656, 427],
   kto: [529, 452, 663, 571],
 };
 
