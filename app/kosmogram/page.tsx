@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { DateTime } from "luxon";
 import BirthForm, { type BirthInput } from "@/components/BirthForm";
-import { loadOsoby, saveOsoba, usunOsobe, type Osoba } from "@/lib/osobyStore";
+import { loadBirth } from "@/lib/birthStore";
 import NorthChart from "@/components/NorthChart";
 import SouthChart from "@/components/SouthChart";
 import Interpretation from "@/components/Interpretation";
@@ -11,7 +11,6 @@ import Rozmowa from "@/components/Rozmowa";
 import { buildChart, type VedicChart, type Dignity } from "@/lib/astro/chart";
 import { GRAHAS, RASIS, PLANET_ORDER } from "@/lib/astro/constants";
 import { formatDMS } from "@/lib/astro/math";
-import { SceneKosmogram } from "@/components/infographics";
 import Konwencje from "@/components/Konwencje";
 import Term from "@/components/Term";
 import { navamsaChart, dashamsaChart, isVargottama } from "@/lib/astro/varga";
@@ -22,11 +21,11 @@ import PlanetyWSkrocie from "@/components/PlanetyWSkrocie";
 import SyntezaKosmogramu from "@/components/SyntezaKosmogramu";
 import Talenty from "@/components/Talenty";
 import WrazliwoscDuchowa from "@/components/WrazliwoscDuchowa";
-import { poziomWzmocnienia, MOZLIWE_ZAWODY } from "@/lib/astro/domInterpretacja";
+import { poziomWzmocnienia, kondycjaWskaznik, MOZLIWE_ZAWODY } from "@/lib/astro/domInterpretacja";
 import { ocenaWladcy } from "@/lib/astro/sila";
 import { wykryteJogiPosortowane } from "@/lib/astro/yogas";
-import PanchangUrodzenia from "@/components/PanchangUrodzenia";
 import TranzytyTeraz from "@/components/TranzytyTeraz";
+import JednoSpojrzenie from "@/components/JednoSpojrzenie";
 import WargiDodatkowe from "@/components/WargiDodatkowe";
 import AsztakawargaSekcja from "@/components/AsztakawargaSekcja";
 import SzadbalaSekcja from "@/components/SzadbalaSekcja";
@@ -53,17 +52,19 @@ import GodloPlanety from "@/components/GodloPlanety";
 import HeksDomu from "@/components/HeksDomu";
 import { BHAVAS } from "@/lib/astro/constants";
 import { odblokuj } from "@/lib/collection";
-import { IconOsoba } from "@/components/icons";
 
 type StylWykresu = "polnocny" | "poludniowy";
 const KLUCZ_STYLU = "9dom_styl_wykresu";
 
 /**
  * VesicaKarma nie ma "Rodzaju odczytu" (Portret/Dziecko/Finanse/Prognoza) —
- * zamiast tego kafelki to zapisane OSOBY (patrz lib/osobyStore.ts), a każda
- * pokazuje zawsze CAŁY kosmogram, wszystkie sekcje naraz (dawny tryb
+ * strona pokazuje zawsze CAŁY kosmogram, wszystkie sekcje naraz (dawny tryb
  * "portret"). Finanse i inne wątki tematyczne trafiają do jednej, wspólnej
- * interpretacji AI na dole, zamiast osobnego, węższego raportu.
+ * interpretacji AI na dole, zamiast osobnego, węższego raportu. Panel danych
+ * jest dla JEDNEJ osoby (Twój własny profil, wspólny ze wszystkimi modułami
+ * serwisu przez lib/birthStore.ts) — wcześniejsza wersja z kafelkami wielu
+ * zapisanych osób (lib/osobyStore.ts) została wycofana na rzecz koła danych
+ * wzorowanego na designie 9dom.pl.
  */
 type SekcjaKosmogramu = "techniczne" | "czasGleboko" | "dusza" | "predyspozycje" | "finanse" | "zdrowie" | "tranzyty";
 const WSZYSTKIE_SEKCJE: Record<SekcjaKosmogramu, boolean> = {
@@ -83,6 +84,33 @@ function wzmocnienieBadge(dignity: Dignity): { className: string; style?: React.
 }
 
 
+/**
+ * Pierścień znaku zodiaku — glif na środku, wypełnienie pierścienia to
+ * "kondycja" (siła godności) tej pozycji, ta sama wartość co pasek
+ * kondycjaWskaznik gdzie indziej w serwisie (Synteza niżej na tej samej
+ * stronie) — dwa miejsca liczą siłę identycznie, tylko rysują ją inaczej.
+ * Kolor zawsze złoto/taupe (nie zielony/czerwony jak gdzie indziej) — to
+ * skrót tuż pod Kołem Karmy, ma być wizualnie jednym z nim, nie osobnym
+ * systemem kolorów. Ostre (nie zaokrąglone) końce wypełnienia — spójne
+ * z resztą serwisu, gdzie ostre krawędzie są świadomym wyborem.
+ */
+function PierscienZnaku({ symbol, procent, size = 108 }: { symbol: string; procent: number; size?: number }) {
+  const stroke = 9;
+  const r = size / 2 - stroke / 2;
+  const obwod = 2 * Math.PI * r;
+  const dl = (Math.max(0, Math.min(100, procent)) / 100) * obwod;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--taupe)" strokeWidth={stroke} />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--sand)" strokeWidth={stroke}
+        strokeDasharray={`${dl} ${obwod - dl}`} transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        style={{ transition: "stroke-dasharray 0.6s var(--ease-out)" }} />
+      <text x={size / 2} y={size / 2} textAnchor="middle" dominantBaseline="central"
+        fontSize={size * 0.36} fill="var(--sand)">{symbol}</text>
+    </svg>
+  );
+}
+
 type TrybKosmogramu = "poczatkujacy" | "zaawansowany";
 const KLUCZ_TRYBU = "9dom_tryb_kosmogramu";
 
@@ -91,9 +119,6 @@ export default function KosmogramPage() {
   const [birthInput, setBirthInput] = useState<BirthInput | null>(null);
   const [styl, setStyl] = useState<StylWykresu>("polnocny");
   const [tryb, setTryb] = useState<TrybKosmogramu>("poczatkujacy");
-  const [osoby, setOsoby] = useState<Osoba[]>([]);
-  const [wybranaOsobaId, setWybranaOsobaId] = useState<string | null>(null);
-  const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
     const s = localStorage.getItem(KLUCZ_STYLU);
@@ -102,8 +127,28 @@ export default function KosmogramPage() {
     if (s === "polnocny" || s === "poludniowy") setStyl(s);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- jw.
     if (t === "poczatkujacy" || t === "zaawansowany") setTryb(t);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- jw., lista zapisanych osób
-    setOsoby(loadOsoby());
+
+    // Panel jest teraz dla jednej osoby (własny profil, wspólny ze wszystkimi
+    // modułami serwisu) — wracający użytkownik od razu widzi swój kosmogram,
+    // bez ponownego wypełniania formularza.
+    const b = loadBirth();
+    if (!b) return;
+    const effectiveTime = b.timeKnown ? b.time : "12:00";
+    const local = DateTime.fromISO(`${b.date}T${effectiveTime}`, { zone: b.place.tz });
+    if (!local.isValid) return;
+    handleSubmit({
+      utc: local.toUTC().toJSDate(),
+      latitude: b.place.lat,
+      longitude: b.place.lon,
+      timeKnown: b.timeKnown,
+      isoDate: b.date,
+      placeName: b.place.name,
+      localTime: effectiveTime,
+      plec: b.plec ?? "ona",
+      name: b.name,
+      place: b.place,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tylko przy montowaniu, handleSubmit stabilny w obrębie renderu
   }, []);
 
   function zmienStyl(s: StylWykresu) {
@@ -127,55 +172,6 @@ export default function KosmogramPage() {
       }),
     );
     odblokuj("kosmogram");
-  }
-
-  /** Nowa osoba z formularza — zapisujemy na liście kafelków i od razu liczymy. */
-  function handleDodajOsobe(input: BirthInput) {
-    const nowa: Osoba = {
-      id: crypto.randomUUID(),
-      date: input.isoDate,
-      time: input.localTime,
-      timeKnown: input.timeKnown,
-      place: input.place,
-      plec: input.plec,
-      name: input.name,
-    };
-    saveOsoba(nowa);
-    setOsoby((lista) => [...lista, nowa]);
-    setWybranaOsobaId(nowa.id);
-    setFormKey((k) => k + 1); // reset formularza pod kolejną osobę
-    handleSubmit(input);
-  }
-
-  /** Kliknięcie zapisanego kafelka — odtwarza chwilę urodzenia z zapisanych danych. */
-  function wybierzOsobe(o: Osoba) {
-    const effectiveTime = o.timeKnown ? o.time : "12:00";
-    const local = DateTime.fromISO(`${o.date}T${effectiveTime}`, { zone: o.place.tz });
-    if (!local.isValid) return;
-    setWybranaOsobaId(o.id);
-    handleSubmit({
-      utc: local.toUTC().toJSDate(),
-      latitude: o.place.lat,
-      longitude: o.place.lon,
-      timeKnown: o.timeKnown,
-      isoDate: o.date,
-      placeName: o.place.name,
-      localTime: effectiveTime,
-      plec: o.plec ?? "ona",
-      name: o.name,
-      place: o.place,
-    });
-  }
-
-  function usunKafelek(e: React.MouseEvent, id: string) {
-    e.stopPropagation();
-    usunOsobe(id);
-    setOsoby((lista) => lista.filter((o) => o.id !== id));
-    if (wybranaOsobaId === id) {
-      setWybranaOsobaId(null);
-      setChart(null);
-      setBirthInput(null);
-    }
   }
 
   /** Kompaktowe dane dla AI — tylko to, co potrzebne do interpretacji. */
@@ -279,80 +275,49 @@ export default function KosmogramPage() {
 
   return (
     <div className="container section">
-      <div className="fade-up" style={{ maxWidth: 340, margin: "0 auto 10px" }}><SceneKosmogram /></div>
-      <h1 style={{ textAlign: "center" }}>Kosmogram wedyjski</h1>
+      <h1 style={{ textAlign: "center" }}>Astrologia Wedyjska</h1>
       <p className="section-sub">
         Mapa nieba z chwili urodzenia w zodiaku syderycznym (ayanamsa Lahiri) —
         <Term k="lagna">lagna</Term>, <Term k="graha">9 grah</Term>, <Term k="dom">domy</Term>,{" "}
         <Term k="nakszatra">nakszatry</Term> i <Term k="dasza">okresy planetarne</Term>.
       </p>
 
-      <div className="numerologia-uklad">
-        <div className="card">
-          <p className="eyebrow" style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-            Osoby
-            <Term term={{
-              title: "Osoby",
-              text: "Kliknij kafelek, żeby zobaczyć kosmogram tej osoby. Każda ma swój pełny profil — techniczne dane, dasze, jogi i dosze, predyspozycje i interpretację AI.",
-            }}>
-              <span aria-hidden="true" style={{
-                display: "inline-flex", alignItems: "center", justifyContent: "center",
-                width: 16, height: 16, borderRadius: "50%", border: "1px solid var(--muted)",
-                color: "var(--muted)", fontSize: "0.68rem", fontStyle: "italic", cursor: "help",
-              }}>i</span>
-            </Term>
-          </p>
-          <div className="bf-plec numerologia-raporty" role="radiogroup" aria-label="Wybierz osobę do analizy">
-            {osoby.map((o) => (
-              <button key={o.id} type="button" role="radio" aria-checked={wybranaOsobaId === o.id}
-                className={`bf-plec-opcja${wybranaOsobaId === o.id ? " bf-plec-opcja-aktywna" : ""}`}
-                style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 8px" }}
-                onClick={() => wybierzOsobe(o)}>
-                <span
-                  role="button" tabIndex={0} aria-label={`Usuń ${o.name || "tę osobę"}`}
-                  onClick={(e) => usunKafelek(e, o.id)}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); usunKafelek(e as unknown as React.MouseEvent, o.id); } }}
-                  style={{ position: "absolute", top: 4, right: 6, fontSize: "0.8rem", color: "var(--muted)", cursor: "pointer", lineHeight: 1, padding: 4 }}>
-                  ✕
-                </span>
-                <IconOsoba size={32} />
-                <span style={{ fontSize: "0.86rem" }}>{o.name || o.date}</span>
-              </button>
-            ))}
-            <button type="button"
-              className="bf-plec-opcja"
-              style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "14px 8px", borderStyle: "dashed", opacity: 0.75 }}
-              onClick={() => document.getElementById("bf-name")?.focus()}>
-              <span style={{ fontSize: "1.6rem", lineHeight: 1 }}>+</span>
-              <span style={{ fontSize: "0.86rem" }}>Dodaj osobę</span>
-            </button>
-          </div>
+      {/* Koło danych — panel dla JEDNEJ osoby (Twój własny profil, wspólny
+          ze wszystkimi modułami serwisu przez lib/birthStore.ts), wzorowany
+          na designie 9dom.pl i na public/brand/panel.jpg. BirthForm.tsx jest
+          używany wyłącznie tutaj, więc jego układ (Płeć obok "Nie znam
+          godziny") jest dopasowany pod ten kontekst; wygląd pól dopina
+          scoped CSS (.kolo-danych ...). */}
+      <div className="kolo-danych-scena">
+        <div className="kolo-danych">
+          <p className="kolo-danych-tytul">Twoje dane</p>
+          <BirthForm onSubmit={handleSubmit} submitLabel="Zapisz" />
         </div>
-
-        <BirthForm
-          key={formKey}
-          onSubmit={handleDodajOsobe}
-          submitLabel="Dodaj osobę i policz kosmogram"
-          persist={false}
-          dateLabel="Data urodzenia"
-          nameLabel="Imię (żeby rozpoznać kafelek)"
-          namePlaceholder="np. Jacek, Zosia, Mama…"
-        />
       </div>
 
       {chart && (
         <div className="fade-up" style={{ marginTop: 48 }}>
-          {/* skrót najważniejszych faktów — tuż przy danych osobowych, zanim zejdzie się do szczegółów */}
-          <div className="card" style={{ marginBottom: 24 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 16 }}>
+          {/* skrót najważniejszych faktów — trzy duże pierścienie ze znakiem
+              zodiaku tuż pod Kołem Karmy, zanim zejdzie się do szczegółów.
+              Wypełnienie pierścienia = kondycjaWskaznik tej pozycji (dla
+              Ascendentu — godność JEGO WŁADCY, ten sam skrót co w panelu
+              Synteza niżej), więc zmienia się automatycznie wraz z danymi
+              urodzenia, nie jest wpisane na sztywno. */}
+          <div className="skrot-hero">
+            <div className="skrot-hero-linia" />
+            <div className="skrot-hero-rzad">
               {chart.angles && (() => {
                 const lagnaNak = nakshatraOf(chart.angles.ascendant);
+                const wladcaAscendentu = RASIS[chart.angles.lagnaSign].lord;
+                const k = kondycjaWskaznik(chart.planets[wladcaAscendentu].dignity);
                 return (
-                  <div className="skrot-fakt">
-                    <p className="eyebrow" style={{ marginBottom: 6 }}><Term k="lagna">Ascendent</Term></p>
-                    <p className="skrot-fakt-znak">{RASIS[chart.angles.lagnaSign].pl}</p>
-                    <p className="muted" style={{ fontSize: "0.82rem" }}>{formatDMS(chart.angles.ascendant % 30)}</p>
-                    <p className="muted" style={{ fontSize: "0.82rem" }}>
+                  <div className="skrot-hero-item">
+                    <PierscienZnaku symbol={RASIS[chart.angles.lagnaSign].symbol} procent={k.procent} />
+                    <p className="skrot-hero-znak">{RASIS[chart.angles.lagnaSign].pl}</p>
+                    <p className="eyebrow skrot-hero-rola"><Term k="lagna">Ascendent</Term></p>
+                    <div className="skrot-hero-podkreslenie" />
+                    <p className="muted skrot-hero-detal" style={{ color: "var(--sand)" }}>{formatDMS(chart.angles.ascendant % 30)}</p>
+                    <p className="muted skrot-hero-detal" style={{ color: "var(--sand)" }}>
                       <Term k="nakszatra" plain>{lagnaNak.nakshatra.pl}</Term> <span>p.{lagnaNak.pada}</span>
                     </p>
                   </div>
@@ -361,30 +326,27 @@ export default function KosmogramPage() {
               {(["sun", "moon"] as const).map((id) => {
                 const p = chart.planets[id];
                 const g = GRAHAS[id];
+                const k = kondycjaWskaznik(p.dignity);
                 return (
-                  <div key={id} className="skrot-fakt">
-                    <p className="eyebrow" style={{ marginBottom: 6 }}>
-                      <span style={{ color: g.color }}>{g.symbol}</span> {g.pl}
-                    </p>
-                    <p className="skrot-fakt-znak">{p.signPl}</p>
-                    <p className="muted" style={{ fontSize: "0.82rem" }}>
+                  <div key={id} className="skrot-hero-item">
+                    <PierscienZnaku symbol={RASIS[p.sign].symbol} procent={k.procent} />
+                    <p className="skrot-hero-znak">{p.signPl}</p>
+                    <p className="eyebrow skrot-hero-rola">{g.pl}</p>
+                    <div className="skrot-hero-podkreslenie" />
+                    <p className="muted skrot-hero-detal" style={{ color: "var(--sand)" }}>
                       {p.degreeFormatted}{chart.angles && ` · dom ${p.house}`}
                     </p>
-                    <p className="muted" style={{ fontSize: "0.82rem" }}>
+                    <p className="muted skrot-hero-detal" style={{ color: "var(--sand)" }}>
                       <Term term={nakshatraTerm(p.nakshatra)} plain>{p.nakshatra.nakshatra.pl}</Term> <span>p.{p.nakshatra.pada}</span>
                     </p>
-                    {(p.dignity === "egzaltacja" || p.dignity === "mulatrikona" || p.dignity === "władanie" || p.dignity === "upadek") && (
-                      <span className={`badge${p.dignity === "upadek" ? " badge-warn" : " badge-good"}`} style={{ marginTop: 6 }}>
-                        {p.dignity === "władanie" ? "u siebie" : p.dignity}
-                      </span>
-                    )}
                   </div>
                 );
               })}
             </div>
+            <div className="skrot-hero-linia" />
           </div>
 
-          {birthInput && <PanchangUrodzenia birthUtc={birthInput.utc} isoDate={birthInput.isoDate} />}
+          <JednoSpojrzenie chart={chart} />
 
           {w.tranzyty && <TranzytyTeraz chart={chart} />}
 

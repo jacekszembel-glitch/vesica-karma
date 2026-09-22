@@ -23,10 +23,8 @@ export default function SiteHeader() {
   return (
     <header style={{ padding: "20px 0", position: "relative" }}>
       <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Link href="/" style={{ fontFamily: "var(--font-serif)", fontSize: "1.15rem", letterSpacing: "0.02em" }}>
-          <span style={{ color: "var(--text)" }}>vesica</span>
-          <span style={{ color: "var(--sand)", fontWeight: 700 }}>karma</span>
-          <span style={{ color: "var(--muted)" }}>.com</span>
+        <Link href="/" style={{ display: "block" }}>
+          <img src="/brand/logo-vesicakarma.png" alt="vesicakarma.com" style={{ height: 22, width: "auto", display: "block" }} />
         </Link>
 
         <button

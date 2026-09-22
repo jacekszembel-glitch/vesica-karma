@@ -64,12 +64,22 @@ for (const [x, y] of keepPixels) {
 }
 console.log("content bbox:", minX, minY, maxX, maxY);
 
-// build clean RGBA buffer with original colors preserved
+// build clean RGBA buffer with original colors preserved, przeskalowane do
+// tego samego złota co reszta koła (recolor-source-to-gold.mjs) — zdjęcie
+// referencyjne miało jaśniejszy, bardziej żółty ton (~255,238,151) niż
+// --sand (230,196,138); user zgłosił, że gwiazdy/księżyc zostały żółte
+// mimo przetonowania pierścienia.
+const OD = { r: 255, g: 238, b: 151 };
+const DO = { r: 230, g: 196, b: 138 };
+const wsp = { r: DO.r / OD.r, g: DO.g / OD.g, b: DO.b / OD.b };
 const clean = Buffer.alloc(width * height * 4);
 for (const [x, y] of keepPixels) {
   const si = (y * width + x) * channels;
   const di = (y * width + x) * 4;
-  clean[di] = data[si]; clean[di + 1] = data[si + 1]; clean[di + 2] = data[si + 2]; clean[di + 3] = 255;
+  clean[di] = Math.min(255, Math.round(data[si] * wsp.r));
+  clean[di + 1] = Math.min(255, Math.round(data[si + 1] * wsp.g));
+  clean[di + 2] = Math.min(255, Math.round(data[si + 2] * wsp.b));
+  clean[di + 3] = 255;
 }
 // slight blur+threshold to smooth jpeg-jagged edges into clean anti-aliasing
 const cleanPng = await sharp(clean, { raw: { width, height, channels: 4 } })

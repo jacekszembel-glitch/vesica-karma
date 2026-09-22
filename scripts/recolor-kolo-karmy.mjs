@@ -39,9 +39,9 @@ const IMG_W = 1260, IMG_H = 761;
 /** Geometria pętli w przestrzeni kolo-karmy.png (1260×761), zmierzona z
  *  referencji projektowych — środek + promień zewnętrzny/wewnętrzny pasa. */
 const RINGS = {
-  astrologia: { cx: 599, cy: 255, rOuter: 208, rInner: 170 },
-  hiromancja: { cx: 495, cy: 439, rOuter: 208, rInner: 170 },
-  numerologia: { cx: 701, cy: 439, rOuter: 208, rInner: 170 },
+  astrologia: { cx: 599, cy: 255, rOuter: 204, rInner: 166 },
+  hiromancja: { cx: 495, cy: 439, rOuter: 204, rInner: 166 },
+  numerologia: { cx: 701, cy: 439, rOuter: 204, rInner: 166 },
 };
 
 /** Stary kompas (piktogram Astrologii, wypalony w kolo-karmy.png) — wycinany
@@ -54,6 +54,19 @@ const RINGS = {
  *  (kompas prawie wypełnia swój kwadrat 150×150, z małym zapasem od pierścienia
  *  w rogu). */
 const KOMPAS_DZIURA = { cx: 600, cy: 166, r: 78, feather: 6 };
+
+/** Klin dokładnie nad trójkątem — dokładnie zmierzony w kolo-karmy.png:
+ *  długi, wąski, PRZEKĄTNY kształt od ostrego czubka (~597,308) do miejsca,
+ *  gdzie zlewa się z szerokim pasem Astrologii nad nim (~655,272). Kółko nie
+ *  pasuje do tak wydłużonego kształtu (albo za mało kryje na końcach, albo
+ *  za dużo w środku) — stąd elipsa obrócona pod kątem tej samej przekątnej.
+ *  Ten obszar wizualnie należy do pętli Astrologii/Numerologii, która w tym
+ *  miejscu przechodzi NAD Chiromancją, ale jest zbyt jasno/niejednoznacznie
+ *  oświetlony, żeby płynna maska jasności sama go wygasiła do czystej
+ *  szarości. Twarde (potem rozmyte na brzegu) wycięcie — tylko dla pętli,
+ *  do której NIE należy (obecnie: hiromancja). Zgłoszone przez użytkownika
+ *  zdjęciami z zaznaczeniem. */
+const KLIN_NAD_TROJKATEM = { cx: 642, cy: 305, rx: 58, ry: 26, obrotDeg: -32 };
 
 /** Stara dłoń (piktogram Chiromancji) — wycinana tym samym sposobem co
  *  kompas, ale maską o dokładnym kształcie dłoni (nie okręgiem — dłoń nie
@@ -108,11 +121,11 @@ async function przywrocWspolneIkony(input) {
  *  współrzędnych okręgiem. Używana jako dodatkowe AND do masek pierścieni —
  *  koło Karmy (wykluczenie) i tak odcina sam "kwiat" od Karmy tam, gdzie
  *  w pliku nie ma między nimi realnej przerwy. */
-async function wypelnijKwiat(imgPath, width, height) {
+async function wypelnijKwiat(imgPath, width, height, seed = [306, 439]) {
   const { data } = await sharp(imgPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const channels = 4;
   const alphaAt = (x, y) => data[(y * width + x) * channels + 3];
-  const seed = [306, 439]; // lewy kraniec pętli Chiromancji (170..208 od cx=495,cy=439)
+  // domyślny zalążek: lewy kraniec pętli Chiromancji (170..208 od cx=495,cy=439)
   const visited = new Uint8Array(width * height);
   const stack = [seed];
   visited[seed[1] * width + seed[0]] = 1;
@@ -134,27 +147,29 @@ async function wypelnijKwiat(imgPath, width, height) {
   return sharp(out, { raw: { width, height, channels: 4 } }).png().toBuffer();
 }
 
-/** Maska "własnej, oświetlonej powierzchni" pętli — biała tam, gdzie
- *  kolo-karmy.png jest w pełni jasny (jasność kanałów ~211-213, zmierzone),
- *  czarna tam, gdzie piksel jest przyciemniony (jasność < 195) — czyli
- *  dokładnie w miejscu, gdzie w prawdziwej grafice SĄSIEDNIA pętla (albo
- *  pierścień Karmy) fizycznie przechodzi NAD tą, więc to już nie "moja"
- *  widoczna powierzchnia. Bez tego złota wypełnienie ukończonej pętli
- *  potrafiło pokazać się na wierzchu w miejscu, gdzie nieukończona sąsiednia
- *  pętla powinna wygrywać. Próg 195 (nie niższy) — zmierzone przeploty mają
- *  RÓŻNĄ głębokość cienia (jeden spada do ~111, inny tylko do ~144), więc
- *  niższy próg (np. 165) łapał głęboki cień, ale przepuszczał płytszy jako
- *  fałszywie "swój" — stąd cienki złoty pasek w miejscu, gdzie miało być
- *  szaro. 195 zostaje wyraźnie poniżej pełnej jasności (~212), więc zwykły
- *  1-2px antyaliasing krawędzi wciąż przechodzi. */
-async function maskaJasnosci(imgPath, width, height, prog = 195) {
+/** Maska "własnej, oświetlonej powierzchni" pętli — PŁYNNA (nie progowa):
+ *  przezroczystość każdego piksela jest wprost proporcjonalna do jego
+ *  prawdziwej jasności w kolo-karmy.png (pełne światło ~212 -> 100%
+ *  widoczne; zmierzony cień przeplotu, ~111-144 w zależności od miejsca
+ *  -> płynnie w stronę 0%). Dzięki temu tam, gdzie w prawdziwej grafice
+ *  SĄSIEDNIA pętla (albo Karma) przechodzi NAD, złote wypełnienie samo
+ *  gaśnie w naturalny gradient (zamiast twardo znikać), odsłaniając pod
+ *  spodem bazowy (taupe) render tej sąsiedniej pętli — dokładnie tak, jak
+ *  wygląda cień na szarych pierścieniach, bo to TEN SAM realny gradient
+ *  z pliku, tylko przeniesiony na kanał alfa zamiast progowany na 0/1.
+ *  Wcześniejsza wersja z twardym progiem (195) dawała ostrą, "obciętą"
+ *  krawędź zamiast naturalnego cienia. Poniżej ciemno (~120) = w pełni
+ *  przezroczyste, powyżej jasno (~205) = w pełni widoczne, między — liniowa
+ *  rampa (to samo, co robi realny cień w oryginale). */
+async function maskaJasnosci(imgPath, width, height, ciemno = 120, jasno = 205) {
   const { data } = await sharp(imgPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const channels = 4;
   const out = Buffer.alloc(width * height * 4);
   for (let i = 0; i < width * height; i++) {
     const o = i * 4;
     const lum = (data[o] + data[o + 1] + data[o + 2]) / 3;
-    if (lum >= prog) { out[o] = 255; out[o + 1] = 255; out[o + 2] = 255; out[o + 3] = 255; }
+    const a = Math.max(0, Math.min(255, Math.round(((lum - ciemno) / (jasno - ciemno)) * 255)));
+    out[o] = 255; out[o + 1] = 255; out[o + 2] = 255; out[o + 3] = a;
   }
   return sharp(out, { raw: { width, height, channels: 4 } }).png().toBuffer();
 }
@@ -167,7 +182,11 @@ async function maskaJasnosci(imgPath, width, height, prog = 195) {
  *  trzy pętle — jaśniejsza niż próg maski jasności, ale odcięta cieniami
  *  z OBU stron od najbliższego łuku). Taka plamka jest o rząd wielkości
  *  mniejsza niż jakikolwiek prawdziwy odcinek pierścienia, więc filtr wg
- *  rozmiaru (nie "tylko największa") bezpiecznie usuwa tylko ją. */
+ *  rozmiaru (nie "tylko największa") bezpiecznie usuwa tylko ją.
+ *  WAŻNE: maska jasności jest teraz płynna (gradient, nie 0/1) — łączność
+ *  liczona jest od progu "jest tu w ogóle jakiś ślad" (alfa > 10), ale
+ *  zachowywane piksele zostają z ORYGINALNĄ (płynną) wartością alfa, nie
+ *  spłaszczone do 255 — inaczej zniknąłby naturalny gradient cienia. */
 async function odrzucMalePlamki(maskBuffer, width, height, minRozmiar = 3000) {
   const { data } = await sharp(maskBuffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const channels = 4;
@@ -177,7 +196,7 @@ async function odrzucMalePlamki(maskBuffer, width, height, minRozmiar = 3000) {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const idx = y * width + x;
-      if (visited[idx] || alphaAt(x, y) < 40) continue;
+      if (visited[idx] || alphaAt(x, y) <= 10) continue;
       const stack = [[x, y]];
       visited[idx] = 1;
       const pixels = [idx];
@@ -187,7 +206,7 @@ async function odrzucMalePlamki(maskBuffer, width, height, minRozmiar = 3000) {
           const nx = cx2 + dx, ny = cy2 + dy;
           if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
           const nidx = ny * width + nx;
-          if (visited[nidx] || alphaAt(nx, ny) < 40) continue;
+          if (visited[nidx] || alphaAt(nx, ny) <= 10) continue;
           visited[nidx] = 1;
           pixels.push(nidx);
           stack.push([nx, ny]);
@@ -198,7 +217,7 @@ async function odrzucMalePlamki(maskBuffer, width, height, minRozmiar = 3000) {
   }
   const out = Buffer.alloc(width * height * 4);
   for (const idx of keep) {
-    out[idx * 4] = 255; out[idx * 4 + 1] = 255; out[idx * 4 + 2] = 255; out[idx * 4 + 3] = 255;
+    out[idx * 4] = 255; out[idx * 4 + 1] = 255; out[idx * 4 + 2] = 255; out[idx * 4 + 3] = data[idx * 4 + 3];
   }
   return sharp(out, { raw: { width, height, channels: 4 } }).png().toBuffer();
 }
@@ -239,16 +258,18 @@ async function main() {
   }
 
   // Bez wycinania sąsiednich pętli okręgiem-przybliżeniem (astrologia/
-  // numerologia/hiromancja nawzajem, ani zewnętrznego pierścienia Karmy),
-  // bez rozmycia — maska to czysty, ostry kształt WŁASNEGO pierścienia,
-  // przycięty do (1) realnej, spójnej plamy pikseli z kolo-karmy.png
-  // (wypełnienie od zalążka na pętli, zatrzymujące się dokładnie tam, gdzie
-  // plik jest naprawdę przezroczysty) oraz (2) maski jasności — tam, gdzie
-  // prawdziwy piksel jest wyraźnie przyciemniony, znaczy że w tym miejscu
-  // SĄSIEDNIA pętla/Karma przechodzi NAD, więc złote wypełnienie nie ma
-  // tam wygrywać z bazowym (taupe) renderem tej sąsiedniej, nieukończonej
-  // pętli. Obie granice (przezroczystość, jasność) są z realnego pliku —
-  // zero rozmycia, zero zgadywania geometrii.
+  // numerologia/hiromancja nawzajem, ani zewnętrznego pierścienia Karmy) —
+  // maska to kształt WŁASNEGO pierścienia, przycięty do (1) realnej, spójnej
+  // plamy pikseli z kolo-karmy.png (wypełnienie od zalążka na pętli,
+  // zatrzymujące się dokładnie tam, gdzie plik jest naprawdę przezroczysty)
+  // oraz (2) maski jasności — PŁYNNEJ, nie progowej: przezroczystość rośnie
+  // wprost z jasnością piksela, więc tam, gdzie w prawdziwej grafice
+  // SĄSIEDNIA pętla/Karma przechodzi NAD, złote wypełnienie samo gaśnie w
+  // naturalny gradient (jak realny cień w oryginale), zamiast twardo znikać
+  // i odsłaniać bazowy (taupe) render tej sąsiedniej pętli po ostrej linii.
+  // Obie granice (przezroczystość, jasność) są z realnego pliku — zero
+  // zgadywania geometrii; jedyne rozmycie w całym procesie to ten sam
+  // gradient, który i tak jest widoczny na szarych pierścieniach.
   const flowerMask = await wypelnijKwiat(basePath, IMG_W, IMG_H);
   const jasnoscMask = await maskaJasnosci(basePath, IMG_W, IMG_H);
   for (const [id, { cx, cy, rOuter, rInner }] of Object.entries(RINGS)) {
@@ -258,9 +279,22 @@ async function main() {
       <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#fff" stroke-width="${strokeW}"/>
     </svg>`;
     const maskOstra = await sharp(Buffer.from(svg)).png().toBuffer();
-    const maskPrzycieta = await sharp(maskOstra)
-      .composite([{ input: flowerMask, blend: "dest-in" }, { input: jasnoscMask, blend: "dest-in" }])
-      .png().toBuffer();
+    const kompozycja = [{ input: flowerMask, blend: "dest-in" }, { input: jasnoscMask, blend: "dest-in" }];
+    if (id === "hiromancja") {
+      const { cx: kcx, cy: kcy, rx: krx, ry: kry, obrotDeg } = KLIN_NAD_TROJKATEM;
+      // Miękki brzeg (rozmycie TYLKO tej elipsy) — twardy kształt wyglądał
+      // jak sztuczny ubytek na tle naturalnych, gradientowych cieni dookoła.
+      // Promień rozmycia dobrany tak, żeby zanikanie było podobnej
+      // szerokości co realne cienie przeplotów.
+      const wykluczenieKlina = await sharp(Buffer.from(
+        `<svg width="${IMG_W}" height="${IMG_H}" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="${kcx}" cy="${kcy}" rx="${krx}" ry="${kry}" fill="#fff"
+            transform="rotate(${obrotDeg} ${kcx} ${kcy})"/>
+        </svg>`,
+      )).blur(14).png().toBuffer();
+      kompozycja.push({ input: wykluczenieKlina, blend: "dest-out" });
+    }
+    const maskPrzycieta = await sharp(maskOstra).composite(kompozycja).png().toBuffer();
     const mask = await odrzucMalePlamki(maskPrzycieta, IMG_W, IMG_H);
     let wynik = sharp(basePath).composite([{ input: mask, blend: "dest-in" }]);
 
@@ -272,11 +306,20 @@ async function main() {
     await wynik.toFile(path.join(dir, `fill-${id}-gold.png`));
   }
 
+  // fill-zwiazki-gold.png — ikona Związków (dwa zachodzące koła) na hover ma
+  // podświetlać się złotem tak samo jak Astrologia/Chiromancja/Numerologia:
+  // realny, ostry wycinek własnego kształtu z kolo-karmy.png (ikona jest w
+  // pliku odizolowana od reszty kwiatu, więc samo wypełnienie od zalążka
+  // wewnątrz jednego z dwóch kółek wystarcza, bez żadnej maski pierścienia).
+  const zwiazkiMask = await wypelnijKwiat(basePath, IMG_W, IMG_H, [1012, 610]);
+  await sharp(basePath).composite([{ input: zwiazkiMask, blend: "dest-in" }]).toFile(path.join(dir, "fill-zwiazki-gold.png"));
+
   console.log("Gotowe:", [
     "kolo-karmy-taupe.png",
     "kolo-karmy-gold-clean.png",
     ...Object.keys(RINGS).filter((s) => s !== "astrologia").map((s) => `icon-${s}-taupe.png`),
     ...Object.keys(RINGS).map((s) => `fill-${s}-gold.png`),
+    "fill-zwiazki-gold.png",
   ].join(", "));
 }
 

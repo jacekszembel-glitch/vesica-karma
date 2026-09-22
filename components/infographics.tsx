@@ -151,27 +151,6 @@ export function SceneRelacje(p: S) {
   );
 }
 
-/** DNA DUSZY — kosmogram: romb w kwadracie z planetami. */
-export function SceneKosmogram(p: S) {
-  return (
-    <Scene {...p} label="Kosmogram">
-      <rect x="90" y="30" width="140" height="140" rx="4" stroke={G} strokeWidth="1.5" />
-      <path d="M90 30 L230 170 M230 30 L90 170" stroke={GD} strokeWidth="1" />
-      <path d="M160 30 L230 100 L160 170 L90 100 Z" stroke={G} strokeWidth="1.2" />
-      <circle cx="160" cy="100" r="5" stroke={T} strokeWidth="1.3" />
-      {/* planety w domach swojej mocy (digbala): ♃ w 1 (góra), ☾ w 4 (lewo), ♄ w 7 (dół), ☉ w 10 (prawo) */}
-      {["♃", "☾", "♄", "☉"].map((s, i) => {
-        const pos = [[160, 62], [122, 100], [160, 140], [198, 100]][i];
-        return <text key={i} x={pos[0]} y={pos[1] + 4} fill={i % 2 ? T : G} fontSize="13" stroke="none" textAnchor="middle">{s}</text>;
-      })}
-      {/* orbity zewnętrzne */}
-      <circle cx="160" cy="100" r="92" stroke={TD} strokeWidth="0.8" strokeDasharray="1 6" />
-      <circle cx="48" cy="100" r="2" fill={T} stroke="none" />
-      <circle cx="272" cy="100" r="2" fill={G} stroke="none" />
-    </Scene>
-  );
-}
-
 /** LICZBY — siatka Lo Shu z cyframi i konstelacją. */
 export function SceneNumerologia(p: S) {
   return (

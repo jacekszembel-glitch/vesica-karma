@@ -7,7 +7,7 @@ import DateInput from "./DateInput";
 import type { Place } from "@/lib/geo";
 import { loadBirth, saveBirth, DEFAULT_PLACE } from "@/lib/birthStore";
 
-export type Plec = "on" | "ona" | "ono";
+export type Plec = "on" | "ona";
 
 /** Imię i nazwisko zawsze z wielkiej litery w każdym członie — niezależnie od tego, jak ktoś je wpisał. */
 function capitalizeName(s: string): string {
@@ -115,7 +115,7 @@ export default function BirthForm({
       </div>
 
       <div className={askTimePlace ? "bf-row" : ""} style={askTimePlace ? undefined : { display: "grid", gap: 16 }}>
-        <DateInput id="bf-date" value={date} onChange={setDate} required label={dateLabel} />
+        <DateInput id="bf-date" value={date} onChange={setDate} required label={dateLabel} compact />
         {askTimePlace && (
           <div>
             <label htmlFor="bf-time">Godzina urodzenia</label>
@@ -127,11 +127,27 @@ export default function BirthForm({
 
       {askTimePlace && (
         <>
-          <label style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 44, textTransform: "none", fontSize: "0.95rem", color: "var(--text)", cursor: "pointer" }}>
-            <input type="checkbox" checked={!timeKnown} onChange={(e) => setTimeKnown(!e.target.checked)}
-              style={{ width: 22, height: 22, flex: "none", accentColor: "var(--teal)" }} />
-            Nie znam godziny urodzenia
-          </label>
+          <div className="bf-godzina-plec">
+            <label style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 44, textTransform: "none", fontSize: "0.95rem", color: "var(--text)", cursor: "pointer" }}>
+              <input type="checkbox" checked={!timeKnown} onChange={(e) => setTimeKnown(!e.target.checked)}
+                style={{ width: 22, height: 22, flex: "none", accentColor: "var(--teal)" }} />
+              Nie znam godziny urodzenia
+            </label>
+            <div className="bf-plec" role="radiogroup" aria-label="Płeć">
+              {(["on", "ona"] as const).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  role="radio"
+                  aria-checked={plec === p}
+                  className={`bf-plec-opcja${plec === p ? " bf-plec-opcja-aktywna" : ""}`}
+                  onClick={() => setPlec(p)}
+                >
+                  {p === "on" ? "On" : "Ona"}
+                </button>
+              ))}
+            </div>
+          </div>
           {!timeKnown && (
             <p className="muted" style={{ fontSize: "0.85rem", marginTop: -8 }}>
               Bez godziny nie policzymy ascendentu (lagny) i domów — pokażemy pozycje planet,
@@ -142,30 +158,6 @@ export default function BirthForm({
           <PlacePicker value={place} onChange={setPlace} id="bf-place" />
         </>
       )}
-
-      <div>
-        <label id="bf-plec-label">Płeć</label>
-        <div className="bf-plec" role="radiogroup" aria-labelledby="bf-plec-label">
-          {(["on", "ona", "ono"] as const).map((p) => (
-            <button
-              key={p}
-              type="button"
-              role="radio"
-              aria-checked={plec === p}
-              className={`bf-plec-opcja${plec === p ? " bf-plec-opcja-aktywna" : ""}`}
-              onClick={() => setPlec(p)}
-              title={p === "ono" ? "Podmiot inny niż osoba — np. auto, miasto, firma" : undefined}
-            >
-              {p === "on" ? "On" : p === "ona" ? "Ona" : "Obiekt"}
-            </button>
-          ))}
-        </div>
-        {plec === "ono" && (
-          <p className="muted" style={{ fontSize: "0.85rem", marginTop: 6 }}>
-            Wybierz to dla podmiotu, który nie jest osobą — np. auta, miasta, firmy czy wydarzenia.
-          </p>
-        )}
-      </div>
 
       {children}
 

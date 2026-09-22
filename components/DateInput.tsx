@@ -20,6 +20,10 @@ const MIESIACE = [
   "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień",
 ];
 
+/** Skrócone nazwy — do wąskich kontekstów (np. koło danych w kosmogramie),
+ * gdzie pełne "październik"/"wrzesień" nie mieszczą się w polu select. */
+const MIESIACE_SKROT = ["sty", "lut", "mar", "kwi", "maj", "cze", "lip", "sie", "wrz", "paź", "lis", "gru"];
+
 const MIN_ROK = 1900;
 
 interface Props {
@@ -29,6 +33,8 @@ interface Props {
   label?: string;
   id?: string;
   required?: boolean;
+  /** Skrócone nazwy miesięcy (sty, lut, ...) — dla wąskich pól, np. koła danych. */
+  compact?: boolean;
 }
 
 /** Ile dni ma miesiąc (z uwzględnieniem lat przestępnych). */
@@ -37,7 +43,8 @@ function dniWMiesiacu(rok: number, miesiac: number): number {
   return new Date(rok, miesiac, 0).getDate();
 }
 
-export default function DateInput({ value, onChange, label = "Data urodzenia", id, required }: Props) {
+export default function DateInput({ value, onChange, label = "Data urodzenia", id, required, compact }: Props) {
+  const nazwyMiesiecy = compact ? MIESIACE_SKROT : MIESIACE;
   const autoId = useId();
   const bazaId = id ?? autoId;
   const [dzien, setDzien] = useState("");
@@ -139,7 +146,7 @@ export default function DateInput({ value, onChange, label = "Data urodzenia", i
           onChange={(e) => zmienMiesiac(e.target.value)}
         >
           <option value="">miesiąc</option>
-          {MIESIACE.map((m, i) => (
+          {nazwyMiesiecy.map((m, i) => (
             <option key={m} value={i + 1}>{m}</option>
           ))}
         </select>

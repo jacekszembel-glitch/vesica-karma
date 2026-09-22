@@ -300,16 +300,6 @@ export function IconRodzina(p: P) {
   );
 }
 
-/** Kto — sylwetka osoby (dane identyfikujące). */
-export function IconOsoba(p: P) {
-  return (
-    <Base {...p}>
-      <circle cx="24" cy="16" r="7" />
-      <path d="M10 41 c0 -8.5 6.3 -14 14 -14 s14 5.5 14 14" />
-    </Base>
-  );
-}
-
 /** Mapy — glob z południkiem, równoleżnikiem i punktem miejsca. */
 export function IconMapy(p: P) {
   return (
@@ -319,65 +309,6 @@ export function IconMapy(p: P) {
       <path d="M24 9 c6 4.5 6 25.5 0 30 M24 9 c-6 4.5 -6 25.5 0 30" opacity="0.6" />
       <circle cx="30" cy="17" r="2.4" />
       <path d="M30 19.4 v4" />
-    </Base>
-  );
-}
-
-/* ═══ ikony rodzajów raportu numerologicznego (kafle /numerologia) ═══
-   Wspólna sygnatura: zaokrąglony kwadrat — „komórka cyfry", nawiązanie
-   do siatki Lo Shu, materiał WŁASNY numerologii (nie koło, które w reszcie
-   serwisu należy do astrologii/orbit). Wewnątrz — promień światła zamiast
-   oklepanej gwiazdki, cytujący zasadę marki „światło jako przewodnik". */
-
-const KOMORKA = <rect x="11" y="11" width="26" height="26" rx="8" />;
-
-/** Portret ogólny — pojedyncza iskra/gwiazdka w centrum (rdzeń liczb), z małym satelitą dla równowagi. */
-export function IconRaportPortret(p: P) {
-  return (
-    <Base {...p}>
-      {KOMORKA}
-      <path d="M24 14.5 l2.9 6.4 6.4 2.9 -6.4 2.9 -2.9 6.4 -2.9 -6.4 -6.4 -2.9 6.4 -2.9 Z" />
-      <circle cx="32.5" cy="15" r="1.3" fill="currentColor" stroke="none" opacity="0.5" />
-    </Base>
-  );
-}
-
-/** Dla dziecka — kiełek: łodyżka i dwa listki różnej wielkości nad prostą linią gruntu (bez łuku, żeby nie czytać się jako uśmiech). */
-export function IconRaportDziecko(p: P) {
-  return (
-    <Base {...p}>
-      {KOMORKA}
-      <path d="M24 32.5 v-9.5" />
-      <path d="M24 26 C 18.5 26 15.8 21.6 15.8 17.3 C 21 17.3 24 21 24 26 Z" />
-      <path d="M24 23 C 29.7 23 32.2 19 32.2 15 C 27.4 15 24 18.4 24 23 Z" opacity="0.6" />
-      <path d="M18.5 32.5 h11" opacity="0.4" />
-    </Base>
-  );
-}
-
-/** Finanse — trzy komórki cyfr rosnące jak słupki (bez monety/strzałki). */
-export function IconRaportFinanse(p: P) {
-  return (
-    <Base {...p}>
-      {KOMORKA}
-      <rect x="15" y="26.5" width="5" height="6.5" rx="1.3" />
-      <rect x="21.5" y="21" width="5" height="12" rx="1.3" opacity="0.85" />
-      <rect x="28" y="15" width="5" height="18" rx="1.3" />
-    </Base>
-  );
-}
-
-/** Prognoza roczna — minikalendarz ze spiralą i trzema zaznaczonymi datami. */
-export function IconRaportRok(p: P) {
-  return (
-    <Base {...p}>
-      {KOMORKA}
-      <rect x="17" y="18" width="14" height="12" rx="1.6" />
-      <path d="M17 22.2 h14" />
-      <path d="M20.6 15.5 v4.3 M27.4 15.5 v4.3" />
-      <circle cx="20.8" cy="26" r="1" fill="currentColor" stroke="none" />
-      <circle cx="24" cy="26" r="1" fill="currentColor" stroke="none" opacity="0.6" />
-      <circle cx="27.2" cy="26" r="1" fill="currentColor" stroke="none" opacity="0.6" />
     </Base>
   );
 }

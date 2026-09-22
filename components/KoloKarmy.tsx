@@ -27,7 +27,6 @@ const RING_R = 322.5, RING_W = 60;
 type Hotspot = {
   id: string;
   x: number; y: number; r: number;
-  glowR?: number;
   href: string;
   label: string;
   /** Gdy pole jest nieregularne (kwiat trzech kół) — dokładny bounding box
@@ -51,7 +50,7 @@ const HOTSPOTY: Hotspot[] = [
   { id: "hiromancja", x: 415, y: 470, r: 85, href: "/hiromancja", label: "Chiromancja", gap: SEGMENT_GAPY.hiromancja },
   { id: "numerologia", x: 775, y: 470, r: 85, href: "/numerologia", label: "Numerologia", gap: SEGMENT_GAPY.numerologia },
   { id: "panel", x: 596, y: 367, r: 60, href: "/panel", label: "Mój Panel" },
-  { id: "zwiazki", x: 1012, y: 645, r: 80, glowR: 90, href: "/dopasowanie", label: "Związki" },
+  { id: "zwiazki", x: 1012, y: 645, r: 80, href: "/dopasowanie", label: "Związki" },
 ];
 
 /** Piktogramy w soczewkach przenikania (dom/klepsydra/postać) — czysto opisowe,
@@ -157,32 +156,38 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
       />
 
       {/* pętle „ukończonych" systemów — złote wypełnienie zamiast domyślnego
-          taupe, bez poświaty (ostra krawędź, jak reszta grafiki). Pominięte,
-          gdy baza już jest w pełni złota (patrz wyżej). */}
-      {!wszystkoZlote && (["astrologia", "hiromancja", "numerologia"] as const).filter((id) => ukonczone.has(id)).map((id) => (
+          taupe, bez poświaty (ostra krawędź, jak reszta grafiki); te same
+          złote wycinki wracają na hover nawet dla systemów jeszcze
+          nieukończonych (kk-fill-hover-aktywny), więc podświetlenie jest
+          dokładnie tym samym kolorem/kształtem co stan „ukończony", nie
+          osobnym rozmytym efektem. Pominięte, gdy baza już jest w pełni
+          złota (patrz wyżej). */}
+      {!wszystkoZlote && (["astrologia", "hiromancja", "numerologia"] as const).map((id) => (
         <img key={`fill-${id}`} src={`/brand/fill-${id}-gold.png`} alt=""
-          style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }} />
+          className={`kk-fill-hover${ukonczone.has(id) || aktywny === id ? " kk-fill-hover-aktywny" : ""}`}
+          style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
       ))}
       <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} />
 
       {/* poświata pól o nieregularnym kształcie — astrologia/hiromancja/
           numerologia pominięte: hover-feedback dla wszystkich trzech daje
           już puls piktogramu (MoonStars / PIKTOGRAMY_PULSUJACE), stara
-          poświata dawała niespójny, zbędny efekt w tle */}
-      {[...KSZTALTNE].filter((id) => !["astrologia", "hiromancja", "numerologia"].includes(id)).map((id) => (
+          poświata dawała niespójny, zbędny efekt w tle. Astrokartografia/
+          mahadasze/karma też pominięte — maska (flood fill) nie pasowała
+          dokładnie do krzywizny złotego pierścienia, więc poświata wystawała
+          poza niego (widoczne jako "skrzydło" na zdjęciu od użytkownika). */}
+      {[...KSZTALTNE].filter((id) => !["astrologia", "hiromancja", "numerologia", "astrokartografia", "mahadasze", "karma"].includes(id)).map((id) => (
         <img key={`glow-${id}`} src={`/brand/glow-${id}.png`} alt=""
           className={`kk-glow-ksztalt${aktywny === id ? " kk-glow-aktywny" : ""}`}
           style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
       ))}
-      {/* poświata Związków — proste koło */}
-      {(() => {
-        const z = HOTSPOTY.find((h) => h.id === "zwiazki")!;
-        const gr = z.glowR ?? z.r * 1.3;
-        return (
-          <span className={`kk-glow${aktywny === "zwiazki" ? " kk-glow-aktywny" : ""}`}
-            style={{ left: pctX(z.x - gr), top: pctY(z.y - gr), width: pctX(gr * 2), height: pctY(gr * 2) }} />
-        );
-      })()}
+      {/* podświetlenie Związków na hover — realny, ostry wycinek własnego
+          kształtu ikony (fill-zwiazki-gold.png), ten sam wzorzec co pętle
+          systemów wyżej, zamiast poprzedniej rozmytej poświaty (radial-
+          gradient + mix-blend-mode). */}
+      <img src="/brand/fill-zwiazki-gold.png" alt=""
+        className={`kk-fill-hover${aktywny === "zwiazki" ? " kk-fill-hover-aktywny" : ""}`}
+        style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
 
       {/* piktogramy — leżą idealnie na tle (taupe albo złote, zależnie od
           stanu). Bez pulsu na hover — animacja transform:scale przy okazji

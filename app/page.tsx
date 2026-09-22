@@ -1,5 +1,6 @@
 import KoloKarmy from "@/components/KoloKarmy";
 import Starfield from "@/components/Starfield";
+import CzymJestVesicaKarma from "@/components/CzymJestVesicaKarma";
 
 /**
  * Strona główna VesicaKarma = samo Koło Karmy, bez sekcji hero nad nim
@@ -16,6 +17,7 @@ export default function Home() {
             <KoloKarmy />
           </div>
         </div>
+        <CzymJestVesicaKarma />
       </div>
     </section>
   );
