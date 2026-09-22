@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
-import Nebula from "@/components/Nebula";
 import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
@@ -43,7 +42,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pl" className={`${cormorant.variable} ${inter.variable}`}>
       <body>
-        <Nebula />
         <SiteHeader />
         <main>{children}</main>
         <footer style={{ background: "var(--navy)", marginTop: 90, padding: "40px 0" }}>

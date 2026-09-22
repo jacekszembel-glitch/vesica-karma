@@ -1,6 +1,6 @@
 /* ═══════════════ VesicaKarma — design system (odgałęzienie od 9dom) ═══════════════
    Paleta: fiolet #170F28 / #1F1636 · turkus #11A7B6 (tylko mandala w tle) ·
-   złoto #E6C48A/#C39A3B · taupe #8D8175 (stan „nieukończony" Koła Karmy)
+   złoto #E6C48A/#C39A3B · taupe #47413B (stan „nieukończony" Koła Karmy)
    Typografia: Cormorant Garamond (nagłówki) + Inter (treść)
    Zasady ikon: geometria i prostota, jednolita grubość linii, harmonia i równowaga. */
 
@@ -28,8 +28,8 @@
   --line-soft: rgba(127, 208, 216, 0.1);
   --line-gold: rgba(195, 154, 59, 0.4);
   /* stan „nieukończony" Koła Karmy i kafelków w Panelu (Faza 1: reskin) */
-  --taupe: #8d8175;
-  --taupe-soft: rgba(141, 129, 117, 0.4);
+  --taupe: #47413b;
+  --taupe-soft: rgba(71, 65, 59, 0.4);
   --radius: 16px;
   --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
   --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
@@ -53,58 +53,16 @@ body {
   overflow-x: hidden;
 }
 
-/* tło: pionowy spadek granatu, baza pod mgławicą */
+/* tło: jednolity fiolet, bez gradientu */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -3;
-  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  background: var(--bg);
 }
 
-/* ═══ mgławica — oddychające, wolno dryfujące poświaty tła (całej strony) ═══ */
-.nebula { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; }
-.nebula-blob { position: absolute; border-radius: 50%; filter: blur(30px); will-change: transform, opacity; }
-.nebula-1 {
-  width: 70vw; height: 70vw; left: 12%; top: -32%;
-  background: radial-gradient(ellipse, rgba(17, 167, 182, 0.42), transparent 70%);
-  animation: nebula-drift-1 26s ease-in-out infinite;
-}
-.nebula-2 {
-  width: 56vw; height: 56vw; left: 62%; top: 2%;
-  background: radial-gradient(ellipse, rgba(230, 196, 138, 0.3), transparent 70%);
-  animation: nebula-drift-2 34s ease-in-out infinite;
-}
-.nebula-3 {
-  width: 62vw; height: 62vw; left: -14%; top: 58%;
-  background: radial-gradient(ellipse, rgba(17, 167, 182, 0.26), transparent 70%);
-  animation: nebula-drift-3 38s ease-in-out infinite;
-}
-.nebula-4 {
-  width: 42vw; height: 42vw; left: 42%; top: 38%;
-  background: radial-gradient(ellipse, rgba(127, 208, 216, 0.22), transparent 70%);
-  animation: nebula-drift-4 22s ease-in-out infinite;
-}
-@keyframes nebula-drift-1 {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.65; }
-  50% { transform: translate(9%, 11%) scale(1.25); opacity: 1; }
-}
-@keyframes nebula-drift-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.55; }
-  50% { transform: translate(-11%, 8%) scale(0.8); opacity: 1; }
-}
-@keyframes nebula-drift-3 {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
-  50% { transform: translate(8%, -9%) scale(1.2); opacity: 1; }
-}
-@keyframes nebula-drift-4 {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
-  50% { transform: translate(7%, 7%) scale(1.3); opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .nebula-blob { animation: none; }
-}
-/* treść ponad mgławicą */
+/* treść ponad tłem */
 main, header, footer { position: relative; z-index: 1; }
 
 /* ── typografia ── */
