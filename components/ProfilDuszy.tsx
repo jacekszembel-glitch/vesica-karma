@@ -84,11 +84,36 @@ const S = 348;
 const CX = S / 2;
 const CY = S / 2 + 6;
 const R = 100;
+// Skala STAŁA (nie względna do maksimum w danej mapie) — 4 pierścienie tła
+// odpowiadają dosłownie 1/2/3/4 planetom, jak w pliku wzorcowym. Dzięki temu
+// "Kama - 3" zawsze trafia dokładnie na 3. pierścień, niezależnie od tego, ile
+// planet ma najmocniej obsadzona grupa w tej konkretnej mapie.
+const MAKS_SKALI = 4;
 
 /** Punkt na osi o indeksie i (0 = góra, zgodnie z zegarem) w ułamku promienia t. */
 function punkt(i: number, t: number): [number, number] {
   const kat = (i / GRUPY.length) * 2 * Math.PI - Math.PI / 2;
   return [CX + Math.cos(kat) * R * t, CY + Math.sin(kat) * R * t];
+}
+
+/** Gładka zamknięta krzywa (Catmull-Rom → Bezier) przez punkty — zamiast prostego
+ * romba ostre naroża znikają, a przy typowej mapie (Dharma/Karma wysokie, Artha/
+ * Moksza niższe) kształt naturalnie robi się soczewkowaty — jak w pliku wzorcowym. */
+function gladkaSciezka(pkt: [number, number][]): string {
+  const n = pkt.length;
+  const cz1: [number, number][] = [];
+  const cz2: [number, number][] = [];
+  for (let i = 0; i < n; i++) {
+    const p0 = pkt[(i - 1 + n) % n], p1 = pkt[i], p2 = pkt[(i + 1) % n], p3 = pkt[(i + 2) % n];
+    cz1.push([p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6]);
+    cz2.push([p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6]);
+  }
+  let d = `M ${pkt[0][0].toFixed(1)} ${pkt[0][1].toFixed(1)}`;
+  for (let i = 0; i < n; i++) {
+    const p2 = pkt[(i + 1) % n];
+    d += ` C ${cz1[i][0].toFixed(1)} ${cz1[i][1].toFixed(1)}, ${cz2[i][0].toFixed(1)} ${cz2[i][1].toFixed(1)}, ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+  }
+  return d + " Z";
 }
 
 /**
@@ -174,11 +199,11 @@ export default function ProfilDuszy({ chart }: { chart: VedicChart }) {
     const liczby = GRUPY.map((g) =>
       PLANET_ORDER.filter((id) => (g.domy as readonly number[]).includes(chart.planets[id].house)).length,
     );
-    const maks = Math.max(...liczby, 1);
     return {
       liczby,
-      // skala: 0 planet = 15% promienia (żeby kształt nie znikał), maks = 100%
-      ulamki: liczby.map((n) => 0.15 + (n / maks) * 0.85),
+      // skala stała: 0 planet = 8% promienia (żeby punkt nie znikał w centrum),
+      // 1-4 planety = dosłownie 1.-4. pierścień; 4+ ląduje na brzegu.
+      ulamki: liczby.map((n) => (n === 0 ? 0.08 : Math.min(1, n / MAKS_SKALI))),
       dominanta: GRUPY[liczby.indexOf(Math.max(...liczby))],
     };
   }, [chart]);
@@ -226,20 +251,16 @@ export default function ProfilDuszy({ chart }: { chart: VedicChart }) {
     };
   })() : null;
 
-  const obrys = dane?.ulamki
-    .map((t, i) => punkt(i, t).map((v) => v.toFixed(1)).join(" "))
-    .join(" L ");
+  const obrys = dane ? gladkaSciezka(dane.ulamki.map((t, i) => punkt(i, t))) : null;
 
   return (
-    <details className="card" open>
-      <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)", marginBottom: 4 }}>
+    <div style={{ maxWidth: 720, marginLeft: "auto", marginRight: "auto" }}>
+      <p style={{ fontFamily: "var(--font-serif)", fontSize: "2.6rem", color: "var(--sand)", fontWeight: 700, marginBottom: 16, textAlign: "center" }}>
         Profil duszy
-      </summary>
-      <p className="muted" style={{ fontSize: "0.84rem", lineHeight: 1.55, marginBottom: 18 }}>
-        Rozkład dziewięciu grah po czterech klasycznych celach życia (purusharthach):{" "}
-        <Term k="dharma">Dharma</Term> (sens i droga), <Term k="artha">Artha</Term> (środki i praca),{" "}
-        <Term k="kama">Kama</Term> (pragnienia i więzi), <Term k="moksza">Moksza</Term> (wolność i głębia) —{" "}
-        <Term k="dom">domy</Term> pogrupowane tradycyjnie.
+      </p>
+      <p style={{ fontSize: "0.86rem", lineHeight: 1.6, color: "var(--sand)", textAlign: "center", marginBottom: 20 }}>
+        Rozkład <Term k="graha" plain>dziewięciu grah</Term> po czterech klasycznych celach życia
+        (purusharthach) — <Term k="dom" plain>domy</Term> pogrupowane tradycyjnie.
       </p>
 
       {/* ── portret: krótka, płynna narracja spinająca tożsamość, rytm emocjonalny,
@@ -248,27 +269,22 @@ export default function ProfilDuszy({ chart }: { chart: VedicChart }) {
           techniczna (wykres, tabela Atmakaraki, Synteza pod spodem). Świadomie
           nie obok Syntezy: dwie narracje jedna pod drugą się gryzły, a Synteza
           i tak komentuje wykres, więc lepiej pasuje bezpośrednio pod nim. ── */}
-      <div style={{
-        marginBottom: 20, padding: "14px 18px", borderRadius: 10,
-        background: "rgba(127,208,216,0.06)", border: "1px solid var(--line)",
-      }}>
-        <p className="eyebrow" style={{ marginBottom: 6 }}>Portret</p>
-        <p style={{ fontSize: "0.9rem", lineHeight: 1.65 }}>
+      <div style={{ marginBottom: 20 }}>
+        <p className="eyebrow" style={{ marginBottom: 6, color: "var(--sand)" }}>Portret</p>
+        <p style={{ fontSize: "0.9rem", lineHeight: 1.65, color: "var(--sand)" }}>
           {portret.map((zdanie, i) => <span key={i}>{zdanie}{" "}</span>)}
         </p>
       </div>
 
-      <div className="profil-uklad">
-        {/* ── lewo: wykres radarowy ── */}
+      <div style={{ display: "grid", gap: 28 }}>
+        {/* ── wykres radarowy, wyśrodkowany, nad tekstem Atmakaraki (nie obok) ── */}
         <div style={{ position: "relative" }}>
           {dane && <>
-          <svg viewBox={`0 0 ${S} ${S}`} style={{ width: "100%", maxWidth: 340, display: "block", margin: "0 auto" }}
+          <svg viewBox={`0 0 ${S} ${S}`} style={{ width: "100%", maxWidth: 452, display: "block", margin: "0 auto" }}
             role="img" aria-label={`Profil duszy: ${GRUPY.map((g, i) => `${g.pl} ${dane.liczby[i]}`).join(", ")}`}>
-            {/* pierścienie tła */}
-            {[0.33, 0.66, 1].map((t) => (
-              <polygon key={t}
-                points={GRUPY.map((_, i) => punkt(i, t).map((v) => v.toFixed(1)).join(",")).join(" ")}
-                fill="none" stroke="rgba(127,208,216,0.14)" strokeWidth="1" />
+            {/* pierścienie tła — okręgi, jak w pliku wzorcowym (nie romby) */}
+            {[0.25, 0.5, 0.75, 1].map((t) => (
+              <circle key={t} cx={CX} cy={CY} r={R * t} fill="none" stroke="rgba(230,196,138,0.22)" strokeWidth="1" />
             ))}
             {/* osie */}
             {GRUPY.map((g, i) => {
@@ -276,14 +292,14 @@ export default function ProfilDuszy({ chart }: { chart: VedicChart }) {
               const podswietlona = aktywny === g.klucz;
               return (
                 <line key={i} x1={CX} y1={CY} x2={px} y2={py}
-                  stroke={podswietlona ? "rgba(127,208,216,0.6)" : "rgba(127,208,216,0.18)"}
+                  stroke={podswietlona ? "#7fd0d8" : "rgba(230,196,138,0.3)"}
                   strokeWidth={podswietlona ? 1.6 : 1}
                   style={{ transition: "stroke 0.2s, stroke-width 0.2s" }} />
               );
             })}
 
-            {/* kształt profilu */}
-            <path d={`M ${obrys} Z`} fill="rgba(230,196,138,0.14)" stroke="#e6c48a" strokeWidth="1.8"
+            {/* kształt profilu — gładka soczewkowata krzywa, nie ostry romb */}
+            <path d={obrys ?? undefined} fill="rgba(230,196,138,0.16)" stroke="#e6c48a" strokeWidth="1.8"
               strokeLinejoin="round" />
             {dane.ulamki.map((t, i) => {
               const [px, py] = punkt(i, t);
@@ -305,7 +321,7 @@ export default function ProfilDuszy({ chart }: { chart: VedicChart }) {
                   onMouseEnter={() => setAktywny(g.klucz)}
                   onMouseLeave={() => setAktywny(null)}>
                   <tspan x={px} fontSize="12.5" fontWeight="600" fill={podswietlona ? "#7fd0d8" : "#e6c48a"}
-                    style={{ transition: "fill 0.2s" }}>{g.pl} · {dane.liczby[i]}</tspan>
+                    style={{ transition: "fill 0.2s" }}>{g.pl} - {dane.liczby[i]}</tspan>
                   <tspan x={px} dy="13" fontSize="9" fill="#93a6b3">{g.pod}</tspan>
                 </text>
               );
@@ -340,10 +356,9 @@ export default function ProfilDuszy({ chart }: { chart: VedicChart }) {
             );
           })()}
 
-          <p style={{ fontSize: "0.9rem", lineHeight: 1.6, textAlign: "center", marginTop: 6 }}>
-            Najmocniej obsadzona: <strong style={{ color: "var(--primary-soft)" }}>{dane.dominanta.pl}</strong>{" "}
-            <span className="muted">({dane.dominanta.pod})</span> —{" "}
-            {PLANET_ORDER
+          <p className="muted" style={{ fontSize: "0.86rem", lineHeight: 1.6, textAlign: "center", marginTop: 10 }}>
+            Najmocniejsza obsadzona: <strong style={{ color: "var(--sand)" }}>{dane.dominanta.pl.toUpperCase()}</strong>{" "}
+            ({dane.dominanta.pod}) - {PLANET_ORDER
               .filter((id) => (dane.dominanta.domy as readonly number[]).includes(chart.planets[id].house))
               .map((id) => GRAHAS[id].pl)
               .join(", ")}.
@@ -351,9 +366,9 @@ export default function ProfilDuszy({ chart }: { chart: VedicChart }) {
           </>}
         </div>
 
-        {/* ── prawo: atmakaraka — znak · dom · nawamsza ── */}
+        {/* ── atmakaraka — znak · dom · nawamsza, pod wykresem ── */}
         <div>
-          <p className="eyebrow" style={{ marginBottom: 10 }}>
+          <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.15rem", fontWeight: 700, color: "var(--sand)", marginBottom: 10 }}>
             <Term k="atmakaraka">Atmakaraka</Term> — wskaźnik duszy
           </p>
           <p style={{ fontSize: "0.95rem", lineHeight: 1.6, marginBottom: 10 }}>
@@ -415,12 +430,9 @@ export default function ProfilDuszy({ chart }: { chart: VedicChart }) {
 
       {/* ── synteza: łączy dominującą puruszartę z domem atmakaraki w jeden wniosek ── */}
       {synteza && (
-        <div style={{
-          marginTop: 18, padding: "14px 18px", borderRadius: 10,
-          background: "rgba(230,196,138,0.06)", border: "1px solid var(--line-gold)",
-        }}>
-          <p className="eyebrow" style={{ marginBottom: 6 }}>Synteza</p>
-          <p style={{ fontSize: "0.9rem", lineHeight: 1.65 }}>
+        <div style={{ marginTop: 18 }}>
+          <p className="eyebrow" style={{ marginBottom: 6, color: "var(--sand)" }}>Synteza</p>
+          <p style={{ fontSize: "0.9rem", lineHeight: 1.65, color: "var(--sand)" }}>
             {synteza.map((zdanie, i) => <span key={i}>{zdanie}{" "}</span>)}
           </p>
           {aiData && (
@@ -435,6 +447,8 @@ export default function ProfilDuszy({ chart }: { chart: VedicChart }) {
           )}
         </div>
       )}
-    </details>
+
+      <div className="skrot-hero-linia" />
+    </div>
   );
 }

@@ -18,13 +18,11 @@ import { nakshatraOf, nakshatraTerm } from "@/lib/astro/nakshatra";
 import ProfilDuszy from "@/components/ProfilDuszy";
 import DaszaSekcja from "@/components/DaszaSekcja";
 import PlanetyWSkrocie from "@/components/PlanetyWSkrocie";
-import SyntezaKosmogramu from "@/components/SyntezaKosmogramu";
 import Talenty from "@/components/Talenty";
 import WrazliwoscDuchowa from "@/components/WrazliwoscDuchowa";
 import { poziomWzmocnienia, kondycjaWskaznik, MOZLIWE_ZAWODY } from "@/lib/astro/domInterpretacja";
 import { ocenaWladcy } from "@/lib/astro/sila";
 import { wykryteJogiPosortowane } from "@/lib/astro/yogas";
-import TranzytyTeraz from "@/components/TranzytyTeraz";
 import JednoSpojrzenie from "@/components/JednoSpojrzenie";
 import WargiDodatkowe from "@/components/WargiDodatkowe";
 import AsztakawargaSekcja from "@/components/AsztakawargaSekcja";
@@ -66,9 +64,9 @@ const KLUCZ_STYLU = "9dom_styl_wykresu";
  * zapisanych osób (lib/osobyStore.ts) została wycofana na rzecz koła danych
  * wzorowanego na designie 9dom.pl.
  */
-type SekcjaKosmogramu = "techniczne" | "czasGleboko" | "dusza" | "predyspozycje" | "finanse" | "zdrowie" | "tranzyty";
+type SekcjaKosmogramu = "techniczne" | "czasGleboko" | "dusza" | "predyspozycje" | "finanse" | "zdrowie";
 const WSZYSTKIE_SEKCJE: Record<SekcjaKosmogramu, boolean> = {
-  techniczne: true, czasGleboko: true, dusza: true, predyspozycje: true, finanse: true, zdrowie: true, tranzyty: true,
+  techniczne: true, czasGleboko: true, dusza: true, predyspozycje: true, finanse: true, zdrowie: true,
 };
 
 /**
@@ -275,8 +273,8 @@ export default function KosmogramPage() {
 
   return (
     <div className="container section">
-      <h1 style={{ textAlign: "center" }}>Astrologia Wedyjska</h1>
-      <p className="section-sub">
+      <h1 style={{ textAlign: "center", color: "var(--sand)" }}>Astrologia Wedyjska</h1>
+      <p className="section-sub" style={{ color: "var(--sand)" }}>
         Mapa nieba z chwili urodzenia w zodiaku syderycznym (ayanamsa Lahiri) —
         <Term k="lagna">lagna</Term>, <Term k="graha">9 grah</Term>, <Term k="dom">domy</Term>,{" "}
         <Term k="nakszatra">nakszatry</Term> i <Term k="dasza">okresy planetarne</Term>.
@@ -348,7 +346,7 @@ export default function KosmogramPage() {
 
           <JednoSpojrzenie chart={chart} />
 
-          {w.tranzyty && <TranzytyTeraz chart={chart} />}
+          {chart.angles && w.dusza && <ProfilDuszy chart={chart} />}
 
           {/* poczatkujacy/zaawansowany — poczatkujacy pokazuje tylko interpretacyjne rankingi
               (Predyspozycje/Finanse/Zdrowie), zaawansowany cala reszte (diagramy, tabele, warga,
@@ -589,16 +587,7 @@ export default function KosmogramPage() {
           {/* predyspozycje + na co uwazac — jedna wspolna rozwijana karta, widoczna w trybie
               poczatkujacym (maPelneDane jest zawsze true, wiec warunek sprowadza sie do trybu). */}
           {(tryb === "poczatkujacy" || !maPelneDane) && <>
-          {/* mandala syntezy — sam szczyt trybu poczatkujacego, zanim ktokolwiek zacznie przewijac dalej */}
-          <SyntezaKosmogramu chart={chart} />
-
           <PlanetyWSkrocie chart={chart} />
-
-          {chart.angles && w.dusza && (
-            <div style={{ marginBottom: 24 }}>
-              <ProfilDuszy chart={chart} />
-            </div>
-          )}
 
           {w.predyspozycje && <>
           <details className="card" style={{ marginBottom: 24 }} open>

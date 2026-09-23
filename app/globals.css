@@ -51,6 +51,10 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   overflow-x: hidden;
+  /* domyślnie tekst wyjustowany do bloku; dowolny przodek z własnym
+     textAlign (np. wyśrodkowane nagłówki) nadpisuje to przez dziedziczenie */
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 /* tło: jednolity fiolet, bez gradientu */
@@ -2093,15 +2097,6 @@ p, li, td, th, h1, h2, h3, .badge {
 .synteza-mandala { width: 100%; height: auto; display: block; }
 
 /* Profil duszy — ten sam wzorzec co Synteza: wykres po lewej, tekst po prawej */
-.profil-uklad {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(min(300px, 100%), 1fr));
-  gap: 30px;
-  align-items: start;
-}
-@media (max-width: 760px) {
-  .profil-uklad { grid-template-columns: 1fr; }
-}
 .synteza-lista { display: grid; gap: 10px; min-width: 0; }
 .synteza-rzad {
   display: flex;
