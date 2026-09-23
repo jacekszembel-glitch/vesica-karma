@@ -1106,7 +1106,7 @@ main, .site-header, footer { position: relative; z-index: 1; }
   margin: 0 auto 32px;
   background: var(--line-gold);
 }
-.skrot-hero-linia:last-child { margin: 32px auto 0; }
+.skrot-hero-linia:last-child { margin: 32px auto 16px; }
 .skrot-hero-linia::after {
   content: "";
   position: absolute;

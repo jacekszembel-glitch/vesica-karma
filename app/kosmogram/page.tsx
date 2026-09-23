@@ -348,6 +348,8 @@ export default function KosmogramPage() {
 
           {chart.angles && w.dusza && <ProfilDuszy chart={chart} />}
 
+          <KarakiCzarowe chart={chart} />
+
           {/* poczatkujacy/zaawansowany — poczatkujacy pokazuje tylko interpretacyjne rankingi
               (Predyspozycje/Finanse/Zdrowie), zaawansowany cala reszte (diagramy, tabele, warga,
               Asztakawarga, Szadbala, Dasza, Karaki, Jogi, Dosze, glosariusze). Kazda osoba ma
@@ -575,9 +577,6 @@ export default function KosmogramPage() {
           )}
 
           <WargiDodatkowe chart={chart} styl={styl} d10={d10} />
-
-          {/* karaki czarowe (Dzajmini) — osiem rol wg stopnia w znaku, z rozwijanymi opisami planeta×rola */}
-          <KarakiCzarowe chart={chart} />
 
           <AsztakawargaSekcja chart={chart} />
 

@@ -293,7 +293,7 @@ export default function JednoSpojrzenie({ chart }: { chart: VedicChart }) {
         </div>
       </div>
 
-      <div className="skrot-hero-linia" style={{ marginBottom: 16 }} />
+      <div className="skrot-hero-linia" />
     </div>
   );
 }
