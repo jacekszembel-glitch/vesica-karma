@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { VedicChart } from "@/lib/astro/chart";
-import { GRAHAS, RASIS } from "@/lib/astro/constants";
+import { GRAHAS, RASIS, BHAVAS } from "@/lib/astro/constants";
 import { atmakaraka } from "@/lib/astro/karaki";
 import { navamsaChart } from "@/lib/astro/varga";
 import { szadbala, GRAHY_SZADBALI, type WynikSzadbali } from "@/lib/astro/shadbala";
@@ -132,6 +132,8 @@ export default function JednoSpojrzenie({ chart }: { chart: VedicChart }) {
   const ak = atmakaraka(chart);
   const akId = ak.planeta;
   const akSign = chart.planets[akId].sign;
+  const akZnak = RASIS[akSign];
+  const akDom = chart.planets[akId].house;
 
   const d9 = navamsaChart(chart);
   const karakamszaSign = d9 ? d9.planets[akId].sign : akSign;
@@ -214,7 +216,10 @@ export default function JednoSpojrzenie({ chart }: { chart: VedicChart }) {
           {aktywny === "atmakaraka" && (
             <p className="muted" style={{ fontSize: "0.84rem", lineHeight: 1.55, margin: "8px 4px 0" }}>
               {OPIS_ATMAKARAKA.text} Tutaj: <strong style={{ color: "var(--sand)" }}>{GRAHAS[akId].pl}</strong>{" "}
-              ({ak.stopien.toFixed(1)}° w znaku) — {ak.znaczenie}.
+              ({ak.stopien.toFixed(1)}° — najwyższy stopień w znaku) w <strong style={{ color: "var(--sand)" }}>{akZnak.pl}</strong>{" "}
+              (żywioł {akZnak.element}, władca {GRAHAS[akZnak.lord].pl}) — {ak.znaczenie}; ton, w jakim dusza przerabia
+              swoją lekcję. W <strong style={{ color: "var(--sand)" }}>{akDom}. domu</strong> — {BHAVAS[akDom - 1].obszar};
+              obszar życia, w którym ta lekcja najmocniej się materializuje.
             </p>
           )}
         </div>

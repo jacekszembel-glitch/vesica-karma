@@ -365,67 +365,6 @@ export default function ProfilDuszy({ chart }: { chart: VedicChart }) {
           </p>
           </>}
         </div>
-
-        {/* ── atmakaraka — znak · dom · nawamsza, pod wykresem ── */}
-        <div>
-          <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.15rem", fontWeight: 700, color: "var(--sand)", marginBottom: 10 }}>
-            <Term k="atmakaraka">Atmakaraka</Term> — wskaźnik duszy
-          </p>
-          <p style={{ fontSize: "0.95rem", lineHeight: 1.6, marginBottom: 10 }}>
-            <span style={{ color: GRAHAS[ak.planeta].color, fontSize: "1.15rem" }}>
-              {GRAHAS[ak.planeta].symbol}
-            </span>{" "}
-            <strong>{GRAHAS[ak.planeta].pl}</strong>{" "}
-            <span className="muted">
-              ({ak.stopien.toFixed(1)}° — najwyższy stopień w znaku)
-            </span>{" "}
-            — {AK_OPISY[ak.planeta]}.
-          </p>
-          <div style={{ display: "grid", gap: 7, fontSize: "0.88rem", lineHeight: 1.55 }}>
-            <p>
-              <span className="muted">W znaku:</span>{" "}
-              <strong>{ak.znak.symbol} {ak.znak.pl}</strong>{" "}
-              <span className="muted">
-                — żywioł {ak.znak.element}, władca {GRAHAS[ak.znak.lord].pl}; ton, w jakim dusza
-                przerabia swoją lekcję.
-              </span>
-            </p>
-            {ak.dom > 0 && (
-              <p>
-                <span className="muted">W domu:</span>{" "}
-                <strong>{ak.dom}. dom</strong>{" "}
-                <span className="muted">
-                  — {BHAVAS[ak.dom - 1].obszar}; obszar życia, w którym ta lekcja
-                  najmocniej się materializuje.
-                </span>
-              </p>
-            )}
-            <p>
-              <span className="muted">W <Term k="nawamsza">nawamszy</Term> (karakamsza):</span>{" "}
-              <strong>{ak.d9.symbol} {ak.d9.pl}</strong>{" "}
-              <span className="muted">
-                {ak.vargottama
-                  ? "— vargottama: ten sam znak w D1 i D9, przekaz duszy wyjątkowo spójny i mocny."
-                  : `— dojrzały kierunek duszy: owoc lekcji ujawnia się w tonie znaku ${ak.d9.pl} (władca: ${GRAHAS[ak.d9.lord].pl}).`}
-              </span>
-            </p>
-            {ak.karakamszaDom > 0 && (
-              <p>
-                <span className="muted">Karakamsza licząc od Lagny:</span>{" "}
-                <strong>{ak.karakamszaDom}. dom</strong>{" "}
-                <span className="muted">
-                  — {BHAVAS[ak.karakamszaDom - 1].obszar}.{" "}
-                  {ak.vargottama
-                    ? `Wychodzi ten sam dom co przy pozycji D1 wyżej — to nie powtórka, tylko efekt vargottamy: skoro D1 i D9 dzielą ten sam znak, `
-                      + `dom liczony od Lagny musi wyjść identyczny. Lekcja duszy nie „przesuwa się” do innego obszaru życia w miarę dojrzewania — `
-                      + `zaczyna się i owocuje w tym samym, jednym polu. To rzadkie i wzmacnia przekaz zamiast go rozdwajać.`
-                    : `To pole, w którym ta lekcja duszy dojrzewa najpełniej — inne niż dom, w którym atmakaraka stoi w samej mapie urodzeniowej `
-                      + `(wyżej): tamten pokazuje, gdzie lekcja się zaczyna, ten — do czego ostatecznie prowadzi.`}
-                </span>
-              </p>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* ── synteza: łączy dominującą puruszartę z domem atmakaraki w jeden wniosek ── */}

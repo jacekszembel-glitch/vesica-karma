@@ -1101,7 +1101,7 @@ main, .site-header, footer { position: relative; z-index: 1; }
 .skrot-hero { margin: 0 auto 16px; }
 .skrot-hero-linia {
   position: relative;
-  height: 1px;
+  height: 2px;
   max-width: 720px;
   margin: 0 auto 32px;
   background: var(--line-gold);
