@@ -16,7 +16,7 @@ const client = new Anthropic(); // ANTHROPIC_API_KEY z env
 const requestSchema = z.object({
   kind: z.enum([
     "numerologia", "numerologia-dziecko", "numerologia-finanse", "numerologia-rok", "para",
-    "kosmogram", "kosmogram-dziecko", "kosmogram-finanse", "kosmogram-prognoza", "profil-duszy",
+    "kosmogram", "kosmogram-dziecko", "kosmogram-finanse", "kosmogram-prognoza", "profil-duszy", "rozdzial-dasz",
   ]),
   /** Policzone dane z wyliczeń — deterministyczne, gotowe do interpretacji. */
   data: z.record(z.string(), z.unknown()),
@@ -47,6 +47,8 @@ STRUKTURA ODPOWIEDZI (Markdown):
 - Długość: 400-700 słów. Piszesz do osoby („Twój Księżyc...", per „Ty").`;
 
 const KIND_PROMPTS: Record<string, string> = {
+  "rozdzial-dasz":
+    "To NAZWANIE JEDNEGO ROZDZIAŁU ŻYCIA na osi dwóch systemów Jyotisz naraz: Wimszottari (planety, pole 'planety' — każda z tonem: wspierający/wymagający/mieszany) i Chara Dasza (znaki Dżajminiego, pole 'znaki' — każdy ze swoim domem i tematem, w kolejności czasowej). Granice tego rozdziału to punkty, w których OBA systemy jednocześnie zmieniają temat — to samo w sobie czyni ten fragment wyraźnie odrębnym etapem. Masz też pola 'jogi' (co w tym czasie wspiera) i 'dosze' (na co uważać) — jeśli obecne, użyj ich, jeśli listy puste, pomiń ten wątek. Napisz DOKŁADNIE dwie rzeczy, nic więcej: (1) jedną linią, pogrubione: krótki, chwytliwy tytuł rozdziału (3-6 słów, po polsku, bez cudzysłowów, w formacie: **Tytuł**) — jeśli wśród planet przeważa ton 'wymagający', tytuł może brzmieć poważniej/ostrzegawczo, jeśli 'wspierający' — bardziej afirmująco; (2) akapit 2-4 zdań OPISU, który tłumaczy skąd wziął się tytuł: jak planeta(-y) i kolejne znaki się splatają, i — jeśli są w danych — co wspiera (jogi) i na co uważać (dosze). Bez nagłówków markdown, bez list, bez sekcji 'Co z tym zrobić' — tylko te dwa elementy, tytuł i opis, razem 40-90 słów łącznie. To ma być zrozumiałe dla kogoś, kto płaci za tę interpretację i musi od razu wiedzieć, o co chodzi.",
   kosmogram:
     "Zinterpretuj kosmogram wedyjski (D1). Priorytety: 1) lagna i jej władca, 2) Księżyc — znak i nakszatra (fundament psychiki), 3) najsilniejsze konfiguracje (egzaltacje, upadki, spalenia, retrogradacje), 4) aktualny okres Vimshottari (mahadasza/antardasza) — jaki temat życia jest teraz aktywny. Dołącz OBOWIĄZKOWO sekcję ### Czym warto się zajmować, oparta na polach 'predyspozycje' (5 najsilniejszych planet wg oceny — pole 'zawody' to klasyczne karakatwa zawodowe BPHS, 'ton' mówi czy działa gładko czy z tarciem) i 'talenty' (wykryte jogi, jeśli są). Wskaż KONKRETNE kierunki/dziedziny z pól 'zawody' najsilniejszych planet — nie generyczne rady w stylu 'rób to, co lubisz'. Jeśli 'talenty' nie jest puste, wpleć je jako dodatkowe potwierdzenie kierunku. Na pytanie 'kiedy zmienić' odpowiedz przez pryzmat aktualnego okresu (aktualnyOkres): czy bieżąca mahadasza/antardasza wspiera nowy kierunek, czy raczej sprzyja dokończeniu obecnego etapu — bez wskazywania konkretnych dat decyzji, tylko charakteru okresu.",
   "kosmogram-dziecko":

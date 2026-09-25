@@ -93,7 +93,7 @@ function PieczecOdslaniania() {
 
 interface Props {
   kind: "numerologia" | "numerologia-dziecko" | "numerologia-finanse" | "numerologia-rok" | "para"
-    | "kosmogram" | "kosmogram-dziecko" | "kosmogram-finanse" | "kosmogram-prognoza" | "profil-duszy";
+    | "kosmogram" | "kosmogram-dziecko" | "kosmogram-finanse" | "kosmogram-prognoza" | "profil-duszy" | "rozdzial-dasz";
   /** Policzone dane do interpretacji. Zmiana obiektu nie uruchamia automatycznie — user klika. */
   data: Record<string, unknown> | null;
   /** Podpis w historii konta, np. „Mapa życia — Jacek”. */
@@ -105,6 +105,9 @@ interface Props {
    * za dużo miejsca i dublował już istniejący kontekst.
    */
   compact?: boolean;
+  /** Wywoływane z pełnym tekstem, gdy tylko jest znany (z cache albo po wygenerowaniu) —
+   *  do wyciągnięcia np. samego tytułu przez rodzica, bez duplikowania logiki wczytywania. */
+  onText?: (text: string) => void;
 }
 
 /** Stabilny skrót danych — ten sam kosmogram daje ten sam klucz.
@@ -128,12 +131,17 @@ const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
  * Zalogowani mają historię w bazie (dostępną z każdego urządzenia),
  * niezalogowani — w pamięci przeglądarki.
  */
-export default function Interpretation({ kind, data, label, compact }: Props) {
+export default function Interpretation({ kind, data, label, compact, onText }: Props) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [origin, setOrigin] = useState<"nowa" | "konto" | "przegladarka">("nowa");
   const abortRef = useRef<AbortController | null>(null);
+  // ref, nie zaleznosc efektu/callbacku — onText to zazwyczaj inline funkcja
+  // rodzica, nowa przy kazdym renderze; ref pozwala wolac zawsze najswiezsza
+  // wersje bez wywolywania powtornych efektow/petli.
+  const onTextRef = useRef(onText);
+  onTextRef.current = onText;
 
   const dataHash = data ? hash(JSON.stringify(data)) : null;
   const lsKey = dataHash ? `${PREFIX}${kind}_${dataHash}` : null;
@@ -162,7 +170,7 @@ export default function Interpretation({ kind, data, label, compact }: Props) {
               .eq("data_hash", dataHash)
               .maybeSingle();
             if (!alive) return;
-            if (row?.content) { setText(row.content); setOrigin("konto"); return; }
+            if (row?.content) { setText(row.content); setOrigin("konto"); onTextRef.current?.(row.content); return; }
           }
         } catch { /* brak sesji albo tabeli — schodzimy do localStorage */ }
       }
@@ -170,7 +178,7 @@ export default function Interpretation({ kind, data, label, compact }: Props) {
       try {
         const saved = localStorage.getItem(lsKey);
         if (!alive) return;
-        if (saved) { setText(saved); setOrigin("przegladarka"); }
+        if (saved) { setText(saved); setOrigin("przegladarka"); onTextRef.current?.(saved); }
       } catch { /* tryb prywatny */ }
     })();
 
@@ -244,6 +252,7 @@ export default function Interpretation({ kind, data, label, compact }: Props) {
         acc += decoder.decode(value, { stream: true });
       }
       setText(acc);
+      onTextRef.current?.(acc);
       // zapisujemy dopiero kompletny tekst — urwany strumień nie ma trafić do historii
       if (acc.trim().length > 200) await persist(acc);
     } catch (e) {

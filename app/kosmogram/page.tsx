@@ -16,7 +16,7 @@ import Term from "@/components/Term";
 import { navamsaChart, dashamsaChart, isVargottama } from "@/lib/astro/varga";
 import { nakshatraOf, nakshatraTerm } from "@/lib/astro/nakshatra";
 import ProfilDuszy from "@/components/ProfilDuszy";
-import DaszaSekcja from "@/components/DaszaSekcja";
+import DwieOsieDasz from "@/components/DwieOsieDasz";
 import PlanetyWSkrocie from "@/components/PlanetyWSkrocie";
 import Talenty from "@/components/Talenty";
 import WrazliwoscDuchowa from "@/components/WrazliwoscDuchowa";
@@ -731,9 +731,9 @@ export default function KosmogramPage() {
           </details>
           )}
 
-          {/* dasza — dziala tez bez znanej godziny urodzenia (Ksiezyc jest liczony zawsze); przeniesiona
-              tu z trybu "Pełne dane" na prosbe uzytkownika */}
-          <DaszaSekcja chart={chart} />
+          {/* dwie osie dasz — Chara Dasza x Wimszottari naraz, zastapilo samo Wimszottari
+              (DaszaSekcja/DashaTimeline/DashaOrbit); dziala tez bez znanej godziny urodzenia */}
+          <DwieOsieDasz chart={chart} plec={birthInput?.plec} imie={birthInput?.name} />
 
           {/* pas dziewieciu godel — jezyk symboli z brandbooka, przeniesiony tu z zaawansowanego na prosbe uzytkownika */}
           <details className="card" style={{ marginBottom: 24 }}>
