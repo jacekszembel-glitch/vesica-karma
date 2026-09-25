@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { DateTime } from "luxon";
 import BirthForm, { type BirthInput } from "@/components/BirthForm";
 import { loadBirth } from "@/lib/birthStore";
@@ -16,7 +17,6 @@ import Term from "@/components/Term";
 import { navamsaChart, dashamsaChart, isVargottama } from "@/lib/astro/varga";
 import { nakshatraOf, nakshatraTerm } from "@/lib/astro/nakshatra";
 import ProfilDuszy from "@/components/ProfilDuszy";
-import DwieOsieDasz from "@/components/DwieOsieDasz";
 import PlanetyWSkrocie from "@/components/PlanetyWSkrocie";
 import Talenty from "@/components/Talenty";
 import WrazliwoscDuchowa from "@/components/WrazliwoscDuchowa";
@@ -733,9 +733,17 @@ export default function KosmogramPage() {
           </details>
           )}
 
-          {/* dwie osie dasz — Chara Dasza x Wimszottari naraz, zastapilo samo Wimszottari
-              (DaszaSekcja/DashaTimeline/DashaOrbit); dziala tez bez znanej godziny urodzenia */}
-          <DwieOsieDasz chart={chart} plec={birthInput?.plec} imie={birthInput?.name} />
+          {/* dwie osie dasz — Chara Dasza x Wimszottari naraz — mieszka teraz jako
+              wlasna, skondensowana strona pod satelita Kola Karmy "Mahadasze",
+              nie tutaj (kosmogram jest juz i tak bardzo dlugi). Krotki link
+              zamiast calego, ciezkiego komponentu. */}
+          <Link href="/sade-sati" className="card fade-up" style={{ display: "block", color: "var(--text)", marginBottom: 24 }}>
+            <p className="eyebrow" style={{ marginBottom: 4 }}>Mahadashe, jogi i dosze</p>
+            <p className="muted" style={{ fontSize: "0.86rem", lineHeight: 1.6 }}>
+              Chara Dasza i Wimszottari na jednej osi czasu, z jogami i doszami wpisanymi w każdy
+              okres. <strong style={{ color: "var(--primary-soft)" }}>Zobacz swoją oś dasz →</strong>
+            </p>
+          </Link>
 
           {/* pas dziewieciu godel — jezyk symboli z brandbooka, przeniesiony tu z zaawansowanego na prosbe uzytkownika */}
           <details className="card" style={{ marginBottom: 24 }}>
