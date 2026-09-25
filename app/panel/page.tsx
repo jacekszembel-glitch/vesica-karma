@@ -1,12 +1,15 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import KoloKarmyMini from "@/components/KoloKarmyMini";
-import { UKONCZONE_DEMO, type SystemKarmy } from "@/lib/koloKarmyGeometria";
+import { ukonczoneSystemyKarmy, type SystemKarmy } from "@/lib/koloKarmyGeometria";
 
 /**
  * Mój Panel — status trzech systemów (Chiromancja/Astrologia/Numerologia)
- * jako kafelki, wzorowane na mockupach. Faza 1 reskinu: stan „ukończone"
- * na sztywno (przykładowy), nie prawdziwe śledzenie zapisanych danych —
- * to osobna, późniejsza faza (patrz plan reskinu w repo czas-duszy).
+ * jako kafelki, wzorowane na mockupach. Faza 2 reskinu: prawdziwe śledzenie
+ * (localStorage, patrz koloKarmyGeometria.ts) zamiast danych demo z Fazy 1.
+ * Gdy komplet — hasło pod kafelkami staje się linkiem do /karma (synteza).
  */
 const SYSTEMY: { id: SystemKarmy; label: string; href: string }[] = [
   { id: "hiromancja", label: "Chiromancja", href: "/hiromancja" },
@@ -74,19 +77,28 @@ function StrzalkaDoKafelka() {
 }
 
 export default function Page() {
-  const brakujace = SYSTEMY.filter((s) => !UKONCZONE_DEMO.has(s.id));
+  // localStorage dostępny dopiero po zamontowaniu — start z pustym zbiorem,
+  // zeby SSR i pierwszy render klienta sie zgadzaly, potem hydratacja.
+  const [ukonczone, setUkonczone] = useState<Set<SystemKarmy>>(new Set());
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydratacja z localStorage po zamontowaniu
+    setUkonczone(ukonczoneSystemyKarmy());
+  }, []);
+
+  const brakujace = SYSTEMY.filter((s) => !ukonczone.has(s.id));
   const strzalkaPasuje = brakujace.length > 0 && brakujace[0].id === SYSTEMY[0].id;
+  const komplet = brakujace.length === 0;
 
   return (
     <div className="container section" style={{ maxWidth: 640, textAlign: "center" }}>
-      <KoloKarmyMini ukonczone={UKONCZONE_DEMO} />
+      <KoloKarmyMini ukonczone={ukonczone} />
 
       <h1 style={{ margin: "28px 0 18px" }}>Mój panel</h1>
       <div className="ornament" style={{ marginBottom: 32 }} />
 
       <div style={{ display: "flex", justifyContent: "center", gap: 36, flexWrap: "wrap" }}>
         {SYSTEMY.map((s) => (
-          <Kafelek key={s.id} {...s} gotowe={UKONCZONE_DEMO.has(s.id)} />
+          <Kafelek key={s.id} {...s} gotowe={ukonczone.has(s.id)} />
         ))}
       </div>
 
@@ -94,15 +106,18 @@ export default function Page() {
 
       <div style={{ position: "relative", display: "inline-block" }}>
         {strzalkaPasuje && <StrzalkaDoKafelka />}
-        {brakujace.length > 0 ? (
+        {!komplet ? (
           <p style={{ color: "var(--sand)", fontFamily: "var(--font-serif)", fontSize: "1.2rem" }}>
             Już prawie gotowe! Jeszcze tylko {brakujace.map((s) => s.label).join(" i ")}{" "}
             i zaczynamy analizę!
           </p>
         ) : (
-          <p style={{ color: "var(--sand)", fontFamily: "var(--font-serif)", fontSize: "1.2rem" }}>
-            Wszystkie trzy systemy gotowe — czas na pełną analizę Twojego Koła Karmy.
-          </p>
+          <Link href="/karma" style={{
+            color: "var(--gold)", fontFamily: "var(--font-serif)", fontSize: "1.2rem",
+            textDecoration: "none", borderBottom: "1px solid var(--gold)", paddingBottom: 2,
+          }}>
+            Wszystkie trzy systemy gotowe — zobacz pełną syntezę Twojego Koła Karmy →
+          </Link>
         )}
       </div>
 

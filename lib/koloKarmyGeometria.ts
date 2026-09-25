@@ -14,7 +14,34 @@ export const SEGMENT_GAPY: Record<SystemKarmy, readonly [number, number, number,
   numerologia: [633, 301, 867, 606],
 };
 
-/** Faza 1 reskinu: przykładowy/testowy stan postępu, wspólny dla Mojego
- *  Panelu i mini-nagłówków na stronach systemów — jeden punkt do podmiany
- *  w Fazie 2 na prawdziwe śledzenie zapisanych danych. */
-export const UKONCZONE_DEMO = new Set<SystemKarmy>(["astrologia", "numerologia"]);
+const KLUCZ_POSTEPU = "vk_systemy_karmy";
+
+/** Faza 2 reskinu: prawdziwe śledzenie postępu (localStorage, jak
+ *  lib/collection.ts) zamiast danych demo z Fazy 1. Bezpieczne w SSR
+ *  (zwraca pusty zbiór) — ten plik świadomie nie ma "use client", żeby
+ *  import działał identycznie w KoloKarmy.tsx i KoloKarmyMini.tsx. */
+export function ukonczoneSystemyKarmy(): Set<SystemKarmy> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem(KLUCZ_POSTEPU);
+    return new Set(raw ? (JSON.parse(raw) as SystemKarmy[]) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+/** Wołane przy udanym policzeniu/odczytaniu danego systemu — dopisuje go
+ *  na stałe. Astrologia = policzony kosmogram, numerologia = policzony
+ *  profil liczb, hiromancja = wygenerowany odczyt AI dłoni (nie samo
+ *  wejście na stronę). */
+export function odblokujSystemKarmy(id: SystemKarmy): void {
+  if (typeof window === "undefined") return;
+  const set = ukonczoneSystemyKarmy();
+  if (set.has(id)) return;
+  set.add(id);
+  try {
+    localStorage.setItem(KLUCZ_POSTEPU, JSON.stringify([...set]));
+  } catch {
+    /* tryb prywatny — postęp po prostu się nie zapamięta */
+  }
+}

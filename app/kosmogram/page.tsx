@@ -50,6 +50,7 @@ import GodloPlanety from "@/components/GodloPlanety";
 import HeksDomu from "@/components/HeksDomu";
 import { BHAVAS } from "@/lib/astro/constants";
 import { odblokuj } from "@/lib/collection";
+import { odblokujSystemKarmy } from "@/lib/koloKarmyGeometria";
 
 type StylWykresu = "polnocny" | "poludniowy";
 const KLUCZ_STYLU = "9dom_styl_wykresu";
@@ -170,6 +171,7 @@ export default function KosmogramPage() {
       }),
     );
     odblokuj("kosmogram");
+    odblokujSystemKarmy("astrologia");
   }
 
   /** Kompaktowe dane dla AI — tylko to, co potrzebne do interpretacji. */

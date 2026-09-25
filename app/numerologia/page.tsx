@@ -10,6 +10,7 @@ import RelacjaMulankBhagyank from "@/components/RelacjaMulankBhagyank";
 import PredyspozycjeLiczb from "@/components/PredyspozycjeLiczb";
 import NaCoUwazacLiczb from "@/components/NaCoUwazacLiczb";
 import { odblokuj } from "@/lib/collection";
+import { odblokujSystemKarmy } from "@/lib/koloKarmyGeometria";
 
 function Num({ label, value, big, note }: {
   label: React.ReactNode; value: number | string | null; big?: boolean; note?: React.ReactNode;
@@ -37,6 +38,7 @@ export default function NumerologiaPage() {
     const rok = new Date().getFullYear();
     setWynik(numerology(date, name || undefined, "wedyjski", rok));
     odblokuj("numerologia");
+    odblokujSystemKarmy("numerologia");
   }
 
   const aiData = useMemo(() => {

@@ -2,6 +2,8 @@
 
 import { useCallback, useRef, useState } from "react";
 import type { TypDloni } from "@/lib/hiromancja";
+import { zapiszOdczytDloni } from "@/lib/hiromancjaOdczytStore";
+import { odblokujSystemKarmy } from "@/lib/koloKarmyGeometria";
 
 /**
  * ODCZYT AI — uproszczony sibling Interpretation.tsx, świadomie NIE ten sam
@@ -9,7 +11,11 @@ import type { TypDloni } from "@/lib/hiromancja";
  * localStorage) — dobre dla deterministycznych danych astro/numerologii,
  * złe dla zdjęcia (nie chcemy trzymać zdjęcia dłoni w localStorage, a "ten
  * sam hash = ten sam wynik" nie ma tu sensu, bo zdjęcie nie jest
- * deterministyczne). Tu generujemy zawsze na żywo, bez zapisu.
+ * deterministyczne). Tu generujemy zawsze na żywo, ZDJĘCIE nigdy nie jest
+ * zapisywane — ale sam gotowy TEKST odczytu zapisujemy (zapiszOdczytDloni),
+ * żeby /karma mogła go pokazać jako trzeci głos syntezy bez ponownego
+ * przesyłania zdjęć; to samo zdarzenie odblokowuje hiromancję jako
+ * "zrobiony" system w Kole Karmy.
  *
  * renderMd()/akapitHtml() skopiowane z Interpretation.tsx (nie wydzielone
  * do wspólnego helpera w v1 — mniejsze ryzyko dla istniejącego, działającego
@@ -95,6 +101,8 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
         acc += decoder.decode(value, { stream: true });
       }
       setText(acc);
+      zapiszOdczytDloni(acc);
+      odblokujSystemKarmy("hiromancja");
     } catch (e) {
       if ((e as Error).name !== "AbortError") setError((e as Error).message);
     } finally {
