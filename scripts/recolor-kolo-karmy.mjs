@@ -68,6 +68,16 @@ const KOMPAS_DZIURA = { cx: 600, cy: 166, r: 78, feather: 6 };
  *  zdjęciami z zaznaczeniem. */
 const KLIN_NAD_TROJKATEM = { cx: 642, cy: 305, rx: 58, ry: 26, obrotDeg: -32 };
 
+/** Drugi, osobny wyciek — wyzej i bardziej w lewo niz KLIN_NAD_TROJKATEM, na
+ *  tym samym skrzyzowaniu (Astrologia nad Chiromancja). Zgloszony zrzutem
+ *  ekranu: na szarym pierscieniu Astrologii byl widoczny zlocisty, ostry
+ *  klin — maska jasnosci nie wygaszala go w pelni, a byl STOPIONY (ta sama
+ *  spojna plama pikseli co reszta petli Chiromancji), wiec `odrzucMalePlamki`
+ *  nie mogla go usunac wg rozmiaru bez ucinania prawdziwego luku pierscienia.
+ *  Namierzone connected-component scanem pieciu tysiecy pikseli w fill-
+ *  hiromancja-gold.png, potem elipsa dopasowana iteracyjnie do zniknięcia. */
+const KLIN_GORNY_LEWY = { cx: 592, cy: 278, rx: 55, ry: 42, obrotDeg: -35 };
+
 /** Stara dłoń (piktogram Chiromancji) — wycinana tym samym sposobem co
  *  kompas, ale maską o dokładnym kształcie dłoni (nie okręgiem — dłoń nie
  *  jest okrągła), zapisaną raz jako erase-hiromancja-mask.png. Ta maska to
@@ -281,18 +291,21 @@ async function main() {
     const maskOstra = await sharp(Buffer.from(svg)).png().toBuffer();
     const kompozycja = [{ input: flowerMask, blend: "dest-in" }, { input: jasnoscMask, blend: "dest-in" }];
     if (id === "hiromancja") {
-      const { cx: kcx, cy: kcy, rx: krx, ry: kry, obrotDeg } = KLIN_NAD_TROJKATEM;
       // Miękki brzeg (rozmycie TYLKO tej elipsy) — twardy kształt wyglądał
       // jak sztuczny ubytek na tle naturalnych, gradientowych cieni dookoła.
       // Promień rozmycia dobrany tak, żeby zanikanie było podobnej
-      // szerokości co realne cienie przeplotów.
-      const wykluczenieKlina = await sharp(Buffer.from(
-        `<svg width="${IMG_W}" height="${IMG_H}" xmlns="http://www.w3.org/2000/svg">
-          <ellipse cx="${kcx}" cy="${kcy}" rx="${krx}" ry="${kry}" fill="#fff"
-            transform="rotate(${obrotDeg} ${kcx} ${kcy})"/>
-        </svg>`,
-      )).blur(14).png().toBuffer();
-      kompozycja.push({ input: wykluczenieKlina, blend: "dest-out" });
+      // szerokości co realne cienie przeplotów. Dwa osobne kliny na tym samym
+      // skrzyżowaniu (Astrologia nad Chiromancją) — patrz komentarze przy
+      // stałych KLIN_NAD_TROJKATEM / KLIN_GORNY_LEWY.
+      for (const { cx: kcx, cy: kcy, rx: krx, ry: kry, obrotDeg } of [KLIN_NAD_TROJKATEM, KLIN_GORNY_LEWY]) {
+        const wykluczenieKlina = await sharp(Buffer.from(
+          `<svg width="${IMG_W}" height="${IMG_H}" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="${kcx}" cy="${kcy}" rx="${krx}" ry="${kry}" fill="#fff"
+              transform="rotate(${obrotDeg} ${kcx} ${kcy})"/>
+          </svg>`,
+        )).blur(14).png().toBuffer();
+        kompozycja.push({ input: wykluczenieKlina, blend: "dest-out" });
+      }
     }
     const maskPrzycieta = await sharp(maskOstra).composite(kompozycja).png().toBuffer();
     const mask = await odrzucMalePlamki(maskPrzycieta, IMG_W, IMG_H);
