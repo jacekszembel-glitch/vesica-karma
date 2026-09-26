@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 export default function SignOutButton() {
+  const t = useTranslations("Konto");
   const router = useRouter();
   return (
     <button
@@ -14,7 +16,7 @@ export default function SignOutButton() {
         router.refresh();
       }}
     >
-      Wyloguj się
+      {t("wyloguj")}
     </button>
   );
 }

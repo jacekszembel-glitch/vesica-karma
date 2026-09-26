@@ -48,5 +48,31 @@
       "mahadasze": { "label": "Mahadashe, jogi i dosze", "linia1": "MAHADASHE", "linia2": "JOGI I DOSHE" },
       "karma": { "label": "Co z tym zrobić?", "linia1": "CO Z TYM", "linia2": "ZROBIĆ?" }
     }
+  },
+  "Login": {
+    "errors": {
+      "przegladarka": "Link logujący trzeba otworzyć w tej samej przeglądarce, w której podano e-mail. Najprościej: wyślij link jeszcze raz i wpisz 6-cyfrowy kod z wiadomości poniżej.",
+      "wygasl": "Ten link wygasł albo został już użyty (czasem „klika” go automat pocztowy). Wyślij nowy i wpisz 6-cyfrowy kod z wiadomości."
+    },
+    "title": "Wejdź do swojej mapy",
+    "subtitle": "Bez hasła — wyślemy Ci e-mail z linkiem i 6-cyfrowym kodem.",
+    "sentTitle": "Sprawdź skrzynkę",
+    "sentDesc": "Wysłaliśmy wiadomość na <email></email>. Kliknij link <em>na tym urządzeniu</em> — albo przepisz kod poniżej (działa wszędzie, np. gdy czytasz pocztę na telefonie).",
+    "otpLabel": "Kod z wiadomości",
+    "otpSubmit": "Zaloguj kodem",
+    "otpChecking": "Sprawdzam…",
+    "resend": "Wyślij jeszcze raz / zmień e-mail",
+    "emailLabel": "Adres e-mail",
+    "emailPlaceholder": "ty@przyklad.pl",
+    "sendSubmit": "Wyślij link i kod",
+    "sending": "Wysyłam…",
+    "or": "albo",
+    "google": "Kontynuuj z Google",
+    "googleDisabled": "Logowanie Google jest chwilowo niedostępne — skorzystaj z linku i kodu e-mail powyżej.",
+    "otpInvalid": "Kod nieprawidłowy albo wygasł. Uwaga: liczy się kod z NAJNOWSZEJ wiadomości — każde ponowne wysłanie unieważnia poprzedni. ({message})"
+  },
+  "Konto": {
+    "zalogowano": "Zalogowano",
+    "wyloguj": "Wyloguj się"
   }
 }

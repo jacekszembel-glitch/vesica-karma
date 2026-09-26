@@ -48,5 +48,31 @@
       "mahadasze": { "label": "Mahadashas, yogas and doshas", "linia1": "MAHADASHAS,", "linia2": "YOGAS & DOSHAS" },
       "karma": { "label": "What to do with it?", "linia1": "WHAT TO", "linia2": "DO NEXT?" }
     }
+  },
+  "Login": {
+    "errors": {
+      "przegladarka": "The sign-in link has to be opened in the same browser where you entered your email. Easiest fix: send the link again and enter the 6-digit code from the email below.",
+      "wygasl": "This link has expired or was already used (sometimes an email app \"clicks\" it automatically). Send a new one and enter the 6-digit code from the email."
+    },
+    "title": "Enter your chart",
+    "subtitle": "No password — we'll send you an email with a link and a 6-digit code.",
+    "sentTitle": "Check your inbox",
+    "sentDesc": "We sent a message to <email></email>. Click the link <em>on this device</em> — or type in the code below (works anywhere, e.g. when reading mail on your phone).",
+    "otpLabel": "Code from the email",
+    "otpSubmit": "Sign in with code",
+    "otpChecking": "Checking…",
+    "resend": "Send again / change email",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "sendSubmit": "Send link and code",
+    "sending": "Sending…",
+    "or": "or",
+    "google": "Continue with Google",
+    "googleDisabled": "Google sign-in is temporarily unavailable — use the email link and code above instead.",
+    "otpInvalid": "Invalid or expired code. Note: only the code from the MOST RECENT email counts — every resend invalidates the previous one. ({message})"
+  },
+  "Konto": {
+    "zalogowano": "Signed in",
+    "wyloguj": "Sign out"
   }
 }
