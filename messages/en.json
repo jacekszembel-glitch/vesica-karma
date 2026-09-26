@@ -1,0 +1,12 @@
+{
+  "Nav": {
+    "menuOtworz": "Open menu",
+    "menuZamknij": "Close menu",
+    "ariaNawigacja": "Navigation",
+    "mojeKonto": "My account",
+    "zaloguj": "Sign in"
+  },
+  "Footer": {
+    "stopka": "© {rok} VesicaKarma — a tool for growth and education, it does not replace medical, legal or financial advice. We don't predict the future — we point the way."
+  }
+}

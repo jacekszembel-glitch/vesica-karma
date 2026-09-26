@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/navigation";
 
 /**
  * Nagłówek VesicaKarma — sam wordmark + hamburger, bez paska linków jak w 9dom
@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
  * (klasy .nav-burger/.nav-mobile), tu wymuszony na każdej szerokości w CSS.
  */
 export default function SiteHeader() {
+  const t = useTranslations("Nav");
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -30,16 +31,16 @@ export default function SiteHeader() {
         <button
           className={`nav-burger ${open ? "open" : ""}`}
           onClick={() => setOpen(!open)}
-          aria-label={open ? "Zamknij menu" : "Otwórz menu"}
+          aria-label={open ? t("menuZamknij") : t("menuOtworz")}
           aria-expanded={open}
         >
           <span /><span /><span />
         </button>
       </div>
 
-      <nav className={`nav-mobile ${open ? "open" : ""}`} aria-label="Nawigacja" style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 20 }}>
-        <Link href="/konto" className={pathname === "/konto" ? "active" : ""}>Moje konto</Link>
-        <Link href="/logowanie" className={pathname === "/logowanie" ? "active" : ""}>Zaloguj</Link>
+      <nav className={`nav-mobile ${open ? "open" : ""}`} aria-label={t("ariaNawigacja")} style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 20 }}>
+        <Link href="/konto" className={pathname === "/konto" ? "active" : ""}>{t("mojeKonto")}</Link>
+        <Link href="/logowanie" className={pathname === "/logowanie" ? "active" : ""}>{t("zaloguj")}</Link>
       </nav>
     </header>
   );

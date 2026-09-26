@@ -5,6 +5,7 @@ import { DateTime } from "luxon";
 import Link from "next/link";
 import Term from "@/components/Term";
 import DwieOsieDasz from "@/components/DwieOsieDasz";
+import MandalaDwochDasz from "@/components/MandalaDwochDasz";
 import { buildChart, type VedicChart } from "@/lib/astro/chart";
 import { loadBirth } from "@/lib/birthStore";
 
@@ -20,6 +21,7 @@ import { loadBirth } from "@/lib/birthStore";
  */
 export default function SadeSatiPage() {
   const [chart, setChart] = useState<VedicChart | null>(null);
+  const [wiekLat, setWiekLat] = useState<number | null>(null);
   const [brakDanych, setBrakDanych] = useState(false);
 
   useEffect(() => {
@@ -40,6 +42,8 @@ export default function SadeSatiPage() {
     setChart(buildChart({
       date: local.toUTC().toJSDate(), latitude: b.place.lat, longitude: b.place.lon, timeKnown: b.timeKnown,
     }));
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- jw.
+    setWiekLat(DateTime.now().diff(local, "years").years);
   }, []);
 
   if (brakDanych) {
@@ -63,6 +67,7 @@ export default function SadeSatiPage() {
         Dwa systemy Jyotisz na jednej osi czasu: Chara Dasza (znaki) i <Term k="mahadasza">Wimszottari</Term>{" "}
         (planety) — z jogami i doszami wpisanymi w każdy okres.
       </p>
+      <MandalaDwochDasz wiekLat={wiekLat ?? undefined} />
       <DwieOsieDasz chart={chart} />
     </div>
   );

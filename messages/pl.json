@@ -1,0 +1,12 @@
+{
+  "Nav": {
+    "menuOtworz": "Otwórz menu",
+    "menuZamknij": "Zamknij menu",
+    "ariaNawigacja": "Nawigacja",
+    "mojeKonto": "Moje konto",
+    "zaloguj": "Zaloguj"
+  },
+  "Footer": {
+    "stopka": "© {rok} VesicaKarma — narzędzie rozwojowe i edukacyjne, nie zastępuje porady medycznej, prawnej ani finansowej. Niczego nie przepowiadamy — wskazujemy drogę."
+  }
+}

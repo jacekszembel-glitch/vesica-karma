@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
@@ -38,21 +42,37 @@ export const metadata: Metadata = {
     "Trzy systemy odczytu — astrologia wedyjska, chiromancja i numerologia — połączone w jeden całościowy system wokół Koła Karmy.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export default async function RootLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+  setRequestLocale(locale);
+  const messages = await getMessages();
+  const t = await getTranslations("Footer");
+
   return (
-    <html lang="pl" className={`${cormorant.variable} ${inter.variable}`}>
+    <html lang={locale} className={`${cormorant.variable} ${inter.variable}`}>
       <body>
-        <SiteHeader />
-        <main>{children}</main>
-        <footer style={{ background: "var(--navy)", marginTop: 90, padding: "40px 0" }}>
-          <div className="container">
-            <p style={{ fontSize: "0.78rem", textAlign: "center", color: "#6e8292" }}>
-              © {new Date().getFullYear()} VesicaKarma — narzędzie rozwojowe i edukacyjne,
-              nie zastępuje porady medycznej, prawnej ani finansowej. Niczego nie przepowiadamy —
-              wskazujemy drogę.
-            </p>
-          </div>
-        </footer>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <SiteHeader />
+          <main>{children}</main>
+          <footer style={{ background: "var(--navy)", marginTop: 90, padding: "40px 0" }}>
+            <div className="container">
+              <p style={{ fontSize: "0.78rem", textAlign: "center", color: "#6e8292" }}>
+                {t("stopka", { rok: new Date().getFullYear() })}
+              </p>
+            </div>
+          </footer>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
