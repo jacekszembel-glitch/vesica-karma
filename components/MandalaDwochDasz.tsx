@@ -1,3 +1,7 @@
+"use client";
+
+import { useLocale } from "next-intl";
+
 /**
  * MANDALA DWÓCH DASZ — czysto dekoracyjna winieta nad osią czasu na /sade-sati,
  * w duchu koła Majów (Tzolkin/Haab): dwa splecione pierścienie o innym okresie
@@ -5,20 +9,21 @@
  * oś liniowa (DwieOsieDasz). Statyczny SVG, brak danych z mapy.
  */
 const WIMSZOTTARI = [
-  { nazwa: "Ketu", skrot: "Ket", lata: 7 },
-  { nazwa: "Wenus", skrot: "Wen", lata: 20 },
-  { nazwa: "Słońce", skrot: "Sło", lata: 6 },
-  { nazwa: "Księżyc", skrot: "Ksż", lata: 10 },
-  { nazwa: "Mars", skrot: "Mar", lata: 7 },
-  { nazwa: "Rahu", skrot: "Rah", lata: 18 },
-  { nazwa: "Jowisz", skrot: "Jow", lata: 16 },
-  { nazwa: "Saturn", skrot: "Sat", lata: 19 },
-  { nazwa: "Merkury", skrot: "Mer", lata: 17 },
+  { nazwa: "Ketu", skrot: "Ket", skrotEn: "Ket", lata: 7 },
+  { nazwa: "Wenus", skrot: "Wen", skrotEn: "Ven", lata: 20 },
+  { nazwa: "Słońce", skrot: "Sło", skrotEn: "Sun", lata: 6 },
+  { nazwa: "Księżyc", skrot: "Ksż", skrotEn: "Moo", lata: 10 },
+  { nazwa: "Mars", skrot: "Mar", skrotEn: "Mar", lata: 7 },
+  { nazwa: "Rahu", skrot: "Rah", skrotEn: "Rah", lata: 18 },
+  { nazwa: "Jowisz", skrot: "Jow", skrotEn: "Jup", lata: 16 },
+  { nazwa: "Saturn", skrot: "Sat", skrotEn: "Sat", lata: 19 },
+  { nazwa: "Merkury", skrot: "Mer", skrotEn: "Mer", lata: 17 },
 ];
 const WIMSZOTTARI_LATA = WIMSZOTTARI.map((p) => p.lata); // suma 120
 // Skróty zamiast symboli unicode ♈-♓ — te ostatnie bywają renderowane jako
 // puste "tofu" gdy czcionka systemowa nie ma tego zakresu (np. część Linuksów).
 const ZNAKI = ["Bar", "Byk", "Bli", "Rak", "Lew", "Pan", "Wag", "Skp", "Str", "Koz", "Wod", "Ryb"];
+const ZNAKI_EN = ["Ari", "Tau", "Gem", "Can", "Leo", "Vir", "Lib", "Sco", "Sgr", "Cap", "Aqu", "Psc"];
 
 /** Kąty środkowe segmentów proporcjonalnych (do etykiet) — bez rysowania ścieżek. */
 function srodkiProporcjonalne(lata: number[]) {
@@ -74,6 +79,8 @@ function pierscienProporcjonalny(cx: number, cy: number, rOut: number, rIn: numb
 }
 
 export default function MandalaDwochDasz({ wiekLat }: { wiekLat?: number }) {
+  const locale = useLocale();
+  const en = locale === "en";
   const CX = 300, CY = 300;
   const zewnetrzne = pierscienProporcjonalny(CX, CY, 258, 202, WIMSZOTTARI_LATA);
   const srodkiZewn = srodkiProporcjonalne(WIMSZOTTARI_LATA);
@@ -90,7 +97,7 @@ export default function MandalaDwochDasz({ wiekLat }: { wiekLat?: number }) {
 
   return (
     <div style={{ display: "flex", justifyContent: "center", margin: "8px 0 36px" }}>
-      <svg width={480} height={480} viewBox="0 0 600 600" role="img" aria-label="Dekoracyjna mandala dwóch dasz">
+      <svg width={480} height={480} viewBox="0 0 600 600" role="img" aria-label={en ? "Decorative mandala of two dashas" : "Dekoracyjna mandala dwóch dasz"}>
         <circle cx={CX} cy={CY} r={261} fill="var(--bg-2)" stroke="rgba(230,196,138,0.15)" strokeWidth={1.4} />
         {zewnetrzne.map((d, i) => (
           <path key={`z-${i}`} d={d} fill="rgba(230,196,138,0.10)" stroke="var(--sand)" strokeWidth={1.6} opacity={0.85} />
@@ -112,7 +119,7 @@ export default function MandalaDwochDasz({ wiekLat }: { wiekLat?: number }) {
               fill="var(--sand)"
               opacity={0.95}
             >
-              {WIMSZOTTARI[i].skrot}
+              {en ? WIMSZOTTARI[i].skrotEn : WIMSZOTTARI[i].skrot}
             </text>
           );
         })}
@@ -130,7 +137,7 @@ export default function MandalaDwochDasz({ wiekLat }: { wiekLat?: number }) {
               fill="var(--sand)"
               opacity={0.9}
             >
-              {ZNAKI[i]}
+              {en ? ZNAKI_EN[i] : ZNAKI[i]}
             </text>
           );
         })}
@@ -140,10 +147,10 @@ export default function MandalaDwochDasz({ wiekLat }: { wiekLat?: number }) {
         })}
         <circle cx={CX} cy={CY} r={90} fill="var(--bg)" stroke="rgba(230,196,138,0.3)" strokeWidth={1.4} strokeDasharray="3 5" />
         <text x={CX} y={CY - 8} textAnchor="middle" fontSize={16} fill="var(--muted)" letterSpacing={1.8}>
-          CHARA × WIMSZOTTARI
+          {en ? "CHARA × VIMSHOTTARI" : "CHARA × WIMSZOTTARI"}
         </text>
         <text x={CX} y={CY + 18} textAnchor="middle" fontSize={16} fill="var(--muted)" letterSpacing={1.8}>
-          0 — 100 LAT
+          {en ? "0 — 100 YEARS" : "0 — 100 LAT"}
         </text>
         {igla && wiekKlamrowany !== null && (
           <>
@@ -162,7 +169,7 @@ export default function MandalaDwochDasz({ wiekLat }: { wiekLat?: number }) {
               fontWeight={700}
               fill="var(--teal-soft)"
             >
-              TERAZ · {Math.round(wiekKlamrowany)} lat
+              {en ? `NOW · ${Math.round(wiekKlamrowany)} yrs` : `TERAZ · ${Math.round(wiekKlamrowany)} lat`}
             </text>
           </>
         )}

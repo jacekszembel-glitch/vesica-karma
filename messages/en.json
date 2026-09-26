@@ -84,5 +84,16 @@
     "stopkaTytul": "Hours are signs of the moment. Your chart is the whole picture.",
     "stopkaOpis": "If numbers speak to you — see what your whole birth date says.",
     "stopkaCta": "Calculate your numerology →"
+  },
+  "AstrokartografiaStub": {
+    "tytul": "Astrocartography",
+    "opis": "A condensed version of this system — coming soon."
+  },
+  "SadeSatiPage": {
+    "tytul": "Mahadashas, Yogas and Doshas",
+    "brakDanych": "Missing birth data — calculate your birth chart first to see the timeline of periods.",
+    "policzKosmogram": "Calculate birth chart →",
+    "tytulRich": "Mahadashas, <joga>Yogas</joga> and <dosza>Doshas</dosza>",
+    "opis": "Two Jyotish systems on one timeline: Chara Dasha (signs) and <mahadasza>Vimshottari</mahadasza> (planets) — with yogas and doshas noted for every period."
   }
 }

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { DateTime } from "luxon";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import Term from "@/components/Term";
 import DwieOsieDasz from "@/components/DwieOsieDasz";
 import MandalaDwochDasz from "@/components/MandalaDwochDasz";
@@ -20,6 +21,7 @@ import { loadBirth } from "@/lib/birthStore";
  * formularza, bo dane urodzenia są już wspólne dla całego serwisu.
  */
 export default function SadeSatiPage() {
+  const t = useTranslations("SadeSatiPage");
   const [chart, setChart] = useState<VedicChart | null>(null);
   const [wiekLat, setWiekLat] = useState<number | null>(null);
   const [brakDanych, setBrakDanych] = useState(false);
@@ -49,11 +51,11 @@ export default function SadeSatiPage() {
   if (brakDanych) {
     return (
       <div className="container section" style={{ maxWidth: 560, textAlign: "center" }}>
-        <h1 style={{ marginBottom: 12 }}>Mahadashe, Jogi i Dosze</h1>
+        <h1 style={{ marginBottom: 12 }}>{t("tytul")}</h1>
         <p className="muted" style={{ marginBottom: 28, lineHeight: 1.6 }}>
-          Brakuje danych urodzenia — policz najpierw swój kosmogram, żeby zobaczyć oś okresów.
+          {t("brakDanych")}
         </p>
-        <Link href="/kosmogram" className="btn btn-primary">Policz kosmogram →</Link>
+        <Link href="/kosmogram" className="btn btn-primary">{t("policzKosmogram")}</Link>
       </div>
     );
   }
@@ -62,10 +64,9 @@ export default function SadeSatiPage() {
 
   return (
     <div className="container section">
-      <h1 style={{ textAlign: "center" }}>Mahadashe, <Term k="joga">Jogi</Term> i <Term k="dosza">Dosze</Term></h1>
+      <h1 style={{ textAlign: "center" }}>{t.rich("tytulRich", { joga: (c) => <Term k="joga">{c}</Term>, dosza: (c) => <Term k="dosza">{c}</Term> })}</h1>
       <p className="section-sub">
-        Dwa systemy Jyotisz na jednej osi czasu: Chara Dasza (znaki) i <Term k="mahadasza">Wimszottari</Term>{" "}
-        (planety) — z jogami i doszami wpisanymi w każdy okres.
+        {t.rich("opis", { mahadasza: (c) => <Term k="mahadasza">{c}</Term> })}
       </p>
       <MandalaDwochDasz wiekLat={wiekLat ?? undefined} />
       <DwieOsieDasz chart={chart} />
