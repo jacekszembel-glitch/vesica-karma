@@ -74,5 +74,15 @@
   "Konto": {
     "zalogowano": "Zalogowano",
     "wyloguj": "Wyloguj się"
+  },
+  "GodzinyLustrzane": {
+    "tytul": "Godziny lustrzane",
+    "opis": "Spojrzałaś/eś na zegarek dokładnie o 21:21? Znowu 11:11? Wybierz godzinę, którą widujesz — każda niesie własną wibrację liczby i przesłanie.",
+    "lustrzaneTytul": "Godziny lustrzane (podwojone)",
+    "odwroconeTytul": "Godziny odwrócone",
+    "liczbaEtykieta": "liczba {n}",
+    "stopkaTytul": "Godziny to znaki chwili. Twoja mapa to całość.",
+    "stopkaOpis": "Jeśli liczby do Ciebie mówią — sprawdź, co mówi cała Twoja data urodzenia.",
+    "stopkaCta": "Policz swoją numerologię →"
   }
 }

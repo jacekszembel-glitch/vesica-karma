@@ -74,5 +74,15 @@
   "Konto": {
     "zalogowano": "Signed in",
     "wyloguj": "Sign out"
+  },
+  "GodzinyLustrzane": {
+    "tytul": "Mirror Hours",
+    "opis": "Did you glance at the clock at exactly 21:21? 11:11 again? Pick the hour you keep seeing — each carries its own number vibration and message.",
+    "lustrzaneTytul": "Mirror hours (doubled)",
+    "odwroconeTytul": "Reversed hours",
+    "liczbaEtykieta": "number {n}",
+    "stopkaTytul": "Hours are signs of the moment. Your chart is the whole picture.",
+    "stopkaOpis": "If numbers speak to you — see what your whole birth date says.",
+    "stopkaCta": "Calculate your numerology →"
   }
 }
