@@ -101,7 +101,9 @@ const SATELITY_BAZA = [
 // przez <MoonStars> (osobny puls, patrz aktywny === "astrologia" niżej).
 const PIKTOGRAMY_PULSUJACE = [
   { id: "hiromancja", box: [340, 385, 490, 555] as const },
-  { id: "numerologia", box: [708, 387, 863, 537] as const },
+  // Powiekszone (2026-09-26): nowa ikona ma 9 cyfr rozlozonych szerzej niz
+  // stara (4 cyfry) — mniejsze pudelko zostawialo duzo pustego miejsca.
+  { id: "numerologia", box: [700, 375, 880, 570] as const },
 ];
 
 function pctX(v: number) { return `${(v / IMG_W) * 100}%`; }
