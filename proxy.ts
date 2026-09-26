@@ -26,12 +26,19 @@ function bezPrefiksuJezyka(pathname: string): string {
  *     app/[locale]/. /api i /auth NIE sa pod [locale] (to route handlery,
  *     nie strony) — next-intl w ogole ich nie dotyka, inaczej rewrite'owalby
  *     np. /api/interpret na /pl/api/interpret (404, znaleziony bug w czas-duszy).
+ *     Z tego samego powodu pomijamy KAZDA sciezke z kropka w ostatnim
+ *     segmencie (pliki statyczne z public/, np. /brand/logo.png) — bez tego
+ *     next-intl rewrite'owalby je na /pl/brand/logo.png, ktorego nie ma
+ *     (public/ nie jest zagniezdzone pod [locale]). Znaleziony REALNY bug:
+ *     przez cala sesje i18n obrazy z public/brand/ wychodzily 404 na kazdej
+ *     stronie, dopoki tego nie dodano.
  *  2) odswiezanie sesji Supabase + ochrona /konto (istniejaca logika,
  *     zachowanie bez zmian poza uwzglednieniem prefiksu jezyka w sciezce).
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const pomijaJezyk = pathname.startsWith("/api/") || pathname === "/api" || pathname.startsWith("/auth/");
+  const wygladaJakPlik = /\.[^/]+$/.test(pathname);
+  const pomijaJezyk = pathname.startsWith("/api/") || pathname === "/api" || pathname.startsWith("/auth/") || wygladaJakPlik;
   const i18nResponse = pomijaJezyk ? NextResponse.next({ request }) : handleI18nRouting(request);
 
   if (i18nResponse.headers.get("location")) return i18nResponse;
