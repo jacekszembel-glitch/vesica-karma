@@ -101,11 +101,14 @@ const SATELITY_BAZA = [
 // przez <MoonStars> (osobny puls, patrz aktywny === "astrologia" niżej).
 const PIKTOGRAMY_PULSUJACE = [
   { id: "hiromancja", box: [340, 385, 490, 555] as const },
-  // Powiekszone i wyosiowane (2026-09-26): nowa ikona ma 9 cyfr rozlozonych
-  // szerzej niz stara (4 cyfry) — pudelko dopasowane do rzeczywistego
-  // ksztaltu platka numerologii (zmierzone siatka wspolrzednych na grafice),
-  // centrowane w najszerszym miejscu miedzy klepsydra "kiedy" a pierscieniem.
-  { id: "numerologia", box: [715, 325, 860, 550] as const },
+  // Skalibrowane (2026-09-26) wprost z public/brand/nowa-numerologia.jpg —
+  // pelny wzorcowy wykres kola z cyframi juz osadzonymi na wlasciwym miejscu.
+  // Transformacja wyliczona z polozenia ikony klepsydry (znany punkt
+  // odniesienia w obu ukladach wspolrzednych: 34x44px we wzorze = 33x43px
+  // tutaj, skala ~0.97, prawie 1:1) i zweryfikowana osobno dla kazdej z 9
+  // cyfr wzgledem rzeczywistej krawedzi platka (skan kanalu alfa wiersz po
+  // wierszu) — zaden budzil watpliwosci wczesniejszych probach "na oko".
+  { id: "numerologia", box: [708, 360, 831, 572] as const },
 ];
 
 function pctX(v: number) { return `${(v / IMG_W) * 100}%`; }
