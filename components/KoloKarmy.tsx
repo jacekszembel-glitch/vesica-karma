@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import MoonStars from "./MoonStars";
 import { SEGMENT_GAPY, type SystemKarmy } from "@/lib/koloKarmyGeometria";
 
@@ -28,7 +29,6 @@ type Hotspot = {
   id: string;
   x: number; y: number; r: number;
   href: string;
-  label: string;
   /** Gdy pole jest nieregularne (kwiat trzech kół) — dokładny bounding box
    *  z tej samej maski flood-fill co poświata (glow-<id>.png), używany
    *  zamiast koła x/y/r, żeby cały płatek reagował na hover, nie tylko
@@ -45,21 +45,21 @@ const KSZTALTNE = new Set([
   "astrokartografia", "mahadasze", "karma",
 ]);
 
-const HOTSPOTY: Hotspot[] = [
-  { id: "astrologia", x: 598, y: 175, r: 85, href: "/kosmogram", label: "Astrologia", gap: SEGMENT_GAPY.astrologia },
-  { id: "hiromancja", x: 415, y: 470, r: 85, href: "/hiromancja", label: "Chiromancja", gap: SEGMENT_GAPY.hiromancja },
-  { id: "numerologia", x: 775, y: 470, r: 85, href: "/numerologia", label: "Numerologia", gap: SEGMENT_GAPY.numerologia },
-  { id: "panel", x: 596, y: 367, r: 60, href: "/panel", label: "Mój Panel" },
-  { id: "zwiazki", x: 1012, y: 645, r: 80, href: "/dopasowanie", label: "Związki" },
+const HOTSPOTY_BAZA: Hotspot[] = [
+  { id: "astrologia", x: 598, y: 175, r: 85, href: "/kosmogram", gap: SEGMENT_GAPY.astrologia },
+  { id: "hiromancja", x: 415, y: 470, r: 85, href: "/hiromancja", gap: SEGMENT_GAPY.hiromancja },
+  { id: "numerologia", x: 775, y: 470, r: 85, href: "/numerologia", gap: SEGMENT_GAPY.numerologia },
+  { id: "panel", x: 596, y: 367, r: 60, href: "/panel" },
+  { id: "zwiazki", x: 1012, y: 645, r: 80, href: "/dopasowanie" },
 ];
 
 /** Piktogramy w soczewkach przenikania (dom/klepsydra/postać) — czysto opisowe,
  *  bez własnej podstrony, więc bez linku: tylko dymek z nazwą danych, które
  *  wpisujesz raz, a trafiają do wszystkich trzech systemów naraz. */
-const DANE_WSPOLNE = [
-  { id: "gdzie", label: "Twoje miejsce urodzenia", gap: [429, 267, 560, 389] as const },
-  { id: "kiedy", label: "Twój czas urodzenia", gap: [632, 267, 764, 391] as const },
-  { id: "kto", label: "Twoje ciało, imię i nazwisko", gap: [529, 452, 663, 571] as const },
+const DANE_WSPOLNE_BAZA = [
+  { id: "gdzie", gap: [429, 267, 560, 389] as const },
+  { id: "kiedy", gap: [632, 267, 764, 391] as const },
+  { id: "kto", gap: [529, 452, 663, 571] as const },
 ];
 
 /** Satelity pierścienia Karmy — Astrokartografia / Mahadasze / Co z tym zrobić.
@@ -75,20 +75,20 @@ function naOkregu(angleDeg: number, r: number) {
  *  (sierp) między pierścieniem Karmy a kwiatem trzech kół, wyznaczona metodą
  *  wypełnienia (flood fill) bezpośrednio z pliku, tak jak maski poświaty
  *  powyżej. Bounding box tej szczeliny: public/brand/glow-<id>.png. */
-const SATELITY = [
+const SATELITY_BAZA = [
   {
-    id: "astrokartografia", angle: -60, out: 70, href: "/astrokartografia", label: "Astrokartografia",
-    lines: ["ASTRO-", "KARTOGRAFIA"], side: "left" as const, gap: [283, 94, 464, 421] as const,
+    id: "astrokartografia", angle: -60, out: 70, href: "/astrokartografia",
+    side: "left" as const, gap: [283, 94, 464, 421] as const,
   },
   {
-    id: "mahadasze", angle: 65, out: 70, href: "/sade-sati", label: "Mahadashe, jogi i dosze",
-    lines: ["MAHADASHE", "JOGI I DOSHE"], side: "right" as const, gap: [735, 98, 908, 416] as const,
+    id: "mahadasze", angle: 65, out: 70, href: "/sade-sati",
+    side: "right" as const, gap: [735, 98, 908, 416] as const,
   },
   // Karma jest u dołu koła — „na zewnątrz" wzdłuż promienia oznaczałoby zejście
   // poza obraz, więc jej ramię celowo idzie w bok (mniejszy promień), nie w dół.
   {
-    id: "karma", angle: 190, out: 25, href: "/karma", label: "Co z tym zrobić?",
-    lines: ["CO Z TYM", "ZROBIĆ?"], side: "left" as const, gap: [405, 618, 785, 690] as const,
+    id: "karma", angle: 190, out: 25, href: "/karma",
+    side: "left" as const, gap: [405, 618, 785, 690] as const,
   },
 ].map((s) => ({ ...s, dot: naOkregu(s.angle, R_OUTER + 22) }));
 
@@ -122,6 +122,13 @@ export type { SystemKarmy };
 const WSZYSTKIE_SYSTEMY = new Set<SystemKarmy>(["astrologia", "hiromancja", "numerologia"]);
 
 export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone?: Set<SystemKarmy> }) {
+  const t = useTranslations("KoloKarmy");
+  const HOTSPOTY = HOTSPOTY_BAZA.map((h) => ({ ...h, label: t(`hotspoty.${h.id}`) }));
+  const DANE_WSPOLNE = DANE_WSPOLNE_BAZA.map((d) => ({ ...d, label: t(`daneWspolne.${d.id}`) }));
+  const SATELITY = SATELITY_BAZA.map((s) => ({
+    ...s, label: t(`satelity.${s.id}.label`),
+    lines: [t(`satelity.${s.id}.linia1`), t(`satelity.${s.id}.linia2`)],
+  }));
   const [aktywny, setAktywny] = useState<string | null>(null);
   const [tip, setTip] = useState<{ label: string; left: number; top: number } | null>(null);
   const [hoverTytul, setHoverTytul] = useState(false);
@@ -151,7 +158,7 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
     <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
       <img
         src={wszystkoZlote ? "/brand/kolo-karmy-gold-clean.png" : "/brand/kolo-karmy-taupe.png"}
-        alt="Koło Karmy — Astrologia, Numerologia i Chiromancja wokół Twojego Panelu, z Astrokartografią, Mahadashami i Karmą jako punktami wyjścia"
+        alt={t("obrazAlt")}
         style={{ display: "block", width: "100%", height: "auto" }}
       />
 
@@ -246,8 +253,8 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
             <g className={`kk-tytul${hoverTytul ? " kk-tytul-widoczny" : ""}`}>
               <circle cx={p.x} cy={p.y} r="6" className="kk-tytul-kropka" />
               <line x1={p.x} y1={p.y} x2={top.x} y2={top.y} className="kk-tytul-linia" />
-              <text x={top.x + 22} y={top.y + 24} className="kk-tytul-eyebrow">TWOJE KOŁO</text>
-              <text x={top.x + 22} y={top.y + 56} className="kk-tytul-glowny">KARMY</text>
+              <text x={top.x + 22} y={top.y + 24} className="kk-tytul-eyebrow">{t("tytulEyebrow")}</text>
+              <text x={top.x + 22} y={top.y + 56} className="kk-tytul-glowny">{t("tytulGlowny")}</text>
             </g>
           );
         })()}
