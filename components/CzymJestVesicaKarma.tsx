@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useKoloKarmyStart } from "./KoloKarmyStartContext";
 
@@ -15,11 +16,19 @@ import { useKoloKarmyStart } from "./KoloKarmyStartContext";
  * interaktywny Koła Karmy wyżej na stronie (KoloKarmyStartContext) — po
  * kliknięciu koło gaśnie do taupe i odkrywa się przez najeżdżanie. Komponent
  * musiał przez to przejść na klienta (useTranslations zamiast getTranslations).
+ * Przycisk jest na dole strony, więc klik od razu przewija do koła (patrz
+ * id="kolo-karmy" w page.tsx) i dopiero po 2s — gdy przewijanie na pewno się
+ * skończyło — woła zacznij(), żeby użytkownik zdążył zobaczyć samo gaśnięcie.
  */
 export default function CzymJestVesicaKarma() {
   const t = useTranslations("CzymJestVesicaKarma");
-  const { wystartowano, zacznij } = useKoloKarmyStart();
+  const { zacznij } = useKoloKarmyStart();
   const strong = (c: React.ReactNode) => <strong>{c}</strong>;
+  // Klikniecie od razu blokuje przycisk (kliknieto) i przewija do kola, ale
+  // samo zacznij() — czyli faktyczne gasniecie zlota na Kole Karmy — czeka
+  // 2s, zeby uzytkownik zdazyl dojechac scrollem i zobaczyc animacje, zamiast
+  // przegapic ja w trakcie przewijania.
+  const [kliknieto, setKliknieto] = useState(false);
   return (
     <div style={{ maxWidth: 720, margin: "70px auto 0" }}>
       {/* Ten sam h1 co "Astrologia Wedyjska" na /kosmogram — domyslny rozmiar
@@ -110,18 +119,20 @@ export default function CzymJestVesicaKarma() {
         <button
           type="button"
           onClick={() => {
-            zacznij();
+            if (kliknieto) return;
+            setKliknieto(true);
             // Przycisk jest teraz na dole strony — bez tego uzytkownik nie
             // widzialby wcale gasniecia zlota do taupe na Kole Karmy u gory.
             document.getElementById("kolo-karmy")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            setTimeout(zacznij, 2000);
           }}
-          disabled={wystartowano}
+          disabled={kliknieto}
           style={{
             font: "inherit", fontFamily: "var(--font-sans)", fontWeight: 800,
             fontSize: "1.6rem", letterSpacing: "0.08em", color: "var(--sand)",
             background: "none", border: "none", padding: 0,
-            cursor: wystartowano ? "default" : "pointer",
-            opacity: wystartowano ? 0.6 : 1, transition: "opacity 0.3s ease",
+            cursor: kliknieto ? "default" : "pointer",
+            opacity: kliknieto ? 0.6 : 1, transition: "opacity 0.3s ease",
           }}
         >
           {t("zacznij")}
