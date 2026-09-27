@@ -208,6 +208,12 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   // nie obejmują (dotyczą tylko trzech wewnętrznych pętli-systemów).
   const wszystkoZlote = ukonczone.size >= 3;
 
+  // Na stronie glownej, zanim ktos nacisnie "Zacznij", nie mozna wejsc wprost
+  // w Astrologie/Numerologie/Hiromancje — mozna je tylko podejrzec hoverem
+  // (podswietlenie zostaje, patrz wskaz/schowaj nizej). Panel i Zwiazki NIE
+  // sa objete tym ograniczeniem — to osobne funkcje, nie "systemy" Karmy.
+  const startBlokuje = interaktywnyStart && !wystartowano;
+
   return (
     <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
       {/* baza jako dwie nałożone warstwy (taupe pod spodem, złota na wierzchu
@@ -312,13 +318,13 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
             widoczny tylko po najechaniu na największy żółty pierścień */}
         {(() => {
           const p = naOkregu(38, R_OUTER);
-          const top = { x: p.x, y: p.y - 64 };
+          const top = { x: p.x, y: p.y - 74 };
           return (
             <g className={`kk-tytul${hoverTytul ? " kk-tytul-widoczny" : ""}`}>
               <circle cx={p.x} cy={p.y} r="6" className="kk-tytul-kropka" />
               <line x1={p.x} y1={p.y} x2={top.x} y2={top.y} className="kk-tytul-linia" />
               <text x={top.x + 22} y={top.y + 24} className="kk-tytul-eyebrow">{t("tytulEyebrow")}</text>
-              <text x={top.x + 22} y={top.y + 56} className="kk-tytul-glowny">{t("tytulGlowny")}</text>
+              <text x={top.x + 22} y={top.y + 76} className="kk-tytul-glowny">{t("tytulGlowny")}</text>
             </g>
           );
         })()}
@@ -348,18 +354,26 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
           soczewki „gdzie/kiedy/kto" leżą w środku płatków, więc muszą być nad
           nimi w DOM, żeby wygrywały hover w tym mniejszym, bardziej precyzyjnym
           obszarze, zamiast oddawać go całemu (dużo większemu) płatkowi. */}
-      {HOTSPOTY.filter((n) => n.gap).map((n) => (
-        <Link key={n.id} href={n.href} aria-label={n.label} className="kk-hit kk-hit-prostokat"
-          style={{
-            left: pctX(n.gap![0]), top: pctY(n.gap![1]),
-            width: pctX(n.gap![2] - n.gap![0]), height: pctY(n.gap![3] - n.gap![1]),
-          }}
-          onMouseEnter={wskaz(n.id, n.label)}
-          onMouseLeave={schowaj}
-          onFocus={wskaz(n.id, n.label)}
-          onBlur={schowaj}
-        />
-      ))}
+      {HOTSPOTY.filter((n) => n.gap).map((n) => {
+        const styl = {
+          left: pctX(n.gap![0]), top: pctY(n.gap![1]),
+          width: pctX(n.gap![2] - n.gap![0]), height: pctY(n.gap![3] - n.gap![1]),
+        };
+        // Zablokowane pole zostaje najezdzalne (podswietlenie + dymek dzialaja
+        // dalej, patrz startBlokuje wyzej), tylko bez nawigacji po kliknieciu.
+        return startBlokuje ? (
+          <span key={n.id} tabIndex={0} role="button" aria-disabled="true" aria-label={n.label}
+            className="kk-hit kk-hit-prostokat" style={styl}
+            onMouseEnter={wskaz(n.id, n.label)} onMouseLeave={schowaj}
+            onFocus={wskaz(n.id, n.label)} onBlur={schowaj}
+          />
+        ) : (
+          <Link key={n.id} href={n.href} aria-label={n.label} className="kk-hit kk-hit-prostokat" style={styl}
+            onMouseEnter={wskaz(n.id, n.label)} onMouseLeave={schowaj}
+            onFocus={wskaz(n.id, n.label)} onBlur={schowaj}
+          />
+        );
+      })}
 
       {/* soczewki przenikania — dom/klepsydra/postać: sam dymek, bez linku.
           Pole aktywujące to dokładna soczewka (jak szczeliny satelitów), nie

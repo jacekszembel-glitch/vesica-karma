@@ -22,24 +22,6 @@ export default function CzymJestVesicaKarma() {
   const strong = (c: React.ReactNode) => <strong>{c}</strong>;
   return (
     <div style={{ maxWidth: 720, margin: "70px auto 0" }}>
-      <h2 style={{ textAlign: "center", marginBottom: 14 }}>
-        <button
-          type="button"
-          onClick={zacznij}
-          disabled={wystartowano}
-          style={{
-            font: "inherit", fontFamily: "var(--font-sans)", fontWeight: 800,
-            fontSize: "1.6rem", letterSpacing: "0.08em", color: "var(--sand)",
-            background: "none", border: "none", padding: 0,
-            cursor: wystartowano ? "default" : "pointer",
-            opacity: wystartowano ? 0.6 : 1, transition: "opacity 0.3s ease",
-          }}
-        >
-          {t("zacznij")}
-        </button>
-      </h2>
-      <div className="skrot-hero-linia" />
-
       {/* Ten sam h1 co "Astrologia Wedyjska" na /kosmogram — domyslny rozmiar
           z globals.css (clamp 2.5-4.1rem), tylko kolor/wyrownanie nadpisane.
           Sekcje nizej dzieli wylacznie pozioma kreska (.skrot-hero-linia),
@@ -75,7 +57,7 @@ export default function CzymJestVesicaKarma() {
         <img
           src="/brand/wykres-vesica-karma.png"
           alt={t("wykresAlt")}
-          style={{ display: "block", width: "100%", maxWidth: 380, margin: "0 auto 28px" }}
+          style={{ display: "block", width: "100%", maxWidth: 520, margin: "0 auto 28px" }}
         />
 
         <p style={{ marginBottom: 16 }}>
@@ -123,6 +105,23 @@ export default function CzymJestVesicaKarma() {
       </div>
 
       <div className="skrot-hero-linia" />
+
+      <h2 style={{ textAlign: "center", margin: 0 }}>
+        <button
+          type="button"
+          onClick={zacznij}
+          disabled={wystartowano}
+          style={{
+            font: "inherit", fontFamily: "var(--font-sans)", fontWeight: 800,
+            fontSize: "1.6rem", letterSpacing: "0.08em", color: "var(--sand)",
+            background: "none", border: "none", padding: 0,
+            cursor: wystartowano ? "default" : "pointer",
+            opacity: wystartowano ? 0.6 : 1, transition: "opacity 0.3s ease",
+          }}
+        >
+          {t("zacznij")}
+        </button>
+      </h2>
     </div>
   );
 }

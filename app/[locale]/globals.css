@@ -2349,11 +2349,11 @@ p, li, td, th, h1, h2, h3, .badge {
 .kk-tytul-linia { stroke: var(--sand); stroke-width: 6; stroke-linecap: round; }
 .kk-tytul-eyebrow {
   fill: var(--sand); stroke: none;
-  font-family: var(--font-sans); font-size: 16px; font-weight: 500; letter-spacing: 0.18em;
+  font-family: var(--font-sans); font-size: 20px; font-weight: 500; letter-spacing: 0.18em;
 }
 .kk-tytul-glowny {
   fill: var(--sand); stroke: none;
-  font-family: var(--font-sans); font-size: 34px; font-weight: 800; letter-spacing: 0.01em;
+  font-family: var(--font-sans); font-size: 52px; font-weight: 800; letter-spacing: 0.01em;
 }
 
 /* dymek z nazwą — portal do <body>, pozycja na sztywno (jak .term-tip):
