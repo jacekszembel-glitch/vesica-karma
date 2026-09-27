@@ -209,9 +209,10 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   const wszystkoZlote = ukonczone.size >= 3;
 
   // Na stronie glownej, zanim ktos nacisnie "Zacznij", nie mozna wejsc wprost
-  // w Astrologie/Numerologie/Hiromancje — mozna je tylko podejrzec hoverem
-  // (podswietlenie zostaje, patrz wskaz/schowaj nizej). Panel i Zwiazki NIE
-  // sa objete tym ograniczeniem — to osobne funkcje, nie "systemy" Karmy.
+  // w Astrologie/Numerologie/Hiromancje ani w satelity Astrokartografia/
+  // Mahadasze/Karma — mozna je tylko podejrzec hoverem (podswietlenie
+  // zostaje, patrz wskaz/schowaj nizej). Panel i Zwiazki NIE sa objete tym
+  // ograniczeniem — to osobne funkcje, nie "systemy"/etapy Karmy.
   const startBlokuje = interaktywnyStart && !wystartowano;
 
   return (
@@ -336,18 +337,27 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
           piktogramami — ich prostokąt bywa szerszy niż faktyczny sierp i
           zachodzi na górny skrawek koła obok (Hiromancja/Numerologia), więc
           piktogram musi leżeć nad nimi w DOM, żeby zawsze wygrywał hover. */}
-      {SATELITY.map((s) => (
-        <Link key={s.id} href={s.href} aria-label={s.label} className="kk-hit kk-hit-prostokat"
-          style={{
-            left: pctX(s.gap[0]), top: pctY(s.gap[1]),
-            width: pctX(s.gap[2] - s.gap[0]), height: pctY(s.gap[3] - s.gap[1]),
-          }}
-          onMouseEnter={wskaz(s.id, s.label)}
-          onMouseLeave={schowaj}
-          onFocus={wskaz(s.id, s.label)}
-          onBlur={schowaj}
-        />
-      ))}
+      {SATELITY.map((s) => {
+        const styl = {
+          left: pctX(s.gap[0]), top: pctY(s.gap[1]),
+          width: pctX(s.gap[2] - s.gap[0]), height: pctY(s.gap[3] - s.gap[1]),
+        };
+        // Astrokartografia/Mahadasze/Karma tez wymagaja Zacznij na stronie
+        // glownej — patrz startBlokuje przy plateczkach Astrologii/Numerologii/
+        // Hiromancji wyzej, ten sam mechanizm (hover dziala, klik nie nawiguje).
+        return startBlokuje ? (
+          <span key={s.id} tabIndex={0} role="button" aria-disabled="true" aria-label={s.label}
+            className="kk-hit kk-hit-prostokat" style={styl}
+            onMouseEnter={wskaz(s.id, s.label)} onMouseLeave={schowaj}
+            onFocus={wskaz(s.id, s.label)} onBlur={schowaj}
+          />
+        ) : (
+          <Link key={s.id} href={s.href} aria-label={s.label} className="kk-hit kk-hit-prostokat" style={styl}
+            onMouseEnter={wskaz(s.id, s.label)} onMouseLeave={schowaj}
+            onFocus={wskaz(s.id, s.label)} onBlur={schowaj}
+          />
+        );
+      })}
 
       {/* uchwyty klikalne — pełny płatek Astrologii/Hiromancji/Numerologii (nad
           szczelinami satelitów). Renderowane PRZED soczewkami przenikania —
