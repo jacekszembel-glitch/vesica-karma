@@ -17,9 +17,8 @@ import { useKoloKarmyStart } from "./KoloKarmyStartContext";
  * kliknięciu koło gaśnie do taupe i odkrywa się przez najeżdżanie. Komponent
  * musiał przez to przejść na klienta (useTranslations zamiast getTranslations).
  * Przycisk jest na dole strony, więc klik od razu przewija do koła (patrz
- * id="kolo-karmy" w page.tsx) i dopiero po 4s — z zapasem, żeby przewijanie
- * na pewno się skończyło i użytkownik NAPRAWDĘ zobaczył gaśnięcie, nie tylko
- * jego koniec — woła zacznij().
+ * id="kolo-karmy" w page.tsx) i dopiero po 2s — gdy przewijanie na pewno się
+ * skończyło — woła zacznij(), żeby użytkownik zdążył zobaczyć samo gaśnięcie.
  */
 export default function CzymJestVesicaKarma() {
   const t = useTranslations("CzymJestVesicaKarma");
@@ -27,8 +26,7 @@ export default function CzymJestVesicaKarma() {
   const strong = (c: React.ReactNode) => <strong>{c}</strong>;
   // Klikniecie od razu blokuje przycisk (kliknieto) i przewija do kola, ale
   // samo zacznij() — czyli faktyczne gasniecie zlota na Kole Karmy — czeka
-  // 4s, zeby uzytkownik zdazyl dojechac scrollem i NAPRAWDE zobaczyc cala
-  // animacje gasniecia (nie tylko jej koniec), zamiast
+  // 2s, zeby uzytkownik zdazyl dojechac scrollem i zobaczyc animacje, zamiast
   // przegapic ja w trakcie przewijania.
   const [kliknieto, setKliknieto] = useState(false);
   return (
@@ -126,7 +124,7 @@ export default function CzymJestVesicaKarma() {
             // Przycisk jest teraz na dole strony — bez tego uzytkownik nie
             // widzialby wcale gasniecia zlota do taupe na Kole Karmy u gory.
             document.getElementById("kolo-karmy")?.scrollIntoView({ behavior: "smooth", block: "start" });
-            setTimeout(zacznij, 4000);
+            setTimeout(zacznij, 2000);
           }}
           disabled={kliknieto}
           style={{
