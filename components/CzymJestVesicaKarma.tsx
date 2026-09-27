@@ -30,7 +30,7 @@ export default function CzymJestVesicaKarma() {
   // przegapic ja w trakcie przewijania.
   const [kliknieto, setKliknieto] = useState(false);
   return (
-    <div style={{ maxWidth: 720, margin: "70px auto 0" }}>
+    <div style={{ maxWidth: 720, margin: "84px auto 0" }}>
       {/* Ten sam h1 co "Astrologia Wedyjska" na /kosmogram — domyslny rozmiar
           z globals.css (clamp 2.5-4.1rem), tylko kolor/wyrownanie nadpisane.
           Sekcje nizej dzieli wylacznie pozioma kreska (.skrot-hero-linia),
