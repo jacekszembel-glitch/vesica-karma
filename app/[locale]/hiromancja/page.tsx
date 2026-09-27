@@ -154,27 +154,66 @@ export default function HiromancjaPage() {
         matematyka bez AI).
       </p>
 
-      <div className="card" style={{ maxWidth: 640, margin: "0 auto" }}>
-        <label id="hiro-pismo-label">Którą ręką piszesz?</label>
-        <div className="bf-plec" role="radiogroup" aria-labelledby="hiro-pismo-label" style={{ marginBottom: 14 }}>
-          <button type="button" role="radio" aria-checked={pismoReka === "prawa"}
-            className={`bf-plec-opcja${pismoReka === "prawa" ? " bf-plec-opcja-aktywna" : ""}`}
-            onClick={() => setPismoReka("prawa")}>
-            Prawą
-          </button>
+      <div style={{ maxWidth: 640, margin: "0 auto" }}>
+        <p id="hiro-pismo-label" style={{ textAlign: "center", fontWeight: 700, color: "var(--sand)", marginBottom: 10 }}>
+          Którą ręką piszesz?
+        </p>
+        <div role="radiogroup" aria-labelledby="hiro-pismo-label"
+          style={{ display: "flex", maxWidth: 320, margin: "0 auto", borderRadius: 999, overflow: "hidden" }}>
           <button type="button" role="radio" aria-checked={pismoReka === "lewa"}
-            className={`bf-plec-opcja${pismoReka === "lewa" ? " bf-plec-opcja-aktywna" : ""}`}
-            onClick={() => setPismoReka("lewa")}>
-            Lewą
+            onClick={() => setPismoReka("lewa")}
+            style={{
+              flex: 1, padding: "10px 0", border: "none", cursor: "pointer", fontWeight: 700,
+              background: pismoReka === "lewa" ? "var(--sand)" : "var(--taupe-soft)",
+              color: pismoReka === "lewa" ? "#1a1330" : "var(--sand)",
+            }}>
+            Lewa
+          </button>
+          <button type="button" role="radio" aria-checked={pismoReka === "prawa"}
+            onClick={() => setPismoReka("prawa")}
+            style={{
+              flex: 1, padding: "10px 0", border: "none", cursor: "pointer", fontWeight: 700,
+              background: pismoReka === "prawa" ? "var(--sand)" : "var(--taupe-soft)",
+              color: pismoReka === "prawa" ? "#1a1330" : "var(--sand)",
+            }}>
+            Prawa
           </button>
         </div>
-        <p className="muted" style={{ fontSize: "0.78rem" }}>
+        <div style={{ display: "flex", maxWidth: 320, margin: "6px auto 24px" }}>
+          <span style={{ flex: 1, textAlign: "center", fontSize: "0.68rem", letterSpacing: "0.05em", color: "var(--sand)", fontWeight: 700 }}>
+            {pismoReka === "lewa" ? "DOMINUJĄCA" : ""}
+          </span>
+          <span style={{ flex: 1, textAlign: "center", fontSize: "0.68rem", letterSpacing: "0.05em", color: "var(--sand)", fontWeight: 700 }}>
+            {pismoReka === "prawa" ? "DOMINUJĄCA" : ""}
+          </span>
+        </div>
+
+        <p className="muted" style={{ fontSize: "0.78rem", textAlign: "center", maxWidth: 480, margin: "0 auto 28px" }}>
           Zdjęcia nigdzie nie są zapisywane — trafiają z przeglądarki prosto do modelu AI (dopiero
           gdy klikniesz „Odczytaj” niżej) i nie są przechowywane na serwerze ani w bazie danych.
         </p>
+
+        {/* podglad na pierwszy rzut oka: zloty pierscien = dlon dominujaca (D1),
+            taupe = bierna (D9) — ten sam jezyk zloto/taupe co Kolo Karmy. */}
+        <div style={{ display: "flex", gap: 24, justifyContent: "center", marginBottom: 24 }}>
+          <div style={{
+            width: 90, height: 90, borderRadius: "50%",
+            border: `3px solid ${pismoReka === "lewa" ? "var(--sand)" : "var(--taupe)"}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <img src={pismoReka === "lewa" ? "/brand/icon-dlon-lewa.png" : "/brand/icon-dlon-lewa-taupe.png"} alt="" style={{ width: "58%", height: "auto" }} />
+          </div>
+          <div style={{
+            width: 90, height: 90, borderRadius: "50%",
+            border: `3px solid ${pismoReka === "prawa" ? "var(--sand)" : "var(--taupe)"}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <img src={pismoReka === "prawa" ? "/brand/icon-dlon-prawa.png" : "/brand/icon-dlon-prawa-taupe.png"} alt="" style={{ width: "58%", height: "auto" }} />
+          </div>
+        </div>
       </div>
 
-      <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap", margin: "28px 0" }}>
+      <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap", margin: "0 0 28px" }}>
         <HiromancjaZdjecie id="hiromancja-plik-lewa" etykieta="Prześlij zdjęcie — lewa dłoń"
           maZdjecie={!!zdjecia.lewa} onZdjecieGotowe={(d) => handleZdjecie("lewa", d)} />
         <HiromancjaZdjecie id="hiromancja-plik-prawa" etykieta="Prześlij zdjęcie — prawa dłoń"
