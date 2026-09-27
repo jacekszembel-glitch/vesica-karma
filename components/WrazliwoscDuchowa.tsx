@@ -10,7 +10,7 @@ const POZIOM_OPIS: Record<PoziomWrazliwosci, string> = {
 };
 
 const POZIOM_PROCENT: Record<PoziomWrazliwosci, number> = { "wyraźna": 90, "umiarkowana": 55, "subtelna": 25 };
-const POZIOM_KOLOR: Record<PoziomWrazliwosci, string> = { "wyraźna": "#6fbf9f", "umiarkowana": "#e6c48a", "subtelna": "#93a6b3" };
+const POZIOM_KOLOR: Record<PoziomWrazliwosci, string> = { "wyraźna": "#6fbf9f", "umiarkowana": "#e6c48a", "subtelna": "#11a7b6" };
 
 export default function WrazliwoscDuchowa({ chart }: { chart: VedicChart }) {
   const w = wrazliwoscDuchowa(chart);

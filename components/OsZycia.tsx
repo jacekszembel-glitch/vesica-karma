@@ -37,7 +37,7 @@ type Ton = "wspierający" | "wymagający" | "mieszany";
 export const TON_KOLOR: Record<Ton, string> = {
   "wspierający": "#6fbf9f",
   "wymagający": "#e08a63",
-  "mieszany": "#93a6b3",
+  "mieszany": "#11a7b6",
 };
 
 const mies = (d: Date) => d.toLocaleDateString("pl-PL", { month: "short", year: "2-digit" });

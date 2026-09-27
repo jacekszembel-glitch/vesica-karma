@@ -38,7 +38,7 @@ export default function HeksDomu({ dom, size = 108, aktywny = false }: {
       </text>
       <text x="50" y="53" textAnchor="middle" fontSize="8.5"
         fontFamily="var(--font-sans)" letterSpacing="0.12em"
-        fill="#93a6b3" style={{ textTransform: "uppercase" }}>
+        fill="#11a7b6" style={{ textTransform: "uppercase" }}>
         {b.sanskrit.toUpperCase()}
       </text>
       {/* temat w dwóch krótkich liniach */}
@@ -49,8 +49,8 @@ export default function HeksDomu({ dom, size = 108, aktywny = false }: {
         const l2 = slowa.slice(pol).join(" ");
         return (
           <>
-            <text x="50" y="66" textAnchor="middle" fontSize="7" fontFamily="var(--font-sans)" fill="#e8eef2" opacity="0.85">{l1}</text>
-            {l2 && <text x="50" y="75" textAnchor="middle" fontSize="7" fontFamily="var(--font-sans)" fill="#e8eef2" opacity="0.85">{l2}</text>}
+            <text x="50" y="66" textAnchor="middle" fontSize="7" fontFamily="var(--font-sans)" fill="#7fd0d8" opacity="0.85">{l1}</text>
+            {l2 && <text x="50" y="75" textAnchor="middle" fontSize="7" fontFamily="var(--font-sans)" fill="#7fd0d8" opacity="0.85">{l2}</text>}
           </>
         );
       })()}

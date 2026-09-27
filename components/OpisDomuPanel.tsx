@@ -29,7 +29,7 @@ export default function OpisDomuPanel({ chart, house, onZamknij, compareChart }:
           fontSize: "0.85rem", lineHeight: 1, cursor: "pointer",
         }}>×</button>
       <p style={{ margin: "0 0 4px", fontFamily: "var(--font-serif)", fontSize: "1.15rem", paddingRight: 30, color: "var(--sand)" }}>
-        {opis.numer}. dom — {opis.nazwa} <span style={{ fontSize: "0.78rem", color: "#8ba0b0" }}>({opis.sanskryt})</span>
+        {opis.numer}. dom — {opis.nazwa} <span style={{ fontSize: "0.78rem", color: "#11a7b6" }}>({opis.sanskryt})</span>
       </p>
       <p className="muted" style={{ margin: "0 0 10px", fontSize: "0.86rem", lineHeight: 1.6 }}>{opis.obszar}</p>
       <p style={{ margin: "0 0 12px", fontSize: "0.88rem" }}>
@@ -62,7 +62,7 @@ export default function OpisDomuPanel({ chart, house, onZamknij, compareChart }:
         </div>
       )}
       <p style={{ margin: "0 0 8px", fontSize: "0.8rem", color: "var(--teal-soft)", letterSpacing: "0.03em" }}>CO TO ZNACZY</p>
-      <ul style={{ margin: 0, paddingLeft: 18, fontSize: "0.88rem", lineHeight: 1.65, color: "#dde5ea", display: "grid", gap: 8 }}>
+      <ul style={{ margin: 0, paddingLeft: 18, fontSize: "0.88rem", lineHeight: 1.65, color: "#7fd0d8", display: "grid", gap: 8 }}>
         {opis.wnioski.map((w, i) => <li key={i}>{w}</li>)}
       </ul>
     </div>

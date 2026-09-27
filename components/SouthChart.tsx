@@ -171,7 +171,7 @@ export default function SouthChart({ chart, compareChart }: { chart: VedicChart;
           return (
             <g key={sign} pointerEvents="none">
               <text x={M + col * C + 9} y={M + row * C + 15} textAnchor="start" dominantBaseline="middle"
-                fill={hover === sign ? "#7fd0d8" : "#b9c7d1"} fontSize="14"
+                fill={hover === sign ? "#7fd0d8" : "#11a7b6"} fontSize="14"
                 fontFamily="var(--font-serif)" fontStyle="italic"
                 filter="url(#sc-glow)" opacity={hover === sign ? 1 : 0.92}>
                 {sign + 1}
@@ -237,21 +237,21 @@ export default function SouthChart({ chart, compareChart }: { chart: VedicChart;
           padding: "14px 16px",
           boxShadow: "0 16px 40px rgba(0,0,0,0.55), 0 0 22px -10px rgba(230,196,138,0.35)",
           animation: "fadeUp 0.2s var(--ease-out) both",
-          color: "#e8eef2",
+          color: "#7fd0d8",
         }}>
           <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.1rem", color: "var(--sand)", marginBottom: 3 }}>
             {BHAVAS[hoveredHouse - 1].pl}{" "}
-            <span style={{ fontSize: "0.78rem", color: "#8ba0b0" }}>({BHAVAS[hoveredHouse - 1].sanskrit})</span>
+            <span style={{ fontSize: "0.78rem", color: "#11a7b6" }}>({BHAVAS[hoveredHouse - 1].sanskrit})</span>
           </p>
-          <p style={{ fontSize: "0.84rem", lineHeight: 1.55, marginBottom: 10, color: "#b9c7d1" }}>
+          <p style={{ fontSize: "0.84rem", lineHeight: 1.55, marginBottom: 10, color: "#11a7b6" }}>
             {BHAVAS[hoveredHouse - 1].obszar}
           </p>
-          <p style={{ fontSize: "0.88rem", marginBottom: hoveredPlanets.length ? 9 : 0, color: "#e8eef2" }}>
+          <p style={{ fontSize: "0.88rem", marginBottom: hoveredPlanets.length ? 9 : 0, color: "#7fd0d8" }}>
             <span style={{ color: "var(--teal-soft)" }}>{RASIS[hoveredSign!].symbol}</span>{" "}
-            <strong style={{ color: "#f2f5f7" }}>{RASIS[hoveredSign!].pl}</strong>{" "}
-            <span style={{ color: "#8ba0b0", fontSize: "0.8rem" }}>({RASIS[hoveredSign!].sanskrit})</span>
+            <strong style={{ color: "#7fd0d8" }}>{RASIS[hoveredSign!].pl}</strong>{" "}
+            <span style={{ color: "#11a7b6", fontSize: "0.8rem" }}>({RASIS[hoveredSign!].sanskrit})</span>
             <br />
-            <span style={{ fontSize: "0.8rem", color: "#b9c7d1" }}>
+            <span style={{ fontSize: "0.8rem", color: "#11a7b6" }}>
               władca: {GRAHAS[RASIS[hoveredSign!].lord].symbol} {GRAHAS[RASIS[hoveredSign!].lord].pl}
               {" · "}{RASIS[hoveredSign!].element}
             </span>

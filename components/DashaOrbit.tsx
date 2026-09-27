@@ -26,7 +26,7 @@ const CX = W / 2;
 const TONE: Record<UpcomingPeriod["tone"], { color: string; opis: string }> = {
   "wspierający": { color: "#6fbf9f", opis: "dobry czas na starty, ekspansję i ważne kroki" },
   "wymagający": { color: "#e08a63", opis: "czas dyscypliny — porządkuj i wzmacniaj, nie forsuj" },
-  "mieszany": { color: "#93a6b3", opis: "czas umysłu i elastyczności — obserwuj i dostrajaj" },
+  "mieszany": { color: "#11a7b6", opis: "czas umysłu i elastyczności — obserwuj i dostrajaj" },
 };
 
 const fmt = (d: Date) => d.toLocaleDateString("pl-PL", { year: "numeric", month: "short" });
@@ -152,7 +152,7 @@ export default function DashaOrbit({ periods }: { periods: UpcomingPeriod[] }) {
                   stroke="rgba(127,208,216,0.18)" strokeWidth="1" strokeDasharray="3 6" />
                 <rect x={CX - 218} y={r.y - 12} width="436" height="24" rx="12" fill="#0d1b2a" />
                 <text x={CX} y={r.y + 4} textAnchor="middle" fontSize="11.5"
-                  fill={r.current ? "#e6c48a" : "#93a6b3"} letterSpacing="0.06em">
+                  fill={r.current ? "#e6c48a" : "#11a7b6"} letterSpacing="0.06em">
                   <tspan fill={g.color}>{g.symbol}</tspan>
                   <tspan dx="7">{label}</tspan>
                 </text>
@@ -204,10 +204,10 @@ export default function DashaOrbit({ periods }: { periods: UpcomingPeriod[] }) {
               <text x={tx} y={ny - 24} textAnchor={anchor} fill="#7fd0d8" fontSize="9.5" letterSpacing="0.16em">
                 PODOKRES
               </text>
-              <text x={tx} y={ny - 6} textAnchor={anchor} fill="#f2f5f7" fontSize="15" fontWeight="600">
+              <text x={tx} y={ny - 6} textAnchor={anchor} fill="#7fd0d8" fontSize="15" fontWeight="600">
                 {g.pl}
               </text>
-              <text x={tx} y={ny + 13} textAnchor={anchor} fill="#93a6b3" fontSize="12.5"
+              <text x={tx} y={ny + 13} textAnchor={anchor} fill="#11a7b6" fontSize="12.5"
                 style={{ fontVariantNumeric: "tabular-nums" }}>
                 {fmt(p.start)} — {fmt(p.end)}
               </text>

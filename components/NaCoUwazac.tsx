@@ -56,7 +56,7 @@ function Dymek({ opis }: { opis: string }) {
         borderRadius: 10, padding: "9px 13px",
         boxShadow: "0 10px 26px rgba(0,0,0,0.5)",
         animation: "fadeUp 0.15s var(--ease-out) both",
-        fontSize: "0.82rem", color: "#e8eef2", lineHeight: 1.55,
+        fontSize: "0.82rem", color: "#7fd0d8", lineHeight: 1.55,
       }}>
         {opis}
       </div>

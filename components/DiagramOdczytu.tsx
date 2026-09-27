@@ -97,7 +97,7 @@ function RozaKierunkow({ kierunki }: { kierunki: Kierunek[] }) {
           const a = (i * 90 - 90) * Math.PI / 180;
           return (
             <text key={s} x={C + (R + 11) * Math.cos(a)} y={C + (R + 11) * Math.sin(a)}
-              textAnchor="middle" dominantBaseline="middle" fill="#93a6b3" fontSize="9">{s}</text>
+              textAnchor="middle" dominantBaseline="middle" fill="#11a7b6" fontSize="9">{s}</text>
           );
         })}
         {kierunki.map((k) => {

@@ -143,7 +143,7 @@ function ZDymkiem({ trigger, content, pelnyRozmiar, onKlik }: { trigger: React.R
           <div style={{
             background: "rgba(16, 34, 49, 0.98)", border: "1px solid var(--line)", borderRadius: 12,
             padding: "14px 16px", boxShadow: "0 16px 40px rgba(0,0,0,0.55), 0 0 22px -10px rgba(230,196,138,0.35)",
-            animation: "fadeUp 0.2s var(--ease-out) both", color: "#e8eef2",
+            animation: "fadeUp 0.2s var(--ease-out) both", color: "#7fd0d8",
           }}>
             {content}
           </div>
@@ -158,10 +158,10 @@ function DymekTytul({ dzieci }: { dzieci: React.ReactNode }) {
   return <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.05rem", color: "var(--sand)", marginBottom: 3 }}>{dzieci}</p>;
 }
 function DymekPodtytul({ dzieci }: { dzieci: React.ReactNode }) {
-  return <p style={{ fontSize: "0.78rem", color: "#8ba0b0", marginBottom: 8 }}>{dzieci}</p>;
+  return <p style={{ fontSize: "0.78rem", color: "#11a7b6", marginBottom: 8 }}>{dzieci}</p>;
 }
 function DymekOpis({ dzieci }: { dzieci: React.ReactNode }) {
-  return <p style={{ fontSize: "0.84rem", lineHeight: 1.55, color: "#b9c7d1", margin: "0 0 6px" }}>{dzieci}</p>;
+  return <p style={{ fontSize: "0.84rem", lineHeight: 1.55, color: "#11a7b6", margin: "0 0 6px" }}>{dzieci}</p>;
 }
 
 function KropkaZDymkiem({ info, wypelniona }: { info: Aktywne; wypelniona: boolean }) {

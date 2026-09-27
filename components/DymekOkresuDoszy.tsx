@@ -18,7 +18,7 @@ export default function DymekOkresuDoszy({ birth, faza, dosze }: { birth: Date; 
       borderRadius: 10, padding: "10px 14px", width: 260,
       boxShadow: "0 10px 26px rgba(0,0,0,0.5)",
       animation: "fadeUp 0.15s var(--ease-out) both",
-      fontSize: "0.8rem", color: "#e8eef2", lineHeight: 1.5,
+      fontSize: "0.8rem", color: "#7fd0d8", lineHeight: 1.5,
       pointerEvents: "auto", maxHeight: "min(340px, 70vh)", overflowY: "auto",
     }}>
       <p style={{ margin: "0 0 6px", fontFamily: "var(--font-serif)", fontSize: "0.95rem" }}>

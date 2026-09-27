@@ -322,7 +322,7 @@ export default function ProfilDuszy({ chart }: { chart: VedicChart }) {
                   onMouseLeave={() => setAktywny(null)}>
                   <tspan x={px} fontSize="12.5" fontWeight="600" fill={podswietlona ? "#7fd0d8" : "#e6c48a"}
                     style={{ transition: "fill 0.2s" }}>{g.pl} - {dane.liczby[i]}</tspan>
-                  <tspan x={px} dy="13" fontSize="9" fill="#93a6b3">{g.pod}</tspan>
+                  <tspan x={px} dy="13" fontSize="9" fill="#11a7b6">{g.pod}</tspan>
                 </text>
               );
             })}
@@ -345,7 +345,7 @@ export default function ProfilDuszy({ chart }: { chart: VedicChart }) {
                   borderRadius: 10, padding: "10px 14px", maxWidth: 220,
                   boxShadow: "0 10px 26px rgba(0,0,0,0.5)",
                   animation: "fadeUp 0.15s var(--ease-out) both",
-                  fontSize: "0.82rem", color: "#e8eef2", lineHeight: 1.5,
+                  fontSize: "0.82rem", color: "#7fd0d8", lineHeight: 1.5,
                 }}>
                   <strong>{g.pl}</strong> ({g.pod})
                   <p className="muted" style={{ fontSize: "0.76rem", marginTop: 2, marginBottom: 6 }}>{g.opis}</p>
