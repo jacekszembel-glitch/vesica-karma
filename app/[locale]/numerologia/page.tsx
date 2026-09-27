@@ -5,6 +5,7 @@ import Link from "next/link";
 import Interpretation from "@/components/Interpretation";
 import { numerology, type NumerologyResult } from "@/lib/astro/numerology";
 import BirthForm, { type BirthInput } from "@/components/BirthForm";
+import KoloDanychPanel from "@/components/KoloDanychPanel";
 import Term from "@/components/Term";
 import RelacjaMulankBhagyank from "@/components/RelacjaMulankBhagyank";
 import PredyspozycjeLiczb from "@/components/PredyspozycjeLiczb";
@@ -32,12 +33,14 @@ export default function NumerologiaPage() {
   const [date, setDate] = useState("1990-06-15");
   const [name, setName] = useState<string | undefined>(undefined);
   const [wynik, setWynik] = useState<NumerologyResult | null>(null);
+  const [zwiniete, setZwiniete] = useState(false);
 
   function handleSubmit(input: BirthInput) {
     const rok = new Date().getFullYear();
     setDate(input.isoDate);
     setName(input.name);
     setWynik(numerology(input.isoDate, input.name, "wedyjski", rok));
+    setZwiniete(true);
     odblokuj("numerologia");
     odblokujSystemKarmy("numerologia");
   }
@@ -79,12 +82,10 @@ export default function NumerologiaPage() {
           lib/birthStore.ts) — astrologia nie pyta już o imię (usunięte tam),
           numerologia nie pyta o godzinę i miejsce (askTimePlace={false}),
           bo do mulanka/bhagyanka wystarczy data urodzenia. */}
-      <div className="kolo-danych-scena">
-        <div className="kolo-danych">
-          <p className="kolo-danych-tytul">Twoje dane</p>
-          <BirthForm onSubmit={handleSubmit} submitLabel="Oblicz liczby" askTimePlace={false} />
-        </div>
-      </div>
+      <KoloDanychPanel zlozone={zwiniete} onRozwin={() => setZwiniete(false)}>
+        <p className="kolo-danych-tytul">Twoje dane</p>
+        <BirthForm onSubmit={handleSubmit} submitLabel="Oblicz liczby" askTimePlace={false} />
+      </KoloDanychPanel>
 
       {wynik && (
         <div className="fade-up" style={{ marginTop: 48 }}>

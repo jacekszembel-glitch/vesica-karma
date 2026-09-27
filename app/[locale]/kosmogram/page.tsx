@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import BirthForm, { type BirthInput } from "@/components/BirthForm";
+import KoloDanychPanel from "@/components/KoloDanychPanel";
 import { loadBirth } from "@/lib/birthStore";
 import NorthChart from "@/components/NorthChart";
 import SouthChart from "@/components/SouthChart";
@@ -118,6 +119,7 @@ export default function KosmogramPage() {
   const [birthInput, setBirthInput] = useState<BirthInput | null>(null);
   const [styl, setStyl] = useState<StylWykresu>("polnocny");
   const [tryb, setTryb] = useState<TrybKosmogramu>("poczatkujacy");
+  const [zwiniete, setZwiniete] = useState(false);
 
   useEffect(() => {
     const s = localStorage.getItem(KLUCZ_STYLU);
@@ -170,6 +172,7 @@ export default function KosmogramPage() {
         timeKnown: input.timeKnown,
       }),
     );
+    setZwiniete(true);
     odblokuj("kosmogram");
     odblokujSystemKarmy("astrologia");
   }
@@ -289,12 +292,10 @@ export default function KosmogramPage() {
           używany wyłącznie tutaj, więc jego układ (Płeć obok "Nie znam
           godziny") jest dopasowany pod ten kontekst; wygląd pól dopina
           scoped CSS (.kolo-danych ...). */}
-      <div className="kolo-danych-scena">
-        <div className="kolo-danych">
-          <p className="kolo-danych-tytul">Twoje dane</p>
-          <BirthForm onSubmit={handleSubmit} submitLabel="Zapisz" askName={false} />
-        </div>
-      </div>
+      <KoloDanychPanel zlozone={zwiniete} onRozwin={() => setZwiniete(false)}>
+        <p className="kolo-danych-tytul">Twoje dane</p>
+        <BirthForm onSubmit={handleSubmit} submitLabel="Zapisz" askName={false} />
+      </KoloDanychPanel>
 
       {chart && (
         <div className="fade-up" style={{ marginTop: 48 }}>

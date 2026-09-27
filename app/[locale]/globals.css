@@ -875,7 +875,12 @@ main, .site-header, footer { position: relative; z-index: 1; }
    zawartości (overflow: visible) — lista podpowiedzi miejscowości i
    ewentualne komunikaty o błędzie mają się gdzie zmieścić, nawet gdyby
    lekko wystawały poza okrąg. */
-.kolo-danych-scena { display: flex; justify-content: center; margin: 0 auto 48px; }
+.kolo-danych-scena {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 48px;
+  transition: height 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
 .kolo-danych {
   position: relative;
   --kd-d: min(92vw, 580px);
@@ -890,6 +895,35 @@ main, .site-header, footer { position: relative; z-index: 1; }
   padding: 5% 9%;
   box-sizing: border-box;
   overflow: visible;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Zwężanie się dzieje transformem (bez zmiany realnego layoutu), więc
+     domyślny środek jako punkt odniesienia wypchnąłby zmniejszone koło
+     poniżej widocznego, przyciętego do 74px okna rodzica (.kolo-danych-scena)
+     — kotwiczymy u góry, żeby zmniejszone koło zostało dokładnie w tym oknie. */
+  transform-origin: 50% 0;
+}
+/* Po zapisaniu danych: koło (złote tło + odznaka "Twoje dane") "wjeżdża"
+   do rozmiaru przycisku Zapisz (74px) i zostaje widoczne jako mała złota
+   kropka z podpisem, a .kolo-danych-scena (wysokość animowana z JS, patrz
+   KoloDanychPanel.tsx) kurczy się razem z nim, więc wynik pod spodem
+   sam wsuwa się w zwolnione miejsce zamiast czekać za pustym kołem.
+   Sam formularz znika szybciej niż trwa zwężanie, żeby nie było widać
+   kurczącego się drobnego druku — odznaka zostaje, powiększona z
+   wyprzedzeniem (przed przeskalowaniem), żeby po zmniejszeniu razem z
+   całym kołem była czytelna, a nie mikroskopijna.
+   Samo kółko zostaje klikalne (pointer-events na formularzu wyłączone,
+   nie na nim) — kliknięcie rozwija formularz z powrotem. */
+.kolo-danych-zwiniete .kolo-danych {
+  transform: scale(calc(74 / 580));
+}
+.kolo-danych-zwiniete .kolo-danych > *:not(.kolo-danych-tytul) {
+  transition: opacity 0.25s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+.kolo-danych-zwiniete .kolo-danych-tytul {
+  font-size: 4.6rem;
+  transition: font-size 0.4s ease;
 }
 .kolo-danych::before {
   content: "";
