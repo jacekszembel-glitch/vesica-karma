@@ -15,7 +15,7 @@ import { GRAHAS, RASIS, PLANET_ORDER } from "@/lib/astro/constants";
 import { formatDMS } from "@/lib/astro/math";
 import Konwencje from "@/components/Konwencje";
 import Term from "@/components/Term";
-import { navamsaChart, dashamsaChart, isVargottama } from "@/lib/astro/varga";
+import { navamsaChart, isVargottama } from "@/lib/astro/varga";
 import { nakshatraOf, nakshatraTerm } from "@/lib/astro/nakshatra";
 import ProfilDuszy from "@/components/ProfilDuszy";
 import PlanetyWSkrocie from "@/components/PlanetyWSkrocie";
@@ -25,15 +25,11 @@ import { poziomWzmocnienia, kondycjaWskaznik, MOZLIWE_ZAWODY } from "@/lib/astro
 import { ocenaWladcy } from "@/lib/astro/sila";
 import { wykryteJogiPosortowane } from "@/lib/astro/yogas";
 import JednoSpojrzenie from "@/components/JednoSpojrzenie";
-import WargiDodatkowe from "@/components/WargiDodatkowe";
-import AsztakawargaSekcja from "@/components/AsztakawargaSekcja";
-import SzadbalaSekcja from "@/components/SzadbalaSekcja";
 import { karakiCzarowe, jogakaraka } from "@/lib/astro/karaki";
 import KarakiCzarowe from "@/components/KarakiCzarowe";
 import JogiISzczescie from "@/components/JogiISzczescie";
 import MapaCzasuJog from "@/components/MapaCzasuJog";
 import MapaCzasuDosz from "@/components/MapaCzasuDosz";
-import OsZycia from "@/components/OsZycia";
 import { fazyZycia } from "@/lib/astro/lifemap";
 import RankingGrah from "@/components/RankingGrah";
 import NaCoUwazac from "@/components/NaCoUwazac";
@@ -266,7 +262,6 @@ export default function KosmogramPage() {
   }, [chart, birthInput]);
 
   const d9 = useMemo(() => (chart ? navamsaChart(chart) : null), [chart]);
-  const d10 = useMemo(() => (chart ? dashamsaChart(chart) : null), [chart]);
   const finansowe = useMemo(() => (chart ? ocenaFinansowa(chart) : null), [chart]);
   const finanse = finansowe?.planety ?? [];
   const zdrowotne = useMemo(() => (chart ? ocenaZdrowotna(chart) : null), [chart]);
@@ -355,9 +350,9 @@ export default function KosmogramPage() {
           <KarakiCzarowe chart={chart} />
 
           {/* poczatkujacy/zaawansowany — poczatkujacy pokazuje tylko interpretacyjne rankingi
-              (Predyspozycje/Finanse/Zdrowie), zaawansowany cala reszte (diagramy, tabele, warga,
-              Asztakawarga, Szadbala, Dasza, Karaki, Jogi, Dosze, glosariusze). Kazda osoba ma
-              zawsze pelny kosmogram, wiec ten przelacznik jest zawsze widoczny (maPelneDane = true). */}
+              (Predyspozycje/Finanse/Zdrowie), zaawansowany cala reszte (diagramy, tabele,
+              Dasza, Karaki, Jogi, Dosze, glosariusze). Kazda osoba ma zawsze pelny kosmogram,
+              wiec ten przelacznik jest zawsze widoczny (maPelneDane = true). */}
           {maPelneDane && (
           <div className="card poziom-blok" style={{ marginBottom: 24 }}>
             <p className="eyebrow" style={{ marginBottom: 14 }}>Wybierz poziom szczegółowości</p>
@@ -372,13 +367,13 @@ export default function KosmogramPage() {
                 className={`poziom-opcja${tryb === "zaawansowany" ? " poziom-opcja-aktywna" : ""}`}
                 onClick={() => zmienTryb("zaawansowany")}>
                 <span className="poziom-opcja-etykieta">Pełne dane</span>
-                <span className="poziom-opcja-opis">Diagramy, warga, dasza, jogi i dosze</span>
+                <span className="poziom-opcja-opis">Diagramy, dasza, jogi i dosze</span>
               </button>
             </div>
             <p className="muted" style={{ fontSize: "0.8rem", marginTop: 14 }}>
               {tryb === "poczatkujacy"
                 ? "Predyspozycje (z możliwymi zawodami), finanse, zdrowie — bez surowych tabel i technicznych systemów."
-                : "Pełny obraz: diagramy D1/D9, wszystkie warga (w tym D10), Asztakawarga, Szadbala, dasza, jogi i dosze."}
+                : "Pełny obraz: diagramy D1/D9, dasza, jogi i dosze."}
             </p>
           </div>
           )}
@@ -580,11 +575,6 @@ export default function KosmogramPage() {
             </details>
           )}
 
-          <WargiDodatkowe chart={chart} styl={styl} d10={d10} />
-
-          <AsztakawargaSekcja chart={chart} />
-
-          <SzadbalaSekcja chart={chart} />
           </>}
 
           {/* predyspozycje + na co uwazac — jedna wspolna rozwijana karta, widoczna w trybie
@@ -760,20 +750,6 @@ export default function KosmogramPage() {
 
           {/* jogi klasyczne — szczęście, tuż pod predyspozycjami */}
           {tryb === "zaawansowany" && w.czasGleboko && <>
-
-          {/* os zycia — glowny diagram mapy zycia (przeszlosc/teraz/przyszlosc dasz z
-              rozwijanymi podokresami), przeniesiony z /mapa-zycia na prosbe uzytkownika;
-              umieszczony PRZED joga/dosza, bo to fundament ("kiedy"), na ktorym te dwie
-              mapy czasu dopiero nadbudowuja "co dokladnie sie wtedy odpala" */}
-          <div className="panel-navy" style={{ padding: "30px 22px 20px", marginBottom: 24 }}>
-            <p className="eyebrow" style={{ marginBottom: 6 }}>Twoja mapa linii czasu — kiedy · najbliższe okresy</p>
-            <p className="muted" style={{ fontSize: "0.9rem", marginBottom: 14 }}>
-              Twój czas ma dwa poziomy: wieloletni <Term k="mahadasza">wielki okres</Term>{" "}
-              i krótsze <Term k="antardasza">podokresy</Term> wewnątrz niego.
-              Najedź na podokres, aby poznać jego charakter.
-            </p>
-            <OsZycia dashas={chart.dashas} birth={chart.birth.date} chart={chart} />
-          </div>
 
           <JogiISzczescie chart={chart} />
 
