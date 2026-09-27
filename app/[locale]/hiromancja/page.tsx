@@ -144,8 +144,8 @@ export default function HiromancjaPage() {
   const rekaBierna: Reka = pismoReka === "prawa" ? "lewa" : "prawa";
 
   return (
-    <div className="container section">
-      <h1 style={{ textAlign: "center", color: "var(--sand)" }}><Term k="hiromancja">Chiromancja</Term></h1>
+    <div className="container section" style={{ paddingTop: 40 }}>
+      <h1 style={{ textAlign: "center", color: "var(--sand)", marginBottom: 16 }}><Term k="hiromancja">Chiromancja</Term></h1>
       <div className="skrot-hero-linia" />
       <p className="section-sub" style={{ color: "var(--sand)" }}>
         Prześlij zdjęcia obu dłoni — Claude spojrzy na nie i jakościowo opisze kształt dłoni oraz

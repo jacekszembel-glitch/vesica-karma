@@ -274,8 +274,9 @@ export default function KosmogramPage() {
   const maPelneDane = true;
 
   return (
-    <div className="container section">
-      <h1 style={{ textAlign: "center", color: "var(--sand)" }}>Astrologia Wedyjska</h1>
+    <div className="container section" style={{ paddingTop: 40 }}>
+      <h1 style={{ textAlign: "center", color: "var(--sand)", marginBottom: 16 }}>Astrologia Wedyjska</h1>
+      <div className="skrot-hero-linia" />
       <p className="section-sub" style={{ color: "var(--sand)" }}>
         Mapa nieba z chwili urodzenia w zodiaku syderycznym (ayanamsa Lahiri) —
         <Term k="lagna">lagna</Term>, <Term k="graha">9 grah</Term>, <Term k="dom">domy</Term>,{" "}

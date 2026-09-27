@@ -60,8 +60,9 @@ export default function NumerologiaPage() {
   }, [wynik, date, name]);
 
   return (
-    <div className="container section">
-      <h1 style={{ textAlign: "center", color: "var(--sand)" }}>Numerologia wedyjska</h1>
+    <div className="container section" style={{ paddingTop: 40 }}>
+      <h1 style={{ textAlign: "center", color: "var(--sand)", marginBottom: 16 }}>Numerologia wedyjska</h1>
+      <div className="skrot-hero-linia" />
       <p className="section-sub" style={{ color: "var(--sand)" }}>
         Indyjski system numerologii — każda liczba ma swoją planetę. Mulank (liczba urodzenia) i
         bhagyank (liczba przeznaczenia) liczymy zawsze z daty urodzenia; imię i nazwisko dodaje

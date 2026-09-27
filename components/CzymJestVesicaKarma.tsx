@@ -30,7 +30,7 @@ export default function CzymJestVesicaKarma() {
   // przegapic ja w trakcie przewijania.
   const [kliknieto, setKliknieto] = useState(false);
   return (
-    <div style={{ maxWidth: 720, margin: "84px auto 0" }}>
+    <div style={{ maxWidth: 720, margin: "40px auto 0" }}>
       {/* Ten sam h1 co "Astrologia Wedyjska" na /kosmogram — domyslny rozmiar
           z globals.css (clamp 2.5-4.1rem), tylko kolor/wyrownanie nadpisane.
           Sekcje nizej dzieli wylacznie pozioma kreska (.skrot-hero-linia),
@@ -38,6 +38,7 @@ export default function CzymJestVesicaKarma() {
       <h1 style={{ textAlign: "center", color: "var(--sand)", marginBottom: 16 }}>
         {t("tytul")}
       </h1>
+      <div className="skrot-hero-linia" />
       <p style={{ fontSize: "1.05rem", lineHeight: 1.6, color: "var(--sand)", textAlign: "center", marginBottom: 32 }}>
         {t("podtytul")}
       </p>
