@@ -64,10 +64,17 @@ export default function CzymJestVesicaKarma() {
           {t("zadenNieIstnieje")}
         </p>
 
+        {/* Szerszy niz kolumna tekstu (720px) — gwiazdy/planety w tle diagramu
+            wygladaly stloczone przy waskim ograniczeniu. "Wylamanie" poza
+            kolumne (100vw + margin-left:50%/translateX(-50%)) zamiast zwyklego
+            procentu szerokosci rodzica, zeby naprawde bylo szersze niz tekst. */}
         <img
           src="/brand/wykres-vesica-karma.png"
           alt={t("wykresAlt")}
-          style={{ display: "block", width: "100%", maxWidth: 520, margin: "0 auto 28px" }}
+          style={{
+            display: "block", width: "100vw", maxWidth: 900,
+            marginLeft: "50%", transform: "translateX(-50%)", marginBottom: 28,
+          }}
         />
 
         <p style={{ marginBottom: 16, color: "var(--sand)" }}>
