@@ -1,4 +1,7 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { useTranslations } from "next-intl";
+import { useKoloKarmyStart } from "./KoloKarmyStartContext";
 
 /**
  * Sekcja pod Kołem Karmy na stronie głównej — wyjaśnienie systemu, złożone
@@ -7,19 +10,33 @@ import { getTranslations } from "next-intl/server";
  * przekolorowanym na złoto w scripts/extract-wykres.mjs) wplecionym w
  * środku — dokładnie tam, gdzie podsumowuje "3 warunki -> 3 systemy ->
  * Koło Karmy -> kiedy/gdzie/co dalej".
+ *
+ * Nagłówek "Zacznij" jest jednocześnie przyciskiem uruchamiającym tryb
+ * interaktywny Koła Karmy wyżej na stronie (KoloKarmyStartContext) — po
+ * kliknięciu koło gaśnie do taupe i odkrywa się przez najeżdżanie. Komponent
+ * musiał przez to przejść na klienta (useTranslations zamiast getTranslations).
  */
-export default async function CzymJestVesicaKarma() {
-  const t = await getTranslations("CzymJestVesicaKarma");
+export default function CzymJestVesicaKarma() {
+  const t = useTranslations("CzymJestVesicaKarma");
+  const { wystartowano, zacznij } = useKoloKarmyStart();
   const strong = (c: React.ReactNode) => <strong>{c}</strong>;
   return (
     <div style={{ maxWidth: 720, margin: "70px auto 0" }}>
-      <h2
-        style={{
-          textAlign: "center", fontFamily: "var(--font-sans)", fontWeight: 800,
-          fontSize: "1.6rem", letterSpacing: "0.08em", color: "var(--sand)", marginBottom: 14,
-        }}
-      >
-        {t("zacznij")}
+      <h2 style={{ textAlign: "center", marginBottom: 14 }}>
+        <button
+          type="button"
+          onClick={zacznij}
+          disabled={wystartowano}
+          style={{
+            font: "inherit", fontFamily: "var(--font-sans)", fontWeight: 800,
+            fontSize: "1.6rem", letterSpacing: "0.08em", color: "var(--sand)",
+            background: "none", border: "none", padding: 0,
+            cursor: wystartowano ? "default" : "pointer",
+            opacity: wystartowano ? 0.6 : 1, transition: "opacity 0.3s ease",
+          }}
+        >
+          {t("zacznij")}
+        </button>
       </h2>
       <div style={{ width: 120, height: 2, background: "var(--gold)", margin: "0 auto 40px" }} />
 

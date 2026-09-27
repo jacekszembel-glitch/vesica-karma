@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import MoonStars from "./MoonStars";
+import { useKoloKarmyStart } from "./KoloKarmyStartContext";
 import { SEGMENT_GAPY, type SystemKarmy } from "@/lib/koloKarmyGeometria";
 
 /**
@@ -156,17 +157,19 @@ const TIP_W = 168;
 export type { SystemKarmy };
 
 /** Strona główna (hub nawigacyjny) startuje w pełnym złocie (jak przed
- *  reskinem), ale z `interaktywnyStart` — po kliknięciu "Zacznij" gaśnie do
- *  taupe i odkrywa się dopiero przez najeżdżanie (patrz `wystartowano` w
- *  komponencie). Prawdziwy, trwały wskaźnik postępu taupe→złoto to osobny
- *  język Mojego Panelu i jego breadcrumbów na podstronach — KoloKarmyMini.tsx. */
+ *  reskinem), ale z `interaktywnyStart` — po kliknięciu nagłówka „Zacznij"
+ *  w CzymJestVesicaKarma.tsx (współdzielony stan przez KoloKarmyStartContext)
+ *  gaśnie do taupe i odkrywa się dopiero przez najeżdżanie. Prawdziwy,
+ *  trwały wskaźnik postępu taupe→złoto to osobny język Mojego Panelu i jego
+ *  breadcrumbów na podstronach — KoloKarmyMini.tsx. */
 const WSZYSTKIE_SYSTEMY = new Set<SystemKarmy>(["astrologia", "hiromancja", "numerologia"]);
 
 export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY, interaktywnyStart = false }: {
   ukonczone?: Set<SystemKarmy>;
-  /** Tryb strony głównej: koło startuje w pełnym złocie (bez interakcji),
-   *  pokazuje przycisk „Zacznij", po kliknięciu płynnie gaśnie do taupe —
-   *  dopiero wtedy najechanie na dany element zapala go z powrotem. */
+  /** Tryb strony głównej: koło startuje w pełnym złocie (bez interakcji);
+   *  gdy `wystartowano` (z KoloKarmyStartContext, ustawiane przyciskiem gdzie
+   *  indziej na stronie) płynnie gaśnie do taupe — dopiero wtedy najechanie
+   *  na dany element zapala go z powrotem. */
   interaktywnyStart?: boolean;
 }) {
   const t = useTranslations("KoloKarmy");
@@ -179,7 +182,7 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   const [aktywny, setAktywny] = useState<string | null>(null);
   const [tip, setTip] = useState<{ label: string; left: number; top: number } | null>(null);
   const [hoverTytul, setHoverTytul] = useState(false);
-  const [wystartowano, setWystartowano] = useState(false);
+  const { wystartowano } = useKoloKarmyStart();
   const ukonczone = interaktywnyStart
     ? (wystartowano ? new Set<SystemKarmy>() : WSZYSTKIE_SYSTEMY)
     : ukonczoneProp;
@@ -207,12 +210,6 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
 
   return (
     <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
-      {/* Owinięcie SAMEGO obrazu (i wszystkich nakładek pozycjonowanych
-          względem niego) w osobny kontener — przycisk "Zacznij" niżej jest
-          normalnym elementem w przepływie, a złota warstwa (height:100%)
-          musi się odnosić TYLKO do wysokości obrazu, nie całego kola z
-          przyciskiem pod spodem (inaczej złota warstwa rozciąga się pionowo). */}
-      <div style={{ position: "relative" }}>
       {/* baza jako dwie nałożone warstwy (taupe pod spodem, złota na wierzchu
           z przejściem opacity) zamiast twardej zmiany `src` — dzięki temu
           "Zacznij" na stronie głównej gasi koło płynnie, nie skokowo. */}
@@ -399,21 +396,6 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
       ))}
 
       {dymek}
-      </div>
-
-      {/* Przycisk startu trybu interaktywnego — koło gaśnie płynnie (crossfade
-          bazy wyżej), przycisk znika tym samym przejściem, nie skokowo. */}
-      {interaktywnyStart && (
-        <div style={{
-          textAlign: "center", marginTop: 32,
-          opacity: wystartowano ? 0 : 1, pointerEvents: wystartowano ? "none" : "auto",
-          transition: "opacity 0.5s ease",
-        }}>
-          <button type="button" className="btn btn-primary" onClick={() => setWystartowano(true)}>
-            {t("przyciskZacznij")}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
