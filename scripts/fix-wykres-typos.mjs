@@ -65,10 +65,15 @@ function patchSvg({ width, height, pad, bg, text, fontSize, textLength, fill }) 
   );
 }
 
+// left przesuniety z 318 na 277: pierwsza proba centrowala tekst w dowolnie
+// dobranym prostokacie, nie w prawdziwym srodku elipsy (zmierzony lewy/prawy
+// brzeg elipsy w tej linii tekstu: x=227 i x=616, srodek=421.5) — stad napis
+// wychodzil widocznie przesuniety w prawo wzgledem pola. Teraz box ma ten sam
+// srodek co elipsa: 277+290/2=422.
 const PAD = 14;
-const NARIDZNY_BOX = { left: 318, top: 149, width: 290, height: 33 };
+const NARIDZNY_BOX = { left: 277, top: 149, width: 290, height: 33 };
 
-const bgNaridzny = await avgColor({ left: 318, top: 138, width: 290, height: 6 });
+const bgNaridzny = await avgColor({ left: 277, top: 138, width: 290, height: 6 });
 
 const patchNaridzny = patchSvg({
   width: NARIDZNY_BOX.width, height: NARIDZNY_BOX.height, pad: PAD, bg: bgNaridzny,
