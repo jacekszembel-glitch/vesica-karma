@@ -12,7 +12,6 @@ export default function Home() {
   return (
     <section className="section" style={{ position: "relative", overflow: "hidden", paddingTop: 60 }}>
       <div className="container" style={{ position: "relative", zIndex: 1 }}>
-        <h1 style={{ textAlign: "center", color: "var(--sand)" }}>Vesica Karma</h1>
         <KoloKarmyStartProvider>
           <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto" }}>
             <Starfield count={50} centerX={47.3} centerY={49.7} />

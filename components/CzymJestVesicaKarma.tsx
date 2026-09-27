@@ -38,18 +38,22 @@ export default function CzymJestVesicaKarma() {
           {t("zacznij")}
         </button>
       </h2>
-      <div style={{ width: 120, height: 2, background: "var(--gold)", margin: "0 auto 40px" }} />
+      <div className="skrot-hero-linia" />
 
-      <div
-        style={{
-          border: "1px dashed var(--line-gold)", borderRadius: 12, padding: "32px 30px",
-          color: "var(--sand)", fontSize: "0.95rem", lineHeight: 1.8,
-        }}
-      >
-        <p style={{ marginBottom: 16 }}>
-          {t.rich("wstep", { strong })}
-        </p>
+      {/* Nagłówek "Jedno spojrzenie" — bez ramek/boxów, sekcje niżej dzieli
+          wyłącznie pozioma kreska (.skrot-hero-linia), ten sam wzorzec co
+          np. ProfilDuszy.tsx. */}
+      <h1 style={{
+        fontFamily: "var(--font-serif)", fontSize: "2.6rem", color: "var(--sand)",
+        fontWeight: 700, marginBottom: 16, textAlign: "center",
+      }}>
+        {t("tytul")}
+      </h1>
+      <p style={{ fontSize: "0.95rem", lineHeight: 1.6, color: "var(--sand)", textAlign: "center", marginBottom: 32 }}>
+        {t("podtytul")}
+      </p>
 
+      <div style={{ color: "var(--sand)", fontSize: "0.95rem", lineHeight: 1.8 }}>
         <p style={{ marginBottom: 16 }}>
           {t("trzyWarunki")}
         </p>
@@ -80,11 +84,18 @@ export default function CzymJestVesicaKarma() {
           {t.rich("dlonDominujaca", { strong })}
         </p>
 
-        <p style={{ marginBottom: 28 }}>
+        <p>
           {t.rich("dlonBierna", { strong })}
         </p>
+      </div>
 
-        <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.15rem", marginBottom: 12 }}>
+      <div className="skrot-hero-linia" />
+
+      <div style={{ color: "var(--sand)", fontSize: "0.95rem", lineHeight: 1.8 }}>
+        <p style={{
+          fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--sand)",
+          textAlign: "center", marginBottom: 16,
+        }}>
           {t("kiedyGdzieCoDalej")}
         </p>
 
@@ -108,6 +119,8 @@ export default function CzymJestVesicaKarma() {
           {t.rich("vesicaPiscis", { strong })}
         </p>
       </div>
+
+      <div className="skrot-hero-linia" />
     </div>
   );
 }
