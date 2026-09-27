@@ -111,6 +111,19 @@ const PIKTOGRAMY_PULSUJACE = [
   { id: "numerologia", box: [708, 360, 831, 572] as const },
 ];
 
+/** Piktogramy we WSPÓLNYCH soczewkach (dom/klepsydra/postać) — każda leży
+ *  dokładnie na przecięciu DWÓCH kręgów, więc zapala się złotem, gdy
+ *  KTÓRYKOLWIEK z tej pary jest ukończony (tak jak złoty pierścień faktycznie
+ *  ją obejmuje) — nie wymaga obu naraz. Wycięte z grafiki tą samą metodą co
+ *  piktogramy pulsujące (public/brand/icon-<id>.png), boxy zmierzone przez
+ *  izolację spójnych składowych w lokalnym oknie (odporne na dotykanie
+ *  pierścienia — patrz nakszatra postaci "kto"). */
+const PIKTOGRAMY_WSPOLNE = [
+  { id: "gdzie", box: [461, 287, 506, 332] as const, pary: ["astrologia", "hiromancja"] as const },
+  { id: "kiedy", box: [695, 288, 730, 333] as const, pary: ["astrologia", "numerologia"] as const },
+  { id: "kto", box: [581, 474, 611, 548] as const, pary: ["hiromancja", "numerologia"] as const },
+];
+
 function pctX(v: number) { return `${(v / IMG_W) * 100}%`; }
 function pctY(v: number) { return `${(v / IMG_H) * 100}%`; }
 
@@ -216,6 +229,23 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
             width: pctX(p.box[2] - p.box[0]), height: pctY(p.box[3] - p.box[1]),
           }} />
       ))}
+
+      {/* piktogramy wspólne — złote, gdy choć jeden z dwóch systemów w
+          przecięciu jest ukończony (na stronie głównej wszystkoZlote=true,
+          więc i tak zawsze złote — to działa naprawdę dopiero na
+          /astrologia, /hiromancja, /numerologia, gdzie ukonczone ma 1 element). */}
+      {PIKTOGRAMY_WSPOLNE.map((p) => {
+        const zlote = wszystkoZlote || p.pary.some((id) => ukonczone.has(id));
+        return (
+          <img key={`ikona-wspolna-${p.id}`}
+            src={`/brand/icon-${p.id}${zlote ? "" : "-taupe"}.png`} alt=""
+            style={{
+              position: "absolute", pointerEvents: "none",
+              left: pctX(p.box[0]), top: pctY(p.box[1]),
+              width: pctX(p.box[2] - p.box[0]), height: pctY(p.box[3] - p.box[1]),
+            }} />
+        );
+      })}
 
       {/* satelity Karmy — kropka, ramię i podpis w całości narysowane, widoczne tylko na hover */}
       <svg viewBox={`0 0 ${IMG_W} ${IMG_H}`} aria-hidden="true"
