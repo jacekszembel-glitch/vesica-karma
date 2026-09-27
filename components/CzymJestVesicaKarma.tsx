@@ -128,9 +128,11 @@ export default function CzymJestVesicaKarma() {
           }}
           disabled={kliknieto}
           style={{
-            font: "inherit", fontFamily: "var(--font-sans)", fontWeight: 800,
-            fontSize: "1.6rem", letterSpacing: "0.08em", color: "var(--sand)",
-            background: "none", border: "none", padding: 0,
+            width: 150, height: 150, borderRadius: "50%",
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "var(--font-sans)", fontWeight: 800, textTransform: "uppercase",
+            fontSize: "1.15rem", letterSpacing: "0.08em", color: "var(--bg)",
+            background: "var(--sand)", border: "none",
             cursor: kliknieto ? "default" : "pointer",
             opacity: kliknieto ? 0.6 : 1, transition: "opacity 0.3s ease",
           }}
