@@ -158,26 +158,21 @@ export default function HiromancjaPage() {
         <p id="hiro-pismo-label" style={{ textAlign: "center", fontWeight: 700, color: "var(--sand)", marginBottom: 10 }}>
           Którą ręką piszesz?
         </p>
+        {/* Prawdziwy wycinek pikseli z chiromanca-2.jpg (scripts/extract-hand-toggle.mjs)
+            zamiast plaskich kolorow CSS — dwa stany (ktora strona zlota) to dwa
+            gotowe obrazki, nie przemalowany na biezaco div. */}
         <div role="radiogroup" aria-labelledby="hiro-pismo-label"
-          style={{ display: "flex", maxWidth: 320, margin: "0 auto", borderRadius: 999, overflow: "hidden" }}>
-          <button type="button" role="radio" aria-checked={pismoReka === "lewa"}
+          style={{ position: "relative", maxWidth: 320, margin: "0 auto", lineHeight: 0 }}>
+          <img
+            src={pismoReka === "lewa" ? "/brand/toggle-lewa-aktywna.png" : "/brand/toggle-prawa-aktywna.png"}
+            alt="" style={{ width: "100%", height: "auto", display: "block" }}
+          />
+          <button type="button" role="radio" aria-checked={pismoReka === "lewa"} aria-label="Lewa"
             onClick={() => setPismoReka("lewa")}
-            style={{
-              flex: 1, padding: "10px 0", border: "none", cursor: "pointer", fontWeight: 700,
-              background: pismoReka === "lewa" ? "var(--sand)" : "var(--taupe-soft)",
-              color: pismoReka === "lewa" ? "#1a1330" : "var(--sand)",
-            }}>
-            Lewa
-          </button>
-          <button type="button" role="radio" aria-checked={pismoReka === "prawa"}
+            style={{ position: "absolute", left: 0, top: 0, width: "50%", height: "100%", background: "transparent", border: "none", cursor: "pointer" }} />
+          <button type="button" role="radio" aria-checked={pismoReka === "prawa"} aria-label="Prawa"
             onClick={() => setPismoReka("prawa")}
-            style={{
-              flex: 1, padding: "10px 0", border: "none", cursor: "pointer", fontWeight: 700,
-              background: pismoReka === "prawa" ? "var(--sand)" : "var(--taupe-soft)",
-              color: pismoReka === "prawa" ? "#1a1330" : "var(--sand)",
-            }}>
-            Prawa
-          </button>
+            style={{ position: "absolute", right: 0, top: 0, width: "50%", height: "100%", background: "transparent", border: "none", cursor: "pointer" }} />
         </div>
         <div style={{ display: "flex", maxWidth: 320, margin: "6px auto 24px" }}>
           <span style={{ flex: 1, textAlign: "center", fontSize: "0.68rem", letterSpacing: "0.05em", color: "var(--sand)", fontWeight: 700 }}>
