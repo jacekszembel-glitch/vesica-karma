@@ -132,17 +132,17 @@ export default function HiromancjaPage() {
 
   return (
     <div className="container section">
-      <h1 style={{ textAlign: "center" }}><Term k="hiromancja">Chiromancja</Term></h1>
-      <p className="section-sub">
+      <h1 style={{ textAlign: "center", color: "var(--sand)" }}><Term k="hiromancja">Chiromancja</Term></h1>
+      <p className="section-sub" style={{ color: "var(--sand)" }}>
         Prześlij zdjęcia obu dłoni — Claude spojrzy na nie i jakościowo opisze kształt dłoni oraz
         widoczne linie. To subiektywna obserwacja AI, nie pomiar. Jeśli chcesz dokładniejszego,
         policzonego typu dłoni — możesz dodatkowo zaznaczyć 5 punktów ręcznie (opcjonalnie, czysta
         matematyka bez AI).
       </p>
-      <p className="muted" style={{ textAlign: "center", fontSize: "0.85rem", maxWidth: 640, margin: "-30px auto 40px", lineHeight: 1.6 }}>
+      <p style={{ textAlign: "center", maxWidth: 640, margin: "-20px auto 40px", lineHeight: 1.6, color: "var(--sand)" }}>
         Tak jak w astrologii wedyjskiej D1 pokazuje przejawione życie, a D9 wrodzoną naturę — tu dłoń{" "}
-        <strong style={{ color: "var(--sand)" }}>dominująca</strong> (ta, którą piszesz) pokazuje, co
-        świadomie zrobiłeś/aś ze sobą, a dłoń <strong style={{ color: "var(--sand)" }}>bierna</strong>{" "}
+        <strong>dominująca</strong> (ta, którą piszesz) pokazuje, co
+        świadomie zrobiłeś/aś ze sobą, a dłoń <strong>bierna</strong>{" "}
         wrodzony potencjał i talenty, z którymi się urodziłeś/aś.
       </p>
 
