@@ -112,6 +112,16 @@ p { color: var(--text); }
 
 .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 
+/* Opakowanie Koła Karmy (strona główna + wszystkie podstrony-systemy) —
+   na komputerach 1000px było za duże, obszar logo->nagłówek "Vesica Karma"
+   nie mieścił się na ekranie bez przewijania. Na telefonach (poniżej 900px)
+   i tak liczy się szerokość viewportu, nie ten limit, więc tam nic się nie
+   zmienia — mniejszy limit dotyczy wyłącznie szerszych ekranów. */
+.kolo-karmy-wrap { max-width: 1000px; }
+@media (min-width: 900px) {
+  .kolo-karmy-wrap { max-width: 720px; }
+}
+
 /* ═══ nagłówek / menu ═══ */
 .site-header {
   position: sticky;
