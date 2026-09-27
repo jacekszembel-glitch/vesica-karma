@@ -17,7 +17,7 @@ import { wczytajOdczytDloni } from "@/lib/hiromancjaOdczytStore";
  * KARMA — synteza trzech systemów w miejscu satelity "Co z tym zrobić?" na
  * Kole Karmy. Numerologia i astrologia dają tu POLICZONE potwierdzenie (ten
  * sam most co w karma.ts — Mulank/Bhagyank skonfrontowane z ich oceną w
- * mapie); chiromancja dokłada TRZECI, jakościowy głos z ostatniego zapisanego
+ * mapie); hiromancja dokłada TRZECI, jakościowy głos z ostatniego zapisanego
  * odczytu AI dłoni (lib/hiromancjaOdczytStore.ts) — świadomie bez sztucznego
  * "potwierdzenia" liczbowego, bo to tekst AI, nie ocena punktowa planety.
  *
@@ -42,7 +42,7 @@ const POTWIERDZENIE_BADGE: Record<Potwierdzenie, string> = {
 const SYSTEMY: { id: SystemKarmy; label: string; href: string }[] = [
   { id: "astrologia", label: "Astrologię", href: "/kosmogram" },
   { id: "numerologia", label: "Numerologię", href: "/numerologia" },
-  { id: "hiromancja", label: "Chiromancję", href: "/hiromancja" },
+  { id: "hiromancja", label: "Hiromancję", href: "/hiromancja" },
 ];
 
 /** Skromny odpowiednik akapitHtml z Interpretation.tsx — tylko pogrubienia
@@ -117,7 +117,7 @@ export default function KarmaPage() {
       <h1 style={{ textAlign: "center" }}><Term k="karma">Karma</Term></h1>
       <p className="section-sub">
         Trzy warunki narodzin — czas, miejsce, rodzina (ciało, imię i nazwisko) — karmią trzy systemy
-        odczytu. Numerologia i astrologia dają tu policzone potwierdzenie; chiromancja dokłada trzeci,
+        odczytu. Numerologia i astrologia dają tu policzone potwierdzenie; hiromancja dokłada trzeci,
         jakościowy głos z Twojego ostatniego odczytu dłoni.
       </p>
 
@@ -151,7 +151,7 @@ export default function KarmaPage() {
         {/* Trzeci, jakosciowy glos — nie liczbowe potwierdzenie, tylko co dlon mowi o tym samym temacie */}
         {dloniTekst && (
           <div className="card fade-up" style={{ marginBottom: 20, borderTop: "2px solid var(--teal-soft)" }}>
-            <p className="eyebrow" style={{ marginBottom: 8 }}>Trzeci głos — chiromancja</p>
+            <p className="eyebrow" style={{ marginBottom: 8 }}>Trzeci głos — hiromancja</p>
             <div style={{ fontSize: "0.9rem", lineHeight: 1.6 }}
               dangerouslySetInnerHTML={{ __html: `<p>${tekstHtml(dloniTekst)}</p>` }} />
             <p className="muted" style={{ fontSize: "0.76rem", marginTop: 14 }}>

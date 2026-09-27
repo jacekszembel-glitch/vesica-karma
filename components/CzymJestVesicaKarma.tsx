@@ -113,6 +113,10 @@ export default function CzymJestVesicaKarma() {
           </li>
         </ul>
 
+        <p style={{ marginBottom: 16 }}>
+          {t.rich("vesicaPiscisCzymJest", { em: (c) => <em>{c}</em> })}
+        </p>
+
         <p>
           {t.rich("vesicaPiscis", { strong })}
         </p>

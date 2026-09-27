@@ -68,7 +68,7 @@ TWOJE ZADANIE — analizuj MOŻLIWIE NAJWIĘCEJ z tego, co faktycznie widać na 
 3. LINIE DRUGORZĘDNE, jeśli widoczne — linia zdrowia/wątroby, linia Merkurego, linia intuicji, linie relacji/więzów uczuciowych (krótkie kreski pod palcem serdecznym po stronie krawędzi dłoni), bransoletki na nadgarstku (rascettes).
 4. WZGÓRKI (mounts) — czy któryś obszar dłoni (pod poszczególnymi palcami, u podstawy kciuka, przy nadgarstku) wygląda na wyraźnie wypukły/rozwinięty albo płaski — klasycznie łączone z Wenus, Jowiszem, Saturnem, Słońcem/Apollem, Merkurym, Marsem, Księżycem, odpowiednio do położenia.
 5. ZNAKI SZCZEGÓLNE — krzyż mistyczny (mały X między linią serca a głowy, pod palcem środkowym/serdecznym — kojarzony z intuicją i wrażliwością duchową), gwiazda, wyspa, trójkąt, kratka i inne wyraźne symbole.
-6. PAZNOKCIE I SKÓRA — jeśli coś rzuca się w oczy (kształt paznokci, faktura skóry) i klasycznie się to czyta w chiromancji.
+6. PAZNOKCIE I SKÓRA — jeśli coś rzuca się w oczy (kształt paznokci, faktura skóry) i klasycznie się to czyta w hiromancji.
 Dla KAŻDEGO punktu: pisz TYLKO o tym, co faktycznie widać wyraźnie na zdjęciu — pomijaj bez komentarza to, czego nie widać albo co jest niepewne, zamiast zgadywać czy wymyślać. Lepiej krócej i szczerze niż wyczerpująco i zmyślone.
 Jeśli w danych jest pole "geometria" dla danej ręki — to jest już POLICZONY, precyzyjny typ dłoni (z punktów wskazanych ręcznie przez użytkownika). Wtedy NIE zgaduj kształtu od nowa w punkcie 1 — po prostu wspomnij ten policzony typ jako pewniejszy niż Twoje wrażenie, i skup się głównie na pozostałych punktach.
 

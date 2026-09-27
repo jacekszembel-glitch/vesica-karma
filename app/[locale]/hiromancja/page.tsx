@@ -104,7 +104,7 @@ function KartaDloni({ reka, dominujaca, zdjecie, geometria, onZdjecie, onGeometr
               Kształt dłoni (kwadratowa/wydłużona) i proporcja palca (krótki/długi) to dwa realne,
               policzone stosunki odległości między punktami, które wskazałeś/aś. Progi klasyfikacji
               (1.15 dla kształtu, 1.0 dla proporcji palca) to najczęściej cytowane wartości w źródłach
-              popularnych o chiromancji — nie ma tu jednego, naukowo zmierzonego standardu, różne
+              popularnych o hiromancji — nie ma tu jednego, naukowo zmierzonego standardu, różne
               szkoły podają nieco inne progi. Wynik zależy też od precyzji Twojej kalibracji i kąta
               zdjęcia — jeśli typ wydaje się nie pasować, spróbuj skalibrować ponownie.
             </p>
@@ -132,7 +132,7 @@ export default function HiromancjaPage() {
 
   return (
     <div className="container section">
-      <h1 style={{ textAlign: "center" }}><Term k="hiromancja">Chiromancja</Term></h1>
+      <h1 style={{ textAlign: "center" }}><Term k="hiromancja">Hiromancja</Term></h1>
       <p className="section-sub">
         Prześlij zdjęcia obu dłoni — Claude spojrzy na nie i jakościowo opisze kształt dłoni oraz
         widoczne linie. To subiektywna obserwacja AI, nie pomiar. Jeśli chcesz dokładniejszego,

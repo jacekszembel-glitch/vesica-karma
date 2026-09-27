@@ -365,10 +365,10 @@ export const GLOSSARY: Record<string, Term> = {
   // ── Karma (most między systemami) ──────────────────────
   karma: {
     title: "Karma",
-    text: "Przy narodzinach spełnione są trzy warunki — czas, miejsce i rodzina (ciało, imię i nazwisko) — z których każdy karmi inny system odczytu: czas i miejsce astrologię, czas i imię numerologię, ciało chiromancję. Gdy niezależne systemy wskazują to samo, to mocniejszy sygnał niż jeden system osobno. Tu łączymy dwa, które w pełni działają — numerologię i astrologię; chiromancja to trzeci filar, jeszcze nie zbudowany.",
+    text: "Przy narodzinach spełnione są trzy warunki — czas, miejsce i rodzina (ciało, imię i nazwisko) — z których każdy karmi inny system odczytu: czas i miejsce astrologię, czas i imię numerologię, ciało hiromancję. Gdy niezależne systemy wskazują to samo, to mocniejszy sygnał niż jeden system osobno. Tu łączymy dwa, które w pełni działają — numerologię i astrologię; hiromancja to trzeci filar, jeszcze nie zbudowany.",
   },
   hiromancja: {
-    title: "Chiromancja",
+    title: "Hiromancja",
     text: "Wróżenie z dłoni — tu z DWÓCH dłoni naraz, tak jak w astrologii wedyjskiej czyta się D1 obok D9: dłoń dominująca (ta, którą piszesz) pokazuje przejawione życie i świadome wybory, dłoń bierna — wrodzony potencjał i talenty. Strona dzieli się na dwie osobne części: geometryczny typ dłoni (Ziemia/Powietrze/Ogień/Woda), liczony deterministycznie z punktów, które sam/sama wskażesz na zdjęciu, oraz AI-owy, jakościowy odczyt widocznych linii serca, głowy, życia i losu — subiektywna obserwacja, nie pomiar.",
   },
   potwierdzeniekarmy: {

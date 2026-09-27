@@ -12,7 +12,7 @@ import { ukonczoneSystemyKarmy, type SystemKarmy } from "@/lib/koloKarmyGeometri
  * Gdy komplet — hasło pod kafelkami staje się linkiem do /karma (synteza).
  */
 const SYSTEMY: { id: SystemKarmy; label: string; href: string }[] = [
-  { id: "hiromancja", label: "Chiromancja", href: "/hiromancja" },
+  { id: "hiromancja", label: "Hiromancja", href: "/hiromancja" },
   { id: "astrologia", label: "Astrologia", href: "/kosmogram" },
   { id: "numerologia", label: "Numerologia", href: "/numerologia" },
 ];
@@ -129,7 +129,7 @@ export default function Page() {
           Jest zestawieniem trzech systemów, które każdy w inny sposób opisuje każdego z nas
           od samego urodzenia. Każdy z nas, aby mógł przyjść na ten świat, musiał spełnić trzy
           warunki: miejsce, czas oraz ciało. Te trzy bezwzględne warunki mają swoje odpowiedniki
-          w astrologii, numerologii i chiromancji — pierwsza metoda opisuje za pomocą miejsca,
+          w astrologii, numerologii i hiromancji — pierwsza metoda opisuje za pomocą miejsca,
           daty i godziny, druga metoda używa daty oraz imienia i nazwiska, trzecia zaś korzysta
           z samego ciała, na którym zapisana jest — tak samo jak w gwiazdach — nasza karma.
           Musimy ją tylko odnaleźć i korzystać z jej dobrodziejstw.
