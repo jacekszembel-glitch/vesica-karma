@@ -23,10 +23,16 @@ import type { WynikGeometrii } from "@/lib/hiromancja";
  * DWIE DŁONIE, jak D1/D9 w astrologii wedyjskiej: dłoń DOMINUJĄCA (ta,
  * którą się pisze) to D1 — co świadomie zrobiłeś ze sobą, przejawione życie;
  * dłoń BIERNA to D9 — wrodzony potencjał i talenty, z którymi się urodziłeś.
- * Układ na stronie jest PROSTY, nie lustrzany: lewa dłoń zawsze po LEWEJ
- * stronie ekranu, prawa dłoń zawsze po PRAWEJ. Podpis "dominująca" wędruje
- * między kolumnami zależnie od wyboru "którą ręką piszesz", pozycje
- * kolumn — nie.
+ *
+ * Układ (wzór: public/brand/chiromancja-1/3/4.jpg): kompaktowy rząd dwóch
+ * przycisków uploadu na górze (HiromancjaZdjecie samo pokazuje status —
+ * zmienia etykietę na "Zmień zdjęcie" i dokleja wynik szybkiego sprawdzenia
+ * jakości), a NIŻEJ, w jednej kolumnie, osobna sekcja na każdą dłoń: złoty
+ * okrągły medalion z ikoną dłoni (public/brand/icon-dlon-lewa/prawa.png —
+ * wycięte z tej samej pary dłoni co na Kole Karmy, patrz
+ * scripts/extract-single-hands.mjs), podpis "LEWA/PRAWA DŁOŃ — dominująca/
+ * bierna" i wyjaśnienie D1/D9. Kalibracja i wynik geometrii zostają pod
+ * spodem tej samej sekcji, żeby nie gubić istniejącej funkcji.
  *
  * Świadomie POZA zakresem v1: integracja z /karma jako trzeci filar (kolejny,
  * osobny krok — nie ruszamy tu app/karma/page.tsx), getUserMedia/<video>
@@ -44,32 +50,39 @@ const PLEC_OPCJE: { id: "on" | "ona" | "ono"; label: string }[] = [
   { id: "on", label: "On" }, { id: "ona", label: "Ona" }, { id: "ono", label: "Obiekt" },
 ];
 
-function KartaDloni({ reka, dominujaca, zdjecie, geometria, onZdjecie, onGeometria }: {
+const IKONA_DLONI: Record<Reka, string> = {
+  lewa: "/brand/icon-dlon-lewa.png",
+  prawa: "/brand/icon-dlon-prawa.png",
+};
+
+function SekcjaDloni({ reka, dominujaca, zdjecie, geometria, onGeometria }: {
   reka: Reka;
   dominujaca: boolean;
   zdjecie: ZdjecieDane | null;
   geometria: WynikGeometrii | null;
-  onZdjecie: (dane: ZdjecieDane) => void;
   onGeometria: (wynik: WynikGeometrii) => void;
 }) {
-  const nazwa = reka === "prawa" ? "Prawa dłoń" : "Lewa dłoń";
+  const nazwa = reka === "prawa" ? "PRAWA DŁOŃ" : "LEWA DŁOŃ";
   return (
-    <div>
-      <div className="card" style={{ textAlign: "center" }}>
-        <HiromancjaZdjecie
-          id={`hiromancja-plik-${reka}`}
-          etykieta={`Zrób zdjęcie — ${nazwa.toLowerCase()}`}
-          maZdjecie={!!zdjecie}
-          onZdjecieGotowe={onZdjecie}
-        />
-        <p style={{ marginTop: 12, fontSize: "0.85rem" }}>
-          <strong>{nazwa}</strong>
-          {dominujaca && <span className="badge badge-good" style={{ marginLeft: 8, fontSize: "0.7rem" }}>dominująca</span>}
-        </p>
+    <div style={{ maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
+      <div style={{
+        width: 200, height: 200, borderRadius: "50%", border: "3px solid var(--sand)",
+        margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        <img src={IKONA_DLONI[reka]} alt="" style={{ width: "58%", height: "auto" }} />
       </div>
+      <p style={{ marginTop: 16, marginBottom: 0, fontFamily: "var(--font-serif)", fontSize: "1.1rem", color: "var(--sand)", letterSpacing: "0.02em" }}>
+        {nazwa} — {dominujaca ? "dominująca" : "bierna"}
+      </p>
+      <p style={{ marginTop: 12, lineHeight: 1.6, color: "var(--sand)" }}>
+        Tak jak w astrologii wedyjskiej D1 pokazuje przejawione życie, a D9 wrodzoną naturę — ta dłoń{" "}
+        {dominujaca
+          ? <><strong>dominująca</strong> (ta, którą piszesz) pokazuje, co świadomie zrobiłeś/aś ze sobą.</>
+          : <><strong>bierna</strong> pokazuje wrodzony potencjał i talenty, z którymi się urodziłeś/aś.</>}
+      </p>
 
       {zdjecie && !geometria && (
-        <details className="card fade-up" style={{ marginTop: 20 }}>
+        <details className="card fade-up" style={{ marginTop: 20, textAlign: "left" }}>
           <summary style={{ cursor: "pointer", fontSize: "0.85rem", color: "var(--sand)" }}>
             Zaznacz punkty ręcznie — dokładniejszy, policzony typ dłoni (opcjonalnie)
           </summary>
@@ -83,7 +96,7 @@ function KartaDloni({ reka, dominujaca, zdjecie, geometria, onZdjecie, onGeometr
       )}
 
       {geometria && (
-        <div className="card fade-up" style={{ marginTop: 20, borderTop: `2px solid ${KOLOR_TYPU[geometria.typ]}` }}>
+        <div className="card fade-up" style={{ marginTop: 20, textAlign: "left", borderTop: `2px solid ${KOLOR_TYPU[geometria.typ]}` }}>
           <p className="eyebrow" style={{ marginBottom: 6 }}>Typ dłoni — geometria (deterministyczne, ręczna kalibracja)</p>
           <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.3rem", color: KOLOR_TYPU[geometria.typ], marginBottom: 8 }}>
             {OPIS_TYPU_DLONI[geometria.typ].title}
@@ -133,102 +146,106 @@ export default function HiromancjaPage() {
   return (
     <div className="container section">
       <h1 style={{ textAlign: "center", color: "var(--sand)" }}><Term k="hiromancja">Chiromancja</Term></h1>
+      <div className="skrot-hero-linia" />
       <p className="section-sub" style={{ color: "var(--sand)" }}>
         Prześlij zdjęcia obu dłoni — Claude spojrzy na nie i jakościowo opisze kształt dłoni oraz
         widoczne linie. To subiektywna obserwacja AI, nie pomiar. Jeśli chcesz dokładniejszego,
         policzonego typu dłoni — możesz dodatkowo zaznaczyć 5 punktów ręcznie (opcjonalnie, czysta
         matematyka bez AI).
       </p>
-      <p style={{ textAlign: "center", maxWidth: 640, margin: "-20px auto 40px", lineHeight: 1.6, color: "var(--sand)" }}>
-        Tak jak w astrologii wedyjskiej D1 pokazuje przejawione życie, a D9 wrodzoną naturę — tu dłoń{" "}
-        <strong>dominująca</strong> (ta, którą piszesz) pokazuje, co
-        świadomie zrobiłeś/aś ze sobą, a dłoń <strong>bierna</strong>{" "}
-        wrodzony potencjał i talenty, z którymi się urodziłeś/aś.
-      </p>
 
-      <div>
-        <div className="card" style={{ maxWidth: 640, margin: "0 auto" }}>
-          <label id="hiro-pismo-label">Którą ręką piszesz?</label>
-          <div className="bf-plec" role="radiogroup" aria-labelledby="hiro-pismo-label" style={{ marginBottom: 14 }}>
-            <button type="button" role="radio" aria-checked={pismoReka === "prawa"}
-              className={`bf-plec-opcja${pismoReka === "prawa" ? " bf-plec-opcja-aktywna" : ""}`}
-              onClick={() => setPismoReka("prawa")}>
-              Prawą
-            </button>
-            <button type="button" role="radio" aria-checked={pismoReka === "lewa"}
-              className={`bf-plec-opcja${pismoReka === "lewa" ? " bf-plec-opcja-aktywna" : ""}`}
-              onClick={() => setPismoReka("lewa")}>
-              Lewą
-            </button>
-          </div>
-          <p className="muted" style={{ fontSize: "0.78rem" }}>
-            Zdjęcia nigdzie nie są zapisywane — trafiają z przeglądarki prosto do modelu AI (dopiero
-            gdy klikniesz „Odczytaj” niżej) i nie są przechowywane na serwerze ani w bazie danych.
-          </p>
+      <div className="card" style={{ maxWidth: 640, margin: "0 auto" }}>
+        <label id="hiro-pismo-label">Którą ręką piszesz?</label>
+        <div className="bf-plec" role="radiogroup" aria-labelledby="hiro-pismo-label" style={{ marginBottom: 14 }}>
+          <button type="button" role="radio" aria-checked={pismoReka === "prawa"}
+            className={`bf-plec-opcja${pismoReka === "prawa" ? " bf-plec-opcja-aktywna" : ""}`}
+            onClick={() => setPismoReka("prawa")}>
+            Prawą
+          </button>
+          <button type="button" role="radio" aria-checked={pismoReka === "lewa"}
+            className={`bf-plec-opcja${pismoReka === "lewa" ? " bf-plec-opcja-aktywna" : ""}`}
+            onClick={() => setPismoReka("lewa")}>
+            Lewą
+          </button>
         </div>
+        <p className="muted" style={{ fontSize: "0.78rem" }}>
+          Zdjęcia nigdzie nie są zapisywane — trafiają z przeglądarki prosto do modelu AI (dopiero
+          gdy klikniesz „Odczytaj” niżej) i nie są przechowywane na serwerze ani w bazie danych.
+        </p>
+      </div>
 
-        {/* Układ prosty, nie lustrzany: LEWA zawsze po lewej stronie ekranu, PRAWA zawsze
-            po prawej — niezależnie od tego, która jest dominująca. */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: 20, marginTop: 20 }}>
-          <KartaDloni reka="lewa" dominujaca={pismoReka === "lewa"}
-            zdjecie={zdjecia.lewa} geometria={geometrie.lewa}
-            onZdjecie={(d) => handleZdjecie("lewa", d)} onGeometria={(w) => setGeometrie((g) => ({ ...g, lewa: w }))} />
-          <KartaDloni reka="prawa" dominujaca={pismoReka === "prawa"}
-            zdjecie={zdjecia.prawa} geometria={geometrie.prawa}
-            onZdjecie={(d) => handleZdjecie("prawa", d)} onGeometria={(w) => setGeometrie((g) => ({ ...g, prawa: w }))} />
-        </div>
+      <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap", margin: "28px 0" }}>
+        <HiromancjaZdjecie id="hiromancja-plik-lewa" etykieta="Prześlij zdjęcie — lewa dłoń"
+          maZdjecie={!!zdjecia.lewa} onZdjecieGotowe={(d) => handleZdjecie("lewa", d)} />
+        <HiromancjaZdjecie id="hiromancja-plik-prawa" etykieta="Prześlij zdjęcie — prawa dłoń"
+          maZdjecie={!!zdjecia.prawa} onZdjecieGotowe={(d) => handleZdjecie("prawa", d)} />
+      </div>
 
-        {obaZdjeciaGotowe && (
-          <div className="fade-up" style={{ marginTop: 20, maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
-            <div className="card" style={{ marginBottom: 20 }}>
-              <div style={{ marginBottom: 14 }}>
-                <label htmlFor="hiro-imie">Imię (opcjonalnie — do tonu odczytu AI)</label>
-                <input id="hiro-imie" type="text" placeholder="np. Jacek" value={imie}
-                  onChange={(e) => setImie(e.target.value)} />
-              </div>
-              <div>
-                <label id="hiro-plec-label">Płeć (do tonu odczytu AI)</label>
-                <div className="bf-plec" role="radiogroup" aria-labelledby="hiro-plec-label">
-                  {PLEC_OPCJE.map((p) => (
-                    <button key={p.id} type="button" role="radio" aria-checked={plec === p.id}
-                      className={`bf-plec-opcja${plec === p.id ? " bf-plec-opcja-aktywna" : ""}`}
-                      onClick={() => setPlec(p.id)}>
-                      {p.label}
-                    </button>
-                  ))}
-                </div>
+      <div className="skrot-hero-linia" />
+
+      <div style={{ display: "grid", gap: 40, marginTop: 40 }}>
+        <SekcjaDloni reka="lewa" dominujaca={pismoReka === "lewa"}
+          zdjecie={zdjecia.lewa} geometria={geometrie.lewa}
+          onGeometria={(w) => setGeometrie((g) => ({ ...g, lewa: w }))} />
+
+        <div className="skrot-hero-linia" />
+
+        <SekcjaDloni reka="prawa" dominujaca={pismoReka === "prawa"}
+          zdjecie={zdjecia.prawa} geometria={geometrie.prawa}
+          onGeometria={(w) => setGeometrie((g) => ({ ...g, prawa: w }))} />
+      </div>
+
+      {obaZdjeciaGotowe && (
+        <div className="fade-up" style={{ marginTop: 40, maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
+          <div className="skrot-hero-linia" style={{ marginTop: 0 }} />
+          <div className="card" style={{ marginBottom: 20 }}>
+            <div style={{ marginBottom: 14 }}>
+              <label htmlFor="hiro-imie">Imię (opcjonalnie — do tonu odczytu AI)</label>
+              <input id="hiro-imie" type="text" placeholder="np. Jacek" value={imie}
+                onChange={(e) => setImie(e.target.value)} />
+            </div>
+            <div>
+              <label id="hiro-plec-label">Płeć (do tonu odczytu AI)</label>
+              <div className="bf-plec" role="radiogroup" aria-labelledby="hiro-plec-label">
+                {PLEC_OPCJE.map((p) => (
+                  <button key={p.id} type="button" role="radio" aria-checked={plec === p.id}
+                    className={`bf-plec-opcja${plec === p.id ? " bf-plec-opcja-aktywna" : ""}`}
+                    onClick={() => setPlec(p.id)}>
+                    {p.label}
+                  </button>
+                ))}
               </div>
             </div>
-
-            <HiromancjaOdczyt
-              wiodaca={{
-                imageBase64: zdjecia[pismoReka]!.base64, imageMediaType: zdjecia[pismoReka]!.mediaType,
-                geometria: geometrie[pismoReka] ? {
-                  typ: geometrie[pismoReka]!.typ,
-                  stosunekDloni: geometrie[pismoReka]!.stosunekDloni,
-                  stosunekPalca: geometrie[pismoReka]!.stosunekPalca,
-                } : undefined,
-              }}
-              bierna={{
-                imageBase64: zdjecia[rekaBierna]!.base64, imageMediaType: zdjecia[rekaBierna]!.mediaType,
-                geometria: geometrie[rekaBierna] ? {
-                  typ: geometrie[rekaBierna]!.typ,
-                  stosunekDloni: geometrie[rekaBierna]!.stosunekDloni,
-                  stosunekPalca: geometrie[rekaBierna]!.stosunekPalca,
-                } : undefined,
-              }}
-              plec={plec}
-              imie={imie.trim() || undefined}
-            />
-
-            <p className="muted" style={{ fontSize: "0.78rem", marginTop: 20, textAlign: "center" }}>
-              To na razie samodzielna strona — w przyszłości ten odczyt dołączy do{" "}
-              <a href="/karma" style={{ color: "var(--teal-soft)" }}>Karmy</a> jako trzeci filar, obok
-              numerologii i astrologii.
-            </p>
           </div>
-        )}
-      </div>
+
+          <HiromancjaOdczyt
+            wiodaca={{
+              imageBase64: zdjecia[pismoReka]!.base64, imageMediaType: zdjecia[pismoReka]!.mediaType,
+              geometria: geometrie[pismoReka] ? {
+                typ: geometrie[pismoReka]!.typ,
+                stosunekDloni: geometrie[pismoReka]!.stosunekDloni,
+                stosunekPalca: geometrie[pismoReka]!.stosunekPalca,
+              } : undefined,
+            }}
+            bierna={{
+              imageBase64: zdjecia[rekaBierna]!.base64, imageMediaType: zdjecia[rekaBierna]!.mediaType,
+              geometria: geometrie[rekaBierna] ? {
+                typ: geometrie[rekaBierna]!.typ,
+                stosunekDloni: geometrie[rekaBierna]!.stosunekDloni,
+                stosunekPalca: geometrie[rekaBierna]!.stosunekPalca,
+              } : undefined,
+            }}
+            plec={plec}
+            imie={imie.trim() || undefined}
+          />
+
+          <p className="muted" style={{ fontSize: "0.78rem", marginTop: 20, textAlign: "center" }}>
+            To na razie samodzielna strona — w przyszłości ten odczyt dołączy do{" "}
+            <a href="/karma" style={{ color: "var(--teal-soft)" }}>Karmy</a> jako trzeci filar, obok
+            numerologii i astrologii.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
