@@ -39,6 +39,10 @@ interface Props {
   submitLabel?: string;
   /** Czy pokazywać pola godziny i miejsca (numerologia ich nie potrzebuje). */
   askTimePlace?: boolean;
+  /** Czy pokazywać pole imienia i nazwiska (astrologia go nie potrzebuje —
+   *  wpisuje się je w numerologii, gdzie liczy liczbę ekspresji/duszy/
+   *  osobowości; oba panele czytają/zapisują ten sam wspólny profil). */
+  askName?: boolean;
   busy?: boolean;
   children?: React.ReactNode;
   /** Etykieta pola daty — np. „Data urodzenia dziecka" dla raportu dla dziecka. */
@@ -56,7 +60,7 @@ interface Props {
 }
 
 export default function BirthForm({
-  onSubmit, submitLabel = "Oblicz", askTimePlace = true, busy, children,
+  onSubmit, submitLabel = "Oblicz", askTimePlace = true, askName = true, busy, children,
   dateLabel = "Data urodzenia",
   nameLabel = "Imię i nazwisko (opcjonalnie)",
   namePlaceholder = "np. Jacek Kowalski",
@@ -108,11 +112,13 @@ export default function BirthForm({
 
   return (
     <form onSubmit={handleSubmit} className="card" style={{ display: "grid", gap: 18 }}>
-      <div>
-        <label htmlFor="bf-name">{nameLabel}</label>
-        <input id="bf-name" type="text" placeholder={namePlaceholder} autoComplete={persist ? "name" : "off"}
-          value={name} onChange={(e) => setName(e.target.value)} />
-      </div>
+      {askName && (
+        <div>
+          <label htmlFor="bf-name">{nameLabel}</label>
+          <input id="bf-name" type="text" placeholder={namePlaceholder} autoComplete={persist ? "name" : "off"}
+            value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+      )}
 
       <div className={askTimePlace ? "bf-row" : ""} style={askTimePlace ? undefined : { display: "grid", gap: 16 }}>
         <DateInput id="bf-date" value={date} onChange={setDate} required label={dateLabel} compact />

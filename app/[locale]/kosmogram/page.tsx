@@ -291,7 +291,7 @@ export default function KosmogramPage() {
       <div className="kolo-danych-scena">
         <div className="kolo-danych">
           <p className="kolo-danych-tytul">Twoje dane</p>
-          <BirthForm onSubmit={handleSubmit} submitLabel="Zapisz" />
+          <BirthForm onSubmit={handleSubmit} submitLabel="Zapisz" askName={false} />
         </div>
       </div>
 

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import Interpretation from "@/components/Interpretation";
 import { numerology, type NumerologyResult } from "@/lib/astro/numerology";
-import DateInput from "@/components/DateInput";
+import BirthForm, { type BirthInput } from "@/components/BirthForm";
 import Term from "@/components/Term";
 import RelacjaMulankBhagyank from "@/components/RelacjaMulankBhagyank";
 import PredyspozycjeLiczb from "@/components/PredyspozycjeLiczb";
@@ -30,13 +30,14 @@ function Num({ label, value, big, note }: {
 
 export default function NumerologiaPage() {
   const [date, setDate] = useState("1990-06-15");
-  const [name, setName] = useState("");
+  const [name, setName] = useState<string | undefined>(undefined);
   const [wynik, setWynik] = useState<NumerologyResult | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(input: BirthInput) {
     const rok = new Date().getFullYear();
-    setWynik(numerology(date, name || undefined, "wedyjski", rok));
+    setDate(input.isoDate);
+    setName(input.name);
+    setWynik(numerology(input.isoDate, input.name, "wedyjski", rok));
     odblokuj("numerologia");
     odblokujSystemKarmy("numerologia");
   }
@@ -73,18 +74,16 @@ export default function NumerologiaPage() {
         </Link>
       </p>
 
-      <form onSubmit={handleSubmit} className="card" style={{ display: "grid", gap: 18, maxWidth: 460, margin: "0 auto" }}>
-        <DateInput id="num-date" value={date} onChange={setDate} required label="Data urodzenia" />
-        <div>
-          <label htmlFor="num-name">Imię i nazwisko (opcjonalnie)</label>
-          <input id="num-name" type="text" placeholder="np. Jacek Kowalski" value={name}
-            onChange={(e) => setName(e.target.value)} />
+      {/* Ten sam panel "kolo-danych" co na /kosmogram (wspólny profil przez
+          lib/birthStore.ts) — astrologia nie pyta już o imię (usunięte tam),
+          numerologia nie pyta o godzinę i miejsce (askTimePlace={false}),
+          bo do mulanka/bhagyanka wystarczy data urodzenia. */}
+      <div className="kolo-danych-scena">
+        <div className="kolo-danych">
+          <p className="kolo-danych-tytul">Twoje dane</p>
+          <BirthForm onSubmit={handleSubmit} submitLabel="Oblicz liczby" askTimePlace={false} />
         </div>
-        <p className="muted" style={{ fontSize: "0.85rem", lineHeight: 1.55 }}>
-          Liczymy wedyjską numerologię — mulank, bhagyank i planetę władającą.
-        </p>
-        <button type="submit" className="btn btn-primary">Oblicz liczby</button>
-      </form>
+      </div>
 
       {wynik && (
         <div className="fade-up" style={{ marginTop: 48 }}>
