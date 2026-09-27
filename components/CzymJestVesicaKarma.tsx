@@ -83,7 +83,7 @@ export default function CzymJestVesicaKarma() {
 
       <div style={{ color: "var(--sand)", lineHeight: 1.8 }}>
         <p style={{
-          fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--sand)",
+          fontFamily: "var(--font-serif)", fontSize: "1.5rem", color: "var(--sand)",
           textAlign: "center", marginBottom: 16,
         }}>
           {t("kiedyGdzieCoDalej")}
