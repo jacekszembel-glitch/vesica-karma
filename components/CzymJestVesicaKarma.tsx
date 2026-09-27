@@ -44,7 +44,7 @@ export default function CzymJestVesicaKarma() {
       </p>
 
       <div style={{ color: "var(--sand)", lineHeight: 1.8 }}>
-        <p style={{ marginBottom: 16 }}>
+        <p style={{ marginBottom: 16, color: "var(--sand)" }}>
           {t("trzyWarunki")}
         </p>
 
@@ -60,7 +60,7 @@ export default function CzymJestVesicaKarma() {
           </li>
         </ul>
 
-        <p style={{ marginBottom: 28 }}>
+        <p style={{ marginBottom: 28, color: "var(--sand)" }}>
           {t("zadenNieIstnieje")}
         </p>
 
@@ -70,11 +70,11 @@ export default function CzymJestVesicaKarma() {
           style={{ display: "block", width: "100%", maxWidth: 520, margin: "0 auto 28px" }}
         />
 
-        <p style={{ marginBottom: 16 }}>
+        <p style={{ marginBottom: 16, color: "var(--sand)" }}>
           {t.rich("dlonDominujaca", { strong })}
         </p>
 
-        <p>
+        <p style={{ color: "var(--sand)" }}>
           {t.rich("dlonBierna", { strong })}
         </p>
       </div>
@@ -89,7 +89,7 @@ export default function CzymJestVesicaKarma() {
           {t("kiedyGdzieCoDalej")}
         </p>
 
-        <p style={{ marginBottom: 16 }}>
+        <p style={{ marginBottom: 16, color: "var(--sand)" }}>
           {t("wPunkcieNakladania")}
         </p>
 
@@ -105,11 +105,11 @@ export default function CzymJestVesicaKarma() {
           </li>
         </ul>
 
-        <p style={{ marginBottom: 16 }}>
+        <p style={{ marginBottom: 16, color: "var(--sand)" }}>
           {t.rich("vesicaPiscisCzymJest", { em: (c) => <em>{c}</em> })}
         </p>
 
-        <p>
+        <p style={{ color: "var(--sand)" }}>
           {t.rich("vesicaPiscis", { strong })}
         </p>
       </div>
