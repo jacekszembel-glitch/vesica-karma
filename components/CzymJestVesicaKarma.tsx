@@ -109,7 +109,12 @@ export default function CzymJestVesicaKarma() {
       <h2 style={{ textAlign: "center", margin: 0 }}>
         <button
           type="button"
-          onClick={zacznij}
+          onClick={() => {
+            zacznij();
+            // Przycisk jest teraz na dole strony — bez tego uzytkownik nie
+            // widzialby wcale gasniecia zlota do taupe na Kole Karmy u gory.
+            document.getElementById("kolo-karmy")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
           disabled={wystartowano}
           style={{
             font: "inherit", fontFamily: "var(--font-sans)", fontWeight: 800,
