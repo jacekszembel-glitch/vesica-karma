@@ -40,13 +40,11 @@ export default function CzymJestVesicaKarma() {
       </h2>
       <div className="skrot-hero-linia" />
 
-      {/* Nagłówek "Jedno spojrzenie" — bez ramek/boxów, sekcje niżej dzieli
-          wyłącznie pozioma kreska (.skrot-hero-linia), ten sam wzorzec co
-          np. ProfilDuszy.tsx. */}
-      <h1 style={{
-        fontFamily: "var(--font-serif)", fontSize: "2.6rem", color: "var(--sand)",
-        fontWeight: 700, marginBottom: 16, textAlign: "center",
-      }}>
+      {/* Ten sam h1 co "Astrologia Wedyjska" na /kosmogram — domyslny rozmiar
+          z globals.css (clamp 2.5-4.1rem), tylko kolor/wyrownanie nadpisane.
+          Sekcje nizej dzieli wylacznie pozioma kreska (.skrot-hero-linia),
+          bez ramek/boxow. */}
+      <h1 style={{ textAlign: "center", color: "var(--sand)", marginBottom: 16 }}>
         {t("tytul")}
       </h1>
       <p style={{ fontSize: "0.95rem", lineHeight: 1.6, color: "var(--sand)", textAlign: "center", marginBottom: 32 }}>
