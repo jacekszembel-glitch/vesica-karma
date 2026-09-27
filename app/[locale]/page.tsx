@@ -10,7 +10,7 @@ import { KoloKarmyStartProvider } from "@/components/KoloKarmyStartContext";
  */
 export default function Home() {
   return (
-    <section className="section" style={{ position: "relative", overflow: "hidden", paddingTop: 60 }}>
+    <section className="section" style={{ position: "relative", overflow: "hidden", paddingTop: 36 }}>
       <div className="container" style={{ position: "relative", zIndex: 1 }}>
         <KoloKarmyStartProvider>
           <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto" }}>

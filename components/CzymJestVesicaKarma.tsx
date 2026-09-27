@@ -47,11 +47,11 @@ export default function CzymJestVesicaKarma() {
       <h1 style={{ textAlign: "center", color: "var(--sand)", marginBottom: 16 }}>
         {t("tytul")}
       </h1>
-      <p style={{ fontSize: "0.95rem", lineHeight: 1.6, color: "var(--sand)", textAlign: "center", marginBottom: 32 }}>
+      <p style={{ fontSize: "1.05rem", lineHeight: 1.6, color: "var(--sand)", textAlign: "center", marginBottom: 32 }}>
         {t("podtytul")}
       </p>
 
-      <div style={{ color: "var(--sand)", fontSize: "0.95rem", lineHeight: 1.8 }}>
+      <div style={{ color: "var(--sand)", lineHeight: 1.8 }}>
         <p style={{ marginBottom: 16 }}>
           {t("trzyWarunki")}
         </p>
@@ -89,7 +89,7 @@ export default function CzymJestVesicaKarma() {
 
       <div className="skrot-hero-linia" />
 
-      <div style={{ color: "var(--sand)", fontSize: "0.95rem", lineHeight: 1.8 }}>
+      <div style={{ color: "var(--sand)", lineHeight: 1.8 }}>
         <p style={{
           fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--sand)",
           textAlign: "center", marginBottom: 16,
