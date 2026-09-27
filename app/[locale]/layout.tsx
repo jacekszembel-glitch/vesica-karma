@@ -35,11 +35,11 @@ export const metadata: Metadata = {
     locale: "pl_PL",
   },
   title: {
-    default: "VesicaKarma — Astrologia, Hiromancja i Numerologia w jednym Kole Karmy",
+    default: "VesicaKarma — Astrologia, Chiromancja i Numerologia w jednym Kole Karmy",
     template: "%s | VesicaKarma",
   },
   description:
-    "Trzy systemy odczytu — astrologia wedyjska, hiromancja i numerologia — połączone w jeden całościowy system wokół Koła Karmy.",
+    "Trzy systemy odczytu — astrologia wedyjska, chiromancja i numerologia — połączone w jeden całościowy system wokół Koła Karmy.",
 };
 
 export function generateStaticParams() {

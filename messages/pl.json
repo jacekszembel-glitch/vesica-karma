@@ -12,14 +12,14 @@
   "CzymJestVesicaKarma": {
     "zacznij": "Zacznij",
     "tytul": "Vesica Karma",
-    "podtytul": "To uniwersalna matryca przeznaczenia — Astrologia, Numerologia i Hiromancja w jednej świętej geometrii.",
+    "podtytul": "To uniwersalna matryca przeznaczenia — Astrologia, Numerologia i Chiromancja w jednej świętej geometrii.",
     "trzyWarunki": "Człowiek nie jest sumą przypadków, lecz precyzyjnie zaprojektowanym splotem czasu, miejsca i ciała. Każdy z nas, żeby przyjść na ten świat, musiał spełnić te trzy warunki — i każdy z nich ma swój odpowiednik w innym starożytnym wedyjskim systemie odczytu:",
     "astrologiaPunkt": "<strong>Astrologia wedyjska</strong> (czas i miejsce) — układ planet i kosmiczne siły w dokładnym momencie Twojego narodzenia.",
     "numerologiaPunkt": "<strong>Numerologia</strong> (wibracja czasu i imienia) — cykliczny rytm Twojego życia oraz potencjał zapisany w imieniu i nazwisku.",
-    "hiromancjaPunkt": "<strong>Hiromancja</strong> (zapis w ciele) — kosmiczny archetyp przełożony wprost na linie Twoich dłoni. Nasza karma jest zapisana w ciele tak samo jak w gwiazdach — trzeba ją tylko odnaleźć i korzystać z jej dobrodziejstw.",
+    "hiromancjaPunkt": "<strong>Chiromancja</strong> (zapis w ciele) — kosmiczny archetyp przełożony wprost na linie Twoich dłoni. Nasza karma jest zapisana w ciele tak samo jak w gwiazdach — trzeba ją tylko odnaleźć i korzystać z jej dobrodziejstw.",
     "zadenNieIstnieje": "Żaden z tych systemów nie istnieje w izolacji. Trzy przenikające się okręgi tworzą żywą matrycę Twojego życia — każdy opisuje ten sam wzór z innej perspektywy:",
-    "wykresAlt": "Schemat: Narodziny rozgałęziają się na Czas, Miejsce i Ciało — te odpowiadają Numerologii, Astrologii i Hiromancji, które razem prowadzą do Koła Karmy (Mahadasze/Jogi/Dosze, Astrokartografia), odpowiadającego na pytania Kiedy? Gdzie? Co dalej?",
-    "dlonDominujaca": "W hiromancji: <strong>dłoń dominująca to kosmogram D1 (Rasi)</strong> — aktywna dłoń to świat fizycznej manifestacji i tu-i-teraz: codzienne wybory, widoczne działania, sposób, w jaki realizujesz swój los w świecie materialnym.",
+    "wykresAlt": "Schemat: Narodziny rozgałęziają się na Czas, Miejsce i Ciało — te odpowiadają Numerologii, Astrologii i Chiromancji, które razem prowadzą do Koła Karmy (Mahadasze/Jogi/Dosze, Astrokartografia), odpowiadającego na pytania Kiedy? Gdzie? Co dalej?",
+    "dlonDominujaca": "W chiromancji: <strong>dłoń dominująca to kosmogram D1 (Rasi)</strong> — aktywna dłoń to świat fizycznej manifestacji i tu-i-teraz: codzienne wybory, widoczne działania, sposób, w jaki realizujesz swój los w świecie materialnym.",
     "dlonBierna": "<strong>Dłoń bierna to kosmogram D9 (Nawamsia)</strong> — niedominująca dłoń to duchowy fundament i zapis karmy: wrodzone predyspozycje, ukryty potencjał, duchowe dziedzictwo, z którym przychodzisz na świat.",
     "kiedyGdzieCoDalej": "Twoje Koło Karmy: kiedy, gdzie i co dalej",
     "wPunkcieNakladania": "W punkcie, w którym te trzy sfery się nakładają, powstaje Koło Karmy — pełna synteza. Aplikacja nie tylko odkrywa Twój zapis karmiczny, ale daje konkretne narzędzia nawigacyjne:",
@@ -27,15 +27,15 @@
     "gdzieRozwijac": "<strong>Gdzie rozwijać skrzydła?</strong> Astrokartografia pokazuje miejsca na Ziemi sprzyjające Twojemu potencjałowi, relacjom i karierze.",
     "coZTymZrobic": "<strong>Co z tym zrobić?</strong> Praktyczne wskazówki, jak przełożyć wiedzę o swojej karmicznej strukturze na codzienne wybory.",
     "vesicaPiscisCzymJest": "Czym właściwie jest Vesica Piscis? To jeden z najstarszych symboli geometrii świętej: dwa okręgi o dokładnie takim samym promieniu, ułożone tak, że środek każdego z nich leży na obwodzie drugiego. W miejscu, gdzie się przecinają, powstaje migdałowy kształt zwany „pęcherzem ryby” (łac. <em>vesica piscis</em>) — od starożytności symbol spotkania i przenikania się dwóch odrębnych całości w jedną, nową jakość.",
-    "vesicaPiscis": "Nasz system idzie o krok dalej — zamiast dwóch, nakładają się na siebie <strong>trzy</strong> okręgi: Astrologia, Numerologia i Hiromancja. Każda para tworzy własną Vesica Piscis (Gdzie, Kiedy, Kto), a miejsce, w którym przenikają się wszystkie trzy naraz, to <strong>Koło Karmy</strong>. Symbolizuje ono spójność trzech przenikających się stref: ciała, umysłu i duszy; przeszłości, teraźniejszości i przyszłości. To nie sztywny wyrok, lecz żywa przestrzeń, w której kosmiczny plan, osobisty rytm i ciało spotykają się, dając Ci pełną kontrolę nad własną ścieżką."
+    "vesicaPiscis": "Nasz system idzie o krok dalej — zamiast dwóch, nakładają się na siebie <strong>trzy</strong> okręgi: Astrologia, Numerologia i Chiromancja. Każda para tworzy własną Vesica Piscis (Gdzie, Kiedy, Kto), a miejsce, w którym przenikają się wszystkie trzy naraz, to <strong>Koło Karmy</strong>. Symbolizuje ono spójność trzech przenikających się stref: ciała, umysłu i duszy; przeszłości, teraźniejszości i przyszłości. To nie sztywny wyrok, lecz żywa przestrzeń, w której kosmiczny plan, osobisty rytm i ciało spotykają się, dając Ci pełną kontrolę nad własną ścieżką."
   },
   "KoloKarmy": {
-    "obrazAlt": "Koło Karmy — Astrologia, Numerologia i Hiromancja wokół Twojego Panelu, z Astrokartografią, Mahadashami i Karmą jako punktami wyjścia",
+    "obrazAlt": "Koło Karmy — Astrologia, Numerologia i Chiromancja wokół Twojego Panelu, z Astrokartografią, Mahadashami i Karmą jako punktami wyjścia",
     "tytulEyebrow": "TWOJE KOŁO",
     "tytulGlowny": "KARMY",
     "hotspoty": {
       "astrologia": "Astrologia",
-      "hiromancja": "Hiromancja",
+      "hiromancja": "Chiromancja",
       "numerologia": "Numerologia",
       "panel": "Mój Panel",
       "zwiazki": "Związki"

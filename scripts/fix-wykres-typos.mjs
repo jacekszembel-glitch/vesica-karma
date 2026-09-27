@@ -1,8 +1,8 @@
 /**
- * Jednorazowy skrypt — poprawia dwa literowki wpisane bezposrednio jako
- * piksele w public/brand/wykres.jpg: "NARIDZNY" -> "NARODZINY" oraz
- * "CHIROMANCJA" -> "HIROMANCJA" (niespojne z reszta projektu, patrz
- * lib/glossary.ts). Obraz jest rastrowy (recznie rysowany), wiec zamiast
+ * Jednorazowy skrypt — poprawia literowke wpisana bezposrednio jako piksele
+ * w public/brand/wykres.jpg: "NARIDZNY" -> "NARODZINY". ("CHIROMANCJA" na
+ * diagramie byla od poczatku poprawna — polska nazwa tej praktyki pisze sie
+ * przez "ch", nie przez samo "h".) Obraz jest rastrowy (recznie rysowany), wiec zamiast
  * edytowac tekst wprost: wycina stary napis (wypelnia lokalnym tlem
  * zmierzonym tuz obok, w bezpiecznym miejscu wewnatrz elipsy, z dala od jej
  * obwodki), po czym dorysowuje nowy napis przez SVG (font Segoe Print,
@@ -67,26 +67,18 @@ function patchSvg({ width, height, pad, bg, text, fontSize, textLength, fill }) 
 
 const PAD = 14;
 const NARIDZNY_BOX = { left: 318, top: 149, width: 290, height: 33 };
-const CHIROMANCJA_BOX = { left: 513, top: 506, width: 275, height: 30 };
 
 const bgNaridzny = await avgColor({ left: 318, top: 138, width: 290, height: 6 });
-const bgChiro = await avgColor({ left: 513, top: 496, width: 275, height: 6 });
 
 const patchNaridzny = patchSvg({
   width: NARIDZNY_BOX.width, height: NARIDZNY_BOX.height, pad: PAD, bg: bgNaridzny,
   text: "NARODZINY", fontSize: 34, textLength: NARIDZNY_BOX.width * 0.95,
   fill: { r: 250, g: 248, b: 238 },
 });
-const patchChiro = patchSvg({
-  width: CHIROMANCJA_BOX.width, height: CHIROMANCJA_BOX.height, pad: PAD, bg: bgChiro,
-  text: "HIROMANCJA", fontSize: 30, textLength: CHIROMANCJA_BOX.width * 0.95,
-  fill: { r: 250, g: 248, b: 238 },
-});
 
 await sharp(src)
   .composite([
     { input: patchNaridzny, left: NARIDZNY_BOX.left - PAD, top: NARIDZNY_BOX.top - PAD },
-    { input: patchChiro, left: CHIROMANCJA_BOX.left - PAD, top: CHIROMANCJA_BOX.top - PAD },
   ])
   .jpeg({ quality: 95 })
   .toFile(path.join(dir, "wykres.fixed.jpg"));

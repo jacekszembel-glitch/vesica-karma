@@ -279,7 +279,7 @@ export function SceneRaport(p: S) {
  */
 export function SceneHiromancja(p: S) {
   return (
-    <Scene {...p} label="Hiromancja — typ dłoni i linie">
+    <Scene {...p} label="Chiromancja — typ dłoni i linie">
       <circle cx="160" cy="100" r="70" stroke={GD} strokeWidth="0.9" strokeDasharray="1 6" />
       <path d="M126 138 v-48 M142 138 v-56 M160 138 v-60 M178 138 v-56 M194 130 v-42
         M126 138 c0 -22 15 -34 34 -34 c19 0 34 12 34 34 c0 22 -15 34 -34 34 c-19 0 -34 -12 -34 -34"
@@ -300,7 +300,7 @@ export function SceneHiromancja(p: S) {
  */
 export function SceneKarma(p: S) {
   return (
-    <Scene {...p} label="Karma — numerologia, astrologia i hiromancja zbiegające się w jeden odczyt">
+    <Scene {...p} label="Karma — numerologia, astrologia i chiromancja zbiegające się w jeden odczyt">
       <circle cx="76" cy="56" r="27" stroke={G} strokeWidth="1.4" />
       <circle cx="160" cy="38" r="27" stroke={T} strokeWidth="1.4" />
       <circle cx="244" cy="56" r="27" stroke={GD} strokeWidth="1.1" strokeDasharray="2 4" />
