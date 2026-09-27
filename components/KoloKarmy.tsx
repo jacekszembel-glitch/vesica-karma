@@ -127,6 +127,26 @@ const PIKTOGRAMY_WSPOLNE = [
 function pctX(v: number) { return `${(v / IMG_W) * 100}%`; }
 function pctY(v: number) { return `${(v / IMG_H) * 100}%`; }
 
+/** Piktogram jako dwie nałożone warstwy (taupe pod spodem, złota na wierzchu
+ *  z przejściem opacity) zamiast twardej zmiany `src` — to samo podejście co
+ *  przy głównym obrazie kola, żeby zapalanie/gaszenie było płynne, nie skokowe. */
+function IkonaCrossfade({ id, box, zlote }: {
+  id: string; box: readonly [number, number, number, number]; zlote: boolean;
+}) {
+  const wspolny = {
+    position: "absolute" as const, pointerEvents: "none" as const,
+    left: pctX(box[0]), top: pctY(box[1]),
+    width: pctX(box[2] - box[0]), height: pctY(box[3] - box[1]),
+  };
+  return (
+    <>
+      <img src={`/brand/icon-${id}-taupe.png`} alt="" style={wspolny} />
+      <img src={`/brand/icon-${id}.png`} alt=""
+        style={{ ...wspolny, opacity: zlote ? 1 : 0, transition: "opacity 0.7s ease" }} />
+    </>
+  );
+}
+
 const TIP_W = 168;
 
 // SystemKarmy — systemy, które mogą mieć stan „ukończony" (wtedy ich pętla
@@ -135,13 +155,20 @@ const TIP_W = 168;
 // Typ w lib/koloKarmyGeometria.ts (re-export tutaj dla wygody importujących).
 export type { SystemKarmy };
 
-/** Jedyne obecne użycie tego komponentu to strona główna (hub nawigacyjny) —
- *  ta ma zostać zawsze w pełnym złocie, jak przed reskinem (potwierdzone:
- *  wskaźnik postępu taupe→złoto to język Mojego Panelu i jego breadcrumbów
- *  na podstronach — KoloKarmyMini.tsx — nie strony głównej). */
+/** Strona główna (hub nawigacyjny) startuje w pełnym złocie (jak przed
+ *  reskinem), ale z `interaktywnyStart` — po kliknięciu "Zacznij" gaśnie do
+ *  taupe i odkrywa się dopiero przez najeżdżanie (patrz `wystartowano` w
+ *  komponencie). Prawdziwy, trwały wskaźnik postępu taupe→złoto to osobny
+ *  język Mojego Panelu i jego breadcrumbów na podstronach — KoloKarmyMini.tsx. */
 const WSZYSTKIE_SYSTEMY = new Set<SystemKarmy>(["astrologia", "hiromancja", "numerologia"]);
 
-export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone?: Set<SystemKarmy> }) {
+export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY, interaktywnyStart = false }: {
+  ukonczone?: Set<SystemKarmy>;
+  /** Tryb strony głównej: koło startuje w pełnym złocie (bez interakcji),
+   *  pokazuje przycisk „Zacznij", po kliknięciu płynnie gaśnie do taupe —
+   *  dopiero wtedy najechanie na dany element zapala go z powrotem. */
+  interaktywnyStart?: boolean;
+}) {
   const t = useTranslations("KoloKarmy");
   const HOTSPOTY = HOTSPOTY_BAZA.map((h) => ({ ...h, label: t(`hotspoty.${h.id}`) }));
   const DANE_WSPOLNE = DANE_WSPOLNE_BAZA.map((d) => ({ ...d, label: t(`daneWspolne.${d.id}`) }));
@@ -152,6 +179,10 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
   const [aktywny, setAktywny] = useState<string | null>(null);
   const [tip, setTip] = useState<{ label: string; left: number; top: number } | null>(null);
   const [hoverTytul, setHoverTytul] = useState(false);
+  const [wystartowano, setWystartowano] = useState(false);
+  const ukonczone = interaktywnyStart
+    ? (wystartowano ? new Set<SystemKarmy>() : WSZYSTKIE_SYSTEMY)
+    : ukonczoneProp;
 
   const wskaz = (id: string, label: string) => (e: React.MouseEvent | React.FocusEvent) => {
     setAktywny(id);
@@ -176,25 +207,37 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
 
   return (
     <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
-      <img
-        src={wszystkoZlote ? "/brand/kolo-karmy-gold-clean.png" : "/brand/kolo-karmy-taupe.png"}
-        alt={t("obrazAlt")}
-        style={{ display: "block", width: "100%", height: "auto" }}
-      />
+      {/* Owinięcie SAMEGO obrazu (i wszystkich nakładek pozycjonowanych
+          względem niego) w osobny kontener — przycisk "Zacznij" niżej jest
+          normalnym elementem w przepływie, a złota warstwa (height:100%)
+          musi się odnosić TYLKO do wysokości obrazu, nie całego kola z
+          przyciskiem pod spodem (inaczej złota warstwa rozciąga się pionowo). */}
+      <div style={{ position: "relative" }}>
+      {/* baza jako dwie nałożone warstwy (taupe pod spodem, złota na wierzchu
+          z przejściem opacity) zamiast twardej zmiany `src` — dzięki temu
+          "Zacznij" na stronie głównej gasi koło płynnie, nie skokowo. */}
+      <img src="/brand/kolo-karmy-taupe.png" alt={t("obrazAlt")}
+        style={{ display: "block", width: "100%", height: "auto" }} />
+      <img src="/brand/kolo-karmy-gold-clean.png" alt=""
+        style={{
+          position: "absolute", left: 0, top: 0, width: "100%", height: "100%",
+          opacity: wszystkoZlote ? 1 : 0, transition: "opacity 0.9s ease",
+        }} />
 
       {/* pętle „ukończonych" systemów — złote wypełnienie zamiast domyślnego
           taupe, bez poświaty (ostra krawędź, jak reszta grafiki); te same
           złote wycinki wracają na hover nawet dla systemów jeszcze
           nieukończonych (kk-fill-hover-aktywny), więc podświetlenie jest
           dokładnie tym samym kolorem/kształtem co stan „ukończony", nie
-          osobnym rozmytym efektem. Pominięte, gdy baza już jest w pełni
-          złota (patrz wyżej). */}
-      {!wszystkoZlote && (["astrologia", "hiromancja", "numerologia"] as const).map((id) => (
+          osobnym rozmytym efektem. Renderowane zawsze (nie tylko gdy
+          !wszystkoZlote) — na stronie głównej w trybie interaktywnym trzeba
+          im dać szansę animować się razem z gaśnięciem bazy. */}
+      {(["astrologia", "hiromancja", "numerologia"] as const).map((id) => (
         <img key={`fill-${id}`} src={`/brand/fill-${id}-gold.png`} alt=""
           className={`kk-fill-hover${ukonczone.has(id) || aktywny === id ? " kk-fill-hover-aktywny" : ""}`}
           style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
       ))}
-      <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} />
+      <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia") || aktywny === "astrologia"} />
 
       {/* poświata pól o nieregularnym kształcie — astrologia/hiromancja/
           numerologia pominięte: hover-feedback dla wszystkich trzech daje
@@ -216,35 +259,22 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
         className={`kk-fill-hover${aktywny === "zwiazki" ? " kk-fill-hover-aktywny" : ""}`}
         style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
 
-      {/* piktogramy — leżą idealnie na tle (taupe albo złote, zależnie od
-          stanu). Bez pulsu na hover — animacja transform:scale przy okazji
-          nakładała się na złoty pierścień w tle i wyglądała jak zmiana
-          koloru pierścienia. */}
+      {/* piktogramy — leżą idealnie na tle. Zapalają się złotem razem z
+          pętlą na hover (nie tylko gdy trwale "ukończone"), tą samą
+          warstwą crossfade co reszta koła — spójne z gaszeniem "Zacznij". */}
       {PIKTOGRAMY_PULSUJACE.map((p) => (
-        <img key={`ikona-${p.id}`}
-          src={`/brand/icon-${p.id}${ukonczone.has(p.id as SystemKarmy) ? "" : "-taupe"}.png`} alt=""
-          style={{
-            position: "absolute", pointerEvents: "none",
-            left: pctX(p.box[0]), top: pctY(p.box[1]),
-            width: pctX(p.box[2] - p.box[0]), height: pctY(p.box[3] - p.box[1]),
-          }} />
+        <IkonaCrossfade key={`ikona-${p.id}`} id={p.id} box={p.box}
+          zlote={ukonczone.has(p.id as SystemKarmy) || aktywny === p.id} />
       ))}
 
       {/* piktogramy wspólne — złote, gdy choć jeden z dwóch systemów w
-          przecięciu jest ukończony (na stronie głównej wszystkoZlote=true,
-          więc i tak zawsze złote — to działa naprawdę dopiero na
-          /astrologia, /hiromancja, /numerologia, gdzie ukonczone ma 1 element). */}
+          przecięciu jest ukończony LUB akurat pod kursorem (na stronie
+          głównej wszystkoZlote=true, więc i tak zawsze złote — to działa
+          naprawdę dopiero po "Zacznij" albo na /astrologia, /hiromancja,
+          /numerologia, gdzie ukonczone ma 1 element). */}
       {PIKTOGRAMY_WSPOLNE.map((p) => {
-        const zlote = wszystkoZlote || p.pary.some((id) => ukonczone.has(id));
-        return (
-          <img key={`ikona-wspolna-${p.id}`}
-            src={`/brand/icon-${p.id}${zlote ? "" : "-taupe"}.png`} alt=""
-            style={{
-              position: "absolute", pointerEvents: "none",
-              left: pctX(p.box[0]), top: pctY(p.box[1]),
-              width: pctX(p.box[2] - p.box[0]), height: pctY(p.box[3] - p.box[1]),
-            }} />
-        );
+        const zlote = wszystkoZlote || p.pary.some((id) => ukonczone.has(id) || aktywny === id);
+        return <IkonaCrossfade key={`ikona-wspolna-${p.id}`} id={p.id} box={p.box} zlote={zlote} />;
       })}
 
       {/* satelity Karmy — kropka, ramię i podpis w całości narysowane, widoczne tylko na hover */}
@@ -369,6 +399,21 @@ export default function KoloKarmy({ ukonczone = WSZYSTKIE_SYSTEMY }: { ukonczone
       ))}
 
       {dymek}
+      </div>
+
+      {/* Przycisk startu trybu interaktywnego — koło gaśnie płynnie (crossfade
+          bazy wyżej), przycisk znika tym samym przejściem, nie skokowo. */}
+      {interaktywnyStart && (
+        <div style={{
+          textAlign: "center", marginTop: 32,
+          opacity: wystartowano ? 0 : 1, pointerEvents: wystartowano ? "none" : "auto",
+          transition: "opacity 0.5s ease",
+        }}>
+          <button type="button" className="btn btn-primary" onClick={() => setWystartowano(true)}>
+            {t("przyciskZacznij")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -14,7 +14,7 @@ export default function Home() {
         <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto" }}>
           <Starfield count={50} centerX={47.3} centerY={49.7} />
           <div style={{ position: "relative", zIndex: 1 }}>
-            <KoloKarmy />
+            <KoloKarmy interaktywnyStart />
           </div>
         </div>
         <CzymJestVesicaKarma />
