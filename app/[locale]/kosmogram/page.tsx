@@ -24,10 +24,6 @@ import { wykryteJogiPosortowane } from "@/lib/astro/yogas";
 import JednoSpojrzenie from "@/components/JednoSpojrzenie";
 import { karakiCzarowe, jogakaraka } from "@/lib/astro/karaki";
 import KarakiCzarowe from "@/components/KarakiCzarowe";
-import JogiISzczescie from "@/components/JogiISzczescie";
-import MapaCzasuJog from "@/components/MapaCzasuJog";
-import MapaCzasuDosz from "@/components/MapaCzasuDosz";
-import { fazyZycia } from "@/lib/astro/lifemap";
 import RankingGrah from "@/components/RankingGrah";
 import NaCoUwazac from "@/components/NaCoUwazac";
 import RankingDomeny from "@/components/RankingDomeny";
@@ -41,8 +37,6 @@ import {
   ocenaZdrowotna, ZDROWIE_OPIS, ZDROWIE_UWAGA, ZDROWIE_UWAGA_OPIS,
 } from "@/lib/astro/zdrowieWedyjski";
 import GodloPlanety from "@/components/GodloPlanety";
-import HeksDomu from "@/components/HeksDomu";
-import { BHAVAS } from "@/lib/astro/constants";
 import { odblokuj } from "@/lib/collection";
 import { odblokujSystemKarmy } from "@/lib/koloKarmyGeometria";
 
@@ -56,9 +50,9 @@ import { odblokujSystemKarmy } from "@/lib/koloKarmyGeometria";
  * zapisanych osób (lib/osobyStore.ts) została wycofana na rzecz koła danych
  * wzorowanego na designie 9dom.pl.
  */
-type SekcjaKosmogramu = "czasGleboko" | "dusza" | "predyspozycje" | "finanse" | "zdrowie";
+type SekcjaKosmogramu = "dusza" | "predyspozycje" | "finanse" | "zdrowie";
 const WSZYSTKIE_SEKCJE: Record<SekcjaKosmogramu, boolean> = {
-  czasGleboko: true, dusza: true, predyspozycje: true, finanse: true, zdrowie: true,
+  dusza: true, predyspozycje: true, finanse: true, zdrowie: true,
 };
 
 /**
@@ -237,7 +231,6 @@ export default function KosmogramPage() {
   const finanse = finansowe?.planety ?? [];
   const zdrowotne = useMemo(() => (chart ? ocenaZdrowotna(chart) : null), [chart]);
   const zdrowie = zdrowotne?.planety ?? [];
-  const lifePhases = useMemo(() => (chart ? fazyZycia(chart, chart.birth.date) : []), [chart]);
 
   const w = WSZYSTKIE_SEKCJE;
   const maPelneDane = true;
@@ -520,39 +513,6 @@ export default function KosmogramPage() {
           </details>
           </>}
 
-          {/* jogi klasyczne — szczęście, tuż pod predyspozycjami */}
-          {tryb === "zaawansowany" && w.czasGleboko && <>
-
-          <JogiISzczescie chart={chart} />
-
-          {/* mapa czasu jog — KIEDY dokladnie te same jogi "odpalaja sie" na osi zycia;
-              przeniesione z /mapa-zycia, umieszczone tuz pod statyczna lista jog (ten sam
-              temat, tylko w czasie zamiast punktowo) zamiast na koncu strony bez kontekstu */}
-          {lifePhases.length > 0 && <MapaCzasuJog chart={chart} lifePhases={lifePhases} />}
-
-          {/* mapa czasu dosz — jw., ale dla dosz; przeniesione z /mapa-zycia. Zastepuje usuniety
-              DoszeKlasyczne.tsx (byla to zdublowana, zawsze widoczna lista - dokladnie te same
-              karty co ponizej, bez zadnego unikalnego diagramu jak przy Jogach), na wyrazna
-              prosbe uzytkownika po analizie tego samego problemu co przy Jogi i szczescie. */}
-          {lifePhases.length > 0 && <MapaCzasuDosz chart={chart} lifePhases={lifePhases} />}
-
-          {/* 12 domow — obszary zycia (plansza DOMY) */}
-          <details className="card" style={{ marginBottom: 24 }}>
-            <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
-              12 domów — obszary życia
-            </summary>
-            <p className="muted" style={{ fontSize: "0.85rem", margin: "12px 0 16px", lineHeight: 1.6 }}>
-              Złota obwódka — kendry i trikony, filary mapy. Dom podświetlony,
-              gdy stoi w nim któraś z Twoich planet.
-            </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(112px, 100%), 1fr))", gap: 10, justifyItems: "center" }}>
-              {BHAVAS.map((b, i) => (
-                <HeksDomu key={i} dom={i + 1} size={106}
-                  aktywny={!!chart.angles && PLANET_ORDER.some((id) => chart.planets[id].house === i + 1)} />
-              ))}
-            </div>
-          </details>
-          </>}
 
           <Interpretation
             kind="kosmogram"
