@@ -898,23 +898,31 @@ main, .site-header, footer { position: relative; z-index: 1; }
   transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   /* Zwężanie się dzieje transformem (bez zmiany realnego layoutu), więc
      domyślny środek jako punkt odniesienia wypchnąłby zmniejszone koło
-     poniżej widocznego, przyciętego do 74px okna rodzica (.kolo-danych-scena)
-     — kotwiczymy u góry, żeby zmniejszone koło zostało dokładnie w tym oknie. */
+     poniżej widocznego, przyciętego okna rodzica (.kolo-danych-scena,
+     wysokość = ROZMIAR_ZWINIETY z KoloDanychPanel.tsx) — kotwiczymy u góry,
+     żeby zmniejszone koło zostało dokładnie w tym oknie. */
   transform-origin: 50% 0;
 }
 /* Po zapisaniu danych: koło (złote tło + odznaka "Twoje dane") "wjeżdża"
-   do rozmiaru przycisku Zapisz (74px) i zostaje widoczne jako mała złota
-   kropka z podpisem, a .kolo-danych-scena (wysokość animowana z JS, patrz
-   KoloDanychPanel.tsx) kurczy się razem z nim, więc wynik pod spodem
-   sam wsuwa się w zwolnione miejsce zamiast czekać za pustym kołem.
+   do 150px (ROZMIAR_ZWINIETY w KoloDanychPanel.tsx — obie liczby muszą się
+   zgadzać) i zostaje widoczne jako złota kropka z czytelnym podpisem,
+   a .kolo-danych-scena (wysokość animowana z JS) kurczy się razem z nim,
+   więc wynik pod spodem sam wsuwa się w zwolnione miejsce zamiast czekać
+   za pustym kołem. Większe niż sam przycisk Zapisz (74px) na wyraźną
+   prośbę użytkownika — przy rozmiarze przycisku podpis był nieczytelny.
    Sam formularz znika szybciej niż trwa zwężanie, żeby nie było widać
    kurczącego się drobnego druku — odznaka zostaje, powiększona z
    wyprzedzeniem (przed przeskalowaniem), żeby po zmniejszeniu razem z
-   całym kołem była czytelna, a nie mikroskopijna.
+   całym kołem była czytelna, a nie mikroskopijna. Pozycjonujemy ją
+   absolutnie na środku (50%/50% względem PRZED-skalowanego 580px kwadratu,
+   nie względem .kolo-danych-scena) — przy kotwiczeniu transformu w 50% 0
+   punkt (290,290) po przeskalowaniu ląduje dokładnie na wysokości
+   ROZMIAR_ZWINIETY/2, czyli w pionowym środku zwiniętego kółka, niezależnie
+   od tego, ile miejsca (niewidocznie) zajmuje pod spodem sam formularz.
    Samo kółko zostaje klikalne (pointer-events na formularzu wyłączone,
    nie na nim) — kliknięcie rozwija formularz z powrotem. */
 .kolo-danych-zwiniete .kolo-danych {
-  transform: scale(calc(74 / 580));
+  transform: scale(calc(150 / 580));
 }
 .kolo-danych-zwiniete .kolo-danych > *:not(.kolo-danych-tytul) {
   transition: opacity 0.25s ease;
@@ -922,8 +930,15 @@ main, .site-header, footer { position: relative; z-index: 1; }
   pointer-events: none;
 }
 .kolo-danych-zwiniete .kolo-danych-tytul {
-  font-size: 4.6rem;
-  transition: font-size 0.4s ease;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  font-size: 4.2rem;
+  padding: 0.22em 0.6em;
+  white-space: nowrap;
+  transition: font-size 0.4s ease, padding 0.4s ease;
 }
 .kolo-danych::before {
   content: "";

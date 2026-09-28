@@ -4,16 +4,20 @@ import { useEffect, useRef } from "react";
 
 /**
  * Owija .kolo-danych-scena/.kolo-danych (kosmogram, numerologia) i animuje
- * zapisanie danych: po "Zapisz" koło zmniejsza się do rozmiaru przycisku
- * (74px, patrz .kolo-danych form button[type=submit] w globals.css) i
- * zostaje widoczne jako mała złota kropka, a wynik pod spodem sam wjeżdża
- * w zwolnione miejsce (animujemy realną wysokość kontenera, nie samo
- * opacity/scale koła). Kliknięcie tej złotej kropki rozwija koło z
- * powrotem — można wrócić i poprawić dane.
+ * zapisanie danych: po "Zapisz" koło zmniejsza się do ROZMIAR_ZWINIETY
+ * (patrz .kolo-danych-zwiniete .kolo-danych w globals.css — musi się zgadzać
+ * z tą liczbą tam) i zostaje widoczne jako złota kropka z czytelnym
+ * podpisem "Twoje dane", a wynik pod spodem sam wjeżdża w zwolnione miejsce
+ * (animujemy realną wysokość kontenera, nie samo opacity/scale koła).
+ * Kliknięcie tej złotej kropki rozwija koło z powrotem — można wrócić
+ * i poprawić dane. Większy niż przycisk Zapisz (74px) na wyraźną prośbę
+ * użytkownika — sam przycisk był za mały, żeby podpis był czytelny.
  *
  * Wysokość mierzymy z DOM (scrollHeight) zamiast zakładać stałą liczbę,
  * bo koło ma zmienną średnicę (min(92vw, 580px) / płaska karta <640px).
  */
+const ROZMIAR_ZWINIETY = 150;
+
 export default function KoloDanychPanel({
   zlozone,
   onRozwin,
@@ -36,12 +40,12 @@ export default function KoloDanychPanel({
       scena.style.height = `${pelna}px`;
       scena.style.overflow = "hidden";
       void scena.offsetHeight;
-      scena.style.height = "74px";
+      scena.style.height = `${ROZMIAR_ZWINIETY}px`;
     } else if (!zlozone && bylZlozoneRef.current) {
       // złożone -> rozwinięte: zmierz docelową (pełną) wysokość przez chwilowe "auto", wróć i animuj do niej
       scena.style.height = "auto";
       const pelna = scena.scrollHeight;
-      scena.style.height = "74px";
+      scena.style.height = `${ROZMIAR_ZWINIETY}px`;
       void scena.offsetHeight;
       scena.style.height = `${pelna}px`;
       const naKoniec = () => {
