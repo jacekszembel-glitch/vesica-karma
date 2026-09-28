@@ -6,22 +6,19 @@ import { DateTime } from "luxon";
 import BirthForm, { type BirthInput } from "@/components/BirthForm";
 import KoloDanychPanel from "@/components/KoloDanychPanel";
 import { loadBirth } from "@/lib/birthStore";
-import NorthChart from "@/components/NorthChart";
-import SouthChart from "@/components/SouthChart";
 import Interpretation from "@/components/Interpretation";
 import Rozmowa from "@/components/Rozmowa";
-import { buildChart, type VedicChart, type Dignity } from "@/lib/astro/chart";
+import { buildChart, type VedicChart } from "@/lib/astro/chart";
 import { GRAHAS, RASIS, PLANET_ORDER } from "@/lib/astro/constants";
 import { formatDMS } from "@/lib/astro/math";
 import Konwencje from "@/components/Konwencje";
 import Term from "@/components/Term";
-import { navamsaChart, isVargottama } from "@/lib/astro/varga";
 import { nakshatraOf, nakshatraTerm } from "@/lib/astro/nakshatra";
 import ProfilDuszy from "@/components/ProfilDuszy";
 import PlanetyWSkrocie from "@/components/PlanetyWSkrocie";
 import Talenty from "@/components/Talenty";
 import WrazliwoscDuchowa from "@/components/WrazliwoscDuchowa";
-import { poziomWzmocnienia, kondycjaWskaznik, MOZLIWE_ZAWODY } from "@/lib/astro/domInterpretacja";
+import { kondycjaWskaznik, MOZLIWE_ZAWODY } from "@/lib/astro/domInterpretacja";
 import { ocenaWladcy } from "@/lib/astro/sila";
 import { wykryteJogiPosortowane } from "@/lib/astro/yogas";
 import JednoSpojrzenie from "@/components/JednoSpojrzenie";
@@ -49,9 +46,6 @@ import { BHAVAS } from "@/lib/astro/constants";
 import { odblokuj } from "@/lib/collection";
 import { odblokujSystemKarmy } from "@/lib/koloKarmyGeometria";
 
-type StylWykresu = "polnocny" | "poludniowy";
-const KLUCZ_STYLU = "9dom_styl_wykresu";
-
 /**
  * VesicaKarma nie ma "Rodzaju odczytu" (Portret/Dziecko/Finanse/Prognoza) —
  * strona pokazuje zawsze CAŁY kosmogram, wszystkie sekcje naraz (dawny tryb
@@ -62,23 +56,10 @@ const KLUCZ_STYLU = "9dom_styl_wykresu";
  * zapisanych osób (lib/osobyStore.ts) została wycofana na rzecz koła danych
  * wzorowanego na designie 9dom.pl.
  */
-type SekcjaKosmogramu = "techniczne" | "czasGleboko" | "dusza" | "predyspozycje" | "finanse" | "zdrowie";
+type SekcjaKosmogramu = "czasGleboko" | "dusza" | "predyspozycje" | "finanse" | "zdrowie";
 const WSZYSTKIE_SEKCJE: Record<SekcjaKosmogramu, boolean> = {
-  techniczne: true, czasGleboko: true, dusza: true, predyspozycje: true, finanse: true, zdrowie: true,
+  czasGleboko: true, dusza: true, predyspozycje: true, finanse: true, zdrowie: true,
 };
-
-/**
- * Kolor odznaki wzmacniacza (vargottama) — sam wzmacniacz nie jest ani dobry,
- * ani zły, wzmacnia to, co planeta i tak reprezentuje. Zielony/czerwony tylko
- * gdy godność jednoznacznie wskazuje kierunek, inaczej zostaje neutralne złoto.
- */
-function wzmocnienieBadge(dignity: Dignity): { className: string; style?: React.CSSProperties } {
-  const poziom = poziomWzmocnienia(dignity);
-  if (poziom === "dobre") return { className: "badge badge-good" };
-  if (poziom === "zle") return { className: "badge badge-warn" };
-  return { className: "badge", style: { borderColor: "var(--line-gold)", color: "var(--primary-soft)" } };
-}
-
 
 /**
  * Pierścień znaku zodiaku — glif na środku, wypełnienie pierścienia to
@@ -113,16 +94,12 @@ const KLUCZ_TRYBU = "9dom_tryb_kosmogramu";
 export default function KosmogramPage() {
   const [chart, setChart] = useState<VedicChart | null>(null);
   const [birthInput, setBirthInput] = useState<BirthInput | null>(null);
-  const [styl, setStyl] = useState<StylWykresu>("polnocny");
   const [tryb, setTryb] = useState<TrybKosmogramu>("poczatkujacy");
   const [zwiniete, setZwiniete] = useState(false);
 
   useEffect(() => {
-    const s = localStorage.getItem(KLUCZ_STYLU);
     const t = localStorage.getItem(KLUCZ_TRYBU);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- celowa hydratacja preferencji z localStorage po zamontowaniu
-    if (s === "polnocny" || s === "poludniowy") setStyl(s);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- jw.
     if (t === "poczatkujacy" || t === "zaawansowany") setTryb(t);
 
     // Panel jest teraz dla jednej osoby (własny profil, wspólny ze wszystkimi
@@ -147,11 +124,6 @@ export default function KosmogramPage() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- tylko przy montowaniu, handleSubmit stabilny w obrębie renderu
   }, []);
-
-  function zmienStyl(s: StylWykresu) {
-    setStyl(s);
-    try { localStorage.setItem(KLUCZ_STYLU, s); } catch { /* tryb prywatny */ }
-  }
 
   function zmienTryb(t: TrybKosmogramu) {
     setTryb(t);
@@ -261,7 +233,6 @@ export default function KosmogramPage() {
     };
   }, [chart, birthInput]);
 
-  const d9 = useMemo(() => (chart ? navamsaChart(chart) : null), [chart]);
   const finansowe = useMemo(() => (chart ? ocenaFinansowa(chart) : null), [chart]);
   const finanse = finansowe?.planety ?? [];
   const zdrowotne = useMemo(() => (chart ? ocenaZdrowotna(chart) : null), [chart]);
@@ -367,215 +338,16 @@ export default function KosmogramPage() {
                 className={`poziom-opcja${tryb === "zaawansowany" ? " poziom-opcja-aktywna" : ""}`}
                 onClick={() => zmienTryb("zaawansowany")}>
                 <span className="poziom-opcja-etykieta">Pełne dane</span>
-                <span className="poziom-opcja-opis">Diagramy, dasza, jogi i dosze</span>
+                <span className="poziom-opcja-opis">Dasza, jogi i dosze</span>
               </button>
             </div>
             <p className="muted" style={{ fontSize: "0.8rem", marginTop: 14 }}>
               {tryb === "poczatkujacy"
                 ? "Predyspozycje (z możliwymi zawodami), finanse, zdrowie — bez surowych tabel i technicznych systemów."
-                : "Pełny obraz: diagramy D1/D9, dasza, jogi i dosze."}
+                : "Pełny obraz: dasza, jogi i dosze."}
             </p>
           </div>
           )}
-
-          {chart.angles && tryb === "zaawansowany" && w.techniczne && (
-            <details className="card" style={{ marginBottom: 24 }} open>
-              <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)", marginBottom: 4 }}>
-                Diagramy D1 i D9
-              </summary>
-              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 18, marginTop: 14 }}>
-                <div className="bf-plec" style={{ width: "min(320px, 100%)", gridTemplateColumns: "repeat(2, 1fr)" }} role="radiogroup" aria-label="Styl diagramu">
-                  <button type="button" role="radio" aria-checked={styl === "polnocny"}
-                    className={`bf-plec-opcja${styl === "polnocny" ? " bf-plec-opcja-aktywna" : ""}`}
-                    onClick={() => zmienStyl("polnocny")}>
-                    Północnoindyjski
-                  </button>
-                  <button type="button" role="radio" aria-checked={styl === "poludniowy"}
-                    className={`bf-plec-opcja${styl === "poludniowy" ? " bf-plec-opcja-aktywna" : ""}`}
-                    onClick={() => zmienStyl("poludniowy")}>
-                    Południowoindyjski
-                  </button>
-                </div>
-              </div>
-              {/* D1 obok D9 — astrolog indyjski czyta je zawsze razem:
-                  mapa główna mówi, co widać, nawamsza — ile w tym siły. */}
-              <div className="wykresy-para">
-                <div>
-                  <p className="wykres-podpis">
-                    D1 · Rasi <span>mapa główna</span>
-                  </p>
-                  {styl === "polnocny" ? <NorthChart chart={chart} compareChart={d9 ?? undefined} /> : <SouthChart chart={chart} compareChart={d9 ?? undefined} />}
-                </div>
-                {d9 && (
-                  <div>
-                    <p className="wykres-podpis">
-                      <Term k="nawamsza">D9 · Nawamsza</Term> <span>wewnętrzna siła</span>
-                    </p>
-                    {styl === "polnocny" ? <NorthChart chart={d9} /> : <SouthChart chart={d9} />}
-                  </div>
-                )}
-              </div>
-              <p className="muted" style={{ textAlign: "center", fontSize: "0.85rem", marginTop: 14, lineHeight: 1.6 }}>
-                Diagram {styl === "polnocny" ? "północnoindyjski" : "południowoindyjski"} · domy Whole Sign · ayanamsa Lahiri {chart.ayanamsa.toFixed(2)}°
-                <br />
-                Planeta słaba w mapie głównej, ale mocna w nawamszy, i tak się w końcu obroni.
-                Ta sama w obu wykresach — <Term k="vargottama">vargottama</Term> — działa wyjątkowo spójnie.
-              </p>
-            </details>
-          )}
-
-          {tryb === "zaawansowany" && w.techniczne && <>
-          <details className="card" style={{ overflowX: "auto", marginBottom: 24 }} open>
-            <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)", marginBottom: 14 }}>
-              Pozycje planet — D1 · Rasi
-            </summary>
-            <table>
-              <thead>
-                <tr>
-                  <th>Graha</th><th>Znak</th><th>Stopień</th>
-                  {chart.angles && <th>Dom</th>}
-                  <th><Term k="nakszatra">Nakszatra</Term></th><th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {PLANET_ORDER.map((id) => {
-                  const p = chart.planets[id];
-                  const g = GRAHAS[id];
-                  return (
-                    <tr key={id}>
-                      <td><span style={{ color: g.color }}>{g.symbol}</span> {g.pl}</td>
-                      <td>{p.signPl}</td>
-                      <td>{p.degreeFormatted}</td>
-                      {chart.angles && <td>{p.house}</td>}
-                      <td>
-                        <Term term={nakshatraTerm(p.nakshatra)} plain>{p.nakshatra.nakshatra.pl}</Term>{" "}
-                        <span className="muted">p.{p.nakshatra.pada}</span>
-                      </td>
-                      <td style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                        {chart.angles && jogakaraka(chart.angles.lagnaSign) === id && (
-                          <Term k="jogakaraka" plain>
-                            <span className="badge badge-good">jogakaraka</span>
-                          </Term>
-                        )}
-                        {isVargottama(p.longitude) && (() => {
-                          const b = wzmocnienieBadge(p.dignity);
-                          return (
-                            <Term k="vargottama" plain>
-                              <span className={b.className} style={b.style}>vargottama</span>
-                            </Term>
-                          );
-                        })()}
-                        {p.retrograde && id !== "rahu" && id !== "ketu" && (
-                          <Term k="retrogradacja" plain><span className="badge">retro</span></Term>
-                        )}
-                        {p.combust && (
-                          <Term k="spalenie" plain><span className="badge badge-warn">spalona</span></Term>
-                        )}
-                        {p.dignity === "egzaltacja" && (
-                          <Term k="egzaltacja" plain><span className="badge badge-good">egzaltacja</span></Term>
-                        )}
-                        {p.dignity === "mulatrikona" && (
-                          <Term k="mulatrikona" plain><span className="badge badge-good">mulatrikona</span></Term>
-                        )}
-                        {p.dignity === "upadek" && (
-                          <Term k="upadek" plain><span className="badge badge-warn">upadek</span></Term>
-                        )}
-                        {/* relacja z władcą znaku — pokazywana zawsze, nawet gdy planeta
-                            jest jednocześnie w egzaltacji/upadku/mulatrikonie */}
-                        <Term k={p.signRelacja === "władanie" ? "wladanie" : `znak_${p.signRelacja}`} plain>
-                          <span className="badge" style={{
-                            color: p.signRelacja === "władanie" || p.signRelacja === "przyjazny" ? "var(--success)"
-                              : p.signRelacja === "wrogi" ? "var(--warn)" : "var(--muted)",
-                            opacity: p.signRelacja === "neutralny" ? 0.75 : 1,
-                          }}>
-                            {p.signRelacja === "władanie" ? "u siebie"
-                              : p.signRelacja === "przyjazny" ? "znak przyjaciela"
-                              : p.signRelacja === "wrogi" ? "znak wroga" : "znak neutralny"}
-                          </span>
-                        </Term>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </details>
-
-          {d9 && d9.angles && (
-            <details className="card" style={{ overflowX: "auto", marginBottom: 24 }} open>
-              <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)", marginBottom: 6 }}>
-                Pozycje planet — <Term k="nawamsza">D9 · Nawamsza</Term>
-              </summary>
-              <p className="muted" style={{ fontSize: "0.82rem", marginBottom: 14 }}>
-                Stopień liczony wewnątrz nawamszy (0–30°) — to nie ta sama skala co w D1.
-                Dom liczony od lagny D9, nakszatra zostaje z rzeczywistej długości ekliptycznej.
-              </p>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Graha</th><th>Znak</th><th>Stopień</th><th>Dom</th>
-                    <th><Term k="nakszatra">Nakszatra</Term></th><th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {PLANET_ORDER.map((id) => {
-                    const p = d9.planets[id];
-                    const g = GRAHAS[id];
-                    return (
-                      <tr key={id}>
-                        <td><span style={{ color: g.color }}>{g.symbol}</span> {g.pl}</td>
-                        <td>{p.signPl}</td>
-                        <td>{p.degreeFormatted}</td>
-                        <td>{p.house}</td>
-                        <td>
-                          <Term term={nakshatraTerm(p.nakshatra)} plain>{p.nakshatra.nakshatra.pl}</Term>{" "}
-                          <span className="muted">p.{p.nakshatra.pada}</span>
-                        </td>
-                        <td style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                          {isVargottama(p.longitude) && (() => {
-                            const b = wzmocnienieBadge(p.dignity);
-                            return (
-                              <Term k="vargottama" plain>
-                                <span className={b.className} style={b.style}>vargottama</span>
-                              </Term>
-                            );
-                          })()}
-                          {p.retrograde && id !== "rahu" && id !== "ketu" && (
-                            <Term k="retrogradacja" plain><span className="badge">retro</span></Term>
-                          )}
-                          {p.combust && (
-                            <Term k="spalenie" plain><span className="badge badge-warn">spalona</span></Term>
-                          )}
-                          {p.dignity === "egzaltacja" && (
-                            <Term k="egzaltacja" plain><span className="badge badge-good">egzaltacja</span></Term>
-                          )}
-                          {p.dignity === "mulatrikona" && (
-                            <Term k="mulatrikona" plain><span className="badge badge-good">mulatrikona</span></Term>
-                          )}
-                          {p.dignity === "upadek" && (
-                            <Term k="upadek" plain><span className="badge badge-warn">upadek</span></Term>
-                          )}
-                          <Term k={p.signRelacja === "władanie" ? "wladanie" : `znak_${p.signRelacja}`} plain>
-                            <span className="badge" style={{
-                              color: p.signRelacja === "władanie" || p.signRelacja === "przyjazny" ? "var(--success)"
-                                : p.signRelacja === "wrogi" ? "var(--warn)" : "var(--muted)",
-                              opacity: p.signRelacja === "neutralny" ? 0.75 : 1,
-                            }}>
-                              {p.signRelacja === "władanie" ? "u siebie"
-                                : p.signRelacja === "przyjazny" ? "znak przyjaciela"
-                                : p.signRelacja === "wrogi" ? "znak wroga" : "znak neutralny"}
-                            </span>
-                          </Term>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </details>
-          )}
-
-          </>}
 
           {/* predyspozycje + na co uwazac — jedna wspolna rozwijana karta, widoczna w trybie
               poczatkujacym (maPelneDane jest zawsze true, wiec warunek sprowadza sie do trybu). */}
