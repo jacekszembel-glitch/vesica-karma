@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+import WalidacjaZdarzen, { type DrugiSystem } from "@/components/WalidacjaZdarzen";
+import { walidujNumerologie } from "@/lib/astro/walidacjaNumerologia";
 import { DateTime } from "luxon";
 import Link from "next/link";
 import { buildChart, type VedicChart } from "@/lib/astro/chart";
@@ -56,11 +59,30 @@ function tekstHtml(t: string): string {
     .replace(/\n/g, "<br/>");
 }
 
+/** Walidacja z numerologią jako drugim systemem — osobny komponent, żeby hooki
+ *  (useMemo, useTranslations) nie stały za wczesnymi returnami KarmaPage. */
+function SekcjaWalidacji({ chart, urodzenie }: { chart: VedicChart; urodzenie: { data: string; godzina: string } }) {
+  const t = useTranslations("Walidacja");
+  const [, miesiac, dzien] = urodzenie.data.split("-").map(Number);
+  const drugiSystem = useMemo<DrugiSystem>(() => ({
+    nazwa: t("systemNum"),
+    ocen: (w, dniProbki) => {
+      const n = walidujNumerologie(dzien, miesiac, w, dniProbki);
+      return { trafienie: n.trafienie, pPrzypadku: n.pPrzypadku, opis: t("numOpis", { rok: n.rok }) };
+    },
+  }), [t, dzien, miesiac]);
+  return (
+    <WalidacjaZdarzen chart={chart} kluczZapisu={`vk_walidacja_${urodzenie.data}_${urodzenie.godzina}`} drugiSystem={drugiSystem} />
+  );
+}
+
 export default function KarmaPage() {
   const [ukonczone, setUkonczone] = useState<Set<SystemKarmy> | null>(null);
   const [chart, setChart] = useState<VedicChart | null>(null);
   const [num, setNum] = useState<NumerologyResult | null>(null);
   const [dloniTekst, setDloniTekst] = useState<string | null>(null);
+  /** Data i godzina urodzenia "RRRR-MM-DD" / "HH:mm" — do numerologii walidacji i klucza zapisu zdarzeń. */
+  const [urodzenie, setUrodzenie] = useState<{ data: string; godzina: string } | null>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- hydratacja z localStorage po zamontowaniu
@@ -74,6 +96,7 @@ export default function KarmaPage() {
           date: local.toUTC().toJSDate(), latitude: b.place.lat, longitude: b.place.lon, timeKnown: b.timeKnown,
         }));
         setNum(numerology(b.date, b.name, "wedyjski", new Date().getFullYear()));
+        setUrodzenie({ data: b.date, godzina: effectiveTime });
       }
     }
     const zapisany = wczytajOdczytDloni();
@@ -184,6 +207,14 @@ export default function KarmaPage() {
               )}
             </p>
             <OsZycia dashas={chart.dashas} birth={chart.birth.date} chart={chart} />
+          </div>
+        )}
+
+        {/* SPRAWDŹ NA SOBIE — walidacja astrologii i numerologii na zdarzeniach z życia,
+            na tle przypadku (lib/astro/walidacja.ts, walidacjaNumerologia.ts) */}
+        {urodzenie && (
+          <div style={{ marginTop: 20 }}>
+            <SekcjaWalidacji key={`vk_walidacja_${urodzenie.data}_${urodzenie.godzina}`} chart={chart} urodzenie={urodzenie} />
           </div>
         )}
       </div>

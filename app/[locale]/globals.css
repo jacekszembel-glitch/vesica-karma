@@ -1,7 +1,7 @@
 /* ═══════════════ VesicaKarma — design system (odgałęzienie od 9dom) ═══════════════
    Paleta: fiolet #170F28 / #1F1636 · turkus #11A7B6 (tylko mandala w tle) ·
    złoto #E6C48A/#C39A3B · taupe #47413B (stan „nieukończony" Koła Karmy)
-   Typografia: Cormorant Garamond (nagłówki) + Inter (treść)
+   Typografia: Outfit w całej stronie (geometryczna, bez szeryfów)
    Zasady ikon: geometria i prostota, jednolita grubość linii, harmonia i równowaga. */
 
 :root {
@@ -31,8 +31,9 @@
   --taupe: #47413b;
   --taupe-soft: rgba(71, 65, 59, 0.4);
   --radius: 16px;
-  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
-  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  /* obie nazwy zostają (używane w wielu miejscach), ale to ta sama czcionka: Outfit, bez szeryfów */
+  --font-serif: var(--font-outfit), "Outfit", system-ui, sans-serif;
+  --font-sans: var(--font-outfit), "Outfit", system-ui, sans-serif;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 

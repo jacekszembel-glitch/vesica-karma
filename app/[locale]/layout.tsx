@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Outfit } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
@@ -11,16 +11,12 @@ import "./globals.css";
  * Layout — fonty i zmienne CSS w duchu 9dom, ale własna (fioletowa) paleta
  * i własny minimalny nagłówek (SiteHeader: wordmark + hamburger).
  */
-const cormorant = Cormorant_Garamond({
+/** Jedna czcionka całej strony: Outfit — geometryczna, bez szeryfów, okrągłe litery
+ *  powtarzają okręgi Koła Vesica (zastąpiła Cormorant Garamond w nagłówkach i Inter
+ *  w treści). Zmienna oś grubości. */
+const outfit = Outfit({
   subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-cormorant",
-  display: "swap",
-});
-const inter = Inter({
-  subsets: ["latin", "latin-ext"],
-  variable: "--font-inter",
+  variable: "--font-outfit",
   display: "swap",
 });
 
@@ -60,7 +56,7 @@ export default async function RootLayout({
   const t = await getTranslations("Footer");
 
   return (
-    <html lang={locale} className={`${cormorant.variable} ${inter.variable}`}>
+    <html lang={locale} className={outfit.variable}>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <SiteHeader />
