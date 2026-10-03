@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { MIRROR_HOURS } from "@/lib/godziny";
+import { MIRROR_HOURS, type MirrorHour } from "@/lib/godziny";
 import { SceneGodziny } from "@/components/infographics";
+import SekcjaZlota from "@/components/SekcjaZlota";
 
 export const metadata: Metadata = {
   title: "Godziny lustrzane — znaczenie wszystkich godzin",
@@ -11,50 +12,40 @@ export const metadata: Metadata = {
   alternates: { canonical: "/godziny-lustrzane" },
 };
 
+/** Styl vesicakarma (jak astrologia i numerologia): złoty nagłówek z kreską, złote sekcje,
+ *  godziny jako złote pastylki zamiast ciemnych kart, zachęta jako złote koło. */
 export default async function GodzinyLustrzanePage() {
   const t = await getTranslations("GodzinyLustrzane");
   const lustrzane = MIRROR_HOURS.filter((h) => h.type === "lustrzana");
   const odwrocone = MIRROR_HOURS.filter((h) => h.type === "odwrócona");
 
+  const siatka = (lista: MirrorHour[]) => (
+    <div className="godziny-siatka">
+      {lista.map((h) => (
+        <Link key={h.slug} href={`/godziny-lustrzane/${h.slug}`} className="godzina-pastylka">
+          <span className="godzina-pastylka-czas">{h.display}</span>
+          <span className="godzina-pastylka-liczba">{t("liczbaEtykieta", { n: h.sum === 11 || h.sum === 22 ? h.sum : h.number })}</span>
+        </Link>
+      ))}
+    </div>
+  );
+
   return (
-    <div className="container section">
+    <div className="container section" style={{ paddingTop: 40 }}>
       <div className="fade-up" style={{ maxWidth: 340, margin: "0 auto 10px" }}><SceneGodziny /></div>
-      <h1 style={{ textAlign: "center" }}>{t("tytul")}</h1>
-      <p className="section-sub">{t("opis")}</p>
+      <h1 style={{ textAlign: "center", color: "var(--sand)", marginBottom: 16 }}>{t("tytul")}</h1>
+      <div className="skrot-hero-linia" />
+      <p className="section-sub" style={{ color: "var(--sand)" }}>{t("opis")}</p>
 
-      <h2 style={{ fontSize: "1.3rem", margin: "10px 0 16px" }}>{t("lustrzaneTytul")}</h2>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(110px, 100%), 1fr))", gap: 10 }}>
-        {lustrzane.map((h) => (
-          <Link key={h.slug} href={`/godziny-lustrzane/${h.slug}`} className="card card-hover"
-            style={{ padding: "16px 10px", textAlign: "center" }}>
-            <span style={{ fontFamily: "var(--font-serif)", fontSize: "1.35rem", color: "var(--primary-soft)", fontVariantNumeric: "tabular-nums" }}>
-              {h.display}
-            </span>
-            <p className="muted" style={{ fontSize: "0.75rem", marginTop: 2 }}>{t("liczbaEtykieta", { n: h.sum === 11 || h.sum === 22 ? h.sum : h.number })}</p>
-          </Link>
-        ))}
-      </div>
+      <SekcjaZlota tytul={t("lustrzaneTytul")}>{siatka(lustrzane)}</SekcjaZlota>
+      <SekcjaZlota tytul={t("odwroconeTytul")}>{siatka(odwrocone)}</SekcjaZlota>
 
-      <h2 style={{ fontSize: "1.3rem", margin: "34px 0 16px" }}>{t("odwroconeTytul")}</h2>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(110px, 100%), 1fr))", gap: 10 }}>
-        {odwrocone.map((h) => (
-          <Link key={h.slug} href={`/godziny-lustrzane/${h.slug}`} className="card card-hover"
-            style={{ padding: "16px 10px", textAlign: "center" }}>
-            <span style={{ fontFamily: "var(--font-serif)", fontSize: "1.35rem", color: "var(--primary-soft)", fontVariantNumeric: "tabular-nums" }}>
-              {h.display}
-            </span>
-            <p className="muted" style={{ fontSize: "0.75rem", marginTop: 2 }}>{t("liczbaEtykieta", { n: h.sum === 11 || h.sum === 22 ? h.sum : h.number })}</p>
-          </Link>
-        ))}
-      </div>
-
-      <div className="card card-2" style={{ marginTop: 40, maxWidth: 720, marginLeft: "auto", marginRight: "auto", textAlign: "center" }}>
-        <h3 style={{ marginBottom: 8 }}>{t("stopkaTytul")}</h3>
-        <p className="muted" style={{ marginBottom: 16, fontSize: "0.95rem" }}>
-          {t("stopkaOpis")}
+      <SekcjaZlota tytul={t("stopkaTytul")}>
+        <p style={{ textAlign: "center", marginBottom: 22, fontSize: "0.95rem" }}>{t("stopkaOpis")}</p>
+        <p style={{ textAlign: "center" }}>
+          <Link href="/numerologia" className="przycisk-kolo">{t("stopkaCta")}</Link>
         </p>
-        <Link href="/numerologia" className="btn btn-primary">{t("stopkaCta")}</Link>
-      </div>
+      </SekcjaZlota>
     </div>
   );
 }

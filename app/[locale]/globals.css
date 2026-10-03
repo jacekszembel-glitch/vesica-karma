@@ -2583,3 +2583,35 @@ p, li, td, th, h1, h2, h3, .badge {
   pointer-events: none;
 }
 .sekcja-zlota-ai .card > .btn-primary:hover { color: var(--bg); transform: scale(1.04); box-shadow: 0 0 44px -8px var(--primary-glow); }
+
+/* ── Złote koło jako link/przycisk (jak „Odczytaj interpretację” i „Twoje dane”) ── */
+.przycisk-kolo {
+  position: relative;
+  width: 150px; height: 150px; padding: 0 22px;
+  border-radius: 50%;
+  background: var(--sand); color: var(--bg);
+  font-family: var(--font-sans); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase; line-height: 1.35;
+  display: inline-flex; align-items: center; justify-content: center; text-align: center;
+  box-shadow: 0 0 36px -10px var(--primary-glow);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.przycisk-kolo::before {
+  content: ""; position: absolute; inset: 4.5%; border-radius: 50%;
+  border: 3px solid var(--bg); pointer-events: none;
+}
+.przycisk-kolo:hover { color: var(--bg); transform: scale(1.04); box-shadow: 0 0 44px -8px var(--primary-glow); }
+
+/* ── Godziny lustrzane: złote pastylki godzin (jak role w Karakach czarowych) ── */
+.godziny-siatka { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(104px, 100%), 1fr)); gap: 10px; }
+.godzina-pastylka {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 12px 8px; border-radius: 999px;
+  border: 1.5px solid var(--line-gold); color: var(--sand);
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.godzina-pastylka:hover { border-color: var(--sand); background: rgba(230, 196, 138, 0.08); transform: translateY(-2px); color: var(--sand); }
+.godzina-pastylka-czas { font-family: var(--font-serif); font-size: 1.3rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.godzina-pastylka-liczba { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
+.link-zloty { color: var(--sand); font-size: 0.88rem; }
+.link-zloty:hover { color: var(--primary-soft); }
