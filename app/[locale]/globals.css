@@ -2552,3 +2552,6 @@ p, li, td, th, h1, h2, h3, .badge {
 .sekcja-zlota-ai .rozmowa-odpowiedz { border-color: var(--line-gold); background: none; color: var(--sand); }
 .sekcja-zlota-ai .rozmowa-wyczysc { color: var(--sand); }
 .sekcja-zlota-ai strong { color: var(--sand); }
+/* dział kończący się kreską (np. Karaki czarowe) + złota sekcja zaczynająca się kreską
+   = dwie kreski pod rząd — zostaje jedna (zamykająca poprzedni dział) */
+*:has(> .skrot-hero-linia:last-child) + .sekcja-zlota > .skrot-hero-linia:first-child { display: none; }

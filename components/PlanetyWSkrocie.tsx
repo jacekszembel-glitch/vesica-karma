@@ -67,22 +67,27 @@ export default function PlanetyWSkrocie({ chart }: { chart: VedicChart }) {
                 onClick={() => setRozwinieta(rozw ? null : id)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setRozwinieta(rozw ? null : id); } }}
                 style={{
-                  display: "flex", alignItems: "center", gap: 10, padding: "8px 8px", borderRadius: 8, cursor: "pointer",
-                  background: rozw ? "rgba(255,255,255,0.04)" : "transparent", transition: "background 0.2s", flexWrap: "wrap",
+                  display: "grid", gap: 6, padding: "8px 8px", borderRadius: 8, cursor: "pointer",
+                  background: rozw ? "rgba(255,255,255,0.04)" : "transparent", transition: "background 0.2s",
                 }}>
+                {/* dwie linie zawsze: 1) planeta, znak, dom  2) pasek kondycji z opisem + plakietki —
+                    wcześniej jeden zawijany rząd rozdzielał na telefonie pasek od jego opisu */}
+                <span style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
                 <span style={{ width: 22, textAlign: "center", color: g.color, fontSize: "1.1rem" }}>{g.symbol}</span>
                 <span style={{ width: 84, fontSize: "0.86rem", flexShrink: 0 }}>{grahaNazwa(g, locale)}</span>
                 <span className="muted" style={{ width: 110, fontSize: "0.8rem", flexShrink: 0 }}>
                   {rasiNazwa(RASIS[p.sign], locale)}{chart.angles && ` · ${t("domKrotko")} ${p.house}`}
                 </span>
-                <span style={{ flex: 1, minWidth: 60, maxWidth: 160, height: 7, borderRadius: 4, background: "rgba(255,255,255,0.06)" }}>
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", paddingLeft: 32 }}>
+                <span style={{ flex: "0 0 120px", height: 7, borderRadius: 4, background: "rgba(255,255,255,0.06)" }}>
                   <span style={{ display: "block", width: `${k.procent}%`, height: "100%", borderRadius: 4, background: k.kolor, transition: "width 0.4s var(--ease-out)" }} />
                 </span>
                 <span style={{ color: k.kolor, fontSize: "0.78rem", fontWeight: 600, width: 60, flexShrink: 0 }}>{etykietaKondycjiNazwa(k.etykieta, locale)}</span>
                 <span style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                   {rola && (
                     <span className="badge" title={`${rola.pl} — ${rola.znaczenie}`}
-                      style={{ borderColor: "rgba(147,166,179,0.4)", color: "#c3d0d8" }}>
+                      style={{ borderColor: "var(--line-gold)", color: "var(--sand)" }}>
                       {rola.skrot}
                     </span>
                   )}
@@ -100,6 +105,7 @@ export default function PlanetyWSkrocie({ chart }: { chart: VedicChart }) {
                   }}>
                     {dignityNazwa(p.signRelacja, locale)}
                   </span>
+                </span>
                 </span>
               </div>
               {rozw && (
