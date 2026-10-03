@@ -2441,3 +2441,70 @@ p, li, td, th, h1, h2, h3, .badge {
   .kk-tip { animation: none; }
 }
 @media (prefers-reduced-motion: reduce) { .hiro-pulse { animation: none; } }
+
+/* (przeniesione z 9dom.pl, 2026-10-03 — osie zdrowia/finansów/predyspozycji/kariery/talentów) */
+/* ── Oś predyspozycji: tarcie ← | → potencjał ─────────────────── */
+.pdx-predyspozycji-legenda {
+  display: grid; grid-template-columns: 1fr 1fr 176px; gap: 16px;
+  font-size: 0.78rem; color: var(--muted); margin: 0 0 8px;
+  padding: 0 8px 0 164px;
+}
+.pdx-legenda-bilans { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.68rem; }
+.pdx-predyspozycji-legenda > span:first-child { text-align: right; }
+.pdx-kropka { display: inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: middle; }
+.pdx-wiersz { border-radius: 8px; transition: background 0.15s; }
+.pdx-wiersz-aktywny { background: rgba(255, 255, 255, 0.04); }
+.pdx-przycisk {
+  display: grid;
+  grid-template-columns: 124px 32px 1fr 2px 1fr 32px 176px;
+  grid-template-areas:
+    "nazwa lnum lewy os prawy pnum bilans"
+    ". . tematy tematy tematy . .";
+  align-items: center; column-gap: 6px; row-gap: 3px;
+  width: 100%; padding: 8px 8px; background: none; border: 0; border-radius: 8px;
+  color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.pdx-przycisk:focus-visible { outline: 2px solid var(--primary-soft); outline-offset: 2px; }
+.pdx-nazwa { grid-area: nazwa; font-size: 0.88rem; white-space: nowrap; }
+.pdx-liczba { font-size: 0.74rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pdx-liczba-lewa { grid-area: lnum; text-align: right; }
+.pdx-liczba-prawa { grid-area: pnum; text-align: left; }
+.pdx-tor { position: relative; height: 10px; }
+.pdx-tor-lewy { grid-area: lewy; }
+.pdx-tor-prawy { grid-area: prawy; }
+.pdx-tor-lewy .pdx-pasek { position: absolute; top: 0; bottom: 0; right: 2px; }
+.pdx-tor-prawy .pdx-pasek { position: absolute; top: 0; bottom: 0; left: 2px; }
+.pdx-os { grid-area: os; align-self: stretch; background: var(--muted); opacity: 0.45; }
+.pdx-bilans { grid-area: bilans; display: flex; flex-direction: column; line-height: 1.25; }
+.pdx-bilans-wartosc { font-size: 0.86rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.pdx-bilans-wartosc::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.pdx-bilans-plus::before { background: #36a377; }
+.pdx-bilans-minus::before { background: #e0654f; }
+.pdx-bilans-zero::before { background: var(--muted); }
+.pdx-bilans-opis { font-size: 0.72rem; color: var(--muted); }
+.pdx-bilans-porownanie { color: var(--text); }
+.pdx-tematy { grid-area: tematy; font-size: 0.78rem; color: var(--muted); line-height: 1.4; text-align: center; }
+.pdx-uwaga { color: var(--text); }
+.pdx-szczegoly { padding: 6px 12px 16px; border-bottom: 1px solid var(--line-soft); margin-bottom: 6px; }
+.pdx-czynniki { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.pdx-czynnik { font-size: 0.82rem; line-height: 1.5; margin: 0 0 4px; text-align: left; }
+.pdx-waga {
+  display: inline-block; min-width: 42px; margin-right: 6px; padding: 0 5px;
+  border: 1px solid; border-radius: 6px; font-size: 0.74rem; text-align: center;
+  color: var(--text); font-variant-numeric: tabular-nums;
+}
+@media (max-width: 640px) {
+  .pdx-predyspozycji-legenda { padding: 0; font-size: 0.72rem; grid-template-columns: 1fr 1fr; }
+  .pdx-legenda-bilans { display: none; }
+  .pdx-przycisk {
+    grid-template-columns: 86px 24px 1fr 2px 1fr 24px;
+    grid-template-areas:
+      "nazwa lnum lewy os prawy pnum"
+      "tematy tematy tematy tematy tematy tematy"
+      "bilans bilans bilans bilans bilans bilans";
+  }
+  .pdx-nazwa { font-size: 0.82rem; }
+  .pdx-tematy { text-align: left; }
+  .pdx-bilans { flex-direction: row; gap: 8px; align-items: baseline; }
+  .pdx-czynniki { grid-template-columns: 1fr; }
+}

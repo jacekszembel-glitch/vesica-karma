@@ -4,6 +4,8 @@ import { ayanamsa } from "./ayanamsa";
 import { norm360, obliquity, sin, cos, tan, atan2d, RAD, DEG } from "./math";
 import { PLANET_ORDER } from "./constants";
 import { BODIES, OUTER_ORDER, type BodyId } from "./bodies";
+import type { AstroLocale } from "./i18nAstro";
+import { opisLinii } from "./opisyLinii";
 
 /**
  * Astrokartografia — linie planetarne na mapie świata.
@@ -63,8 +65,10 @@ export interface PlanetLines {
   dsc: [number, number][];
 }
 
-/** Maksymalna szerokość geograficzna rysowania linii (przy biegunach się rozbiegają). */
-const LAT_LIMIT = 66;
+/** Maksymalna szerokość geograficzna rysowania linii (przy biegunach się rozbiegają).
+ *  80°, nie 66° — przy 66° krzywe urywały się w połowie Grenlandii i Skandynawii,
+ *  choć mapa sięga dalej na północ. */
+const LAT_LIMIT = 80;
 const LAT_STEP = 1;
 
 /**
@@ -79,9 +83,22 @@ function horizonCurve(
   side: "rise" | "set",
 ): [number, number][] {
   const out: [number, number][] = [];
-  for (let lat = -LAT_LIMIT; lat <= LAT_LIMIT; lat += LAT_STEP) {
-    const cosH0 = -tan(lat) * tan(eq.dec);
-    if (Math.abs(cosH0) > 1) continue; // ciało okołobiegunowe — nie wschodzi/zachodzi
+  // Szerokość graniczna 90° − |δ|: dalej ciało jest okołobiegunowe (nie wschodzi/nie zachodzi).
+  // Tuż przy niej krzywa skręca gwałtownie i spotyka się z krzywą przeciwną (ASC z DSC) —
+  // dokładamy gęste próbki i sam punkt graniczny, żeby linie łączyły się łukiem, a nie urywały.
+  const lats: number[] = [];
+  for (let lat = -LAT_LIMIT; lat <= LAT_LIMIT; lat += LAT_STEP) lats.push(lat);
+  const granica = 90 - Math.abs(eq.dec);
+  if (granica < LAT_LIMIT) {
+    for (const znak of [-1, 1]) {
+      for (const d of [0, 0.02, 0.08, 0.2, 0.4, 0.7]) lats.push(znak * (granica - d));
+    }
+    lats.sort((a, b) => a - b);
+  }
+  for (const lat of lats) {
+    let cosH0 = -tan(lat) * tan(eq.dec);
+    if (Math.abs(cosH0) > 1 + 1e-9) continue; // ciało okołobiegunowe — nie wschodzi/zachodzi
+    cosH0 = Math.max(-1, Math.min(1, cosH0));
     const h0 = Math.acos(cosH0) * RAD;
     const lha = side === "rise" ? -h0 : h0;
     out.push([lat, normLon(eq.ra - gastDeg + lha)]);
@@ -111,12 +128,10 @@ export function astrocartography(date: Date): PlanetLines[] {
 }
 
 /**
- * Linie planet zewnętrznych (Uran, Neptun, Pluton) — tylko dla mapy.
+ * Linie planet zewnętrznych (Uran, Neptun, Pluton) — tylko dla mapy świata.
  *
- * Liczone tak samo jak grahy: z rektascensji i deklinacji, czyli zupełnie bez
- * udziału zodiaku. Dlatego nie kolidują z konwencją wedyjską — pokazują po prostu,
- * nad którymi punktami Ziemi dana planeta stała w chwili urodzenia.
- * Trzymane osobno, żeby nie mogły wejść do kosmogramu ani do oceny miejsc.
+ * Liczone tak samo jak grahy: z rektascensji i deklinacji, czyli bez udziału
+ * zodiaku. Trzymane osobno, żeby nie weszły do kosmogramu ani do oceny miejsc.
  */
 export function outerAstrocartography(date: Date): PlanetLines[] {
   const gastDeg = SiderealTime(date) * 15;
@@ -136,10 +151,10 @@ export function outerAstrocartography(date: Date): PlanetLines[] {
 
 /** Znaczenia kątów — do legendy i danych dla AI. */
 export const ANGLE_MEANINGS = {
-  mc: { code: "MC", pl: "Górowanie", obszar: "kariera, widoczność, powołanie, ekspresja publiczna" },
-  ic: { code: "IC", pl: "Dołowanie", obszar: "dom, korzenie, rodzina, życie wewnętrzne" },
-  asc: { code: "ASC", pl: "Wschód", obszar: "tożsamość, ciało, witalność, nowe początki" },
-  dsc: { code: "DSC", pl: "Zachód", obszar: "relacje, partnerstwo, współpraca, druga strona" },
+  mc: { code: "MC", pl: "Górowanie", en: "Culmination", obszar: "kariera, widoczność, powołanie, ekspresja publiczna", obszarEn: "career, visibility, calling, public expression" },
+  ic: { code: "IC", pl: "Dołowanie", en: "Anti-culmination", obszar: "dom, korzenie, rodzina, życie wewnętrzne", obszarEn: "home, roots, family, inner life" },
+  asc: { code: "ASC", pl: "Wschód", en: "Rising", obszar: "tożsamość, ciało, witalność, nowe początki", obszarEn: "identity, body, vitality, new beginnings" },
+  dsc: { code: "DSC", pl: "Zachód", en: "Setting", obszar: "relacje, partnerstwo, współpraca, druga strona", obszarEn: "relationships, partnership, collaboration, the other side" },
 } as const;
 
 /** Jednosłowna etykieta kąta — do kompaktowej legendy MC/IC/ASC/DSC przy opisie linii. */
@@ -147,15 +162,19 @@ export const SKROT_OBSZARU: Record<keyof typeof ANGLE_MEANINGS, string> = {
   mc: "kariera", ic: "dom", asc: "tożsamość", dsc: "relacje",
 };
 
+export const SKROT_OBSZARU_EN: Record<keyof typeof ANGLE_MEANINGS, string> = {
+  mc: "career", ic: "home", asc: "identity", dsc: "relationships",
+};
+
 /**
  * Ton linii wg natury planety (BODIES[x].nature) — te same słowa i kolory co
  * gdzie indziej w appce (RankingGrah/RankingDomeny: wspierający/mieszany/
  * wymagający), żeby użytkownik nie uczył się nowego słownika dla mapy świata.
  */
-export const TON_LINII: Record<-1 | 0 | 1, { label: string; color: string }> = {
-  1: { label: "wspierająca", color: "#6fbf9f" },
-  0: { label: "mieszana", color: "#b9c7d1" },
-  [-1]: { label: "wymagająca", color: "#5b9bd5" },
+export const TON_LINII: Record<-1 | 0 | 1, { label: string; labelEn: string; color: string }> = {
+  1: { label: "wspierająca", labelEn: "supportive", color: "#6fbf9f" },
+  0: { label: "mieszana", labelEn: "mixed", color: "#b9c7d1" },
+  [-1]: { label: "wymagająca", labelEn: "demanding", color: "#5b9bd5" },
 };
 
 /** Krótkie zdanie: co ta linia (planeta × kąt) konkretnie wspiera albo utrudnia. */
@@ -174,8 +193,28 @@ const RAMA_KATA: Record<keyof typeof ANGLE_MEANINGS, (planeta: string, motyw: st
   dsc: (p, m) => `${p} na DSC (Zachód) dotyczy tematu ${m}, ale INACZEJ niż pozostałe trzy kąty — to nie coś, co robisz sam/a, tylko coś, co przychodzi PRZEZ INNYCH: partnerstwa, relacje, ludzie, których tu przyciągasz albo spotykasz. Temat rozgrywa się bardziej we współpracy z kimś niż w Tobie samym/samej.`,
 };
 
-export function opisSzerszyLinii(planet: BodyId, angle: keyof typeof ANGLE_MEANINGS): string {
+const RAMA_KATA_EN: Record<keyof typeof ANGLE_MEANINGS, (planeta: string, motyw: string) => string> = {
+  mc: (p, m) => `${p} on the MC (Culmination) pushes the theme of ${m} into visibility and career — this is the area of public expression: what you're known for out there, what your calling and status are about.`,
+  ic: (p, m) => `${p} on the IC (Anti-culmination) grounds the theme of ${m} in home and inner foundation — this happens privately, not on display: your base, your roots, what you return to rather than what you show the world.`,
+  asc: (p, m) => `${p} on the ASC (Rising) filters the theme of ${m} through your very identity — it's how you enter new situations and how you're seen before you've even said or done anything.`,
+  dsc: (p, m) => `${p} on the DSC (Setting) concerns the theme of ${m}, but DIFFERENTLY than the other three angles — it isn't something you do yourself, but something that comes THROUGH OTHERS: partnerships, relationships, the people you attract or meet here. The theme plays out more in collaboration with someone than within you alone.`,
+};
+
+export function opisSzerszyLinii(planet: BodyId, angle: keyof typeof ANGLE_MEANINGS, locale: AstroLocale = "pl"): string {
+  // konkretne znaczenie połączenia planeta × kąt (opisyLinii.ts) — szablon niżej tylko jako zapas
+  const konkretny = opisLinii(planet, angle, locale);
+  if (konkretny) return konkretny;
   const g = BODIES[planet];
+  if (locale === "en") {
+    const rdzen = RAMA_KATA_EN[angle](g.en, g.motywEn);
+    if (g.nature === 1) {
+      return `${rdzen} This line acts gently and builds — natural success in this theme comes more easily here, without much resistance.`;
+    }
+    if (g.nature === -1) {
+      return `${rdzen} This line asks for more conscious work — it's not a sentence, just a signal that this theme needs more effort here before it starts working in your favor.`;
+    }
+    return `${rdzen} This line acts variably — sometimes supportive, sometimes testing, depending on how consciously you use it.`;
+  }
   const rdzen = RAMA_KATA[angle](g.pl, g.motyw);
   if (g.nature === 1) {
     return `${rdzen} Ta linia działa łagodnie i buduje — łatwiej tu o naturalne powodzenie w tym temacie, bez większego oporu.`;
@@ -201,6 +240,11 @@ export function opisSzerszyLinii(planet: BodyId, angle: keyof typeof ANGLE_MEANI
  */
 export const ORB_KM = 1125;
 export const ORB_STRONG_KM = 250;
+
+/** Krycie pasa zasięgu na mapie wg siły planety 0–1 (brak danych = środek skali). */
+export function krycieWgSily(sila: number | undefined): number {
+  return 0.08 + 0.34 * (sila ?? 0.5);
+}
 export const ORB_MEDIUM_KM = 800;
 
 export type SilaZasiegu = "silna" | "średnia" | "słaba";
@@ -213,7 +257,7 @@ export function silaZasiegu(km: number): SilaZasiegu {
 }
 
 /** Długość jednego stopnia po południku (i po równiku). */
-const KM_PER_DEG = 111.32;
+export const KM_PER_DEG = 111.32;
 
 /**
  * Najbliższe linie dla danego punktu na Ziemi (np. miejsca, które użytkownik
@@ -270,13 +314,27 @@ export function nearbyLines(
     add(pl.id, "ic", dIc, dIc * KM_PER_DEG * cosLat);
 
     for (const [angle, curve] of [["asc", pl.asc], ["dsc", pl.dsc]] as const) {
-      let best = Infinity;
-      for (const [clat, clon] of curve) {
-        // odległość w przybliżeniu płaskim, długość już ważona cos szerokości
-        const d = Math.hypot(clat - lat, lonDist(clon, lon) * cosLat);
-        if (d < best) best = d;
-      }
-      if (best < Infinity) add(pl.id, angle, best, best * KM_PER_DEG);
+      if (!curve.length) continue;
+      // Punkty krzywej są posortowane wg szerokości (horizonCurve), a odległość
+      // nie może być mniejsza niż sama różnica szerokości — więc zaczynamy od
+      // punktu najbliższego szerokością i idziemy w obie strony tylko dopóki
+      // |Δφ| < najlepszej dotąd odległości. Wynik identyczny jak przy przeglądaniu
+      // całej krzywej, a ranking ~600 miast liczy się kilka razy szybciej.
+      let lo = 0, hi = curve.length;
+      while (lo < hi) { const m = (lo + hi) >> 1; if (curve[m][0] < lat) lo = m + 1; else hi = m; }
+      let best2 = Infinity; // kwadrat odległości, w stopniach
+      const sprawdz = (i: number) => {
+        const dLat = curve[i][0] - lat;
+        if (dLat * dLat >= best2) return false;
+        const dLon = lonDist(curve[i][1], lon) * cosLat;
+        const d2 = dLat * dLat + dLon * dLon;
+        if (d2 < best2) best2 = d2;
+        return true;
+      };
+      for (let i = lo; i < curve.length && sprawdz(i); i++);
+      for (let i = lo - 1; i >= 0 && sprawdz(i); i--);
+      const best = Math.sqrt(best2);
+      add(pl.id, angle, best, best * KM_PER_DEG);
     }
   }
   return out

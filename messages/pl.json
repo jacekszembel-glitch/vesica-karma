@@ -146,5 +146,251 @@
     "prywatnosc": "Zdarzenia zapisują się tylko w tej przeglądarce — nikt poza Tobą ich nie widzi.",
     "systemNum": "Numerologia",
     "numOpis": "rok osobisty {rok}"
+  },
+  "DziedzinyTalentu": {
+    "summary": "Dziedziny talentu",
+    "eyebrow": "Muzyka, sztuka, słowo… — talent z połączenia planet, domów i jog",
+    "wstep": "Predyspozycje wyżej pokazują siłę każdej planety osobno. Talent taki jak muzyka czy pisanie nie należy jednak do jednej planety — rodzi się z połączenia kilku planet, domów i jog. Tu każda dziedzina zbiera swoje klasyczne wskaźniki i pokazuje je na tej samej osi.",
+    "jakCzytac": "W prawo: potencjał (wskaźniki, które wspierają dziedzinę), w lewo: tarcie (te, które ją hamują). Liczby przy paskach to percentyle na wspólnej skali (20 000 map). O wyniku mówi Bilans — różnica w punktach — a obok średni bilans tej samej dziedziny u innych ludzi i odsetek osób, które mają go niższego. Kliknij dziedzinę, żeby zobaczyć, z jakich planet, domów i jog się składa.",
+    "podpowiedz": "Potencjał: {potencjal}. percentyl (+{plus} pkt) · Tarcie: {tarcie}. percentyl (−{minus} pkt) · Bilans {bilans} pkt — {opis} (mocniejszy niż w {bilansPct}% dziedzin w próbie)",
+    "podpowiedzSrednia": "· Średni bilans dziedziny „{planeta}” u innych: {srednia} pkt — Twój jest wyższy niż u {procent}% osób.",
+    "syntezaWspieraja": "Najmocniej na tle innych ludzi wypadają u Ciebie: {lista}.",
+    "syntezaTarcie": "Najmniej naturalnie przychodzą: {lista}.",
+    "syntezaBrakWsparcia": "Żadna dziedzina nie wypada wyraźnie ponad przeciętną — talenty rozkładają się dość równo i rozwiną się tam, gdzie włożysz pracę.",
+    "syntezaBrakTarcia": "Żadna dziedzina nie wypada wyraźnie poniżej przeciętnej — nic w mapie nie zamyka Ci drogi.",
+    "brakGodziny": "Dziedziny talentu liczą się z domów, a do tego potrzebna jest godzina urodzenia.",
+    "uwaga": "To wskazania mapy, nie wyrok — talent i tak trzeba rozwijać, a niski bilans nie zamyka drogi do danej dziedziny, tylko mówi, że przyjdzie mniej samo.",
+    "nazwy": {
+      "muzyka": "Muzyka i głos",
+      "sztuka": "Sztuka",
+      "slowo": "Słowo",
+      "nauczanie": "Nauczanie",
+      "biznes": "Biznes",
+      "technika": "Technika",
+      "uzdrawianie": "Uzdrawianie",
+      "sport": "Sport",
+      "przywodztwo": "Przywództwo",
+      "duchowosc": "Duchowość"
+    },
+    "krotko": {
+      "muzyka": "słuch, śpiew, melodia, instrument",
+      "sztuka": "forma, kolor, kompozycja, design",
+      "slowo": "pisanie, język, opowiadanie",
+      "nauczanie": "przekazywanie wiedzy, doradztwo",
+      "biznes": "handel, negocjacje, zarabianie",
+      "technika": "inżynieria, IT, systemy, mechanika",
+      "uzdrawianie": "opieka, medycyna, terapia",
+      "sport": "ciało, wytrzymałość, rywalizacja",
+      "przywodztwo": "kierowanie ludźmi, odpowiedzialność",
+      "duchowosc": "praktyka, astrologia, badania"
+    },
+    "opisy": {
+      "muzyka": "słuch, głos i wyczucie melodii. Liczone z Wenus (sztuka), Księżyca (głos, emocja) i Merkurego (rytm, instrumenty), z 2. domu (głos), 3. (muzyka, występy) i 5. (twórczość) oraz z Saraswati i Malawja jogi.",
+      "sztuka": "oko do formy, koloru i kompozycji — malarstwo, design, fotografia, moda. Liczone z Wenus, Księżyca i Merkurego, z 5. i 3. domu oraz z Saraswati i Malawja jogi.",
+      "slowo": "pisanie, język, opowiadanie, tłumaczenie. Liczone z Merkurego, Jowisza i Księżyca, z 3. i 2. domu oraz z Saraswati, Budha-Aditja i Bhadra jogi.",
+      "nauczanie": "przekazywanie wiedzy, doradztwo, prowadzenie innych przez naukę. Liczone z Jowisza, Merkurego i Słońca, z 5., 9. i 2. domu oraz z Saraswati, Gadźakesari i Hansa jogi.",
+      "biznes": "handel, negocjacje, zarabianie na wymianie. Liczone z Merkurego, Wenus i Jowisza, z 7., 10. i 11. domu oraz z Dhana, Lakszmi, Budha-Aditja i Bhadra jogi.",
+      "technika": "inżynieria, IT, mechanika, systemy. Liczone z Merkurego, Saturna, Rahu i Marsa, z 3., 6. i 10. domu oraz z Bhadra i Śasza jogi.",
+      "uzdrawianie": "opieka, medycyna, terapia, pomoc w kryzysie. Liczone z Księżyca, Jowisza, Ketu i Słońca, z 6. i 12. domu oraz z Hansa i Gadźakesari jogi.",
+      "sport": "ciało, wytrzymałość, rywalizacja. Liczone z Marsa, Słońca i Saturna, z 1., 3. i 6. domu oraz z Ruczaka jogi.",
+      "przywodztwo": "kierowanie ludźmi, odpowiedzialność, widoczność. Liczone ze Słońca, Marsa, Saturna i Jowisza, z 10. i 1. domu oraz z Radźa, Amala, Adhi, Ubhajaczari, Ruczaka i Śasza jogi.",
+      "duchowosc": "praktyka duchowa, astrologia, badania, sięganie pod powierzchnię. Liczone z Ketu, Jowisza, Saturna i Księżyca, z 9., 8. i 12. domu oraz z Hansa i Wiprita jogi."
+    }
+  },
+  "KoloJog": {
+    "aria": "Konstelacja jog — planety połączone nićmi tam, gdzie tworzą klasyczną jogę"
+  },
+  "NaCoUwazac": {
+    "tematy": {
+      "sun": "potrzeba racji i bycia w centrum",
+      "moon": "huśtawki nastroju, nadwrażliwość",
+      "mars": "impulsywność, konflikt zamiast rozmowy",
+      "mercury": "rozproszenie, gadatliwość bez treści",
+      "jupiter": "przesadny optymizm, pouczanie innych",
+      "venus": "unikanie trudnych rozmów dla świętego spokoju",
+      "saturn": "nadmierny krytycyzm wobec siebie",
+      "rahu": "nienasycenie, gonienie bez końca",
+      "ketu": "wycofanie, niedomykanie spraw"
+    },
+    "opisy": {
+      "sun": "Możesz łatwiej niż inni wchodzić w rolę tego, kto musi mieć rację i być zauważony. Warto pilnować, żeby potrzeba uznania nie zastępowała słuchania innych.",
+      "moon": "Nastrój i emocje mogą przejmować stery szybciej, niż zdążysz to zauważyć. Warto budować rutyny, które stabilizują, zanim fala emocji zdecyduje za Ciebie.",
+      "mars": "Łatwo zareagować szybciej, niż pomyśleć — zwłaszcza pod presją. Warto świadomie dać sobie chwilę, zanim odpowiesz działaniem na frustrację.",
+      "mercury": "Umysł potrafi skakać między wątkami szybciej, niż zdążysz je domknąć. Warto pilnować, żeby ilość słów nie zastępowała jakości przekazu.",
+      "jupiter": "Optymizm i chęć doradzania mogą przesłonić to, że druga strona wcale nie prosiła o radę. Warto czasem zapytać, zanim się poucza.",
+      "venus": "Łatwo wybrać wygodę i miły nastrój zamiast trudnej, ale potrzebnej rozmowy. Harmonia nie powinna oznaczać unikania konfliktu, który trzeba przejść.",
+      "saturn": "Krytycyzm wobec siebie bywa surowszy niż wobec kogokolwiek innego. Warto pamiętać, że dyscyplina bez odpoczynku prędzej czy później się mści.",
+      "rahu": "Pragnienie „więcej” rzadko kończy się uczuciem „wystarczy”. Warto świadomie nazywać moment, w którym już jest dobrze.",
+      "ketu": "Łatwo wycofać się z tematu, zanim zostanie naprawdę domknięty. Intuicyjne „to już nieważne” bywa ucieczką przed czymś ważnym."
+    }
+  },
+  "OsDomeny": {
+    "legendaTarcie": "tarcie — co hamuje",
+    "legendaPotencjal": "potencjał — co wspiera",
+    "legendaBilans": "bilans",
+    "jakCzytac": "W prawo: potencjał (suma czynników wspierających), w lewo: tarcie (suma hamujących). Liczby przy paskach to percentyle na tej samej skali u każdego (20 000 map) — 80 znaczy mocniej niż u 8 na 10 osób. Tych dwóch liczb nie odejmuje się od siebie, bo leżą na różnych skalach. O wyniku mówi Bilans: różnica w punktach (wsparcie minus tarcie). Żeby było wiadomo, czy to dużo czy mało, obok stoi średni bilans tej samej planety u innych ludzi i odsetek osób, które mają go niższego — planety mają różne naturalne poziomy (przeciętny Jowisz ma ok. +3,0, przeciętny Rahu ok. −0,6). Kliknij wiersz, żeby zobaczyć wszystkie czynniki z ich wagą.",
+    "bilans": {
+      "rownowaga": "równowaga",
+      "wsparcie": {
+        "lekka": "lekka przewaga wsparcia",
+        "wyrazna": "wyraźna przewaga wsparcia",
+        "silna": "silna przewaga wsparcia"
+      },
+      "tarcie": {
+        "lekka": "lekka przewaga tarcia",
+        "wyrazna": "wyraźna przewaga tarcia",
+        "silna": "silna przewaga tarcia"
+      }
+    },
+    "podpowiedz": "Potencjał: {potencjal}. percentyl (+{plus} pkt) · Tarcie: {tarcie}. percentyl (−{minus} pkt) · Bilans {bilans} pkt — {opis} (mocniejszy niż u {bilansPct}% planet w próbie)",
+    "uwazaj": "uważaj:",
+    "coWspiera": "Co wspiera",
+    "coHamuje": "Co hamuje",
+    "brak": "nic istotnego",
+    "rola": "Rola w mapie:",
+    "synteza": "Synteza",
+    "syntezaWspieraja": "Najmocniej wspierają: {lista}.",
+    "syntezaBrakWsparcia": "Żadna planeta nie ma tu wyraźnej przewagi wsparcia — mocne strony są w równowadze z tarciem i wymagają świadomej pracy.",
+    "syntezaTarcie": "Najwięcej świadomej uwagi wymagają: {lista}.",
+    "syntezaBrakTarcia": "Żadna planeta nie ma tu wyraźnej przewagi tarcia — nic wyraźnie nie działa przeciw Tobie.",
+    "legendaBilansSrednia": "bilans · średnia",
+    "srednia": "średnia: {srednia}",
+    "wyzejNiz": "wyżej niż u {procent}% osób",
+    "podpowiedzSrednia": "· Średni bilans planety {planeta} u innych: {srednia} pkt — Twój jest wyższy niż u {procent}% osób."
+  },
+  "OsPredyspozycji": {
+    "eyebrow": "Predyspozycje — siła i tarcie",
+    "wstep": "Każda z dziewięciu <graha>grah</graha> ma w Twojej mapie czynniki, które ją wspierają, i takie, które ją hamują — ta sama planeta bywa naraz mocną stroną i źródłem tarcia. Kolejność od największej przewagi wsparcia."
+  },
+  "RankingGrah": {
+    "mozliweZawody": "Możliwe kierunki zawodowe:",
+    "predyspozycje": {
+      "sun": "przywództwo i autorytet",
+      "moon": "empatia, wyobraźnia, głos",
+      "mars": "odwaga i zdecydowane działanie",
+      "mercury": "komunikacja, analiza, zręczność",
+      "jupiter": "nauczanie, strategia, szeroki ogląd",
+      "venus": "estetyka, sztuka, muzyka, relacje",
+      "saturn": "dyscyplina, wytrwałość, porządek",
+      "rahu": "innowacja, ambicja, wchodzenie w nieznane",
+      "ketu": "introspekcja, uważność, puszczanie"
+    }
+  },
+  "Talenty": {
+    "summary": "Talenty (z jog)",
+    "wstep": "<jogiklasyczne>Jogi</jogiklasyczne> to klasyczne, nazwane kombinacje kilku planet naraz, uznawane za wskaźniki wrodzonego talentu i szczęścia — inny język niż Predyspozycje wyżej (te liczą siłę każdej planety z osobna). Jogi są rzadsze i bardziej wyjątkowe: większość map ma zero albo jedną-dwie, nie dziewięć jak w rankingu grah. Ich brak nie znaczy braku talentu — tylko brak akurat TEJ konkretnej, nazwanej kombinacji.",
+    "brak": "Żadna z klasycznych, nazwanych jog nie występuje w Twojej mapie w czystej formie — to normalne i dotyczy większości map. Twoje mocne strony wciąż dobrze widać w Predyspozycjach wyżej, które nie zależą od tego, czy trafi się akurat któraś z tych konkretnych kombinacji.",
+    "talent": "Talent"
+  },
+  "WrazliwoscDuchowa": {
+    "summary": "Wrażliwość duchowa",
+    "wstep": "Klasyczny Jyotish nie ma osobnej kategorii na konkretne \"zdolności paranormalne\" (np. radiestezję) — to inny, uczciwszy temat: naturalne wyczulenie na to, co niematerialne (intuicja, atmosfera, podświadomość), wynikające z Ketu (klasycznego karaki intuicji i mistyki) oraz domów 8. (tajemnica), 9. (dharma, guru, wiara) i 12. (duchowość). To temat i skłonność widoczna w mapie — nie zweryfikowana \"moc\" ani gwarancja konkretnej umiejętności.",
+    "przechylaSie": "W Twojej mapie ten temat przechyla się najbardziej w stronę:",
+    "skadWynika": "Skąd to wynika w Twojej mapie:",
+    "brakCzynnikow": "Żaden z pięciu sprawdzanych czynników (kondycja Ketu, planety w 8./9./12. domu, koniunkcja Księżyc-Ketu, aspekt Jowisza na Ketu) nie wystąpił w Twojej mapie w wyraźnej formie.",
+    "opisy": {
+      "wyraźna": "Wyraźny temat w Twojej mapie — łatwiej niż wielu innym przychodzi Ci wyczuwanie tego, co niewypowiedziane: nastrojów, atmosfery miejsc, subtelnych sygnałów, które inni pomijają.",
+      "umiarkowana": "Obecny, ale nie dominujący temat — masz dostęp do tej wrażliwości, choć nie definiuje ona całej Twojej natury tak, jak dzieje się to u osób z silniejszym wskazaniem.",
+      "subtelna": "Delikatny, w tle — ta strona nie jest u Ciebie szczególnie wyostrzona. To nie ujma, po prostu inne tematy w Twojej mapie mówią głośniej."
+    }
+  },
+  "ZawodKariera": {
+    "kierunekTytul": "Kierunek kariery — planety czytane razem",
+    "kierunekWstep": "W Jyotisz zawód czyta się z połączenia planet, nie z jednej. Poniżej pary trzech najsilniej związanych z karierą planet:",
+    "kierunekGlowny": "główny kierunek",
+    "pary": {
+      "sun-moon": "praca publiczna z ludźmi i dla ludzi — administracja, zarządzanie zespołami, ochrona zdrowia, hotelarstwo na stanowiskach kierowniczych",
+      "sun-mars": "działanie z autorytetem i odwagą — kierowanie zespołami technicznymi, służby, chirurgia, sport, przedsiębiorczość wymagająca szybkich decyzji",
+      "sun-mercury": "autorytet przez wiedzę i słowo — administracja, prawo, zarządzanie informacją, dziennikarstwo, doradztwo na stanowisku decyzyjnym",
+      "sun-jupiter": "przywództwo oparte na wiedzy — nauczanie akademickie, prawo, doradztwo strategiczne, instytucje publiczne, duchowość",
+      "sun-venus": "twórczość pod własnym nazwiskiem — art direction, kierowanie projektami twórczymi, design, moda, sztuka reprezentacyjna, branża luksusowa",
+      "sun-saturn": "długa droga do pozycji — administracja, struktury państwowe, zarządzanie dużymi systemami, budownictwo, autorytet budowany latami",
+      "sun-rahu": "nietypowa droga do rozpoznawalności — media, polityka, technologie, praca międzynarodowa, budowanie marki osobistej",
+      "sun-ketu": "autorytet za kulisami — badania, medycyna, praca duchowa, stanowiska eksperckie bez rozgłosu",
+      "moon-mars": "praca z ludźmi w działaniu — ratownictwo, gastronomia, nieruchomości, handel, opieka wymagająca szybkiej reakcji",
+      "moon-mercury": "słowo i kontakt z ludźmi — handel, media, pisanie, edukacja, obsługa klienta, psychologia",
+      "moon-jupiter": "opieka i nauczanie — pedagogika, doradztwo, psychologia, finanse osobiste, praca społeczna, duchowość",
+      "moon-venus": "piękno i nastrój — sztuka, moda, uroda, muzyka, wystrój wnętrz, gastronomia, hotelarstwo",
+      "moon-saturn": "praca cierpliwa i opiekuńcza — rolnictwo, nieruchomości, opieka długoterminowa, administracja, służba publiczna",
+      "moon-rahu": "praca z masową publicznością — media, marketing, podróże, zagranica, technologie konsumenckie",
+      "moon-ketu": "praca intuicyjna i wycofana — terapia, uzdrawianie, badania, sztuka kontemplacyjna, duchowość",
+      "mars-mercury": "precyzja umysłu i ręki — inżynieria, programowanie, technika, mechanika, analiza techniczna, rzemiosło precyzyjne",
+      "mars-jupiter": "działanie w słusznej sprawie — prawo, służby, sport, zarządzanie, nauczanie praktyczne, przedsiębiorczość",
+      "mars-venus": "twórczość wykonywana rękami i narzędziem — grafika, design, ilustracja, sztuka użytkowa, rzemiosło artystyczne, architektura wnętrz, fotografia",
+      "mars-saturn": "ciężka praca techniczna — budownictwo, inżynieria, przemysł, mechanika, praca z maszynami",
+      "mars-rahu": "technologia i ryzyko — nowe technologie, elektronika, branże pionierskie, przedsiębiorczość, sporty ekstremalne",
+      "mars-ketu": "precyzja i cięcie — chirurgia, technika specjalistyczna, badania techniczne, sztuki walki",
+      "mercury-jupiter": "wiedza i jej przekazywanie — nauczanie, wydawnictwa, prawo, doradztwo, finanse, pisanie",
+      "mercury-venus": "projektowanie i komunikacja — design, media, reklama, pisanie, branża kreatywna, handel sztuką",
+      "mercury-saturn": "porządek i system — księgowość, administracja, analiza danych, informatyka, logistyka, badania",
+      "mercury-rahu": "komunikacja przyszłości — IT, media cyfrowe, marketing internetowy, handel zagraniczny, nowe technologie",
+      "mercury-ketu": "analityczny umysł w ukryciu — programowanie, badania, matematyka, astrologia, analiza danych",
+      "jupiter-venus": "piękno i wartości — sztuka, finanse, doradztwo, dyplomacja, edukacja artystyczna, branża luksusowa",
+      "jupiter-saturn": "struktury i odpowiedzialność — prawo, administracja, finanse, zarządzanie instytucjami, nauczanie",
+      "jupiter-rahu": "wiedza nieortodoksyjna — innowacyjne doradztwo, praca za granicą, nowe dziedziny wiedzy, media edukacyjne",
+      "jupiter-ketu": "wiedza duchowa — duchowość, astrologia, filozofia, badania, terapia, nauczanie tradycji",
+      "venus-saturn": "sztuka rzemiosła i trwałości — architektura, rzeźba, design produktu, konserwacja, rękodzieło, dobra trwałe",
+      "venus-rahu": "nowoczesna estetyka — grafika cyfrowa, film, moda, media, branża rozrywkowa, kreowanie wizerunku",
+      "venus-ketu": "sztuka wewnętrzna — sztuka sakralna, muzyka, terapia przez sztukę, twórczość bez rozgłosu",
+      "saturn-rahu": "duże systemy i technologia — przemysł, IT, logistyka międzynarodowa, administracja dużych organizacji",
+      "saturn-ketu": "praca w odosobnieniu — badania, archiwistyka, praca duchowa, techniczna praca specjalistyczna",
+      "rahu-ketu": "nietypowa, zmienna ścieżka — technologie, badania, zagranica, obszary, w których zawody dopiero powstają"
+    },
+    "summary": "Zawód i kariera",
+    "eyebrow": "Które planety mówią o Twojej pracy — i jak łatwo przyjdzie każdy kierunek",
+    "wstep": "Tu pokazujemy tylko planety, które w Twojej mapie są realnie związane z 10. domem — domem działania w świecie: stoją w nim, nim władają (licząc od lagny, Księżyca i Słońca), wskazuje je klasyczna reguła Warahamihiry, stoją razem z władcą 10. domu (zwłaszcza gdy jest spalony), są jogakaraką lub Amatjakaraką albo grają rolę w daśamszy (D10). Kolejność wyznacza siła tego związku, nie sama siła planety — dlatego żadna planeta nie dominuje u wszystkich.",
+    "jakCzytac": "W prawo: potencjał — związek z karierą i to, co planetę wzmacnia; w lewo: tarcie — co ją osłabia, czyli gdzie ten kierunek będzie wymagał więcej pracy. Liczby przy paskach to percentyle na wspólnej skali (20 000 map). Bilans porównujemy z tą samą planetą u innych ludzi, u których też jest związana z karierą. Kliknij planetę, żeby zobaczyć wszystkie powiązania z ich wagą i możliwe kierunki zawodowe.",
+    "podpowiedz": "Potencjał: {potencjal}. percentyl (+{plus} pkt) · Tarcie: {tarcie}. percentyl (−{minus} pkt) · Bilans {bilans} pkt — {opis} (mocniejszy niż w {bilansPct}% wskazań w próbie)",
+    "podpowiedzSrednia": "· Średni bilans planety {planeta} jako wskaźnika kariery u innych: {srednia} pkt — Twój jest wyższy niż u {procent}% osób.",
+    "syntezaWspieraja": "Najmocniej z Twoją pracą związane są: {lista}.",
+    "syntezaTarcie": "Najwięcej świadomej pracy wymagają: {lista}.",
+    "syntezaBrakWsparcia": "Żadna planeta kariery nie ma tu wyraźnej przewagi wsparcia — kierunek zawodowy zbuduje się raczej pracą niż łatwością.",
+    "syntezaBrakTarcia": "Żadna planeta kariery nie ma wyraźnej przewagi tarcia — nic w mapie nie blokuje Ci drogi zawodowej.",
+    "brakGodziny": "Zawód i kariera liczą się z 10. domu, a do tego potrzebna jest godzina urodzenia.",
+    "uwaga": "To wskazania kierunku, nie lista jedynych możliwych zawodów — najlepiej sprawdzają się tam, gdzie kilka planet z góry listy wskazuje podobny obszar.",
+    "krotko": {
+      "sun": "zarządzanie, administracja, medycyna",
+      "moon": "opieka, gościnność, praca z ludźmi",
+      "mars": "inżynieria, sport, ratownictwo, technika",
+      "mercury": "handel, pisanie, IT, analiza",
+      "jupiter": "nauczanie, doradztwo, prawo, finanse",
+      "venus": "sztuka, design, uroda, dyplomacja",
+      "saturn": "budownictwo, administracja, praca systematyczna",
+      "rahu": "technologie, media, praca za granicą",
+      "ketu": "badania, praca za kulisami, terapie"
+    },
+    "opisy": {
+      "sun": "kariera buduje się przez widoczność, autorytet i branie odpowiedzialności na siebie — przywództwo, administracja, polityka, medycyna. Naturalnie lepiej Ci tam, gdzie jesteś rozpoznawalny/a, nie w cieniu.",
+      "moon": "praca dobrze idzie tam, gdzie liczy się kontakt z ludźmi i płynne dostosowywanie się do zmian — opieka, gastronomia, hotelarstwo, pielęgniarstwo. Stabilność emocjonalna przekłada się wprost na stabilność zawodową.",
+      "mars": "kariera rozkręca się przez odwagę i szybkie, zdecydowane działanie — inżynieria, sport, ratownictwo, chirurgia, służby. Najlepiej tam, gdzie widać efekt działania od razu, nie w wolno tykającej biurokracji.",
+      "mercury": "praca ze słowem i liczbą przychodzi naturalnie — handel, pisanie, dziennikarstwo, księgowość, informatyka. Zawód, w którym codziennie coś analizujesz, negocjujesz albo tłumaczysz innym.",
+      "jupiter": "kariera oparta na wiedzy i autorytecie moralnym — nauczanie, prawo, doradztwo, finanse, duchowość. Naturalnie budzisz zaufanie jako ktoś, kto widzi dalej niż bieżący projekt.",
+      "venus": "praca z estetyką i relacjami — sztuka, moda, uroda, muzyka, dyplomacja. Zawód, w którym liczy się dobry gust i umiejętność łagodzenia napięć między ludźmi.",
+      "saturn": "kariera budowana latami, systematycznie, bez skrótów — budownictwo, administracja, rolnictwo, praca wymagająca dyscypliny. To, co zbudujesz, trzyma się dłużej niż u innych, ale wolniej rusza z miejsca.",
+      "rahu": "ścieżka zawodowa bywa nietypowa, nowoczesna — technologia, zagraniczne interesy, media. Możliwy szybki, nieoczywisty sukces tam, gdzie inni jeszcze nie widzą okazji.",
+      "ketu": "praca „za kulisami”, bez rozgłosu — badania, wsparcie techniczne, uzdrawianie. Zawód, w którym wynik liczy się bardziej niż to, kto dostaje oklaski."
+    },
+    "uwagaTematy": {
+      "sun": "nadmierna duma, trudność z podporządkowaniem się przełożonym",
+      "moon": "niestabilność zawodowa zależna od nastroju",
+      "mars": "impulsywne decyzje zawodowe, konflikty z autorytetami",
+      "mercury": "rozpraszanie się na zbyt wiele ścieżek zawodowych naraz",
+      "jupiter": "teoretyzowanie zamiast konkretnego działania zawodowego",
+      "venus": "wybieranie wygody kosztem realnego rozwoju kariery",
+      "saturn": "nadmierny perfekcjonizm, zbyt wolne tempo awansu",
+      "rahu": "ryzykowne, niesprawdzone ścieżki zawodowe",
+      "ketu": "brak ambicji zawodowej, oddawanie inicjatywy innym"
+    },
+    "uwagaOpisy": {
+      "sun": "Łatwo bronić własnej pozycji jak sprawy honoru, zamiast przyjąć krytykę czy podporządkować się strukturze. Warto pamiętać, że autorytet buduje się też przez słuchanie innych.",
+      "moon": "Nastrój potrafi decydować o zaangażowaniu w pracy bardziej niż plan czy strategia. Warto budować rutyny zawodowe niezależne od chwilowego samopoczucia.",
+      "mars": "Chęć szybkiego działania bywa silniejsza niż namysł nad konsekwencjami zawodowej decyzji. Warto dać sobie chwilę, zanim odpowie się impulsywnie przełożonemu czy klientowi.",
+      "mercury": "Łatwo rozpraszać się na kilka ścieżek zawodowych naraz, zamiast dopracować jedną do końca. Warto pilnować, żeby liczba otwartych projektów nie zastępowała ich jakości.",
+      "jupiter": "Szerokie spojrzenie na karierę bywa tak dominujące, że konkretne, praktyczne kroki schodzą na dalszy plan. Warto czasem po prostu zamknąć jedno zadanie zamiast planować kolejne dziesięć.",
+      "venus": "Wygoda i estetyka miejsca pracy mogą przesłonić to, co naprawdę rozwija karierę na dłuższą metę. Warto nie unikać zadań, które nie wyglądają efektownie, ale się liczą.",
+      "saturn": "Dążenie do idealnego wykonania potrafi tak spowolnić karierę, że okazje przechodzą obok. Warto pamiętać, że „wystarczająco dobre i na czas” też buduje reputację.",
+      "rahu": "Ciągnie w stronę najnowszych, najbardziej ekscytujących ścieżek zawodowych, a sprawdzone zostają porzucone bez realnego powodu. Warto sprawdzić dwa razy, zanim zaufa się czemuś nowemu.",
+      "ketu": "Łatwo stracić zainteresowanie karierą, gdy początkowa fascynacja mija, i zostawić inicjatywę innym. Warto świadomie wracać do zawodowych spraw, które łatwo odpuścić."
+    }
   }
 }

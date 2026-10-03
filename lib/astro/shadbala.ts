@@ -1,10 +1,7 @@
 import { GRAHAS, RASIS, type PlanetId } from "./constants";
 import { FRIENDS, ENEMIES, type VedicChart } from "./chart";
 import { norm360 } from "./math";
-import {
-  navamsaSign, dashamsaSign, drekkanaSign, chaturthamsaSign, saptamsaSign,
-  dwadasamsaSign, horaLord, trimsamszaWladca,
-} from "./varga";
+import { navamsaSign, drekkanaSign, saptamsaSign, dwadasamsaSign, horaLord, trimsamszaWladca } from "./varga";
 import { wschodyZachody, sankrantiPrzed } from "./ephemeris";
 import { eclipticToEquatorial } from "./astrocarto";
 import { ayanamsa } from "./ayanamsa";
@@ -106,6 +103,25 @@ function odlegloscKolowa(a: number, b: number): number {
   const d = Math.abs(norm360(a) - norm360(b));
   return d > 180 ? 360 - d : d;
 }
+
+/** Który dom daje pełną (maksymalną) Dig Balę której planecie — używane też
+ *  poza Szadbalą, np. w dymku kosmogramu (SouthChart/NorthChart), żeby przy
+ *  domu 1/4/7/10 pokazać, czyja to naturalna siła kierunkowa. */
+export const DIGBALA_DOM: Partial<Record<number, PlanetId[]>> = {
+  1: ["mercury", "jupiter"],
+  4: ["moon", "venus"],
+  7: ["saturn"],
+  10: ["sun", "mars"],
+};
+
+/** Lustrzane odbicie DIGBALA_DOM — dom dokladnie naprzeciwko (+6), gdzie ta
+ *  sama planeta ma swoj NAJSLABSZY punkt kierunkowy (Dig Bala = 0). */
+export const DIGBALA_ZERO_DOM: Partial<Record<number, PlanetId[]>> = {
+  7: ["mercury", "jupiter"],
+  10: ["moon", "venus"],
+  1: ["saturn"],
+  4: ["sun", "mars"],
+};
 
 /**
  * Dig Bala — siła kierunkowa. Słońce/Mars silne na MC (10. dom), Merkury/
@@ -305,7 +321,7 @@ export function czesztaBala(chart: VedicChart, id: PlanetId): number | null {
 /* ══════════════════ DRIK BALA (siła aspektu) — uproszczona ══════════════════ */
 
 /** Siła aspektu wg odległości kątowej (0–180°) — interpolacja liniowa między potwierdzonymi punktami klasycznej tabeli. */
-function silaAspektu(separacja: number): number {
+export function silaAspektu(separacja: number): number {
   const t = separacja > 180 ? 360 - separacja : separacja;
   const kotwice: [number, number][] = [[0, 0], [30, 0], [60, 15], [90, 45], [120, 30], [150, 0], [180, 60]];
   for (let i = 1; i < kotwice.length; i++) {
@@ -317,7 +333,7 @@ function silaAspektu(separacja: number): number {
 }
 
 /** Charakter dobroczynny/złośliwy do Drik Bali — wg źródła tylko Jowisz/Wenus (+), Słońce/Mars/Saturn (−), Księżyc wg jasnej/ciemnej połowy; Merkury/węzły nie liczone. */
-function charakterDlaDrik(chart: VedicChart, id: PlanetId): 1 | -1 | 0 {
+export function charakterDlaDrik(chart: VedicChart, id: PlanetId): 1 | -1 | 0 {
   if (id === "jupiter" || id === "venus") return 1;
   if (id === "sun" || id === "mars" || id === "saturn") return -1;
   if (id === "moon") {

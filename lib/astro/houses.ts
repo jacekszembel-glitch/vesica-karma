@@ -22,11 +22,15 @@ export function localSiderealDegrees(date: Date, longitudeEast: number): number 
 export function tropicalAscendant(date: Date, latitude: number, longitudeEast: number): number {
   const ramc = localSiderealDegrees(date, longitudeEast);
   const eps = obliquity(date);
-  const asc = atan2d(
+  let asc = norm360(atan2d(
     cos(ramc),
     -(sin(ramc) * cos(eps) + tan(latitude) * sin(eps)),
-  );
-  return norm360(asc);
+  ));
+  // Za kolem podbiegunowym formula potrafi zwrocic punkt ZACHODZACY (descendent)
+  // zamiast wschodzacego. Ascendent zawsze lezy 0-180° za MC w kierunku znakow —
+  // jesli nie, odwracamy o 180° (ta sama konwencja co Swiss Ephemeris).
+  if (norm360(asc - tropicalMC(date, longitudeEast)) > 180) asc = norm360(asc + 180);
+  return asc;
 }
 
 /** Tropikalna długość Medium Coeli (MC). */

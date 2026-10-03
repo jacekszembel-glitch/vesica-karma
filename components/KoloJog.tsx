@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { VedicChart } from "@/lib/astro/chart";
 import { GRAHAS, type PlanetId } from "@/lib/astro/constants";
 import { domZnaku, type Yoga, type KategoriaJogi } from "@/lib/astro/yogas";
@@ -22,12 +23,15 @@ import { domZnaku, type Yoga, type KategoriaJogi } from "@/lib/astro/yogas";
  */
 export const KATEGORIA_KOLOR: Record<KategoriaJogi, string> = {
   mahapurusza: "#b8811f",
+  saraswati: "#9a62e0",
   gajakesari: "#2196b5",
   "budha-aditja": "#5a9e3a",
   radza: "#4f7fe0",
   dhana: "#d45f9a",
+  pomyslnosc: "#9c9a1e",
   neeczabhanga: "#8b7fe0",
   "wiprita-radza": "#cf6432",
+  luminarze: "#3a9fc0",
 };
 
 const KLASYCZNE: PlanetId[] = ["sun", "moon", "mars", "mercury", "jupiter", "venus", "saturn"];
@@ -95,6 +99,7 @@ export default function KoloJog({ chart, jogi, aktywny, setAktywny }: {
   chart: VedicChart; jogi: Yoga[];
   aktywny: string | null; setAktywny: (v: string | null) => void;
 }) {
+  const t = useTranslations("KoloJog");
   if (!chart.angles) return null;
   const lagnaSign = chart.angles.lagnaSign;
   const pozycje = pozycjeGrah(chart, lagnaSign);
@@ -111,7 +116,7 @@ export default function KoloJog({ chart, jogi, aktywny, setAktywny }: {
 
   return (
     <svg viewBox={`0 0 ${S} ${S}`} className="synteza-mandala" role="img"
-      aria-label="Konstelacja jog — planety połączone nićmi tam, gdzie tworzą klasyczną jogę">
+      aria-label={t("aria")}>
       <defs>
         <filter id="kj-glow" x="-80%" y="-80%" width="260%" height="260%">
           <feGaussianBlur stdDeviation="3.4" result="b" />

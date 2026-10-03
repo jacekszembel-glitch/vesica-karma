@@ -1,20 +1,20 @@
 import { GRAHAS, PLANET_ORDER, type PlanetId } from "./constants";
 
 /**
- * Planety zewnętrzne — Uran, Neptun, Pluton.
+ * Wspólny słownik ciał na mapach (astrokartografia, mapa lokalna): dziewięć grah
+ * wedyjskich, planety zewnętrzne i cztery kąty.
  *
- * DLACZEGO OSOBNY PLIK, a nie dopisanie ich do GRAHAS:
- * astrologia wedyjska zna dziewięć grah i nie używa planet odkrytych po 1781 r.
- * Nie mają władania znakami, egzaltacji ani udziału w cyklu Vimshottari, więc
- * wpuszczenie ich do GRAHAS zepsułoby dasze, godności i kosmogram.
- *
- * Astrokartografia to jednak technika ZACHODNIA (Jim Lewis, lata 70.), w której
- * planety zewnętrzne są standardem. Co ważne, jej linie liczy się z rektascensji
- * i deklinacji — zodiak w ogóle nie bierze w tym udziału, więc nie ma sprzeczności
- * z metodą wedyjską. Dlatego pokazujemy je tylko na mapie, domyślnie wyłączone.
+ * PLANETY ZEWNĘTRZNE (Uran, Neptun, Pluton) — tylko na mapie świata. Astrologia
+ * wedyjska ich nie używa (brak władania znakami, egzaltacji, udziału w daszach),
+ * więc nie wchodzą do GRAHAS, kosmogramu ani oceny miejsc. Astrokartografia to
+ * jednak osobne narzędzie (zachodnie, Jim Lewis), a jej linie liczy się z
+ * rektascensji i deklinacji — zodiak nie bierze w tym udziału. Decyzja
+ * użytkownika (2026-10-02): przy wyborze miejsca ich położenie jest ważne,
+ * a w większości przypadków działają trudno — stąd natura −1.
  */
 
 export type OuterId = "uranus" | "neptune" | "pluto";
+
 /** Cztery kąty kosmogramu — jak planety, mają azymut zależny od miejsca i chwili. */
 export type AngleId = "asc" | "desc" | "mc" | "ic";
 export type BodyId = PlanetId | OuterId | AngleId;
@@ -22,30 +22,31 @@ export type BodyId = PlanetId | OuterId | AngleId;
 export interface BodyInfo {
   id: BodyId;
   pl: string;
+  /** Angielska nazwa — patrz komentarz przy Graha.en w constants.ts. */
+  en: string;
   symbol: string;
   color: string;
   /** Naturalna dobroczynność — używana przy ocenie miejsc. */
   nature: 1 | 0 | -1;
-  /** Czy należy do dziewięciu grah wedyjskich. */
-  vedic: boolean;
   /** Motyw linii na mapie. */
   motyw: string;
+  motywEn: string;
 }
 
 export const OUTER_ORDER: OuterId[] = ["uranus", "neptune", "pluto"];
 
 export const OUTERS: Record<OuterId, BodyInfo> = {
   uranus: {
-    id: "uranus", pl: "Uran", symbol: "♅", color: "#79C7E8", nature: 0, vedic: false,
-    motyw: "zmiana, wolność, zerwanie ze schematem",
+    id: "uranus", pl: "Uran", en: "Uranus", symbol: "♅", color: "#79C7E8", nature: -1,
+    motyw: "wolność, przebudzenie, oryginalność, przełomy i nagłe zmiany", motywEn: "freedom, awakening, originality, breakthroughs and sudden change",
   },
   neptune: {
-    id: "neptune", pl: "Neptun", symbol: "♆", color: "#8AA8E0", nature: 0, vedic: false,
-    motyw: "wyobraźnia, duchowość, rozmycie granic",
+    id: "neptune", pl: "Neptun", en: "Neptune", symbol: "♆", color: "#8AA8E0", nature: -1,
+    motyw: "duchowość, intuicja, wyobraźnia, sztuka, współczucie i złudzenia", motywEn: "spirituality, intuition, imagination, art, compassion and illusion",
   },
   pluto: {
-    id: "pluto", pl: "Pluton", symbol: "♇", color: "#B06A8A", nature: -1, vedic: false,
-    motyw: "przemiana, intensywność, władza nad sobą",
+    id: "pluto", pl: "Pluton", en: "Pluto", symbol: "♇", color: "#B06A8A", nature: -1,
+    motyw: "przemiana, moc, głębia psychiczna, kryzys i odrodzenie", motywEn: "transformation, power, psychological depth, crisis and rebirth",
   },
 };
 
@@ -59,35 +60,48 @@ export const ANGLE_ORDER: AngleId[] = ["asc", "desc", "mc", "ic"];
  * ASC/DESC (oś horyzontu) — jasny/ciemny złoty, MC/IC (oś południka) — jasny/ciemny turkus.
  */
 export const ANGLES: Record<AngleId, BodyInfo> = {
-  asc: { id: "asc", pl: "Ascendent", symbol: "AS", color: "#e6c48a", nature: 0, vedic: false, motyw: "jak wchodzisz w nowe sytuacje, pierwsze wrażenie" },
-  desc: { id: "desc", pl: "Descendent", symbol: "DS", color: "#c39a3b", nature: 0, vedic: false, motyw: "relacje, partnerstwo, czego szukasz u innych" },
-  mc: { id: "mc", pl: "Medium Coeli", symbol: "MC", color: "#7fd0d8", nature: 0, vedic: false, motyw: "kariera, status, publiczny wizerunek" },
-  ic: { id: "ic", pl: "Immum Coeli", symbol: "IC", color: "#11a7b6", nature: 0, vedic: false, motyw: "dom, korzenie, prywatne zaplecze" },
+  asc: { id: "asc", pl: "Ascendent", en: "Ascendant", symbol: "AS", color: "#e6c48a", nature: 0, motyw: "jak wchodzisz w nowe sytuacje, pierwsze wrażenie", motywEn: "how you enter new situations, first impressions" },
+  desc: { id: "desc", pl: "Descendent", en: "Descendant", symbol: "DS", color: "#c39a3b", nature: 0, motyw: "relacje, partnerstwo, czego szukasz u innych", motywEn: "relationships, partnership, what you look for in others" },
+  mc: { id: "mc", pl: "Medium Coeli", en: "Midheaven", symbol: "MC", color: "#7fd0d8", nature: 0, motyw: "kariera, status, publiczny wizerunek", motywEn: "career, status, public image" },
+  ic: { id: "ic", pl: "Immum Coeli", en: "Imum Coeli", symbol: "IC", color: "#11a7b6", nature: 0, motyw: "dom, korzenie, prywatne zaplecze", motywEn: "home, roots, private foundation" },
 };
 
 const MOTYW_GRAHA: Record<PlanetId, string> = {
-  sun: "autorytet, widoczność, siła woli",
-  moon: "emocje, dom, poczucie bezpieczeństwa",
-  mars: "działanie, odwaga, konflikt",
-  mercury: "myślenie, handel, komunikacja",
-  jupiter: "rozwój, sens, obfitość",
-  venus: "relacje, przyjemność, estetyka",
-  saturn: "dyscyplina, struktura, próba czasu",
-  rahu: "ambicja, głód nowego, ryzyko",
-  ketu: "odpuszczanie, wnętrze, dystans",
+  sun: "autorytet, widoczność, siła woli, przywództwo i sens",
+  moon: "emocje, dom, poczucie bezpieczeństwa, troska i intuicja",
+  mars: "działanie, odwaga, energia, rywalizacja i konflikt",
+  mercury: "myślenie, nauka, handel, komunikacja i kontakty",
+  jupiter: "rozwój, mądrość, nauczyciele, sens i obfitość",
+  venus: "miłość, relacje, piękno, sztuka i dostatek",
+  saturn: "dyscyplina, praca, odpowiedzialność, struktura i próba czasu",
+  rahu: "ambicja, głód nowego, obczyzna, technologia i ryzyko",
+  ketu: "odpuszczanie, duchowość, intuicja, wnętrze i dystans",
 };
 
-/** Wspólny słownik ciał — grahy + planety zewnętrzne. Do mapy i legend. */
+const MOTYW_GRAHA_EN: Record<PlanetId, string> = {
+  sun: "authority, visibility, willpower, leadership and purpose",
+  moon: "emotions, home, sense of security, care and intuition",
+  mars: "action, courage, energy, competition and conflict",
+  mercury: "thinking, learning, trade, communication and contacts",
+  jupiter: "growth, wisdom, teachers, meaning and abundance",
+  venus: "love, relationships, beauty, art and abundance",
+  saturn: "discipline, work, responsibility, structure and the test of time",
+  rahu: "ambition, hunger for the new, foreign lands, technology and risk",
+  ketu: "letting go, spirituality, intuition, interiority and distance",
+};
+
+/** Wspólny słownik ciał — grahy, planety zewnętrzne i kąty. Do mapy i legend. */
 export const BODIES: Record<BodyId, BodyInfo> = {
   ...Object.fromEntries(
     PLANET_ORDER.map((id) => [id, {
       id,
       pl: GRAHAS[id].pl,
+      en: GRAHAS[id].en,
       symbol: GRAHAS[id].symbol,
       color: GRAHAS[id].color,
       nature: GRAHAS[id].nature,
-      vedic: true,
       motyw: MOTYW_GRAHA[id],
+      motywEn: MOTYW_GRAHA_EN[id],
     } satisfies BodyInfo]),
   ) as Record<PlanetId, BodyInfo>,
   ...OUTERS,
@@ -95,19 +109,14 @@ export const BODIES: Record<BodyId, BodyInfo> = {
 };
 
 /**
- * Kolejność na mapie: dziewięć grah, potem planety zewnętrzne. ŚWIADOMIE bez kątów
+ * Kolejność na mapie: dziewięć grah. ŚWIADOMIE bez kątów
  * (ANGLE_ORDER) — BODY_ORDER współdzielą też AstroMap/AstroMapGL/DiagramOdczytu
  * (astrokartografia), które mają WŁASNY, osobny koncept linii kątów (MC/IC/ASC/DSC
  * jako południki/krzywe na globie, nie azymuty z jednego punktu) — dopisanie tu
  * ANGLE_ORDER dawałoby im martwe, niedziałające przyciski. Kto potrzebuje kątów
  * Local Space, dokłada ANGLE_ORDER lokalnie (patrz MapaLokalna.tsx).
  */
-export const BODY_ORDER: BodyId[] = [...PLANET_ORDER, ...OUTER_ORDER];
+export const BODY_ORDER: BodyId[] = [...PLANET_ORDER];
 
-export function isOuter(id: BodyId): id is OuterId {
-  return id === "uranus" || id === "neptune" || id === "pluto";
-}
-
-export function isAngle(id: BodyId): id is AngleId {
-  return id === "asc" || id === "desc" || id === "mc" || id === "ic";
-}
+/** Mapa świata (astrokartografia): dziewięć grah, potem planety zewnętrzne. */
+export const MAPA_SWIATA_ORDER: BodyId[] = [...PLANET_ORDER, ...OUTER_ORDER];

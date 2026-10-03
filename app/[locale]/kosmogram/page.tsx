@@ -24,11 +24,14 @@ import { wykryteJogiPosortowane } from "@/lib/astro/yogas";
 import JednoSpojrzenie from "@/components/JednoSpojrzenie";
 import { karakiCzarowe, jogakaraka } from "@/lib/astro/karaki";
 import KarakiCzarowe from "@/components/KarakiCzarowe";
-import RankingGrah from "@/components/RankingGrah";
-import NaCoUwazac from "@/components/NaCoUwazac";
-import RankingDomeny from "@/components/RankingDomeny";
-import { TABELA_FINANSE, TABELA_ZDROWIE } from "@/lib/astro/percentyleDomen";
-import NaCoUwazacDomeny from "@/components/NaCoUwazacDomeny";
+import OsPredyspozycji from "@/components/OsPredyspozycji";
+import OsDomeny from "@/components/OsDomeny";
+import DziedzinyTalentu from "@/components/DziedzinyTalentu";
+import OsKariery from "@/components/OsKariery";
+import {
+  TABELA_FINANSE, TABELA_ZDROWIE, TABELA_FINANSE_POTENCJAL, TABELA_FINANSE_TARCIE,
+  TABELA_ZDROWIE_POTENCJAL, TABELA_ZDROWIE_TARCIE,
+} from "@/lib/astro/percentyleDomen";
 import {
   FINANSE_OPIS, FINANSE_UWAGA, FINANSE_UWAGA_OPIS,
 } from "@/lib/astro/finanseUczucia";
@@ -228,9 +231,11 @@ export default function KosmogramPage() {
   }, [chart, birthInput]);
 
   const finansowe = useMemo(() => (chart ? ocenaFinansowa(chart) : null), [chart]);
-  const finanse = finansowe?.planety ?? [];
   const zdrowotne = useMemo(() => (chart ? ocenaZdrowotna(chart) : null), [chart]);
-  const zdrowie = zdrowotne?.planety ?? [];
+  // wiersze osi (OsDomeny) — planeta, jej ocena z wagami czynników i rola w dziedzinie
+  // (jak w 9dom.pl: oś tarcie ← | → potencjał z bilansem i średnią)
+  const finanseOsi = useMemo(() => (finansowe?.planety ?? []).map((d) => ({ id: d.planeta, ocena: d.ocena, role: d.role })), [finansowe]);
+  const zdrowieOsi = useMemo(() => (zdrowotne?.planety ?? []).map((d) => ({ id: d.planeta, ocena: d.ocena, role: d.role })), [zdrowotne]);
 
   const w = WSZYSTKIE_SEKCJE;
   const maPelneDane = true;
@@ -347,21 +352,56 @@ export default function KosmogramPage() {
           {(tryb === "poczatkujacy" || !maPelneDane) && <>
           <PlanetyWSkrocie chart={chart} />
 
+          {/* zdrowie nad predyspozycjami — jak w 9dom.pl */}
+          {/* zdrowie — osobne wyliczenia (zdrowieWedyjski.ts): wladca lagny/6./8. domu, Slonce/
+              Ksiezyc jako karakowie, potwierdzenie w D9, aspekty malefikow/Jowisza.
+              UWAGA: swiadomie NIE diagnoza medyczna, patrz zastrzezenie w tekscie. */}
+          {w.zdrowie && zdrowotne && (
+          <details className="card" style={{ marginBottom: 24 }} open>
+            <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
+              Zdrowie
+            </summary>
+            <p style={{
+              fontSize: "0.8rem", lineHeight: 1.55, marginBottom: 14, padding: "10px 14px",
+              borderRadius: 8, border: "1px solid var(--line-gold)", background: "rgba(230,196,138,0.06)",
+            }}>
+              <strong>Zastrzeżenie:</strong> to NIE jest diagnoza medyczna. Astrologia wedyjska pokazuje klasyczne
+              skłonności i tematy wymagające uważności — nie konkretne choroby, nie zastępuje lekarza. Przy
+              jakichkolwiek realnych dolegliwościach zawsze skonsultuj się z lekarzem.
+            </p>
+            <OsDomeny
+              dziedzina="zdrowie"
+              eyebrow="Zdrowie"
+              wstep="Dedykowane wyliczenia zdrowotne wg klasycznej astrologii wedyjskiej: władca lagny (Tanu bhava — samo ciało) oraz władcy domów zdrowia (6. — codzienne dolegliwości i odporność, 8. — tematy przewlekłe/ukryte), a także naturalni karakowie (Słońce — witalność, Księżyc — stabilność umysłu). Każda ocena uwzględnia dodatkowo potwierdzenie w nawamszy (D9) i aspekty Marsa/Saturna/Jowisza."
+              wiersze={zdrowieOsi}
+              skale={{ potencjal: TABELA_ZDROWIE_POTENCJAL, tarcie: TABELA_ZDROWIE_TARCIE, bilans: TABELA_ZDROWIE }}
+              podpis={(w) => w.role?.[0] ?? ""}
+              krotko={(w) => (w.role?.[0] ?? "").split("—")[0].trim()}
+              opis={(id) => ZDROWIE_OPIS[id]}
+              uwagaTemat={(id) => ZDROWIE_UWAGA[id]}
+              uwagaOpis={(id) => ZDROWIE_UWAGA_OPIS[id]}
+            />
+          </details>
+          )}
+
           {w.predyspozycje && <>
           <details className="card" style={{ marginBottom: 24 }} open>
             <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
               Predyspozycje i na co uważać
             </summary>
-            <RankingGrah chart={chart} />
-            <NaCoUwazac chart={chart} />
+            <OsPredyspozycji chart={chart} />
           </details>
 
-          <Talenty chart={chart} />
+          {/* dziedziny talentu — muzyka, sztuka, słowo… z połączenia planet, domów i jog,
+              na tej samej osi co Predyspozycje (OsDomeny) */}
+          <DziedzinyTalentu chart={chart} />
 
-          <WrazliwoscDuchowa chart={chart} />
+          {/* zawód i kariera — tylko planety realnie związane z 10. domem tej mapy
+              (karieraWedyjska.ts), ta sama oś co Predyspozycje */}
+          <OsKariery chart={chart} />
           </>}
 
-          {/* finanse — dedykowany silnik (finanseWedyjskie.ts): wladcy 2./5./9./11. domu, czterej
+          {/* finanse — osobne wyliczenia (finanseWedyjskie.ts): wladcy 2./5./9./11. domu, czterej
               karakowie, Dhana jogi, potwierdzenie w D9/D10, Indu Lagna, Hora, biezaca dasza.
               NIE recykling ocenaWladcy jak reszta domen — patrz naglowek finanseWedyjskie.ts. */}
           {w.finanse && finansowe && (
@@ -369,21 +409,18 @@ export default function KosmogramPage() {
             <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
               Finanse
             </summary>
-            <RankingDomeny
+            <OsDomeny
+              dziedzina="finanse"
               eyebrow="Finanse"
-              wstep={<>
-                Dedykowane wyliczenia finansowe wg klasycznej astrologii wedyjskiej: władcy czterech domów
-                majątkowych (2. — zgromadzony majątek, 5. — spekulacja i inwestycje, 9. — fortuna i dziedzictwo,
-                11. — dochody i zyski) oraz czterej naturalni karakowie (Jowisz, Wenus, Saturn, Merkury).
-                Każda ocena uwzględnia dodatkowo: potwierdzenie w nawamszy (D9) i daśamszy (D10), udział
-                w Dhana jogach i wpływ na Indu Lagnę — to nie ten sam wynik co w Predyspozycjach.{" "}
-                <strong>Długość</strong> paska to siła czynnika — <strong>kolor</strong> to jak łatwo się wyraża.
-              </>}
-              dane={finanse}
-              opisy={FINANSE_OPIS}
-              tabelaPercentyli={TABELA_FINANSE}
+              wstep="Dedykowane wyliczenia finansowe wg klasycznej astrologii wedyjskiej: władcy czterech domów majątkowych (2. — zgromadzony majątek, 5. — spekulacja i inwestycje, 9. — fortuna i dziedzictwo, 11. — dochody i zyski) oraz czterej naturalni karakowie (Jowisz, Wenus, Saturn, Merkury). Każda ocena uwzględnia dodatkowo: potwierdzenie w nawamszy (D9) i daśamszy (D10), udział w Dhana jogach i wpływ na Indu Lagnę — to nie ten sam wynik co w Predyspozycjach."
+              wiersze={finanseOsi}
+              skale={{ potencjal: TABELA_FINANSE_POTENCJAL, tarcie: TABELA_FINANSE_TARCIE, bilans: TABELA_FINANSE }}
+              podpis={(w) => w.role?.[0] ?? ""}
+              krotko={(w) => (w.role?.[0] ?? "").split("—")[0].trim()}
+              opis={(id) => FINANSE_OPIS[id]}
+              uwagaTemat={(id) => FINANSE_UWAGA[id]}
+              uwagaOpis={(id) => FINANSE_UWAGA_OPIS[id]}
             />
-            <NaCoUwazacDomeny dane={finanse} uwaga={FINANSE_UWAGA} uwagaOpis={FINANSE_UWAGA_OPIS} />
 
             {/* Dhana jogi — surowane tu wprost, nie tylko w osobnej sekcji Talenty/Jogi */}
             {finansowe.dhanaJogi.length > 0 && (
@@ -455,40 +492,10 @@ export default function KosmogramPage() {
           </details>
           )}
 
-          {/* zdrowie — dedykowany silnik (zdrowieWedyjski.ts): wladca lagny/6./8. domu, Slonce/
-              Ksiezyc jako karakowie, potwierdzenie w D9, aspekty malefikow/Jowisza. Nowa karta
-              (nie zamiana), bo zdrowie to jeden z trzech najczesciej szukanych tematow u
-              astrologow. UWAGA: swiadomie NIE diagnoza medyczna, patrz zastrzezenie w tekscie. */}
-          {w.zdrowie && zdrowotne && (
-          <details className="card" style={{ marginBottom: 24 }} open>
-            <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
-              Zdrowie
-            </summary>
-            <p style={{
-              fontSize: "0.8rem", lineHeight: 1.55, marginBottom: 14, padding: "10px 14px",
-              borderRadius: 8, border: "1px solid var(--line-gold)", background: "rgba(230,196,138,0.06)",
-            }}>
-              <strong>Zastrzeżenie:</strong> to NIE jest diagnoza medyczna. Astrologia wedyjska pokazuje klasyczne
-              skłonności i tematy wymagające uważności — nie konkretne choroby, nie zastępuje lekarza. Przy
-              jakichkolwiek realnych dolegliwościach zawsze skonsultuj się z lekarzem.
-            </p>
-            <RankingDomeny
-              eyebrow="Zdrowie"
-              wstep={<>
-                Dedykowane wyliczenia zdrowotne wg klasycznej astrologii wedyjskiej: władca lagny
-                (Tanu bhava — samo ciało) oraz władcy domów zdrowia (6. — codzienne dolegliwości
-                i odporność, 8. — tematy przewlekłe/ukryte), a także naturalni karakowie (Słońce —
-                witalność, Księżyc — stabilność umysłu). Każda ocena uwzględnia dodatkowo
-                potwierdzenie w nawamszy (D9) i aspekty Marsa/Saturna/Jowisza.{" "}
-                <strong>Długość</strong> paska to siła czynnika — <strong>kolor</strong> to jak łatwo się wyraża.
-              </>}
-              dane={zdrowie}
-              opisy={ZDROWIE_OPIS}
-              tabelaPercentyli={TABELA_ZDROWIE}
-            />
-            <NaCoUwazacDomeny dane={zdrowie} uwaga={ZDROWIE_UWAGA} uwagaOpis={ZDROWIE_UWAGA_OPIS} />
-          </details>
-          )}
+          {/* wrażliwość duchowa i talenty z jog — pod finansami, jak w 9dom.pl */}
+          {w.predyspozycje && <WrazliwoscDuchowa chart={chart} />}
+
+          {w.predyspozycje && <Talenty chart={chart} />}
 
           {/* dwie osie dasz — Chara Dasza x Wimszottari naraz — mieszka teraz jako
               wlasna, skondensowana strona pod satelita Kola Karmy "Mahadasze",

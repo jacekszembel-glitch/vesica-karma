@@ -1,4 +1,5 @@
 import { julianCenturies } from "./math";
+import { ustawienia, type SystemAyanamsy } from "./ustawienia";
 
 /**
  * Ayanamsa — przesunięcie między zodiakiem tropikalnym a syderycznym.
@@ -35,10 +36,28 @@ function generalPrecession(T: number): number {
 
 const P_REF = generalPrecession(T_REF);
 
+/**
+ * Pozostałe ayanamsy do wyboru w ustawieniach — jako stała różnica względem
+ * Lahiri (wszystkie narastają tą samą precesją, więc różnica jest stała).
+ * Wartości zmierzone względem Swiss Ephemeris (SE_SIDM_RAMAN, SE_SIDM_KRISHNAMURTI).
+ * - Raman (B.V. Raman) — o ok. 1°27' mniejsza; popularna w starszej literaturze.
+ * - KP (Krishnamurti) — o ok. 6' mniejsza; system Krishnamurti Paddhati.
+ */
+export const ROZNICA_OD_LAHIRI: Record<SystemAyanamsy, number> = {
+  lahiri: 0,
+  raman: -1.446301,
+  kp: -0.096852,
+};
+
 /** Ayanamsa Lahiri dla podanej chwili, w stopniach. */
-export function ayanamsa(date: Date): number {
+export function ayanamsaLahiri(date: Date): number {
   const T = julianCenturies(date);
   return AYANAMSA_2000 + (generalPrecession(T) - P_REF) / 3600;
+}
+
+/** Ayanamsa wybrana w ustawieniach (domyślnie Lahiri), w stopniach. */
+export function ayanamsa(date: Date, system: SystemAyanamsy = ustawienia().ayanamsa): number {
+  return ayanamsaLahiri(date) + ROZNICA_OD_LAHIRI[system];
 }
 
 /** Zamienia długość tropikalną na syderyczną (Lahiri). */

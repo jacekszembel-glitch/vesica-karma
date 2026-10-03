@@ -5,6 +5,7 @@ import { navamsaSign, isVargottama } from "./varga";
 import { jogakaraka } from "./karaki";
 import { norm360 } from "./math";
 import type { Yoga } from "./yogas";
+import { grahaNazwa, rasiNazwa, dignityNazwa, type AstroLocale } from "./i18nAstro";
 
 /**
  * OCENA WŁADCY OKRESU — jeden rachunek dla całego serwisu.
@@ -48,6 +49,16 @@ export interface OcenaWladcy {
   czynniki: string[];
 }
 
+/** Ocena z rozbiciem na wagi czynników — tylko ocenaWladcy ją liczy (finanse/zdrowie zwracają samo OcenaWladcy). */
+export interface OcenaWladcyZWagami extends OcenaWladcy {
+  /** Waga każdego czynnika (ten sam indeks co `czynniki`): ile dodał (+) albo odjął (−) do `punkty`. */
+  wagi: number[];
+  /** Suma czynników dodatnich — siła tego, co planetę wspiera. */
+  plus: number;
+  /** Suma czynników ujemnych jako wartość dodatnia — siła tego, co ją hamuje. */
+  minus: number;
+}
+
 const KENDRY_BEZ_LAGNY = [4, 7, 10];
 const TRIKONY = [5, 9];
 const UPACZAJA = [3, 6, 11];
@@ -68,10 +79,17 @@ const ASPEKTY: Partial<Record<PlanetId, number[]>> = {
 
 /** Czy aspektujący rzuca pełny aspekt na dany znak. Współdzielone z yogi.ts. */
 export function aspektuje(chart: VedicChart, kto: PlanetId, znakCelu: number): boolean {
+  return aspektDystans(chart, kto, znakCelu) !== null;
+}
+
+/** Jak `aspektuje`, ale zwraca dystans (w domach liczonych od planety, 1-10)
+ *  zamiast bool — żeby UI (dymek/OpisDomuPanel) mógł pokazać, czy to
+ *  uniwersalny aspekt 7. czy specjalny aspekt Marsa/Jowisza/Saturna. */
+export function aspektDystans(chart: VedicChart, kto: PlanetId, znakCelu: number): number | null {
   const zasieg = ASPEKTY[kto];
-  if (!zasieg) return false;
+  if (!zasieg) return null;
   const odleglosc = ((znakCelu - chart.planets[kto].sign + 12) % 12) + 1;
-  return zasieg.includes(odleglosc);
+  return zasieg.includes(odleglosc) ? odleglosc : null;
 }
 
 /** Czy planeta stoi w kendrze (1/4/7/10) od danego znaku odniesienia. */
@@ -91,29 +109,36 @@ function wKendrzeOd(chart: VedicChart, id: PlanetId, odZnaku: number): boolean {
  * Eksportowana — yogi.ts używa jej do wykrywania Neeczabhanga Radźa jogi
  * dla KAŻDEJ planety w upadku, nie tylko władcy aktualnej daszy.
  */
-export function neechaBhanga(chart: VedicChart, lord: PlanetId): string | null {
+export function neechaBhanga(chart: VedicChart, lord: PlanetId, locale: AstroLocale = "pl"): string | null {
   const p = chart.planets[lord];
   const znak = p.sign;
   const wladca = RASIS[znak].lord;
+  const nazwa = (id: PlanetId) => grahaNazwa(GRAHAS[id], locale);
   const odniesienia = [chart.angles?.lagnaSign, chart.planets.moon.sign]
     .filter((x): x is number => x !== undefined);
 
   if (odniesienia.some((od) => wKendrzeOd(chart, wladca, od))) {
-    return `neecha bhanga — władca znaku upadku (${GRAHAS[wladca].pl}) w kendrze`;
+    return locale === "en"
+      ? `neecha bhanga — the lord of the debilitation sign (${nazwa(wladca)}) is in a kendra`
+      : `neecha bhanga — władca znaku upadku (${nazwa(wladca)}) w kendrze`;
   }
   const egzaltant = (Object.keys(GRAHAS) as PlanetId[])
     .find((id) => GRAHAS[id].exaltation?.sign === znak);
   if (egzaltant && odniesienia.some((od) => wKendrzeOd(chart, egzaltant, od))) {
-    return `neecha bhanga — ${GRAHAS[egzaltant].pl} (egzaltujący się tu) w kendrze`;
+    return locale === "en"
+      ? `neecha bhanga — ${nazwa(egzaltant)} (exalted here) is in a kendra`
+      : `neecha bhanga — ${nazwa(egzaltant)} (egzaltujący się tu) w kendrze`;
   }
   if (lord !== "rahu" && lord !== "ketu") {
     const gd9 = dignityOf(lord, navamsaSign(p.longitude), 15);
     if (gd9 === "egzaltacja" || gd9 === "władanie") {
-      return "neecha bhanga — mocna w nawamszy";
+      return locale === "en" ? "neecha bhanga — strong in the navamsa" : "neecha bhanga — mocna w nawamszy";
     }
   }
   if (aspektuje(chart, wladca, znak)) {
-    return `neecha bhanga — aspekt władcy znaku (${GRAHAS[wladca].pl})`;
+    return locale === "en"
+      ? `neecha bhanga — aspect from the sign lord (${nazwa(wladca)})`
+      : `neecha bhanga — aspekt władcy znaku (${nazwa(wladca)})`;
   }
   return null;
 }
@@ -137,84 +162,109 @@ const DIG_BALA: Partial<Record<PlanetId, number>> = {
  * które "Predyspozycje" już liczy dla wszystkiego innego, tylko dotad
  * pomijało to, co appka i tak juz wykrywa w Talentach/Jogach.
  */
-export function ocenaWladcy(chart: VedicChart | null | undefined, lord: PlanetId, jogi: Yoga[] = []): OcenaWladcy {
+/** Numer domu jako "5." (PL) lub "5th" (EN) — tylko domy 1-12. Wspoldzielone z yogas.ts. */
+const DOM_ORDINAL_EN = ["", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"];
+export function domOrdinal(d: number, locale: AstroLocale): string {
+  return locale === "en" ? DOM_ORDINAL_EN[d] : `${d}.`;
+}
+
+/**
+ * `locale` — jezyk zwracanych tekstow `czynniki` (domyslnie "pl" dla wstecznej
+ * zgodnosci z licznymi wywolaniami, ktore celowo chca polskiego tekstu:
+ * payload AI, raport PDF, /data-slubu i inne kalkulatory jeszcze bez i18n).
+ * WARTOSCI punkty/ton zostaja identyczne niezaleznie od locale — tlumaczy sie
+ * tylko wyswietlany tekst uzasadnienia, patrz i18nAstro.ts. */
+export function ocenaWladcy(chart: VedicChart | null | undefined, lord: PlanetId, jogi: Yoga[] = [], locale: AstroLocale = "pl"): OcenaWladcyZWagami {
   const czynniki: string[] = [];
+  const wagi: number[] = [];
+  // Każdy czynnik jest dopisywany zaraz po zmianie `punkty` — waga to przyrost od poprzedniego czynnika.
+  let dotychczas = 0;
+  const dopisz = (tekst: string) => { czynniki.push(tekst); wagi.push(Math.round((punkty - dotychczas) * 100) / 100); dotychczas = punkty; };
+  const dodaj = (pl: string, en: string) => dopisz(locale === "en" ? en : pl);
   const g = GRAHAS[lord];
   const p = chart?.planets?.[lord];
   const lagna = chart?.angles?.lagnaSign;
+  const nazwa = (id: PlanetId) => grahaNazwa(GRAHAS[id], locale);
 
   // ── natura naturalna ──
   let punkty: number;
   if (lord === "sun") {
     punkty = -0.5;
-    czynniki.push("łagodny malefik (Słońce)");
+    dodaj("łagodny malefik (Słońce)", "mild malefic (Sun)");
   } else if (lord === "moon" && chart) {
     // Księżyc wg fazy przy urodzeniu: blisko nowiu (do 72° od Słońca) osłabiony
     const elong = norm360(chart.planets.moon.longitude - chart.planets.sun.longitude);
     const odSlonca = Math.min(elong, 360 - elong);
     if (odSlonca < 72) {
       punkty = -0.25;
-      czynniki.push("Księżyc blisko nowiu — osłabiony");
+      dodaj("Księżyc blisko nowiu — osłabiony", "Moon close to new moon — weakened");
     } else if (elong < 180) {
       punkty = 0.5;
-      czynniki.push("Księżyc jasny, przybywający — dobroczynny");
+      dodaj("Księżyc jasny, przybywający — dobroczynny", "Moon bright, waxing — benefic");
     } else {
       punkty = 0.25;
-      czynniki.push("Księżyc jasny, ubywający");
+      dodaj("Księżyc jasny, ubywający", "Moon bright, waning");
     }
   } else {
     punkty = g.nature as number;
-    if (g.nature === 1) czynniki.push("naturalny dobroczyńca");
-    else if (g.nature === -1) czynniki.push("naturalny malefik");
+    if (g.nature === 1) dodaj("naturalny dobroczyńca", "natural benefic");
+    else if (g.nature === -1) dodaj("naturalny malefik", "natural malefic");
   }
 
   // ── władztwo funkcyjne ──
   if (lagna !== undefined) {
     if (jogakaraka(lagna) === lord) {
       punkty += 1.5;
-      czynniki.push("jogakaraka — władca kendry i trikony dla Twojej lagny");
+      dodaj("jogakaraka — władca kendry i trikony dla Twojej lagny", "jogakaraka — lord of both a kendra and a trikona for your ascendant");
     } else if (g.ownSigns.length) {
       const domy = wladaneDomy(lord, lagna);
-      if (domy.includes(1)) { punkty += 0.5; czynniki.push("władca lagny"); }
+      if (domy.includes(1)) { punkty += 0.5; dodaj("władca lagny", "lord of the ascendant"); }
       if (domy.some((d) => TRIKONY.includes(d))) {
         punkty += 0.75;
-        czynniki.push(`władca trikony (${domy.filter((d) => TRIKONY.includes(d)).join(". i ")}. domu)`);
+        const trikony = domy.filter((d) => TRIKONY.includes(d));
+        dodaj(
+          `władca trikony (${trikony.join(". i ")}. domu)`,
+          `lord of a trikona (house${trikony.length > 1 ? "s" : ""} ${trikony.map((d) => domOrdinal(d, "en")).join(" and ")})`,
+        );
       }
       const zle = domy.filter((d) => [3, 6, 11].includes(d));
       if (zle.length) {
         punkty -= 0.5 * zle.length;
-        czynniki.push(`władca ${zle.map((d) => d + ".").join(" i ")} domu — obciążenie funkcyjne`);
+        dodaj(
+          `władca ${zle.map((d) => d + ".").join(" i ")} domu — obciążenie funkcyjne`,
+          `lord of house${zle.length > 1 ? "s" : ""} ${zle.map((d) => domOrdinal(d, "en")).join(" and ")} — functional burden`,
+        );
       }
       // luminarze zwolnieni ze skazy 8. domu (BPHS)
       if (domy.includes(8) && !domy.includes(1) && lord !== "sun" && lord !== "moon") {
         punkty -= 0.5;
-        czynniki.push("władca 8. domu");
+        dodaj("władca 8. domu", "lord of the 8th house");
       }
       const BENEFIKI_KENDRADHIPATI: PlanetId[] = ["jupiter", "venus", "mercury", "moon"];
       // 1. dom jest naraz kendrą i trikoną — władca lagny NIE podpada pod doszę
       if (BENEFIKI_KENDRADHIPATI.includes(lord) && domy.length > 0
         && domy.every((d) => KENDRY_BEZ_LAGNY.includes(d))) {
         punkty -= 0.5;
-        czynniki.push("kendradhipati dosza — dobroczyńca władający tylko kendrami");
+        dodaj("kendradhipati dosza — dobroczyńca władający tylko kendrami", "kendradhipati dosha — a benefic ruling only kendras");
       }
     }
   }
 
   // ── kondycja w mapie ──
   if (p && chart) {
-    if (p.dignity === "egzaltacja") { punkty += 1; czynniki.push("egzaltacja w mapie"); }
-    else if (p.dignity === "mulatrikona") { punkty += 1; czynniki.push("mulatrikona"); }
-    else if (p.dignity === "władanie") { punkty += 1; czynniki.push("we własnym znaku"); }
-    else if (p.dignity === "przyjazny") { punkty += 0.5; czynniki.push("w znaku przyjaciela"); }
-    else if (p.dignity === "wrogi") { punkty -= 0.5; czynniki.push("w znaku wroga"); }
+    if (p.dignity === "egzaltacja") { punkty += 1; dodaj("egzaltacja w mapie", "exalted in the chart"); }
+    else if (p.dignity === "mulatrikona") { punkty += 1; dodaj("mulatrikona", "mulatrikona"); }
+    else if (p.dignity === "władanie") { punkty += 1; dodaj("we własnym znaku", "in its own sign"); }
+    else if (p.dignity === "przyjazny") { punkty += 0.5; dodaj("w znaku przyjaciela", "in a friend's sign"); }
+    else if (p.dignity === "wrogi") { punkty -= 0.5; dodaj("w znaku wroga", "in an enemy's sign"); }
     else if (p.dignity === "upadek") {
-      const nb = neechaBhanga(chart, lord);
+      const nb = neechaBhanga(chart, lord, locale);
       if (nb) {
         punkty += 0.25; // upadek zniesiony i lekko przekuty w siłę
-        czynniki.push(nb);
+        dopisz(nb);
       } else {
         punkty -= 1;
-        czynniki.push("w upadku");
+        dodaj("w upadku", "debilitated");
       }
     }
 
@@ -224,14 +274,14 @@ export function ocenaWladcy(chart: VedicChart | null | undefined, lord: PlanetId
       const dyspP = chart.planets[dysp];
       if (["egzaltacja", "mulatrikona", "władanie", "przyjazny"].includes(dyspP.dignity)) {
         punkty += 0.5;
-        czynniki.push(`działa przez mocnego władcę znaku (${GRAHAS[dysp].pl})`);
+        dodaj(`działa przez mocnego władcę znaku (${nazwa(dysp)})`, `acts through a strong sign lord (${grahaNazwa(GRAHAS[dysp], "en")})`);
       } else if (dyspP.dignity === "upadek" || dyspP.dignity === "wrogi") {
         punkty -= 0.25;
-        czynniki.push(`władca znaku osłabiony (${GRAHAS[dysp].pl})`);
+        dodaj(`władca znaku osłabiony (${nazwa(dysp)})`, `sign lord weakened (${grahaNazwa(GRAHAS[dysp], "en")})`);
       }
       if (lagna !== undefined && UPACZAJA.includes(p.house)) {
         punkty += 0.5;
-        czynniki.push(`w domu wzrostu (upaczaja, ${p.house}.)`);
+        dodaj(`w domu wzrostu (upaczaja, ${p.house}.)`, `in a house of growth (upachaya, ${domOrdinal(p.house, "en")})`);
       }
     } else {
       // godność w nawamszy — połowa wagi D1
@@ -239,59 +289,61 @@ export function ocenaWladcy(chart: VedicChart | null | undefined, lord: PlanetId
       const gd9 = dignityOf(lord, d9, 15);
       if (gd9 === "egzaltacja" || gd9 === "władanie") {
         punkty += 0.5;
-        czynniki.push(`mocna w nawamszy (${gd9} w ${RASIS[d9].pl})`);
+        dodaj(`mocna w nawamszy (${gd9} w ${RASIS[d9].pl})`, `strong in the navamsa (${dignityNazwa(gd9, "en")} in ${rasiNazwa(RASIS[d9], "en")})`);
       } else if (gd9 === "upadek" && p.dignity !== "upadek") {
         punkty -= 0.5;
-        czynniki.push("słaba w nawamszy (upadek)");
+        dodaj("słaba w nawamszy (upadek)", "weak in the navamsa (debilitated)");
       }
       if (isVargottama(p.longitude)) {
         punkty += 0.5;
-        czynniki.push("vargottama — ten sam znak w D1 i D9");
+        dodaj("vargottama — ten sam znak w D1 i D9", "vargottama — same sign in D1 and D9");
       }
 
       // dig bala — siła kierunkowa (wymaga domów)
       if (lagna !== undefined && DIG_BALA[lord] === p.house) {
         punkty += 0.25;
-        czynniki.push("dig bala — siła kierunkowa w swoim domu");
+        dodaj("dig bala — siła kierunkowa w swoim domu", "dig bala — directional strength in its own house");
       }
 
       // retrogradacja (czeszta): wzmacnia naturę planety
       if (p.retrograde) {
-        if (g.nature === 1) { punkty += 0.25; czynniki.push("retrogradna — dobroczynność wzmocniona (czeszta)"); }
-        else if (g.nature === -1) { punkty -= 0.25; czynniki.push("retrogradna — działa intensywniej (czeszta)"); }
+        if (g.nature === 1) { punkty += 0.25; dodaj("retrogradna — dobroczynność wzmocniona (czeszta)", "retrograde — benefic quality strengthened (cheshta)"); }
+        else if (g.nature === -1) { punkty -= 0.25; dodaj("retrogradna — działa intensywniej (czeszta)", "retrograde — acts more intensely (cheshta)"); }
       }
     }
 
     // aspekty pełne na władcę okresu
     if (lord !== "jupiter" && aspektuje(chart, "jupiter", p.sign)) {
       punkty += 0.4;
-      czynniki.push("aspekt Jowisza — osłona dobroczyńcy");
+      dodaj("aspekt Jowisza — osłona dobroczyńcy", "Jupiter's aspect — a benefic's protection");
     }
     if (lord !== "venus" && aspektuje(chart, "venus", p.sign)) {
       punkty += 0.25;
-      czynniki.push("aspekt Wenus");
+      dodaj("aspekt Wenus", "Venus's aspect");
     }
     if (lord !== "saturn" && aspektuje(chart, "saturn", p.sign)) {
       punkty -= 0.3;
-      czynniki.push("aspekt Saturna — dodatkowy ciężar");
+      dodaj("aspekt Saturna — dodatkowy ciężar", "Saturn's aspect — extra weight");
     }
     if (lord !== "mars" && aspektuje(chart, "mars", p.sign)) {
       punkty -= 0.3;
-      czynniki.push("aspekt Marsa — dodatkowe tarcie");
+      dodaj("aspekt Marsa — dodatkowe tarcie", "Mars's aspect — extra friction");
     }
 
-    if (p.combust) { punkty -= 0.5; czynniki.push("spalona — blisko Słońca"); }
+    if (p.combust) { punkty -= 0.5; dodaj("spalona — blisko Słońca", "combust — close to the Sun"); }
   }
 
   // ── udzial w wykrytych jogach — patrz komentarz przy parametrze `jogi` ──
   for (const j of jogi) {
     if (!j.planety.includes(lord)) continue;
     punkty += 0.75;
-    czynniki.push(`uczestniczy w ${j.nazwa} — ${j.znaczenie}`);
+    dodaj(`uczestniczy w ${j.nazwa} — ${j.znaczenie}`, `participates in ${j.nazwa} — ${j.znaczenie}`);
   }
 
   const ton = punkty >= 0.5 ? "wspierający" : punkty <= -0.75 ? "wymagający" : "mieszany";
-  return { punkty: Math.round(punkty * 100) / 100, ton, czynniki };
+  const plus = wagi.filter((w) => w > 0).reduce((a, b) => a + b, 0);
+  const minus = -wagi.filter((w) => w < 0).reduce((a, b) => a + b, 0);
+  return { punkty: Math.round(punkty * 100) / 100, ton, czynniki, wagi, plus: Math.round(plus * 100) / 100, minus: Math.round(minus * 100) / 100 };
 }
 
 /**
@@ -310,6 +362,13 @@ const CZYNNIKI_MINUS = [
   // finanseWedyjskie.ts/zdrowieWedyjski.ts — dedykowane silniki domenowe,
   // ten sam mechanizm kolorowania
   "niepotwierdzone w nawamszy", "słaba w daśamszy", "osłabia Indu Lagnę",
+  // odpowiedniki angielskie (locale="en") — ten sam mechanizm dopasowania,
+  // patrz komentarz przy ocenaWladcy() o parametrze locale
+  "weakened", "natural malefic", "functional burden", "lord of the 8th house",
+  "kendradhipati dosha", "enemy's sign", "debilitated", "sign lord weakened",
+  "weak in the navamsa", "acts more intensely", "extra weight", "extra friction",
+  "combust", "mild malefic",
+  "not confirmed in the navamsa", "weak in the dashamsha", "weakens the Indu Lagna",
 ];
 export function znakCzynnika(tekst: string): 1 | -1 {
   return CZYNNIKI_MINUS.some((m) => tekst.includes(m)) ? -1 : 1;

@@ -7,7 +7,7 @@ describe("percentylSily", () => {
   });
 
   it("zwraca 100 dla wartosci powyzej lub rownej najwyzszemu breakpointowi", () => {
-    expect(percentylSily(9.45, TABELA_PREDYSPOZYCJE)).toBe(100);
+    expect(percentylSily(TABELA_PREDYSPOZYCJE[50], TABELA_PREDYSPOZYCJE)).toBe(100);
   });
 
   it("nigdy nie przekracza 100 nawet dla ekstremalnej wartosci spoza proby", () => {
@@ -19,9 +19,12 @@ describe("percentylSily", () => {
   });
 
   it("interpoluje liniowo miedzy sasiednimi breakpointami", () => {
-    // breakpointy w tabeli: indeks 45 -> 3.25 (percentyl 90), indeks 46 -> 3.5 (percentyl 92)
-    const wPolowie = percentylSily(3.375, TABELA_PREDYSPOZYCJE);
-    expect(wPolowie).toBeCloseTo(91, 0);
+    // pierwsza para sąsiednich, różnych breakpointów od indeksu 45 (percentyl 90) w górę —
+    // środek między nimi musi wypaść w połowie ich percentyli
+    const T = TABELA_PREDYSPOZYCJE;
+    const i = T.findIndex((v, k) => k >= 45 && T[k + 1] > v && T.indexOf(v) === k && T.lastIndexOf(v) === k);
+    const wPolowie = percentylSily((T[i] + T[i + 1]) / 2, T);
+    expect(wPolowie).toBeCloseTo(i * 2 + 1, 0);
   });
 
   it("jest monotoniczna — wiekszy wynik nigdy nie daje nizszego percentyla", () => {

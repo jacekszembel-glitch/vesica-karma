@@ -1,8 +1,10 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import type { VedicChart } from "@/lib/astro/chart";
 import { wykryteJogiPosortowane } from "@/lib/astro/yogas";
 import { GRAHAS } from "@/lib/astro/constants";
+import type { AstroLocale } from "@/lib/astro/i18nAstro";
 import Term from "@/components/Term";
 
 /**
@@ -17,26 +19,22 @@ import Term from "@/components/Term";
  */
 
 export default function Talenty({ chart }: { chart: VedicChart }) {
-  const jogi = wykryteJogiPosortowane(chart);
+  const t = useTranslations("Talenty");
+  const locale = useLocale() as AstroLocale;
+  const jogi = wykryteJogiPosortowane(chart, locale);
 
   return (
     <details className="card" style={{ marginBottom: 24 }} open>
       <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
-        Talenty (z jog)
+        {t("summary")}
       </summary>
       <p className="muted" style={{ fontSize: "0.84rem", margin: "12px 0 18px", lineHeight: 1.55 }}>
-        <Term k="jogiklasyczne" plain>Jogi</Term> to klasyczne, nazwane kombinacje kilku planet naraz, uznawane
-        za wskaźniki wrodzonego talentu i szczęścia — inny język niż Predyspozycje wyżej (te liczą
-        siłę każdej planety z osobna). Jogi są rzadsze i bardziej wyjątkowe: większość map ma zero
-        albo jedną-dwie, nie dziewięć jak w rankingu grah. Ich brak nie znaczy braku talentu — tylko
-        brak akurat TEJ konkretnej, nazwanej kombinacji.
+        {t.rich("wstep", { jogiklasyczne: (c) => <Term k="jogiklasyczne" plain>{c}</Term> })}
       </p>
 
       {jogi.length === 0 ? (
         <p className="muted" style={{ fontSize: "0.86rem", lineHeight: 1.55 }}>
-          Żadna z klasycznych, nazwanych jog nie występuje w Twojej mapie w czystej formie — to
-          normalne i dotyczy większości map. Twoje mocne strony wciąż dobrze widać w Predyspozycjach
-          wyżej, które nie zależą od tego, czy trafi się akurat któraś z tych konkretnych kombinacji.
+          {t("brak")}
         </p>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
@@ -45,7 +43,7 @@ export default function Talenty({ chart }: { chart: VedicChart }) {
               border: "1px solid rgba(111,191,159,0.4)", borderRadius: 12,
               padding: "14px 16px", background: "rgba(255,255,255,0.02)",
             }}>
-              <p className="eyebrow" style={{ marginBottom: 6, color: "#6fbf9f" }}>Talent</p>
+              <p className="eyebrow" style={{ marginBottom: 6, color: "#6fbf9f" }}>{t("talent")}</p>
               <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.05rem", lineHeight: 1.4, marginBottom: 6 }}>
                 {j.planety.map((id) => (
                   <span key={id} style={{ color: GRAHAS[id].color, marginRight: 4 }}>{GRAHAS[id].symbol}</span>

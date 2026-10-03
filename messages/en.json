@@ -146,5 +146,251 @@
     "prywatnosc": "Events are saved only in this browser — nobody but you can see them.",
     "systemNum": "Numerology",
     "numOpis": "personal year {rok}"
+  },
+  "DziedzinyTalentu": {
+    "summary": "Talent areas",
+    "eyebrow": "Music, art, words… — talent from a combination of planets, houses and yogas",
+    "wstep": "The Predispositions above show the strength of each planet separately. But a talent such as music or writing does not belong to a single planet — it arises from a combination of several planets, houses and yogas. Here each area gathers its classical indicators and shows them on the same axis.",
+    "jakCzytac": "To the right: potential (indicators that support the area), to the left: friction (those that hold it back). The numbers next to the bars are percentiles on a common scale (20,000 charts). The result is the Balance — the difference in points — shown next to the average balance of the same area in other people and the share of people whose balance is lower. Click an area to see which planets, houses and yogas it is made of.",
+    "podpowiedz": "Potential: {potencjal}th percentile (+{plus} pts) · Friction: {tarcie}th percentile (−{minus} pts) · Balance {bilans} pts — {opis} (stronger than {bilansPct}% of areas in the sample)",
+    "podpowiedzSrednia": "· The average balance of “{planeta}” in others: {srednia} pts — yours is higher than {procent}% of people.",
+    "syntezaWspieraja": "Compared with other people, your strongest areas are: {lista}.",
+    "syntezaTarcie": "Coming least naturally: {lista}.",
+    "syntezaBrakWsparcia": "No area stands clearly above average — your talents are spread fairly evenly and will grow where you put in the work.",
+    "syntezaBrakTarcia": "No area falls clearly below average — nothing in the chart closes a path for you.",
+    "brakGodziny": "Talent areas are calculated from the houses, which require the time of birth.",
+    "uwaga": "These are indications of the chart, not a verdict — a talent still has to be developed, and a low balance does not close the path to an area, it only means less will come by itself.",
+    "nazwy": {
+      "muzyka": "Music & voice",
+      "sztuka": "Art",
+      "slowo": "Words",
+      "nauczanie": "Teaching",
+      "biznes": "Business",
+      "technika": "Technology",
+      "uzdrawianie": "Healing",
+      "sport": "Sport",
+      "przywodztwo": "Leadership",
+      "duchowosc": "Spirituality"
+    },
+    "krotko": {
+      "muzyka": "hearing, singing, melody, instrument",
+      "sztuka": "form, colour, composition, design",
+      "slowo": "writing, language, storytelling",
+      "nauczanie": "passing on knowledge, advising",
+      "biznes": "trade, negotiation, earning",
+      "technika": "engineering, IT, systems, mechanics",
+      "uzdrawianie": "care, medicine, therapy",
+      "sport": "body, endurance, competition",
+      "przywodztwo": "leading people, responsibility",
+      "duchowosc": "practice, astrology, research"
+    },
+    "opisy": {
+      "muzyka": "hearing, voice and a feel for melody. Calculated from Venus (art), the Moon (voice, emotion) and Mercury (rhythm, instruments), from the 2nd house (voice), the 3rd (music, performance) and the 5th (creativity), and from the Saraswati and Malavya yogas.",
+      "sztuka": "an eye for form, colour and composition — painting, design, photography, fashion. Calculated from Venus, the Moon and Mercury, from the 5th and 3rd houses, and from the Saraswati and Malavya yogas.",
+      "slowo": "writing, language, storytelling, translation. Calculated from Mercury, Jupiter and the Moon, from the 3rd and 2nd houses, and from the Saraswati, Budha-Aditya and Bhadra yogas.",
+      "nauczanie": "passing on knowledge, advising, guiding others through learning. Calculated from Jupiter, Mercury and the Sun, from the 5th, 9th and 2nd houses, and from the Saraswati, Gajakesari and Hamsa yogas.",
+      "biznes": "trade, negotiation, earning through exchange. Calculated from Mercury, Venus and Jupiter, from the 7th, 10th and 11th houses, and from the Dhana, Lakshmi, Budha-Aditya and Bhadra yogas.",
+      "technika": "engineering, IT, mechanics, systems. Calculated from Mercury, Saturn, Rahu and Mars, from the 3rd, 6th and 10th houses, and from the Bhadra and Shasha yogas.",
+      "uzdrawianie": "care, medicine, therapy, help in a crisis. Calculated from the Moon, Jupiter, Ketu and the Sun, from the 6th and 12th houses, and from the Hamsa and Gajakesari yogas.",
+      "sport": "body, endurance, competition. Calculated from Mars, the Sun and Saturn, from the 1st, 3rd and 6th houses, and from the Ruchaka yoga.",
+      "przywodztwo": "leading people, responsibility, visibility. Calculated from the Sun, Mars, Saturn and Jupiter, from the 10th and 1st houses, and from the Raja, Amala, Adhi, Ubhayachari, Ruchaka and Shasha yogas.",
+      "duchowosc": "spiritual practice, astrology, research, reaching beneath the surface. Calculated from Ketu, Jupiter, Saturn and the Moon, from the 9th, 8th and 12th houses, and from the Hamsa and Vipreet yogas."
+    }
+  },
+  "KoloJog": {
+    "aria": "Yoga constellation — planets linked by threads where they form a classical yoga"
+  },
+  "NaCoUwazac": {
+    "tematy": {
+      "sun": "need to be right and be the center of attention",
+      "moon": "mood swings, oversensitivity",
+      "mars": "impulsiveness, conflict instead of conversation",
+      "mercury": "scattered focus, talking without substance",
+      "jupiter": "excessive optimism, lecturing others",
+      "venus": "avoiding hard conversations for the sake of peace",
+      "saturn": "excessive self-criticism",
+      "rahu": "insatiability, endless chasing",
+      "ketu": "withdrawal, leaving things unresolved"
+    },
+    "opisy": {
+      "sun": "You may more easily than others slip into the role of the one who has to be right and be noticed. It's worth watching that the need for recognition doesn't replace listening to others.",
+      "moon": "Mood and emotions can take the wheel faster than you notice. It's worth building routines that stabilize you before a wave of emotion decides for you.",
+      "mars": "It's easy to react faster than you think — especially under pressure. It's worth consciously giving yourself a moment before responding to frustration with action.",
+      "mercury": "The mind can jump between threads faster than you can wrap them up. It's worth watching that the amount of words doesn't replace the quality of what's said.",
+      "jupiter": "Optimism and the urge to advise can obscure the fact that the other person never asked for advice. It's worth asking sometimes before lecturing.",
+      "venus": "It's easy to choose comfort and a nice mood over a difficult but necessary conversation. Harmony shouldn't mean avoiding a conflict that needs to be worked through.",
+      "saturn": "Self-criticism can be harsher than criticism of anyone else. Worth remembering that discipline without rest eventually takes its toll.",
+      "rahu": "The desire for \"more\" rarely ends in a feeling of \"enough\". It's worth consciously naming the moment when things are already good.",
+      "ketu": "It's easy to withdraw from a topic before it's truly resolved. The intuitive \"it doesn't matter anymore\" can be an escape from something important."
+    }
+  },
+  "OsDomeny": {
+    "legendaTarcie": "friction — what holds back",
+    "legendaPotencjal": "potential — what supports",
+    "legendaBilans": "balance",
+    "jakCzytac": "To the right: potential (the sum of supporting factors); to the left: friction (the sum of hindering ones). The numbers by the bars are percentiles on the same scale for everyone (20,000 charts) — 80 means stronger than in 8 out of 10 people. These two numbers aren't subtracted from each other because they sit on different scales. The result is shown by the Balance: the difference in points (support minus friction). To show whether it's a lot or a little, next to it is the average balance of the same planet in other people and the share of people whose balance is lower — planets have different natural levels (an average Jupiter is about +3.0, an average Rahu about −0.6). Click a row to see all factors with their weight.",
+    "bilans": {
+      "rownowaga": "balanced",
+      "wsparcie": {
+        "lekka": "slight edge of support",
+        "wyrazna": "clear edge of support",
+        "silna": "strong edge of support"
+      },
+      "tarcie": {
+        "lekka": "slight edge of friction",
+        "wyrazna": "clear edge of friction",
+        "silna": "strong edge of friction"
+      }
+    },
+    "podpowiedz": "Potential: {potencjal}th percentile (+{plus} pts) · Friction: {tarcie}th percentile (−{minus} pts) · Balance {bilans} pts — {opis} (stronger than {bilansPct}% of planets in the sample)",
+    "uwazaj": "watch out:",
+    "coWspiera": "What supports",
+    "coHamuje": "What holds back",
+    "brak": "nothing significant",
+    "rola": "Role in the chart:",
+    "synteza": "Synthesis",
+    "syntezaWspieraja": "The strongest support comes from: {lista}.",
+    "syntezaBrakWsparcia": "No planet has a clear edge of support here — strengths are balanced by friction and need conscious work.",
+    "syntezaTarcie": "The most conscious attention is needed for: {lista}.",
+    "syntezaBrakTarcia": "No planet has a clear edge of friction here — nothing clearly works against you.",
+    "legendaBilansSrednia": "balance · average",
+    "srednia": "average: {srednia}",
+    "wyzejNiz": "higher than {procent}% of people",
+    "podpowiedzSrednia": "· The average balance of {planeta} in other people: {srednia} pts — yours is higher than in {procent}% of people."
+  },
+  "OsPredyspozycji": {
+    "eyebrow": "Predispositions — strength and friction",
+    "wstep": "Each of the nine <graha>grahas</graha> has factors in your chart that support it and factors that hold it back — the same planet can be both a strength and a source of friction. Ordered from the greatest advantage of support."
+  },
+  "RankingGrah": {
+    "mozliweZawody": "Possible career directions:",
+    "predyspozycje": {
+      "sun": "leadership and authority",
+      "moon": "empathy, imagination, voice",
+      "mars": "courage and decisive action",
+      "mercury": "communication, analysis, dexterity",
+      "jupiter": "teaching, strategy, a broad view",
+      "venus": "aesthetics, art, music, relationships",
+      "saturn": "discipline, perseverance, order",
+      "rahu": "innovation, ambition, stepping into the unknown",
+      "ketu": "introspection, mindfulness, letting go"
+    }
+  },
+  "Talenty": {
+    "summary": "Talents (from yogas)",
+    "wstep": "<jogiklasyczne>Yogas</jogiklasyczne> are classical, named combinations of several planets at once, considered indicators of innate talent and luck — a different language than Predispositions above (those score each planet's strength separately). Yogas are rarer and more special: most charts have zero or one or two, not nine like in the planet ranking. Their absence doesn't mean an absence of talent — just an absence of THIS specific, named combination.",
+    "brak": "None of the classical, named yogas appear in your chart in pure form — that's normal and applies to most charts. Your strengths are still clearly visible in Predispositions above, which don't depend on whether one of these specific combinations happens to occur.",
+    "talent": "Talent"
+  },
+  "WrazliwoscDuchowa": {
+    "summary": "Spiritual sensitivity",
+    "wstep": "Classical Jyotish doesn't have a separate category for specific \"paranormal abilities\" (e.g. dowsing) — this is a different, more honest theme: a natural sensitivity to the immaterial (intuition, atmosphere, the subconscious), arising from Ketu (the classical karaka of intuition and mysticism) and the 8th house (mystery), 9th house (dharma, guru, faith) and 12th house (spirituality). This is a theme and tendency visible in the chart — not a verified \"power\" or a guarantee of a specific ability.",
+    "przechylaSie": "In your chart this theme tilts most toward:",
+    "skadWynika": "Where this comes from in your chart:",
+    "brakCzynnikow": "None of the five checked factors (Ketu's condition, planets in the 8th/9th/12th house, Moon-Ketu conjunction, Jupiter's aspect on Ketu) appeared in your chart in a distinct form.",
+    "opisy": {
+      "wyraźna": "A distinct theme in your chart — sensing the unspoken comes more easily to you than to many others: moods, the atmosphere of places, subtle signals others miss.",
+      "umiarkowana": "Present, but not a dominant theme — you have access to this sensitivity, though it doesn't define your whole nature the way it does for people with a stronger indication.",
+      "subtelna": "Faint, in the background — this side isn't especially sharpened in you. That's not a shortcoming, other themes in your chart simply speak louder."
+    }
+  },
+  "ZawodKariera": {
+    "kierunekTytul": "Career direction — planets read together",
+    "kierunekWstep": "In Jyotish a profession is read from a combination of planets, not from one. Below are the pairs of the three planets most strongly connected to your career:",
+    "kierunekGlowny": "main direction",
+    "pary": {
+      "sun-moon": "public work with and for people — administration, team management, healthcare, hospitality in leadership roles",
+      "sun-mars": "action with authority and courage — leading technical teams, the services, surgery, sport, entrepreneurship requiring fast decisions",
+      "sun-mercury": "authority through knowledge and words — administration, law, information management, journalism, advising in a decision-making role",
+      "sun-jupiter": "leadership based on knowledge — academic teaching, law, strategic consulting, public institutions, spirituality",
+      "sun-venus": "creative work under your own name — art direction, leading creative projects, design, fashion, representational art, the luxury sector",
+      "sun-saturn": "a long road to position — administration, state structures, managing large systems, construction, authority built over years",
+      "sun-rahu": "an unusual road to recognition — media, politics, technology, international work, building a personal brand",
+      "sun-ketu": "authority behind the scenes — research, medicine, spiritual work, expert roles without publicity",
+      "moon-mars": "work with people in action — rescue, catering, real estate, trade, care requiring quick reactions",
+      "moon-mercury": "words and contact with people — trade, media, writing, education, customer service, psychology",
+      "moon-jupiter": "care and teaching — pedagogy, counselling, psychology, personal finance, social work, spirituality",
+      "moon-venus": "beauty and mood — art, fashion, beauty, music, interior design, catering, hospitality",
+      "moon-saturn": "patient, caring work — agriculture, real estate, long-term care, administration, public service",
+      "moon-rahu": "work with a mass audience — media, marketing, travel, abroad, consumer technology",
+      "moon-ketu": "intuitive, withdrawn work — therapy, healing, research, contemplative art, spirituality",
+      "mars-mercury": "precision of mind and hand — engineering, programming, technology, mechanics, technical analysis, precision craft",
+      "mars-jupiter": "action for a just cause — law, the services, sport, management, practical teaching, entrepreneurship",
+      "mars-venus": "creative work done with hands and tools — graphic design, design, illustration, applied art, artistic craft, interior architecture, photography",
+      "mars-saturn": "hard technical work — construction, engineering, industry, mechanics, work with machines",
+      "mars-rahu": "technology and risk — new technologies, electronics, pioneering industries, entrepreneurship, extreme sports",
+      "mars-ketu": "precision and cutting — surgery, specialist technology, technical research, martial arts",
+      "mercury-jupiter": "knowledge and passing it on — teaching, publishing, law, consulting, finance, writing",
+      "mercury-venus": "design and communication — design, media, advertising, writing, the creative industry, art dealing",
+      "mercury-saturn": "order and systems — accounting, administration, data analysis, IT, logistics, research",
+      "mercury-rahu": "communication of the future — IT, digital media, online marketing, foreign trade, new technologies",
+      "mercury-ketu": "an analytical mind behind the scenes — programming, research, mathematics, astrology, data analysis",
+      "jupiter-venus": "beauty and values — art, finance, consulting, diplomacy, art education, the luxury sector",
+      "jupiter-saturn": "structures and responsibility — law, administration, finance, managing institutions, teaching",
+      "jupiter-rahu": "unorthodox knowledge — innovative consulting, work abroad, new fields of knowledge, educational media",
+      "jupiter-ketu": "spiritual knowledge — spirituality, astrology, philosophy, research, therapy, teaching tradition",
+      "venus-saturn": "the art of craft and durability — architecture, sculpture, product design, conservation, handicraft, durable goods",
+      "venus-rahu": "modern aesthetics — digital graphics, film, fashion, media, the entertainment industry, image-making",
+      "venus-ketu": "inner art — sacred art, music, art therapy, creative work without publicity",
+      "saturn-rahu": "large systems and technology — industry, IT, international logistics, administration of large organisations",
+      "saturn-ketu": "work in seclusion — research, archiving, spiritual work, specialist technical work",
+      "rahu-ketu": "an unusual, changing path — technology, research, abroad, areas where professions are only just emerging"
+    },
+    "summary": "Profession and career",
+    "eyebrow": "Which planets speak about your work — and how easily each direction will come",
+    "wstep": "Only planets that are genuinely connected to the 10th house in your chart — the house of action in the world — are shown here: they stand in it, rule it (counted from the lagna, the Moon and the Sun), are pointed to by Varahamihira's classical rule, stand together with the 10th lord (especially when it is combust), are the yogakaraka or the Amatyakaraka, or play a role in the dashamsha (D10). The order is set by the strength of this connection, not by the planet's strength alone — so no planet dominates for everyone.",
+    "jakCzytac": "To the right: potential — the connection to career and what strengthens the planet; to the left: friction — what weakens it, i.e. where this direction will need more work. The numbers next to the bars are percentiles on a common scale (20,000 charts). The balance is compared with the same planet in other people for whom it is also connected to career. Click a planet to see all connections with their weights and possible career directions.",
+    "podpowiedz": "Potential: {potencjal}th percentile (+{plus} pts) · Friction: {tarcie}th percentile (−{minus} pts) · Balance {bilans} pts — {opis} (stronger than {bilansPct}% of indications in the sample)",
+    "podpowiedzSrednia": "· The average balance of {planeta} as a career indicator in others: {srednia} pts — yours is higher than {procent}% of people.",
+    "syntezaWspieraja": "Most strongly connected to your work: {lista}.",
+    "syntezaTarcie": "Needing the most conscious work: {lista}.",
+    "syntezaBrakWsparcia": "No career planet has a clear advantage of support here — your career direction will be built through work rather than ease.",
+    "syntezaBrakTarcia": "No career planet has a clear advantage of friction — nothing in the chart blocks your professional path.",
+    "brakGodziny": "Profession and career are calculated from the 10th house, which requires the time of birth.",
+    "uwaga": "These are directions, not a list of the only possible professions — they work best where several planets at the top of the list point to a similar area.",
+    "krotko": {
+      "sun": "management, administration, medicine",
+      "moon": "care, hospitality, work with people",
+      "mars": "engineering, sport, rescue, technology",
+      "mercury": "trade, writing, IT, analysis",
+      "jupiter": "teaching, consulting, law, finance",
+      "venus": "art, design, beauty, diplomacy",
+      "saturn": "construction, administration, systematic work",
+      "rahu": "technology, media, work abroad",
+      "ketu": "research, behind-the-scenes work, therapy"
+    },
+    "opisy": {
+      "sun": "a career built through visibility, authority and taking responsibility — leadership, administration, politics, medicine. You naturally do better where you are recognised, not in the shadows.",
+      "moon": "work goes well where contact with people and fluid adaptation to change matter — care, catering, hospitality, nursing. Emotional stability translates directly into professional stability.",
+      "mars": "a career that takes off through courage and fast, decisive action — engineering, sport, rescue, surgery, the services. Best where the effect of action is visible at once, not in slow-ticking bureaucracy.",
+      "mercury": "work with words and numbers comes naturally — trade, writing, journalism, accounting, IT. A profession where every day you analyse, negotiate or explain something to others.",
+      "jupiter": "a career based on knowledge and moral authority — teaching, law, consulting, finance, spirituality. You naturally inspire trust as someone who sees further than the current project.",
+      "venus": "work with aesthetics and relationships — art, fashion, beauty, music, diplomacy. A profession where good taste and the ability to ease tension between people matter.",
+      "saturn": "a career built over years, systematically, without shortcuts — construction, administration, agriculture, work requiring discipline. What you build lasts longer than for others, but starts more slowly.",
+      "rahu": "the career path tends to be unusual and modern — technology, foreign business, media. Fast, unexpected success is possible where others do not yet see the opportunity.",
+      "ketu": "behind-the-scenes work without publicity — research, technical support, healing. A profession where the result matters more than who gets the applause."
+    },
+    "uwagaTematy": {
+      "sun": "excessive pride, difficulty submitting to superiors",
+      "moon": "professional instability dependent on mood",
+      "mars": "impulsive career decisions, conflicts with authority",
+      "mercury": "scattering across too many career paths at once",
+      "jupiter": "theorising instead of concrete professional action",
+      "venus": "choosing comfort at the cost of real career growth",
+      "saturn": "excessive perfectionism, too slow a pace of promotion",
+      "rahu": "risky, untested career paths",
+      "ketu": "lack of professional ambition, handing initiative to others"
+    },
+    "uwagaOpisy": {
+      "sun": "It is easy to defend your own position as a matter of honour instead of accepting criticism or fitting into a structure. Remember that authority is also built by listening to others.",
+      "moon": "Mood can decide your engagement at work more than a plan or strategy. It helps to build work routines that do not depend on how you feel at the moment.",
+      "mars": "The urge to act quickly can be stronger than thinking through the consequences of a career decision. Give yourself a moment before responding impulsively to a boss or a client.",
+      "mercury": "It is easy to spread yourself across several career paths at once instead of finishing one properly. Make sure the number of open projects does not replace their quality.",
+      "jupiter": "A broad view of your career can dominate so much that concrete, practical steps take a back seat. Sometimes it is better to simply finish one task instead of planning ten more.",
+      "venus": "Comfort and the aesthetics of the workplace can obscure what really develops a career in the long run. Do not avoid tasks that do not look impressive but matter.",
+      "saturn": "Striving for perfect execution can slow a career so much that opportunities pass by. Remember that “good enough and on time” also builds a reputation.",
+      "rahu": "You are drawn to the newest, most exciting career paths, and proven ones get abandoned without a real reason. Check twice before trusting something new.",
+      "ketu": "It is easy to lose interest in your career once the initial fascination fades and to leave the initiative to others. Consciously return to professional matters that are easy to let go."
+    }
   }
 }

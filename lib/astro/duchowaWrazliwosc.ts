@@ -4,6 +4,7 @@ import { aspektuje } from "./sila";
 import { domZnaku } from "./yogas";
 import { poziomWzmocnienia } from "./domInterpretacja";
 import { diffAngle } from "./math";
+import { grahaNazwa, type AstroLocale } from "./i18nAstro";
 
 /**
  * WRAŻLIWOŚĆ DUCHOWA — świadomie NIE "zdolności paranormalne/radiestezyjne"
@@ -51,6 +52,28 @@ export const OPIS_ODCIENIA: Record<OdcienDuchowy, string> = {
   podswiadomosc: "bliżej duchowości i pracy z własną podświadomością",
 };
 
+const OPIS_ODCIENIA_EN: Record<OdcienDuchowy, string> = {
+  intuicja: "closer to intuition and sensing other people's moods",
+  tajemnica: "closer to mystery, transformation and what's hidden",
+  wiara: "closer to faith, dharma and relationships with spiritual teachers",
+  podswiadomosc: "closer to spirituality and working with one's own subconscious",
+};
+
+/** Wersja OPIS_ODCIENIA zalezna od jezyka. */
+export function opisOdcieniaNazwa(odcien: OdcienDuchowy, locale: AstroLocale): string {
+  return locale === "en" ? OPIS_ODCIENIA_EN[odcien] : OPIS_ODCIENIA[odcien];
+}
+
+const POZIOM_NAZWA_EN: Record<PoziomWrazliwosci, string> = {
+  "wyraźna": "distinct", "umiarkowana": "moderate", "subtelna": "subtle",
+};
+
+/** Etykieta poziomu wrazliwosci — WARTOSC zostaje po polsku (kluczowana logika
+ *  gdzie indziej), ta funkcja tlumaczy TYLKO wyswietlana etykiete. */
+export function poziomWrazliwosciNazwa(poziom: PoziomWrazliwosci, locale: AstroLocale): string {
+  return locale === "en" ? POZIOM_NAZWA_EN[poziom] : poziom;
+}
+
 export interface WrazliwoscDuchowa {
   punkty: number;
   poziom: PoziomWrazliwosci;
@@ -59,28 +82,30 @@ export interface WrazliwoscDuchowa {
 }
 
 /** Waga obecności planety w domu 8/9/12 wg JEJ WŁASNEJ godności — nie flat +1 za samą obecność. */
-function wagaObecnosci(chart: VedicChart, id: PlanetId): { waga: number; etykieta: string } {
+function wagaObecnosci(chart: VedicChart, id: PlanetId, locale: AstroLocale): { waga: number; etykieta: string } {
   const poziom = poziomWzmocnienia(chart.planets[id].dignity);
-  if (poziom === "dobre") return { waga: 1.5, etykieta: `${GRAHAS[id].pl} (mocna)` };
-  if (poziom === "zle") return { waga: 0.6, etykieta: `${GRAHAS[id].pl} (słaba — temat obecny, ale trudniej dostępny)` };
-  return { waga: 1, etykieta: GRAHAS[id].pl };
+  const nazwa = grahaNazwa(GRAHAS[id], locale);
+  if (poziom === "dobre") return { waga: 1.5, etykieta: locale === "en" ? `${nazwa} (strong)` : `${nazwa} (mocna)` };
+  if (poziom === "zle") return { waga: 0.6, etykieta: locale === "en" ? `${nazwa} (weak — theme present but harder to access)` : `${nazwa} (słaba — temat obecny, ale trudniej dostępny)` };
+  return { waga: 1, etykieta: nazwa };
 }
 
-export function wrazliwoscDuchowa(chart: VedicChart): WrazliwoscDuchowa {
+export function wrazliwoscDuchowa(chart: VedicChart, locale: AstroLocale = "pl"): WrazliwoscDuchowa {
   const czynniki: string[] = [];
+  const dodaj = (pl: string, en: string) => czynniki.push(locale === "en" ? en : pl);
   let punkty = 0;
   const grupy: Record<OdcienDuchowy, number> = { intuicja: 0, tajemnica: 0, wiara: 0, podswiadomosc: 0 };
 
   const ketuPoziom = poziomWzmocnienia(chart.planets.ketu.dignity);
   if (ketuPoziom === "dobre") {
     punkty += 2; grupy.intuicja += 2;
-    czynniki.push("Ketu — karaka intuicji i tematów niematerialnych — silnie ustawiony w Twojej mapie");
+    dodaj("Ketu — karaka intuicji i tematów niematerialnych — silnie ustawiony w Twojej mapie", "Ketu — karaka of intuition and immaterial themes — strongly placed in your chart");
   } else if (ketuPoziom === "neutralne") {
     punkty += 1; grupy.intuicja += 1;
-    czynniki.push("Ketu w neutralnej kondycji");
+    dodaj("Ketu w neutralnej kondycji", "Ketu in neutral condition");
   } else {
     punkty += 0.5; grupy.intuicja += 0.5;
-    czynniki.push("Ketu w słabej kondycji — temat wciąż obecny, ale dostęp do niego bywa bardziej burzliwy");
+    dodaj("Ketu w słabej kondycji — temat wciąż obecny, ale dostęp do niego bywa bardziej burzliwy", "Ketu in weak condition — the theme is still present, but access to it tends to be more turbulent");
   }
 
   if (chart.angles) {
@@ -88,24 +113,27 @@ export function wrazliwoscDuchowa(chart: VedicChart): WrazliwoscDuchowa {
 
     const dom8 = PLANET_ORDER.filter((id) => domZnaku(lagnaSign, chart.planets[id].sign) === 8);
     if (dom8.length > 0) {
-      const wazone = dom8.map((id) => wagaObecnosci(chart, id));
+      const wazone = dom8.map((id) => wagaObecnosci(chart, id, locale));
       const suma = wazone.reduce((s, w) => s + w.waga, 0);
       punkty += suma; grupy.tajemnica += suma;
-      czynniki.push(`${wazone.map((w) => w.etykieta).join(" i ")} w 8. domu — dom tajemnicy i transformacji`);
+      const lista = wazone.map((w) => w.etykieta).join(locale === "en" ? " and " : " i ");
+      dodaj(`${lista} w 8. domu — dom tajemnicy i transformacji`, `${lista} in the 8th house — the house of mystery and transformation`);
     }
     const dom9 = PLANET_ORDER.filter((id) => domZnaku(lagnaSign, chart.planets[id].sign) === 9);
     if (dom9.length > 0) {
-      const wazone = dom9.map((id) => wagaObecnosci(chart, id));
+      const wazone = dom9.map((id) => wagaObecnosci(chart, id, locale));
       const suma = wazone.reduce((s, w) => s + w.waga, 0);
       punkty += suma; grupy.wiara += suma;
-      czynniki.push(`${wazone.map((w) => w.etykieta).join(" i ")} w 9. domu — dom dharmy, guru i wiary`);
+      const lista = wazone.map((w) => w.etykieta).join(locale === "en" ? " and " : " i ");
+      dodaj(`${lista} w 9. domu — dom dharmy, guru i wiary`, `${lista} in the 9th house — the house of dharma, guru and faith`);
     }
     const dom12 = PLANET_ORDER.filter((id) => domZnaku(lagnaSign, chart.planets[id].sign) === 12);
     if (dom12.length > 0) {
-      const wazone = dom12.map((id) => wagaObecnosci(chart, id));
+      const wazone = dom12.map((id) => wagaObecnosci(chart, id, locale));
       const suma = wazone.reduce((s, w) => s + w.waga, 0);
       punkty += suma; grupy.podswiadomosc += suma;
-      czynniki.push(`${wazone.map((w) => w.etykieta).join(" i ")} w 12. domu — dom duchowości i podświadomości`);
+      const lista = wazone.map((w) => w.etykieta).join(locale === "en" ? " and " : " i ");
+      dodaj(`${lista} w 12. domu — dom duchowości i podświadomości`, `${lista} in the 12th house — the house of spirituality and the subconscious`);
     }
   }
 
@@ -114,25 +142,31 @@ export function wrazliwoscDuchowa(chart: VedicChart): WrazliwoscDuchowa {
   const rozstep = Math.abs(diffAngle(chart.planets.moon.longitude, chart.planets.ketu.longitude));
   if (rozstep <= 10) {
     punkty += 2.5; grupy.intuicja += 2.5;
-    czynniki.push(`Księżyc w ścisłej koniunkcji z Ketu (${rozstep.toFixed(1)}°) — wyraźnie wyostrzona intuicja, silna wrażliwość na to, co niematerialne`);
+    dodaj(
+      `Księżyc w ścisłej koniunkcji z Ketu (${rozstep.toFixed(1)}°) — wyraźnie wyostrzona intuicja, silna wrażliwość na to, co niematerialne`,
+      `Moon in a tight conjunction with Ketu (${rozstep.toFixed(1)}°) — clearly sharpened intuition, strong sensitivity to the immaterial`,
+    );
   } else if (rozstep <= 30) {
     punkty += 1.2; grupy.intuicja += 1.2;
-    czynniki.push(`Księżyc i Ketu w tym samym znaku, szerszy rozstęp (${rozstep.toFixed(1)}°) — wrażliwość obecna, ale mniej ścisła`);
+    dodaj(
+      `Księżyc i Ketu w tym samym znaku, szerszy rozstęp (${rozstep.toFixed(1)}°) — wrażliwość obecna, ale mniej ścisła`,
+      `Moon and Ketu in the same sign, a wider orb (${rozstep.toFixed(1)}°) — the sensitivity is present, but less tight`,
+    );
   }
 
   // aspekty NA Ketu — nie tylko Jowisz: kazda z trzech planet o klasycznym pelnym
   // aspekcie koloruje mistyke inaczej (dobroczynca kontra dwaj naturalni malefiki)
   if (aspektuje(chart, "jupiter", chart.planets.ketu.sign)) {
     punkty += 1.2; grupy.intuicja += 1.2;
-    czynniki.push("Jowisz aspektuje Ketu — mądrość splata się tu z tematami mistycznymi, dostęp raczej łagodny");
+    dodaj("Jowisz aspektuje Ketu — mądrość splata się tu z tematami mistycznymi, dostęp raczej łagodny", "Jupiter aspects Ketu — wisdom intertwines here with mystical themes, access tends to be gentle");
   }
   if (aspektuje(chart, "saturn", chart.planets.ketu.sign)) {
     punkty += 0.8; grupy.intuicja += 0.8;
-    czynniki.push("Saturn aspektuje Ketu — pogłębia temat, ale dostęp bywa cięższy, wymaga czasu i dyscypliny");
+    dodaj("Saturn aspektuje Ketu — pogłębia temat, ale dostęp bywa cięższy, wymaga czasu i dyscypliny", "Saturn aspects Ketu — deepens the theme, but access tends to be heavier, requiring time and discipline");
   }
   if (aspektuje(chart, "mars", chart.planets.ketu.sign)) {
     punkty += 0.8; grupy.intuicja += 0.8;
-    czynniki.push("Mars aspektuje Ketu — intensyfikuje temat, dostęp bywa nagły, niespokojny lub impulsywny");
+    dodaj("Mars aspektuje Ketu — intensyfikuje temat, dostęp bywa nagły, niespokojny lub impulsywny", "Mars aspects Ketu — intensifies the theme, access tends to be sudden, restless or impulsive");
   }
 
   const poziom: PoziomWrazliwosci = punkty >= 5 ? "wyraźna" : punkty >= 2 ? "umiarkowana" : "subtelna";

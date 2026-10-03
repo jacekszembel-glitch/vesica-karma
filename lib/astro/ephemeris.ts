@@ -12,6 +12,7 @@ import { atan2d, diffAngle, julianCenturies, norm360 } from "./math";
 import { toSidereal } from "./ayanamsa";
 import { PLANET_ORDER, type PlanetId } from "./constants";
 import type { OuterId } from "./bodies";
+import { ustawienia } from "./ustawienia";
 
 /**
  * Warstwa efemeryd — jedyne miejsce w kodzie, które dotyka biblioteki
@@ -58,7 +59,7 @@ function tropicalPosition(id: PlanetId, date: Date): { lon: number; lat: number 
     return { lon: norm360(m.lon), lat: m.lat };
   }
   if (id === "rahu" || id === "ketu") {
-    const node = meanLunarNode(date);
+    const node = ustawienia().wezel === "prawdziwy" ? trueLunarNode(date) : meanLunarNode(date);
     const lon = id === "rahu" ? node : node + 180;
     return { lon: norm360(lon), lat: 0 };
   }
@@ -89,6 +90,29 @@ export function meanLunarNode(date: Date): number {
   return norm360(omega);
 }
 
+/**
+ * Prawdziwy (oskulacyjny) węzeł wstępujący Księżyca — ta sama definicja co
+ * "true node" w Swiss Ephemeris: węzeł CHWILOWEJ orbity Księżyca, wyznaczony
+ * z wektorów położenia i prędkości (moment pędu h = r × v; węzeł leży na
+ * przecięciu płaszczyzny orbity z ekliptyką, w kierunku z × h). Oscyluje
+ * wokół średniego o ok. ±1,5° i bywa chwilowo prosty. Do wyboru w ustawieniach.
+ */
+export function trueLunarNode(date: Date): number {
+  const wektor = (d: Date) => {
+    const m = EclipticGeoMoon(d);
+    const lon = m.lon * (Math.PI / 180), lat = m.lat * (Math.PI / 180);
+    return [Math.cos(lat) * Math.cos(lon), Math.cos(lat) * Math.sin(lon), Math.sin(lat)].map((x) => x * m.dist);
+  };
+  const krokMs = 30 * 60000;
+  const r = wektor(date);
+  const r1 = wektor(new Date(date.getTime() - krokMs));
+  const r2 = wektor(new Date(date.getTime() + krokMs));
+  const v = [0, 1, 2].map((i) => r2[i] - r1[i]);
+  const hx = r[1] * v[2] - r[2] * v[1];
+  const hy = r[2] * v[0] - r[0] * v[2];
+  return norm360(atan2d(hx, -hy));
+}
+
 export interface PlanetPosition {
   id: PlanetId;
   /** Długość syderyczna 0–360°, 0 = początek Meszy. */
@@ -112,8 +136,8 @@ export function planetPosition(id: PlanetId, date: Date): PlanetPosition {
   const after = toSidereal(tropicalPosition(id, new Date(date.getTime() + stepMs)).lon, date);
   const speed = diffAngle(after, before) / (2 * stepDays);
 
-  // Rahu i Ketu poruszają się wstecznie z definicji.
-  const retrograde = id === "rahu" || id === "ketu" ? true : speed < 0;
+  // Rahu i Ketu: węzeł średni jest wsteczny z definicji; prawdziwy bywa chwilowo prosty.
+  const retrograde = (id === "rahu" || id === "ketu") && ustawienia().wezel === "sredni" ? true : speed < 0;
 
   return { id, longitude: sidereal, latitude: lat, speed, retrograde };
 }
