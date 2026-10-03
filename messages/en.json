@@ -392,5 +392,33 @@
       "rahu": "You are drawn to the newest, most exciting career paths, and proven ones get abandoned without a real reason. Check twice before trusting something new.",
       "ketu": "It is easy to lose interest in your career once the initial fascination fades and to leave the initiative to others. Consciously return to professional matters that are easy to let go."
     }
+  },
+  "PlanetyWSkrocie": {
+    "summary": "Planets at a glance",
+    "wstep": "Everything about each planet in one place — sign, house, condition in the D1 main chart (bar: long green = great, short green = good, blue = mixed, short red = weak, long red = poor) and its role in your chart. Click a planet to also see its condition in D9 (navamsa) and the combined result from both charts.",
+    "domKrotko": "house",
+    "tytulJogakaraka": "Yogakaraka — lord of a kendra and a trikona at once, its periods are classically excellent",
+    "tytulWargottama": "Vargottama — same sign in D1 and D9, an unusually consistent and lasting effect (color follows the planet's dignity)",
+    "tytulRetro": "Retrograde — the theme comes back, demanding it be worked through more deeply",
+    "tytulSpalenie": "Combust from proximity to the Sun — easily overshadowed by self-doubt",
+    "tytulEgzaltacja": "Exaltation — the strongest possible position for this planet",
+    "tytulMulatrikona": "Mulatrikona — almost like in its own sign",
+    "tytulUpadek": "Debilitation — the most difficult possible position for this planet",
+    "tytulRelacja": "Relationship with the sign the planet stands in",
+    "badgeJogakaraka": "yogakaraka",
+    "badgeWargottama": "vargottama",
+    "badgeSpalona": "combust",
+    "kondycjaLabel": "Condition:",
+    "kondycjaLinia": "D1 — {etD1} ({dygD1}), D9 — {etD9} ({dygD9})",
+    "ogolnie": "overall: {etOgolem}",
+    "jogakarakaLabel": "Yogakaraka:",
+    "jogakarakaOpis": "for your ascendant this planet rules a corner house and a house of luck at once — its periods are classically considered excellent, regardless of its usual nature.",
+    "wargottamaLabel": "Vargottama:",
+    "wargottamaOpis": "the same sign in the main chart and in the navamsa — what shows on the surface is backed by the deeper structure. An unusually consistent effect.",
+    "synteza": {
+      "dobra": "Represents {temat} — this theme clearly works in your favor here.",
+      "zla": "Represents {temat} — this theme needs more conscious work here than average before it fully develops.",
+      "neutralna": "Represents {temat} — this theme develops here without major obstacles, but without particular reinforcement either."
+    }
   }
 }

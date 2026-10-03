@@ -40,7 +40,6 @@ import { ocenaFinansowa, HORA_OPIS } from "@/lib/astro/finanseWedyjskie";
 import {
   ocenaZdrowotna, ZDROWIE_OPIS, ZDROWIE_UWAGA, ZDROWIE_UWAGA_OPIS,
 } from "@/lib/astro/zdrowieWedyjski";
-import GodloPlanety from "@/components/GodloPlanety";
 import { odblokuj } from "@/lib/collection";
 import { odblokujSystemKarmy } from "@/lib/koloKarmyGeometria";
 
@@ -86,20 +85,12 @@ function PierscienZnaku({ symbol, procent, size = 108 }: { symbol: string; proce
   );
 }
 
-type TrybKosmogramu = "poczatkujacy" | "zaawansowany";
-const KLUCZ_TRYBU = "9dom_tryb_kosmogramu";
-
 export default function KosmogramPage() {
   const [chart, setChart] = useState<VedicChart | null>(null);
   const [birthInput, setBirthInput] = useState<BirthInput | null>(null);
-  const [tryb, setTryb] = useState<TrybKosmogramu>("poczatkujacy");
   const [zwiniete, setZwiniete] = useState(false);
 
   useEffect(() => {
-    const t = localStorage.getItem(KLUCZ_TRYBU);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- celowa hydratacja preferencji z localStorage po zamontowaniu
-    if (t === "poczatkujacy" || t === "zaawansowany") setTryb(t);
-
     // Panel jest teraz dla jednej osoby (własny profil, wspólny ze wszystkimi
     // modułami serwisu) — wracający użytkownik od razu widzi swój kosmogram,
     // bez ponownego wypełniania formularza.
@@ -122,11 +113,6 @@ export default function KosmogramPage() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- tylko przy montowaniu, handleSubmit stabilny w obrębie renderu
   }, []);
-
-  function zmienTryb(t: TrybKosmogramu) {
-    setTryb(t);
-    try { localStorage.setItem(KLUCZ_TRYBU, t); } catch { /* tryb prywatny */ }
-  }
 
   function handleSubmit(input: BirthInput) {
     setBirthInput(input);
@@ -239,7 +225,6 @@ export default function KosmogramPage() {
   const zdrowieOsi = useMemo(() => (zdrowotne?.planety ?? []).map((d) => ({ id: d.planeta, ocena: d.ocena, role: d.role })), [zdrowotne]);
 
   const w = WSZYSTKIE_SEKCJE;
-  const maPelneDane = true;
 
   return (
     <div className="container section" style={{ paddingTop: 40 }}>
@@ -319,38 +304,10 @@ export default function KosmogramPage() {
 
           <KarakiCzarowe chart={chart} />
 
-          {/* poczatkujacy/zaawansowany — poczatkujacy pokazuje tylko interpretacyjne rankingi
-              (Predyspozycje/Finanse/Zdrowie), zaawansowany cala reszte (diagramy, tabele,
-              Dasza, Karaki, Jogi, Dosze, glosariusze). Kazda osoba ma zawsze pelny kosmogram,
-              wiec ten przelacznik jest zawsze widoczny (maPelneDane = true). */}
-          {maPelneDane && (
-          <div className="card poziom-blok" style={{ marginBottom: 24 }}>
-            <p className="eyebrow" style={{ marginBottom: 14 }}>Wybierz poziom szczegółowości</p>
-            <div className="poziom-siatka" role="radiogroup" aria-label="Poziom szczegółowości kosmogramu">
-              <button type="button" role="radio" aria-checked={tryb === "poczatkujacy"}
-                className={`poziom-opcja${tryb === "poczatkujacy" ? " poziom-opcja-aktywna" : ""}`}
-                onClick={() => zmienTryb("poczatkujacy")}>
-                <span className="poziom-opcja-etykieta">Odczyt</span>
-                <span className="poziom-opcja-opis">Kluczowe wnioski, bez surowych tabel</span>
-              </button>
-              <button type="button" role="radio" aria-checked={tryb === "zaawansowany"}
-                className={`poziom-opcja${tryb === "zaawansowany" ? " poziom-opcja-aktywna" : ""}`}
-                onClick={() => zmienTryb("zaawansowany")}>
-                <span className="poziom-opcja-etykieta">Pełne dane</span>
-                <span className="poziom-opcja-opis">Dasza, jogi i dosze</span>
-              </button>
-            </div>
-            <p className="muted" style={{ fontSize: "0.8rem", marginTop: 14 }}>
-              {tryb === "poczatkujacy"
-                ? "Predyspozycje (z możliwymi zawodami), finanse, zdrowie — bez surowych tabel i technicznych systemów."
-                : "Pełny obraz: dasza, jogi i dosze."}
-            </p>
-          </div>
-          )}
-
-          {/* predyspozycje + na co uwazac — jedna wspolna rozwijana karta, widoczna w trybie
-              poczatkujacym (maPelneDane jest zawsze true, wiec warunek sprowadza sie do trybu). */}
-          {(tryb === "poczatkujacy" || !maPelneDane) && <>
+          {/* przełącznik „Wybierz poziom szczegółowości” (Odczyt / Pełne dane) usunięty
+              2026-10-03 na prośbę użytkownika — tryb „Pełne dane” był już pusty, więc kto go
+              kiedyś wybrał, nie widział żadnej z sekcji poniżej. Strona zawsze pokazuje całość. */}
+          <>
           <PlanetyWSkrocie chart={chart} />
 
           {/* zdrowie nad predyspozycjami — jak w 9dom.pl */}
@@ -495,16 +452,7 @@ export default function KosmogramPage() {
             </p>
           </Link>
 
-          {/* pas dziewieciu godel — jezyk symboli z brandbooka, przeniesiony tu z zaawansowanego na prosbe uzytkownika */}
-          <details className="card" style={{ marginBottom: 24 }}>
-            <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)", marginBottom: 14 }}>
-              Dziewięć grah — język symboli
-            </summary>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(84px, 100%), 1fr))", gap: 14, justifyItems: "center" }}>
-              {PLANET_ORDER.map((id) => <GodloPlanety key={id} id={id} size={70} podpis />)}
-            </div>
-          </details>
-          </>}
+          </>
 
 
           <Interpretation

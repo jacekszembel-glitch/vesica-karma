@@ -392,5 +392,33 @@
       "rahu": "Ciągnie w stronę najnowszych, najbardziej ekscytujących ścieżek zawodowych, a sprawdzone zostają porzucone bez realnego powodu. Warto sprawdzić dwa razy, zanim zaufa się czemuś nowemu.",
       "ketu": "Łatwo stracić zainteresowanie karierą, gdy początkowa fascynacja mija, i zostawić inicjatywę innym. Warto świadomie wracać do zawodowych spraw, które łatwo odpuścić."
     }
+  },
+  "PlanetyWSkrocie": {
+    "summary": "Planety w skrócie",
+    "wstep": "Wszystko o każdej planecie w jednym miejscu — znak, dom, kondycja w mapie głównej D1 (pasek: zielony długi = super, zielony krótki = dobrze, niebieski = zmiennie, czerwony krótki = słabo, czerwony długi = źle) i jej rola w Twojej mapie. Kliknij planetę, żeby zobaczyć też jej kondycję w D9 (nawamszy) i wynik połączony z obu map.",
+    "domKrotko": "dom",
+    "tytulJogakaraka": "Jogakaraka — władca kendry i trikony naraz, jej okresy klasycznie znakomite",
+    "tytulWargottama": "Wargottama — ten sam znak w D1 i D9, efekt wyjątkowo spójny i trwały (kolor podąża za godnością planety)",
+    "tytulRetro": "Retrogradacja — temat wraca, każe przepracować głębiej",
+    "tytulSpalenie": "Spalona bliskością Słońca — łatwo przyćmiona niepewnością",
+    "tytulEgzaltacja": "Egzaltacja — najsilniejsza możliwa pozycja tej planety",
+    "tytulMulatrikona": "Mulatrikona — niemal jak we własnym znaku",
+    "tytulUpadek": "Upadek — najtrudniejsza możliwa pozycja tej planety",
+    "tytulRelacja": "Relacja ze znakiem, w którym stoi planeta",
+    "badgeJogakaraka": "jogakaraka",
+    "badgeWargottama": "wargottama",
+    "badgeSpalona": "spalona",
+    "kondycjaLabel": "Kondycja:",
+    "kondycjaLinia": "D1 — {etD1} ({dygD1}), D9 — {etD9} ({dygD9})",
+    "ogolnie": "ogólnie: {etOgolem}",
+    "jogakarakaLabel": "Jogakaraka:",
+    "jogakarakaOpis": "dla Twojej lagny ta planeta włada jednocześnie domem narożnym i domem szczęścia — jej okresy uchodzą klasycznie za znakomite, niezależnie od jej zwykłej natury.",
+    "wargottamaLabel": "Wargottama:",
+    "wargottamaOpis": "ten sam znak w mapie głównej i w nawamszy — to, co widać na zewnątrz, ma pokrycie w głębszej strukturze. Efekt wyjątkowo spójny.",
+    "synteza": {
+      "dobra": "Reprezentuje {temat} — ten temat działa tu wyraźnie na Twoją korzyść.",
+      "zla": "Reprezentuje {temat} — ten temat wymaga tu więcej świadomej pracy niż przeciętnie, zanim się w pełni rozwinie.",
+      "neutralna": "Reprezentuje {temat} — ten temat rozwija się tu bez większych przeszkód, ale i bez szczególnego wzmocnienia."
+    }
   }
 }
