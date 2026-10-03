@@ -2555,3 +2555,31 @@ p, li, td, th, h1, h2, h3, .badge {
 /* dział kończący się kreską (np. Karaki czarowe) + złota sekcja zaczynająca się kreską
    = dwie kreski pod rząd — zostaje jedna (zamykająca poprzedni dział) */
 *:has(> .skrot-hero-linia:last-child) + .sekcja-zlota > .skrot-hero-linia:first-child { display: none; }
+
+/* „Odczytaj interpretację” w złotych sekcjach (kosmogram, numerologia) — złote koło
+   w stylu „Twoje dane” (.kolo-danych): pełne złoto, ciemna obwódka w środku,
+   ciemny napis wersalikami. !important — Interpretation.tsx ma inline padding/fontSize. */
+.sekcja-zlota-ai .card > .btn-primary {
+  width: 150px; height: 150px;
+  padding: 0 24px !important;
+  border-radius: 50%;
+  background: var(--sand);
+  color: var(--bg);
+  font-size: 0.72rem !important;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  white-space: normal;
+  display: inline-flex; align-items: center; justify-content: center; text-align: center;
+  box-shadow: 0 0 36px -10px var(--primary-glow);
+}
+.sekcja-zlota-ai .card > .btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 4.5%;
+  border-radius: 50%;
+  border: 3px solid var(--bg);
+  pointer-events: none;
+}
+.sekcja-zlota-ai .card > .btn-primary:hover { color: var(--bg); transform: scale(1.04); box-shadow: 0 0 44px -8px var(--primary-glow); }
