@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Term from "@/components/Term";
+import { Link } from "@/i18n/navigation";
 import HiromancjaZdjecie, { type ZdjecieDane } from "@/components/HiromancjaZdjecie";
 import HiromancjaKalibracja from "@/components/HiromancjaKalibracja";
 import HiromancjaOdczyt from "@/components/HiromancjaOdczyt";
@@ -271,7 +272,7 @@ export default function HiromancjaPage() {
 
           <p className="muted" style={{ fontSize: "0.78rem", marginTop: 20, textAlign: "center" }}>
             To na razie samodzielna strona — w przyszłości ten odczyt dołączy do{" "}
-            <a href="/karma" style={{ color: "var(--sand)", textDecoration: "underline" }}>Karmy</a> jako trzeci filar, obok
+            <Link href="/karma" style={{ color: "var(--sand)", textDecoration: "underline" }}>Karmy</Link> jako trzeci filar, obok
             numerologii i astrologii.
           </p>
         </div>
