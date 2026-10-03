@@ -50,9 +50,12 @@ const PLEC_OPCJE: { id: "on" | "ona" | "ono"; label: string }[] = [
   { id: "on", label: "On" }, { id: "ona", label: "Ona" }, { id: "ono", label: "Obiekt" },
 ];
 
+/** Dłonie wycięte dosłownie z wzorów public/brand/chiromancja-3.jpg (lewa) i -4.jpg (prawa),
+ *  przezroczyste tło, kolor złota strony; *-taupe = ten sam kształt w taupe ze wzoru (#8c7f6f).
+ *  Wcześniejsze icon-dlon-*.png miały 112 px i rozmywały się w dużych kołach. */
 const IKONA_DLONI: Record<Reka, string> = {
-  lewa: "/brand/icon-dlon-lewa.png",
-  prawa: "/brand/icon-dlon-prawa.png",
+  lewa: "/brand/dlon-lewa-duza.png",
+  prawa: "/brand/dlon-prawa-duza.png",
 };
 
 function SekcjaDloni({ reka, dominujaca, zdjecie, geometria, onGeometria }: {
@@ -65,13 +68,11 @@ function SekcjaDloni({ reka, dominujaca, zdjecie, geometria, onGeometria }: {
   const nazwa = reka === "prawa" ? "PRAWA DŁOŃ" : "LEWA DŁOŃ";
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
-      <div style={{
-        width: 200, height: 200, borderRadius: "50%", border: "3px solid var(--sand)",
-        margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
-        <img src={IKONA_DLONI[reka]} alt="" style={{ width: "58%", height: "auto" }} />
+      {/* duże złote koło z grubym pierścieniem i dłonią wypełniającą środek — wzór chiromancja-3/4.jpg */}
+      <div className="dlon-kolo dlon-kolo-duze">
+        <img src={IKONA_DLONI[reka]} alt="" />
       </div>
-      <p style={{ marginTop: 16, marginBottom: 0, fontFamily: "var(--font-serif)", fontSize: "1.1rem", color: "var(--sand)", letterSpacing: "0.02em" }}>
+      <p style={{ marginTop: 18, marginBottom: 0, fontWeight: 700, fontSize: "1.05rem", color: "var(--sand)", letterSpacing: "0.02em" }}>
         {nazwa} — {dominujaca ? "dominująca" : "bierna"}
       </p>
       <p style={{ marginTop: 12, lineHeight: 1.6, color: "var(--sand)" }}>
@@ -183,36 +184,29 @@ export default function HiromancjaPage() {
           </span>
         </div>
 
-        <p className="muted" style={{ fontSize: "0.78rem", textAlign: "center", maxWidth: 480, margin: "0 auto 28px" }}>
+        <p style={{ fontSize: "0.8rem", textAlign: "center", maxWidth: 480, margin: "0 auto 28px", color: "var(--sand)" }}>
           Zdjęcia nigdzie nie są zapisywane — trafiają z przeglądarki prosto do modelu AI (dopiero
           gdy klikniesz „Odczytaj” niżej) i nie są przechowywane na serwerze ani w bazie danych.
         </p>
 
-        {/* podglad na pierwszy rzut oka: zloty pierscien = dlon dominujaca (D1),
-            taupe = bierna (D9) — ten sam jezyk zloto/taupe co Kolo Karmy. */}
-        <div style={{ display: "flex", gap: 24, justifyContent: "center", marginBottom: 24 }}>
-          <div style={{
-            width: 90, height: 90, borderRadius: "50%",
-            border: `3px solid ${pismoReka === "lewa" ? "var(--sand)" : "var(--taupe)"}`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <img src={pismoReka === "lewa" ? "/brand/icon-dlon-lewa.png" : "/brand/icon-dlon-lewa-taupe.png"} alt="" style={{ width: "58%", height: "auto" }} />
-          </div>
-          <div style={{
-            width: 90, height: 90, borderRadius: "50%",
-            border: `3px solid ${pismoReka === "prawa" ? "var(--sand)" : "var(--taupe)"}`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <img src={pismoReka === "prawa" ? "/brand/icon-dlon-prawa.png" : "/brand/icon-dlon-prawa-taupe.png"} alt="" style={{ width: "58%", height: "auto" }} />
-          </div>
-        </div>
       </div>
 
-      <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap", margin: "0 0 28px" }}>
-        <HiromancjaZdjecie id="hiromancja-plik-lewa" etykieta="Prześlij zdjęcie — lewa dłoń"
-          maZdjecie={!!zdjecia.lewa} onZdjecieGotowe={(d) => handleZdjecie("lewa", d)} />
-        <HiromancjaZdjecie id="hiromancja-plik-prawa" etykieta="Prześlij zdjęcie — prawa dłoń"
-          maZdjecie={!!zdjecia.prawa} onZdjecieGotowe={(d) => handleZdjecie("prawa", d)} />
+      {/* wgrywanie — wzór public/brand/chiromanca-2.jpg: duże koło z dłonią (ZŁOTE = zdjęcie
+          wgrane, TAUPE = jeszcze nie), pod nim płaski złoty przycisk i podpis stanu.
+          Dominującą rękę pokazuje przełącznik wyżej, nie kolor koła. */}
+      <div className="dlon-wgrywanie">
+        {(["lewa", "prawa"] as const).map((r) => (
+          <div key={r} className="dlon-wgrywanie-kolumna">
+            <div className={`dlon-kolo${zdjecia[r] ? "" : " dlon-kolo-czeka"}`}>
+              <img src={zdjecia[r] ? IKONA_DLONI[r] : `/brand/dlon-${r}-duza-taupe.png`} alt="" />
+            </div>
+            <HiromancjaZdjecie id={`hiromancja-plik-${r}`} etykieta={`Prześlij zdjęcie — ${r === "lewa" ? "LEWA" : "PRAWA"} DŁOŃ`}
+              maZdjecie={!!zdjecia[r]} onZdjecieGotowe={(d) => handleZdjecie(r, d)} />
+            <p className={`dlon-status${zdjecia[r] ? " dlon-status-ok" : ""}`}>
+              {zdjecia[r] ? "Wgrane poprawnie" : "Wgraj zdjęcie"}
+            </p>
+          </div>
+        ))}
       </div>
 
       <div className="skrot-hero-linia" />
@@ -222,7 +216,7 @@ export default function HiromancjaPage() {
           zdjecie={zdjecia.lewa} geometria={geometrie.lewa}
           onGeometria={(w) => setGeometrie((g) => ({ ...g, lewa: w }))} />
 
-        <div className="skrot-hero-linia" />
+        <div className="skrot-hero-linia" style={{ width: "100%", margin: 0 }} />
 
         <SekcjaDloni reka="prawa" dominujaca={pismoReka === "prawa"}
           zdjecie={zdjecia.prawa} geometria={geometrie.prawa}
@@ -252,6 +246,7 @@ export default function HiromancjaPage() {
             </div>
           </div>
 
+          <div className="sekcja-zlota-ai">
           <HiromancjaOdczyt
             wiodaca={{
               imageBase64: zdjecia[pismoReka]!.base64, imageMediaType: zdjecia[pismoReka]!.mediaType,
@@ -272,10 +267,11 @@ export default function HiromancjaPage() {
             plec={plec}
             imie={imie.trim() || undefined}
           />
+          </div>
 
           <p className="muted" style={{ fontSize: "0.78rem", marginTop: 20, textAlign: "center" }}>
             To na razie samodzielna strona — w przyszłości ten odczyt dołączy do{" "}
-            <a href="/karma" style={{ color: "var(--teal-soft)" }}>Karmy</a> jako trzeci filar, obok
+            <a href="/karma" style={{ color: "var(--sand)", textDecoration: "underline" }}>Karmy</a> jako trzeci filar, obok
             numerologii i astrologii.
           </p>
         </div>

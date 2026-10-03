@@ -89,7 +89,8 @@ export default function HiromancjaZdjecie({ id, onZdjecieGotowe, maZdjecie, etyk
     <div style={{ textAlign: "center" }}>
       <input type="file" accept="image/*" capture="environment"
         id={id} style={{ display: "none" }} onChange={handleChange} />
-      <label htmlFor={id} className="btn btn-primary" style={{ cursor: "pointer", display: "inline-block", fontSize: "0.76rem", padding: "8px 16px" }}>
+      {/* płaski złoty przycisk jak we wzorze public/brand/chiromanca-2.jpg */}
+      <label htmlFor={id} className="dlon-przycisk">
         {przetwarzam ? "Wczytuję…" : maZdjecie ? "Zmień zdjęcie" : etykieta}
       </label>
       {blad && <p style={{ color: "var(--warn)", fontSize: "0.85rem", marginTop: 10 }}>{blad}</p>}

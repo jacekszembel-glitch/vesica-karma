@@ -2615,3 +2615,35 @@ p, li, td, th, h1, h2, h3, .badge {
 .godzina-pastylka-liczba { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
 .link-zloty { color: var(--sand); font-size: 0.88rem; }
 .link-zloty:hover { color: var(--primary-soft); }
+
+/* ── Chiromancja wg wzorów public/brand/chiromanca-2.jpg i chiromancja-3/4.jpg ── */
+.dlon-wgrywanie { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin: 0 0 32px; }
+.dlon-wgrywanie-kolumna { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 160px; }
+.dlon-kolo {
+  width: 150px; height: 150px; border-radius: 50%;
+  border: 14px solid var(--sand);
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.3s;
+}
+.dlon-kolo img { height: 66%; width: auto; }
+/* taupe ze wzoru (ten sam co przełącznik Lewa/Prawa wycięty z chiromanca-2.jpg) */
+.dlon-kolo-czeka { border-color: #8c7f6f; }
+.dlon-kolo-duze { width: min(300px, 78vw); height: min(300px, 78vw); border-width: 16px; margin: 0 auto; }
+.dlon-kolo-duze img { height: 68%; }
+.dlon-przycisk {
+  display: inline-block; cursor: pointer;
+  background: var(--sand); color: var(--bg);
+  font-family: var(--font-sans); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em;
+  padding: 7px 12px; border-radius: 999px; text-align: center; line-height: 1.3; max-width: 160px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.dlon-przycisk:hover { transform: translateY(-1px); box-shadow: 0 6px 18px -8px var(--primary-glow); }
+.dlon-status {
+  margin: 0; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #8c7f6f;
+}
+.dlon-status-ok { color: var(--sand); }
+@media (max-width: 380px) {
+  .dlon-wgrywanie-kolumna { width: 140px; }
+  .dlon-kolo:not(.dlon-kolo-duze) { width: 128px; height: 128px; border-width: 12px; }
+}
