@@ -2529,3 +2529,26 @@ p, li, td, th, h1, h2, h3, .badge {
 .sekcja-zlota .pdx-uwaga,
 .sekcja-zlota .pdx-waga { color: var(--sand); }
 .sekcja-zlota .pdx-os { background: var(--sand); }
+
+/* ── Interpretacja i „Zapytaj o swój kosmogram” na kosmogramie — złoty styl działów:
+      karty komponentów (Interpretation/Rozmowa) bez ramek i tła, ich własne tytuły
+      schowane (nagłówek daje SekcjaZlota), podpowiedzi pytań złote. Tylko w .sekcja-zlota-ai,
+      więc numerologia i inne strony z tymi komponentami zostają bez zmian. ── */
+.sekcja-zlota-ai .card {
+  background: none !important; border: none !important; box-shadow: none !important;
+  padding: 0 !important; margin-top: 0 !important;
+}
+.sekcja-zlota-ai .card > h3,
+.sekcja-zlota-ai .card > div > h3:first-child,
+.sekcja-zlota-ai .rozmowa-naglowek h3 { display: none; }
+.sekcja-zlota-ai .card > p { margin-left: auto; margin-right: auto; text-align: center; }
+.sekcja-zlota-ai .interp-kafel { border: none; background: none; padding: 4px 0; }
+.sekcja-zlota-ai .rozmowa-podpowiedzi button {
+  background: rgba(230, 196, 138, 0.06); border-color: var(--line-gold); color: var(--sand);
+}
+.sekcja-zlota-ai .rozmowa-podpowiedzi button:hover:not(:disabled) {
+  border-color: var(--sand); color: var(--sand); background: rgba(230, 196, 138, 0.12);
+}
+.sekcja-zlota-ai .rozmowa-odpowiedz { border-color: var(--line-gold); background: none; color: var(--sand); }
+.sekcja-zlota-ai .rozmowa-wyczysc { color: var(--sand); }
+.sekcja-zlota-ai strong { color: var(--sand); }

@@ -440,27 +440,24 @@ export default function KosmogramPage() {
 
           {w.predyspozycje && <Talenty chart={chart} />}
 
-          {/* dwie osie dasz — Chara Dasza x Wimszottari naraz — mieszka teraz jako
-              wlasna, skondensowana strona pod satelita Kola Karmy "Mahadasze",
-              nie tutaj (kosmogram jest juz i tak bardzo dlugi). Krotki link
-              zamiast calego, ciezkiego komponentu. */}
-          <Link href="/sade-sati" className="card fade-up" style={{ display: "block", color: "var(--text)", marginBottom: 24 }}>
-            <p className="eyebrow" style={{ marginBottom: 4 }}>Mahadashe, jogi i dosze</p>
-            <p className="muted" style={{ fontSize: "0.86rem", lineHeight: 1.6 }}>
-              Chara Dasza i Wimszottari na jednej osi czasu, z jogami i doszami wpisanymi w każdy
-              okres. <strong style={{ color: "var(--primary-soft)" }}>Zobacz swoją oś dasz →</strong>
-            </p>
-          </Link>
 
           </>
 
 
+          {/* interpretacja i rozmowa w złotym stylu działów wyżej — własny nagłówek sekcji,
+              karty komponentów rozebrane w CSS (.sekcja-zlota-ai), bez zmian na innych stronach */}
+          <div className="sekcja-zlota-ai">
+          <SekcjaZlota tytul="Interpretacja">
           <Interpretation
             kind="kosmogram"
             data={aiData}
             label={`Kosmogram${birthInput?.name ? ` — ${birthInput.name}` : ""}`}
           />
+          </SekcjaZlota>
+          <SekcjaZlota tytul="Zapytaj o swój kosmogram">
           <Rozmowa mapa={aiData} tytul="Zapytaj o swój kosmogram" />
+          </SekcjaZlota>
+          </div>
         </div>
       )}
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
