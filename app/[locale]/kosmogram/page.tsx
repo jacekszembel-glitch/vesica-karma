@@ -28,6 +28,7 @@ import OsPredyspozycji from "@/components/OsPredyspozycji";
 import OsDomeny from "@/components/OsDomeny";
 import DziedzinyTalentu from "@/components/DziedzinyTalentu";
 import OsKariery from "@/components/OsKariery";
+import SekcjaZlota from "@/components/SekcjaZlota";
 import {
   TABELA_FINANSE, TABELA_ZDROWIE, TABELA_FINANSE_POTENCJAL, TABELA_FINANSE_TARCIE,
   TABELA_ZDROWIE_POTENCJAL, TABELA_ZDROWIE_TARCIE,
@@ -357,14 +358,8 @@ export default function KosmogramPage() {
               Ksiezyc jako karakowie, potwierdzenie w D9, aspekty malefikow/Jowisza.
               UWAGA: swiadomie NIE diagnoza medyczna, patrz zastrzezenie w tekscie. */}
           {w.zdrowie && zdrowotne && (
-          <details className="card" style={{ marginBottom: 24 }} open>
-            <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
-              Zdrowie
-            </summary>
-            <p style={{
-              fontSize: "0.8rem", lineHeight: 1.55, marginBottom: 14, padding: "10px 14px",
-              borderRadius: 8, border: "1px solid var(--line-gold)", background: "rgba(230,196,138,0.06)",
-            }}>
+          <SekcjaZlota tytul="Zdrowie">
+            <p style={{ fontSize: "0.8rem", lineHeight: 1.55, marginBottom: 14, textAlign: "center" }}>
               <strong>Zastrzeżenie:</strong> to NIE jest diagnoza medyczna. Astrologia wedyjska pokazuje klasyczne
               skłonności i tematy wymagające uważności — nie konkretne choroby, nie zastępuje lekarza. Przy
               jakichkolwiek realnych dolegliwościach zawsze skonsultuj się z lekarzem.
@@ -381,16 +376,13 @@ export default function KosmogramPage() {
               uwagaTemat={(id) => ZDROWIE_UWAGA[id]}
               uwagaOpis={(id) => ZDROWIE_UWAGA_OPIS[id]}
             />
-          </details>
+          </SekcjaZlota>
           )}
 
           {w.predyspozycje && <>
-          <details className="card" style={{ marginBottom: 24 }} open>
-            <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
-              Predyspozycje i na co uważać
-            </summary>
+          <SekcjaZlota tytul="Predyspozycje i na co uważać">
             <OsPredyspozycji chart={chart} />
-          </details>
+          </SekcjaZlota>
 
           {/* dziedziny talentu — muzyka, sztuka, słowo… z połączenia planet, domów i jog,
               na tej samej osi co Predyspozycje (OsDomeny) */}
@@ -405,10 +397,7 @@ export default function KosmogramPage() {
               karakowie, Dhana jogi, potwierdzenie w D9/D10, Indu Lagna, Hora, biezaca dasza.
               NIE recykling ocenaWladcy jak reszta domen — patrz naglowek finanseWedyjskie.ts. */}
           {w.finanse && finansowe && (
-          <details className="card" style={{ marginBottom: 24 }} open>
-            <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
-              Finanse
-            </summary>
+          <SekcjaZlota tytul="Finanse">
             <OsDomeny
               dziedzina="finanse"
               eyebrow="Finanse"
@@ -428,10 +417,7 @@ export default function KosmogramPage() {
                 <p className="eyebrow" style={{ marginBottom: 8 }}>Dhana jogi w Twojej mapie</p>
                 <div style={{ display: "grid", gap: 8 }}>
                   {finansowe.dhanaJogi.map((j) => (
-                    <div key={j.id} style={{
-                      padding: "10px 14px", borderRadius: 8,
-                      border: "1px solid rgba(111,191,159,0.4)", background: "rgba(255,255,255,0.02)",
-                    }}>
+                    <div key={j.id} style={{ padding: "4px 0" }}>
                       <p style={{ fontSize: "0.88rem" }}>
                         {j.planety.map((id) => (
                           <span key={id} style={{ color: GRAHAS[id].color, marginRight: 4 }}>{GRAHAS[id].symbol}</span>
@@ -447,7 +433,7 @@ export default function KosmogramPage() {
 
             {/* Indu Lagna — klasyczny "ascendent bogactwa" */}
             {finansowe.indu && (
-              <div style={{ marginTop: 18, padding: "12px 16px", borderRadius: 8, border: "1px solid var(--line-gold)" }}>
+              <div style={{ marginTop: 18 }}>
                 <p className="eyebrow" style={{ marginBottom: 6 }}>
                   <Term k="indulagna" plain>Indu Lagna</Term> — ascendent bogactwa
                 </p>
@@ -489,7 +475,7 @@ export default function KosmogramPage() {
                       to nie jest okres szczególnie naznaczony tematem pieniędzy, ani w jedną, ani w drugą stronę.</>}
               </p>
             )}
-          </details>
+          </SekcjaZlota>
           )}
 
           {/* wrażliwość duchowa i talenty z jog — pod finansami, jak w 9dom.pl */}

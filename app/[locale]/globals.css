@@ -2508,3 +2508,24 @@ p, li, td, th, h1, h2, h3, .badge {
   .pdx-bilans { flex-direction: row; gap: 8px; align-items: baseline; }
   .pdx-czynniki { grid-template-columns: 1fr; }
 }
+
+/* ── Złota sekcja (components/SekcjaZlota.tsx) — styl góry kosmogramu:
+      kreska z kropką, nagłówek jak „Jedno spojrzenie”, złoty tekst, bez ramek ── */
+.sekcja-zlota { max-width: 720px; margin: 0 auto 8px; color: var(--sand); }
+.sekcja-zlota-tytul {
+  font-family: var(--font-serif); font-size: 2.6rem; font-weight: 700; line-height: 1.14;
+  color: var(--sand); text-align: center; margin-bottom: 16px;
+}
+/* globalne p { color: var(--text) } (błękit) — w złotej sekcji akapity złote */
+.sekcja-zlota p, .sekcja-zlota li { color: var(--sand); }
+.sekcja-zlota .eyebrow { color: var(--sand); }
+.sekcja-zlota .muted,
+.sekcja-zlota .pdx-liczba,
+.sekcja-zlota .pdx-tematy,
+.sekcja-zlota .pdx-bilans-opis,
+.sekcja-zlota .pdx-predyspozycji-legenda { color: var(--sand); opacity: 0.82; }
+.sekcja-zlota .pdx-bilans-wartosc,
+.sekcja-zlota .pdx-bilans-porownanie,
+.sekcja-zlota .pdx-uwaga,
+.sekcja-zlota .pdx-waga { color: var(--sand); }
+.sekcja-zlota .pdx-os { background: var(--sand); }

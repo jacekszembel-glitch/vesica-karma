@@ -9,6 +9,7 @@ import { ocenaKariery } from "@/lib/astro/karieraWedyjska";
 import { ROZKLADY_KARIERY, SKALE_KARIERY } from "@/lib/astro/srednieKariery";
 import { mozliweZawodyNazwa } from "@/lib/astro/domInterpretacja";
 import OsDomeny from "@/components/OsDomeny";
+import SekcjaZlota from "./SekcjaZlota";
 
 /**
  * ZAWÓD I KARIERA — planety realnie związane z 10. domem w tej mapie
@@ -36,10 +37,7 @@ export default function OsKariery({ chart }: { chart: VedicChart }) {
   }, [wiersze]);
 
   return (
-    <details className="card" style={{ marginBottom: 24 }} open>
-      <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
-        {t("summary")}
-      </summary>
+    <SekcjaZlota tytul={t("summary")}>
       {!wiersze ? (
         <p className="muted" style={{ fontSize: "0.86rem", lineHeight: 1.55, marginTop: 12 }}>{t("brakGodziny")}</p>
       ) : (
@@ -84,6 +82,6 @@ export default function OsKariery({ chart }: { chart: VedicChart }) {
           <p className="muted" style={{ fontSize: "0.8rem", marginTop: 12, lineHeight: 1.55, fontStyle: "italic" }}>{t("uwaga")}</p>
         </>
       )}
-    </details>
+    </SekcjaZlota>
   );
 }

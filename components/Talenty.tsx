@@ -6,6 +6,7 @@ import { wykryteJogiPosortowane } from "@/lib/astro/yogas";
 import { GRAHAS } from "@/lib/astro/constants";
 import type { AstroLocale } from "@/lib/astro/i18nAstro";
 import Term from "@/components/Term";
+import SekcjaZlota from "./SekcjaZlota";
 
 /**
  * TALENTY (Z JOG) — dla początkujących, osobno od Predyspozycji. Ta sama
@@ -24,10 +25,7 @@ export default function Talenty({ chart }: { chart: VedicChart }) {
   const jogi = wykryteJogiPosortowane(chart, locale);
 
   return (
-    <details className="card" style={{ marginBottom: 24 }} open>
-      <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
-        {t("summary")}
-      </summary>
+    <SekcjaZlota tytul={t("summary")}>
       <p className="muted" style={{ fontSize: "0.84rem", margin: "12px 0 18px", lineHeight: 1.55 }}>
         {t.rich("wstep", { jogiklasyczne: (c) => <Term k="jogiklasyczne" plain>{c}</Term> })}
       </p>
@@ -39,11 +37,8 @@ export default function Talenty({ chart }: { chart: VedicChart }) {
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
           {jogi.map((j) => (
-            <div key={j.id} style={{
-              border: "1px solid rgba(111,191,159,0.4)", borderRadius: 12,
-              padding: "14px 16px", background: "rgba(255,255,255,0.02)",
-            }}>
-              <p className="eyebrow" style={{ marginBottom: 6, color: "#6fbf9f" }}>{t("talent")}</p>
+            <div key={j.id} style={{ padding: "4px 0" }}>
+              <p className="eyebrow" style={{ marginBottom: 6 }}>{t("talent")}</p>
               <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.05rem", lineHeight: 1.4, marginBottom: 6 }}>
                 {j.planety.map((id) => (
                   <span key={id} style={{ color: GRAHAS[id].color, marginRight: 4 }}>{GRAHAS[id].symbol}</span>
@@ -56,6 +51,6 @@ export default function Talenty({ chart }: { chart: VedicChart }) {
           ))}
         </div>
       )}
-    </details>
+    </SekcjaZlota>
   );
 }

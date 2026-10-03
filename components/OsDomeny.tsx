@@ -234,7 +234,7 @@ export default function OsDomeny<I extends string = PlanetId>({
         })}
       </div>
 
-      <div style={{ border: "1px solid var(--line-gold)", background: "rgba(230,196,138,0.06)", borderRadius: 12, padding: "14px 18px", marginTop: 18 }}>
+      <div style={{ marginTop: 18 }}>
         <p className="eyebrow" style={{ color: "var(--sand)", marginBottom: 6, textAlign: "left" }}>{t("synteza")}</p>
         <p style={{ fontSize: "0.9rem", lineHeight: 1.6 }}>
           {wspieraja.length ? tw("syntezaWspieraja", { lista: lista(wspieraja, "potencjal") }) : tw("syntezaBrakWsparcia")}{" "}

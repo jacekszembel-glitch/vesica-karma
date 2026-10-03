@@ -8,6 +8,7 @@ import type { OcenaWladcyZWagami } from "@/lib/astro/sila";
 import { dziedzinyTalentu, type DziedzinaTalentu } from "@/lib/astro/dziedzinyTalentu";
 import { ROZKLADY_TALENTU, SKALE_TALENTU } from "@/lib/astro/srednieTalentu";
 import OsDomeny, { type WierszOsi } from "@/components/OsDomeny";
+import SekcjaZlota from "./SekcjaZlota";
 
 /**
  * DZIEDZINY TALENTU — muzyka, sztuka, słowo… na TEJ SAMEJ osi co
@@ -40,10 +41,7 @@ export default function DziedzinyTalentu({ chart }: { chart: VedicChart }) {
   }, [chart, locale]);
 
   return (
-    <details className="card" style={{ marginBottom: 24 }} open>
-      <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
-        {t("summary")}
-      </summary>
+    <SekcjaZlota tytul={t("summary")}>
       {!wiersze ? (
         <p className="muted" style={{ fontSize: "0.86rem", lineHeight: 1.55, marginTop: 12 }}>{t("brakGodziny")}</p>
       ) : (
@@ -65,6 +63,6 @@ export default function DziedzinyTalentu({ chart }: { chart: VedicChart }) {
           <p className="muted" style={{ fontSize: "0.8rem", marginTop: 12, lineHeight: 1.55, fontStyle: "italic" }}>{t("uwaga")}</p>
         </>
       )}
-    </details>
+    </SekcjaZlota>
   );
 }

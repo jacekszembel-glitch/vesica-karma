@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import type { VedicChart } from "@/lib/astro/chart";
 import { wrazliwoscDuchowa, opisOdcieniaNazwa, poziomWrazliwosciNazwa, type PoziomWrazliwosci } from "@/lib/astro/duchowaWrazliwosc";
 import type { AstroLocale } from "@/lib/astro/i18nAstro";
+import SekcjaZlota from "./SekcjaZlota";
 
 const POZIOM_PROCENT: Record<PoziomWrazliwosci, number> = { "wyraźna": 90, "umiarkowana": 55, "subtelna": 25 };
 const POZIOM_KOLOR: Record<PoziomWrazliwosci, string> = { "wyraźna": "#6fbf9f", "umiarkowana": "#e6c48a", "subtelna": "#11a7b6" };
@@ -15,10 +16,7 @@ export default function WrazliwoscDuchowa({ chart }: { chart: VedicChart }) {
   const kolor = POZIOM_KOLOR[w.poziom];
 
   return (
-    <details className="card" style={{ marginBottom: 24 }}>
-      <summary style={{ cursor: "pointer", fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--primary-soft)" }}>
-        {t("summary")}
-      </summary>
+    <SekcjaZlota tytul={t("summary")}>
       <p className="muted" style={{ fontSize: "0.84rem", margin: "12px 0 18px", lineHeight: 1.55 }}>
         {t("wstep")}
       </p>
@@ -53,6 +51,6 @@ export default function WrazliwoscDuchowa({ chart }: { chart: VedicChart }) {
           {t("brakCzynnikow")}
         </p>
       )}
-    </details>
+    </SekcjaZlota>
   );
 }
