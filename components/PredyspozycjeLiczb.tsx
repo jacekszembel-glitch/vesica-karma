@@ -31,7 +31,6 @@ export default function PredyspozycjeLiczb({ numerology }: { numerology: Numerol
 
   return (
     <div>
-      <p className="eyebrow" style={{ marginBottom: 6 }}>Predyspozycje</p>
       <p className="muted" style={{ fontSize: "0.84rem", marginBottom: 18, lineHeight: 1.55 }}>
         Ranking cyfr wg łącznej wagi: ile razy cyfra powtarza się w dacie urodzenia (siatka Lo Shu)
         plus ile z Twoich liczb osobistych się do niej redukuje — Droga życia, Mulank, Bhagyank,
@@ -52,10 +51,7 @@ export default function PredyspozycjeLiczb({ numerology }: { numerology: Numerol
             gap: 12, marginBottom: 24,
           }}>
             {top3.map((d, i) => (
-              <div key={d.cyfra} style={{
-                border: `1px solid ${KOLOR}66`, borderRadius: 12,
-                padding: "14px 16px", background: "rgba(255,255,255,0.02)",
-              }}>
+              <div key={d.cyfra} style={{ padding: "4px 0" }}>
                 <p className="eyebrow" style={{ marginBottom: 6, color: KOLOR }}>
                   #{i + 1} predyspozycja
                 </p>

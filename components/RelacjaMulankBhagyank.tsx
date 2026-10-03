@@ -1,6 +1,5 @@
 import { VEDIC_PLANETS, mulankBhagyankRelacja, type NumerologyResult } from "@/lib/astro/numerology";
 import { OPIS_RELACJI_MULANK_BHAGYANK } from "@/lib/astro/numerologia-tresc";
-import Term from "@/components/Term";
 
 /**
  * MULANK ↔ BHAGYANK — klasyczna wedyjska numerologia NIE sumuje tych dwóch
@@ -32,10 +31,7 @@ export default function RelacjaMulankBhagyank({ numerology }: { numerology: Nume
   const kolor = KOLOR[relacja];
 
   return (
-    <div className="card" style={{ borderTop: `2px solid ${kolor}` }}>
-      <p className="eyebrow" style={{ marginBottom: 6 }}>
-        <Term k="relacjamulankbhagyank">Mulank ↔ Bhagyank</Term>
-      </p>
+    <div>
       <p className="muted" style={{ fontSize: "0.84rem", marginBottom: 16, lineHeight: 1.55 }}>
         Tradycja wedyjska nie sumuje tych dwóch liczb w trzecią — porównuje ich planety przez
         naturalną przyjaźń (ta sama zasada co w kosmogramie). To pokazuje, czy Twoja natura

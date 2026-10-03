@@ -10,6 +10,7 @@ import Term from "@/components/Term";
 import RelacjaMulankBhagyank from "@/components/RelacjaMulankBhagyank";
 import PredyspozycjeLiczb from "@/components/PredyspozycjeLiczb";
 import NaCoUwazacLiczb from "@/components/NaCoUwazacLiczb";
+import SekcjaZlota from "@/components/SekcjaZlota";
 import { odblokuj } from "@/lib/collection";
 import { odblokujSystemKarmy } from "@/lib/koloKarmyGeometria";
 
@@ -88,14 +89,11 @@ export default function NumerologiaPage() {
       </KoloDanychPanel>
 
       {wynik && (
-        <div className="fade-up" style={{ marginTop: 48 }}>
-          {/* karta liczb i relacja Mulank↔Bhagyank obok siebie, na tej samej, standardowej
-              szerokości co reszta strony (siatka, predyspozycje, interpretacja) niżej —
-              cała sekcja wyników ma teraz jedną spójną szerokość. */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(420px, 100%), 1fr))", gap: 20 }}>
-            <div className="card" style={{ borderTop: "2px solid var(--sand)" }}>
-              <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.15rem", color: "var(--sand)", marginBottom: 3 }}>Numerologia wedyjska</p>
-              <p className="muted" style={{ fontSize: "0.78rem", lineHeight: 1.5, marginBottom: 16 }}>
+        <div className="fade-up" style={{ marginTop: 16 }}>
+          {/* wyniki w złotym stylu działów (jak kosmogram): kreska z kropką, nagłówek
+              2,6rem, złoty tekst, bez kart i ramek — components/SekcjaZlota.tsx */}
+          <SekcjaZlota tytul="Twoje liczby">
+              <p className="muted" style={{ fontSize: "0.86rem", lineHeight: 1.5, marginBottom: 16, textAlign: "center" }}>
                 Indyjski system — każda liczba ma planetę; mulank, bhagyank i planeta władająca.
               </p>
 
@@ -116,26 +114,29 @@ export default function NumerologiaPage() {
                 <Num label={<Term k="numosobowosc">Osobowość</Term>} value={wynik.personality} />
               </div>
 
-              <hr className="gold-rule" style={{ margin: "18px 0 12px" }} />
-              <p style={{ textAlign: "center", fontSize: "0.85rem" }} className="muted">
-                Planeta władająca: <strong style={{ color: "var(--sand)" }}>{wynik.rulingPlanet}</strong>
+              <p style={{ textAlign: "center", fontSize: "0.9rem", marginTop: 18 }}>
+                Planeta władająca: <strong>{wynik.rulingPlanet}</strong>
               </p>
-            </div>
+          </SekcjaZlota>
 
-            {/* Mulank↔Bhagyank przez przyjaźń planet — tak łączy je klasyczna numerologia wedyjska (nie sumą) */}
+          {/* Mulank↔Bhagyank przez przyjaźń planet — tak łączy je klasyczna numerologia wedyjska (nie sumą) */}
+          <SekcjaZlota tytul={<Term k="relacjamulankbhagyank" plain>Mulank i Bhagyank</Term>}>
             <RelacjaMulankBhagyank numerology={wynik} />
-          </div>
+          </SekcjaZlota>
 
-          {/* predyspozycje i na co uważać — całościowo: data + wszystkie liczby osobiste, jedna wspólna karta */}
-          <div className="card fade-up" style={{ marginTop: 24 }}>
+          {/* predyspozycje i na co uważać — całościowo: data + wszystkie liczby osobiste */}
+          <SekcjaZlota tytul="Predyspozycje">
             <PredyspozycjeLiczb numerology={wynik} />
+          </SekcjaZlota>
+          <SekcjaZlota tytul="Na co uważać">
             <NaCoUwazacLiczb numerology={wynik} />
-          </div>
+          </SekcjaZlota>
 
-          {/* interpretacja AI */}
-          <div style={{ marginTop: 32 }}>
-            <h3 style={{ textAlign: "center", marginBottom: 20 }}>Interpretacja</h3>
-            <Interpretation kind="numerologia" data={aiData!} label="Numerologia wedyjska" />
+          {/* interpretacja AI — ten sam złoty styl co na kosmogramie */}
+          <div className="sekcja-zlota-ai">
+            <SekcjaZlota tytul="Interpretacja">
+              <Interpretation kind="numerologia" data={aiData!} label="Numerologia wedyjska" />
+            </SekcjaZlota>
           </div>
         </div>
       )}

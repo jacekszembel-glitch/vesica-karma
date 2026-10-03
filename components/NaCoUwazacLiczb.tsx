@@ -41,8 +41,6 @@ export default function NaCoUwazacLiczb({ numerology }: { numerology: Numerology
 
   return (
     <div>
-      <hr className="gold-rule" style={{ margin: "24px 0" }} />
-      <p className="eyebrow" style={{ marginBottom: 6 }}>Na co uważać</p>
       <p className="muted" style={{ fontSize: "0.84rem", marginBottom: 18, lineHeight: 1.55 }}>
         Odwrotność Predyspozycji: cyfry, których nie ma ani w dacie urodzenia, ani w żadnej
         z Twoich liczb osobistych — Drodze życia, Mulanku, Bhagyanku, Roku osobistym
@@ -64,10 +62,7 @@ export default function NaCoUwazacLiczb({ numerology }: { numerology: Numerology
             gap: 12, marginBottom: 24,
           }}>
             {top3.map((d, i) => (
-              <div key={d.cyfra} style={{
-                border: `1px solid ${KOLOR_UWAGA}66`, borderRadius: 12,
-                padding: "14px 16px", background: "rgba(255,255,255,0.02)",
-              }}>
+              <div key={d.cyfra} style={{ padding: "4px 0" }}>
                 <p className="eyebrow" style={{ marginBottom: 6, color: KOLOR_UWAGA }}>
                   #{i + 1} na co uważać
                 </p>
