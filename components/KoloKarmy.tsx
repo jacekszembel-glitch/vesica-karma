@@ -311,7 +311,7 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
       ))}
       <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia") || aktywny === "astrologia"} />
 
-      {/* blik na ukończonych pętlach-systemach (Związki — niżej, nad ich warstwami) */}
+      {/* blik na ukończonych pętlach-systemach (Związki bez blika — tylko spokojne złoto) */}
       {(["astrologia", "hiromancja", "numerologia"] as const).filter((id) => postep.has(id)).map((id, k) => blik(id, k))}
 
       {/* finał 3/3 — jasne złote światło obiega zewnętrzny krąg Karmy, potem gaśnie
@@ -352,9 +352,8 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
       <img src="/brand/fill-zwiazki-taupe.png" alt="" aria-hidden="true"
         style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none" }} />
       <img src="/brand/fill-zwiazki-gold.png" alt=""
-        className={`kk-fill-hover${zwiazkiUkonczone || aktywny === "zwiazki" ? " kk-fill-hover-aktywny" : ""}${rozblysk === "zwiazki" ? " kk-rozblysk" : ""}`}
+        className={`kk-fill-hover${zwiazkiUkonczone || aktywny === "zwiazki" ? " kk-fill-hover-aktywny" : ""}`}
         style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
-      {zwiazkiUkonczone && blik("zwiazki", 3)}
 
       {/* piktogramy — leżą idealnie na tle. Zapalają się złotem razem z
           pętlą na hover (nie tylko gdy trwale "ukończone"), tą samą
