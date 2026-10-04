@@ -147,7 +147,7 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
       ) : (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
           <p className="eyebrow" style={{ margin: 0 }}>Odczyt AI — obserwacja jakościowa</p>
-          {(!text || (!!error && !busy)) && (
+          {!busy && (!text || !!error) && (
             <button className="btn btn-ghost" onClick={generate} disabled={busy} style={{ fontSize: "0.82rem" }}>
               {busy ? "Odczytuję…" : "Spróbuj ponownie"}
             </button>

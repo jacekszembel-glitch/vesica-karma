@@ -50,6 +50,8 @@ interface Props {
   /** Etykieta i placeholder pola imienia. */
   nameLabel?: string;
   namePlaceholder?: string;
+  /** Imię i nazwisko obowiązkowe (numerologia — bez nich nie ma pełnego odczytu). */
+  nameRequired?: boolean;
   /**
    * Czy wczytywać i zapisywać dane we wspólnym profilu (localStorage), z którego
    * korzystają panel, /dzis i sade sati. WYŁĄCZ dla danych kogoś innego niż
@@ -64,6 +66,7 @@ export default function BirthForm({
   dateLabel = "Data urodzenia",
   nameLabel = "Imię i nazwisko (opcjonalnie)",
   namePlaceholder = "np. Jacek Kowalski",
+  nameRequired = false,
   persist = true,
 }: Props) {
   const [date, setDate] = useState("1990-06-15");
@@ -116,7 +119,7 @@ export default function BirthForm({
         <div>
           <label htmlFor="bf-name">{nameLabel}</label>
           <input id="bf-name" type="text" placeholder={namePlaceholder} autoComplete={persist ? "name" : "off"}
-            value={name} onChange={(e) => setName(e.target.value)} />
+            value={name} onChange={(e) => setName(e.target.value)} required={nameRequired} />
         </div>
       )}
 

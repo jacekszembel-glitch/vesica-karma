@@ -2732,3 +2732,28 @@ p, li, td, th, h1, h2, h3, .badge {
 .panel-odczyt > summary::after { content: "+"; color: var(--sand); transition: transform 0.2s; }
 .panel-odczyt[open] > summary::after { transform: rotate(45deg); }
 .panel-odczyt[open] > summary { margin-bottom: 14px; }
+
+/* ── Chiromancja: imię i płeć nad „Którą ręką piszesz?” — złote pigułki jak przełącznik ręki ── */
+.hiro-osoba { display: grid; justify-items: center; gap: 10px; margin: 0 auto 30px; max-width: 320px; }
+.hiro-osoba-tytul {
+  font-weight: 700; color: var(--sand); font-size: 1rem; text-transform: none;
+  letter-spacing: normal; margin: 0; opacity: 1;
+}
+.hiro-osoba-imie {
+  width: 100%; text-align: center; border-radius: 999px; border: 1px solid var(--sand);
+  background: transparent; color: var(--sand); font-size: 0.95rem; padding: 10px 18px;
+}
+.hiro-osoba-imie::placeholder { color: rgba(230, 196, 138, 0.5); }
+.hiro-osoba-imie:focus { outline: none; box-shadow: 0 0 0 3px rgba(230, 196, 138, 0.25); }
+.hiro-osoba-plec { display: flex; border: 1px solid var(--sand); border-radius: 999px; overflow: hidden; }
+.hiro-osoba-plec button {
+  background: transparent; color: var(--sand); border: none; border-radius: 0;
+  padding: 7px 26px; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.06em; cursor: pointer;
+}
+.hiro-osoba-plec button.aktywna { background: var(--sand); color: var(--bg); }
+
+/* Kosmogram: „Nie znam godziny urodzenia” w złotym kole — kolor tła strony zamiast błękitu */
+.kolo-danych form label:has(> input[type="checkbox"]) { color: var(--bg) !important; opacity: 1; }
+.loshu-wniosek { display: grid; gap: 10px; width: 100%; border-top: 1px solid rgba(230, 196, 138, 0.22); padding-top: 18px; }
+.loshu-wniosek .eyebrow { text-align: center; }
+.loshu-wniosek p:not(.eyebrow) { margin: 0; font-size: 0.9rem; line-height: 1.6; }

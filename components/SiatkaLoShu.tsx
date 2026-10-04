@@ -71,6 +71,23 @@ export default function SiatkaLoShu({ numerology }: { numerology: NumerologyResu
   const puste = STRZALKI.filter((s) => s.cyfry.every((c) => (siatka[c] ?? 0) === 0));
   const wskazana = STRZALKI.find((s) => s.id === strzalka);
 
+  // „Co to znaczy” — wniosek z całej siatki zwykłym językiem, żeby strzałki nie zostały same w sobie zagadką
+  const wniosek: string[] = [];
+  if (pelne.length === 0) {
+    wniosek.push("Żaden rząd, kolumna ani przekątna nie jest pełny — to nic złego i zdarza się bardzo często, bo data urodzenia ma tylko kilka różnych cyfr. Pełna strzałka to gotowy, „wrodzony” talent, który działa sam z siebie. Jej brak znaczy, że Twoje mocne strony nie układają się w jeden automatyczny schemat: każda cyfra działa osobno, a talenty z różnych pól łączysz świadomie, wtedy, kiedy ich potrzebujesz. To ani lepiej, ani gorzej — po prostu więcej wyboru i mniej autopilota.");
+  } else {
+    wniosek.push(`Masz ${pelne.length === 1 ? "jedną pełną strzałkę" : `${pelne.length} pełne strzałki`} — to obszar, w którym talent działa naturalnie, bez wysiłku. Warto na nim opierać ważne decyzje i pracę.`);
+  }
+  if (puste.length === 0) {
+    wniosek.push("Nie masz też żadnej całkiem pustej linii — żaden obszar nie jest zupełnie odcięty, każdy da się rozwinąć bez walki z sobą.");
+  } else {
+    wniosek.push(`${puste.length === 1 ? "Pusta strzałka pokazuje obszar, który nie przychodzi odruchowo" : "Puste strzałki pokazują obszary, które nie przychodzą odruchowo"}. To nie wada, tylko kierunek pracy: tego uczysz się świadomie, a nie dostajesz w pakiecie.`);
+  }
+  const brakujace = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter((c) => (siatka[c] ?? 0) === 0);
+  if (brakujace.length) {
+    wniosek.push(`Puste pola (${brakujace.join(", ")}) to tematy, których w dacie nie ma — w numerologii mówi się, że to lekcje do odrobienia w tym życiu. Uzupełniać je mogą liczby z imienia i nazwiska (sekcja Predyspozycje i Na co uważać niżej).`);
+  }
+
   const opis = (cyfra: number) => {
     const ile = siatka[cyfra] ?? 0;
     const czestosc = ile === 0 ? "nie pada w dacie urodzenia" : ile === 1 ? "pada w dacie raz" : `pada w dacie ${ile} razy`;
@@ -143,7 +160,7 @@ export default function SiatkaLoShu({ numerology }: { numerology: NumerologyResu
             <p key={s.id} className="loshu-strzalka" onMouseEnter={() => setStrzalka(s.id)} onMouseLeave={() => setStrzalka(null)}>
               <strong>{s.nazwa}</strong> <span className="muted">({s.cyfry.join("-")})</span> — {s.pelna}.
             </p>
-          )) : <p className="muted loshu-strzalka">Żaden rząd, kolumna ani przekątna nie jest pełny — siła rozkłada się po pojedynczych cyfrach.</p>}
+          )) : <p className="muted loshu-strzalka">Brak pełnych strzałek — co to znaczy, wyjaśniamy niżej.</p>}
         </div>
         <div>
           <p className="eyebrow">Puste strzałki</p>
@@ -153,6 +170,11 @@ export default function SiatkaLoShu({ numerology }: { numerology: NumerologyResu
             </p>
           )) : <p className="muted loshu-strzalka">Żadna linia siatki nie jest całkiem pusta.</p>}
         </div>
+      </div>
+
+      <div className="loshu-wniosek">
+        <p className="eyebrow">Co to znaczy</p>
+        {wniosek.map((z, i) => <p key={i}>{z}</p>)}
       </div>
     </div>
   );

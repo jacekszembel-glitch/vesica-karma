@@ -109,7 +109,8 @@ export default function NumerologiaPage() {
           bo do mulanka/bhagyanka wystarczy data urodzenia. */}
       <KoloDanychPanel zlozone={zwiniete} onRozwin={() => setZwiniete(false)}>
         <p className="kolo-danych-tytul">Twoje dane</p>
-        <BirthForm onSubmit={handleSubmit} submitLabel="Oblicz liczby" askTimePlace={false} />
+        <BirthForm onSubmit={handleSubmit} submitLabel="Oblicz liczby" askTimePlace={false}
+          nameLabel="Imię i nazwisko" nameRequired />
       </KoloDanychPanel>
 
       {wynik && (

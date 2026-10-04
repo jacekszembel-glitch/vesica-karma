@@ -4,12 +4,9 @@ import { useState } from "react";
 import Term from "@/components/Term";
 import { Link } from "@/i18n/navigation";
 import HiromancjaZdjecie, { type ZdjecieDane } from "@/components/HiromancjaZdjecie";
-import HiromancjaKalibracja from "@/components/HiromancjaKalibracja";
 import HiromancjaOdczyt from "@/components/HiromancjaOdczyt";
 import SekcjaZlota from "@/components/SekcjaZlota";
 import ZapisanyOdczyt, { useZapisSekcji } from "@/components/ZapisanyOdczyt";
-import { OPIS_TYPU_DLONI } from "@/lib/hiromancja-tresc";
-import type { WynikGeometrii } from "@/lib/hiromancja";
 
 /**
  * HIROMANCJA — domyślnie AI patrzy na całe zdjęcie i opisuje jakościowo
@@ -34,8 +31,8 @@ import type { WynikGeometrii } from "@/lib/hiromancja";
  * okrągły medalion z ikoną dłoni (public/brand/icon-dlon-lewa/prawa.png —
  * wycięte z tej samej pary dłoni co na Kole Karmy, patrz
  * scripts/extract-single-hands.mjs), podpis "LEWA/PRAWA DŁOŃ — dominująca/
- * bierna" i wyjaśnienie D1/D9. Kalibracja i wynik geometrii zostają pod
- * spodem tej samej sekcji, żeby nie gubić istniejącej funkcji.
+ * bierna" i wyjaśnienie D1/D9. (Ręczna kalibracja punktów usunięta 2026-10-04 —
+ * AI sam ocenia kształt dłoni ze zdjęcia; imię i płeć są na górze, nad wyborem ręki).
  *
  * Świadomie POZA zakresem v1: integracja z /karma jako trzeci filar (kolejny,
  * osobny krok — nie ruszamy tu app/karma/page.tsx), getUserMedia/<video>
@@ -45,12 +42,8 @@ import type { WynikGeometrii } from "@/lib/hiromancja";
 
 type Reka = "prawa" | "lewa";
 
-const KOLOR_TYPU: Record<string, string> = {
-  ziemia: "#8a9a5b", powietrze: "#7fd0d8", ogien: "#e08a63", woda: "#6f9fbf",
-};
-
 const PLEC_OPCJE: { id: "on" | "ona" | "ono"; label: string }[] = [
-  { id: "on", label: "On" }, { id: "ona", label: "Ona" }, { id: "ono", label: "Obiekt" },
+  { id: "on", label: "On" }, { id: "ona", label: "Ona" },
 ];
 
 /** Dłonie wycięte dosłownie z wzorów public/brand/chiromancja-3.jpg (lewa) i -4.jpg (prawa),
@@ -61,13 +54,7 @@ const IKONA_DLONI: Record<Reka, string> = {
   prawa: "/brand/dlon-prawa-duza.png",
 };
 
-function SekcjaDloni({ reka, dominujaca, zdjecie, geometria, onGeometria }: {
-  reka: Reka;
-  dominujaca: boolean;
-  zdjecie: ZdjecieDane | null;
-  geometria: WynikGeometrii | null;
-  onGeometria: (wynik: WynikGeometrii) => void;
-}) {
+function SekcjaDloni({ reka, dominujaca }: { reka: Reka; dominujaca: boolean }) {
   const nazwa = reka === "prawa" ? "PRAWA DŁOŃ" : "LEWA DŁOŃ";
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
@@ -85,49 +72,6 @@ function SekcjaDloni({ reka, dominujaca, zdjecie, geometria, onGeometria }: {
           : <><strong>bierna</strong> pokazuje wrodzony potencjał i talenty, z którymi się urodziłeś/aś.</>}
       </p>
 
-      {zdjecie && !geometria && (
-        <details className="card fade-up" style={{ marginTop: 20, textAlign: "left" }}>
-          <summary style={{ cursor: "pointer", fontSize: "0.85rem", color: "var(--sand)" }}>
-            Zaznacz punkty ręcznie — dokładniejszy, policzony typ dłoni (opcjonalnie)
-          </summary>
-          <p className="muted" style={{ fontSize: "0.8rem", marginTop: 10, marginBottom: 4, lineHeight: 1.5 }}>
-            Bez tego AI i tak oceni kształt dłoni jakościowo, patrząc na zdjęcie. Ręczne zaznaczenie
-            5 punktów daje dokładniejszy, policzony wynik (czysta matematyka, bez AI) — dla tych,
-            którzy chcą precyzji.
-          </p>
-          <HiromancjaKalibracja dataUrl={zdjecie.dataUrl} onGotowe={onGeometria} />
-        </details>
-      )}
-
-      {geometria && (
-        <div className="card fade-up" style={{ marginTop: 20, textAlign: "left", borderTop: `2px solid ${KOLOR_TYPU[geometria.typ]}` }}>
-          <p className="eyebrow" style={{ marginBottom: 6 }}>Typ dłoni — geometria (deterministyczne, ręczna kalibracja)</p>
-          <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.3rem", color: KOLOR_TYPU[geometria.typ], marginBottom: 8 }}>
-            {OPIS_TYPU_DLONI[geometria.typ].title}
-          </p>
-          <p style={{ fontSize: "0.88rem", lineHeight: 1.6, marginBottom: 14 }}>
-            {OPIS_TYPU_DLONI[geometria.typ].text}
-          </p>
-          <p className="muted" style={{ fontSize: "0.76rem" }}>
-            Kształt: {geometria.stosunekDloni.toFixed(2)} (długość/szerokość) ·
-            {" "}proporcja palca: {geometria.stosunekPalca.toFixed(2)} (palec/długość dłoni)
-          </p>
-
-          <details style={{ marginTop: 14 }}>
-            <summary style={{ cursor: "pointer", fontSize: "0.8rem", color: "var(--sand)" }}>
-              Metodologia — co jest pewne, a co uproszczone
-            </summary>
-            <p className="muted" style={{ fontSize: "0.8rem", marginTop: 10, lineHeight: 1.55 }}>
-              Kształt dłoni (kwadratowa/wydłużona) i proporcja palca (krótki/długi) to dwa realne,
-              policzone stosunki odległości między punktami, które wskazałeś/aś. Progi klasyfikacji
-              (1.15 dla kształtu, 1.0 dla proporcji palca) to najczęściej cytowane wartości w źródłach
-              popularnych o chiromancji — nie ma tu jednego, naukowo zmierzonego standardu, różne
-              szkoły podają nieco inne progi. Wynik zależy też od precyzji Twojej kalibracji i kąta
-              zdjęcia — jeśli typ wydaje się nie pasować, spróbuj skalibrować ponownie.
-            </p>
-          </details>
-        </div>
-      )}
     </div>
   );
 }
@@ -135,13 +79,11 @@ function SekcjaDloni({ reka, dominujaca, zdjecie, geometria, onGeometria }: {
 export default function HiromancjaPage() {
   const [pismoReka, setPismoReka] = useState<Reka>("prawa");
   const [zdjecia, setZdjecia] = useState<Record<Reka, ZdjecieDane | null>>({ prawa: null, lewa: null });
-  const [geometrie, setGeometrie] = useState<Record<Reka, WynikGeometrii | null>>({ prawa: null, lewa: null });
   const [imie, setImie] = useState("");
   const [plec, setPlec] = useState<"on" | "ona" | "ono">("ona");
 
   function handleZdjecie(reka: Reka, dane: ZdjecieDane) {
     setZdjecia((z) => ({ ...z, [reka]: dane }));
-    setGeometrie((g) => ({ ...g, [reka]: null })); // nowe zdjęcie = ewentualna kalibracja od nowa
   }
 
   const obaZdjeciaGotowe = zdjecia.prawa && zdjecia.lewa;
@@ -155,12 +97,25 @@ export default function HiromancjaPage() {
       <div className="skrot-hero-linia" />
       <p className="section-sub" style={{ color: "var(--sand)" }}>
         Prześlij zdjęcia obu dłoni — Claude spojrzy na nie i jakościowo opisze kształt dłoni oraz
-        widoczne linie. To subiektywna obserwacja AI, nie pomiar. Jeśli chcesz dokładniejszego,
-        policzonego typu dłoni — możesz dodatkowo zaznaczyć 5 punktów ręcznie (opcjonalnie, czysta
-        matematyka bez AI).
+        widoczne linie. To subiektywna obserwacja AI, nie pomiar.
       </p>
 
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
+        {/* imię i płeć — do tonu odczytu AI; w złotym stylu strony, nad wyborem ręki */}
+        <div className="hiro-osoba">
+          <label htmlFor="hiro-imie" className="hiro-osoba-tytul">Jak masz na imię?</label>
+          <input id="hiro-imie" type="text" className="hiro-osoba-imie" placeholder="np. Jacek"
+            autoComplete="given-name" value={imie} onChange={(e) => setImie(e.target.value)} />
+          <div className="hiro-osoba-plec" role="radiogroup" aria-label="Płeć (do tonu odczytu)">
+            {PLEC_OPCJE.map((p) => (
+              <button key={p.id} type="button" role="radio" aria-checked={plec === p.id}
+                className={plec === p.id ? "aktywna" : undefined} onClick={() => setPlec(p.id)}>
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <p id="hiro-pismo-label" style={{ textAlign: "center", fontWeight: 700, color: "var(--sand)", marginBottom: 10 }}>
           Którą ręką piszesz?
         </p>
@@ -217,15 +172,11 @@ export default function HiromancjaPage() {
       <div className="skrot-hero-linia" />
 
       <div style={{ display: "grid", gap: 40, marginTop: 40 }}>
-        <SekcjaDloni reka="lewa" dominujaca={pismoReka === "lewa"}
-          zdjecie={zdjecia.lewa} geometria={geometrie.lewa}
-          onGeometria={(w) => setGeometrie((g) => ({ ...g, lewa: w }))} />
+        <SekcjaDloni reka="lewa" dominujaca={pismoReka === "lewa"} />
 
         <div className="skrot-hero-linia" style={{ width: "100%", margin: 0 }} />
 
-        <SekcjaDloni reka="prawa" dominujaca={pismoReka === "prawa"}
-          zdjecie={zdjecia.prawa} geometria={geometrie.prawa}
-          onGeometria={(w) => setGeometrie((g) => ({ ...g, prawa: w }))} />
+        <SekcjaDloni reka="prawa" dominujaca={pismoReka === "prawa"} />
       </div>
 
       {/* odczyt dłoni widoczny zawsze — wcześniej pojawiał się dopiero po wgraniu obu zdjęć,
@@ -259,44 +210,10 @@ export default function HiromancjaPage() {
       {obaZdjeciaGotowe && (
         <div className="fade-up" style={{ marginTop: 40, maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
           <div className="skrot-hero-linia" style={{ marginTop: 0 }} />
-          <div className="card" style={{ marginBottom: 20 }}>
-            <div style={{ marginBottom: 14 }}>
-              <label htmlFor="hiro-imie">Imię (opcjonalnie — do tonu odczytu AI)</label>
-              <input id="hiro-imie" type="text" placeholder="np. Jacek" value={imie}
-                onChange={(e) => setImie(e.target.value)} />
-            </div>
-            <div>
-              <label id="hiro-plec-label">Płeć (do tonu odczytu AI)</label>
-              <div className="bf-plec" role="radiogroup" aria-labelledby="hiro-plec-label">
-                {PLEC_OPCJE.map((p) => (
-                  <button key={p.id} type="button" role="radio" aria-checked={plec === p.id}
-                    className={`bf-plec-opcja${plec === p.id ? " bf-plec-opcja-aktywna" : ""}`}
-                    onClick={() => setPlec(p.id)}>
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
           <div className="sekcja-zlota-ai">
           <HiromancjaOdczyt
-            wiodaca={{
-              imageBase64: zdjecia[pismoReka]!.base64, imageMediaType: zdjecia[pismoReka]!.mediaType,
-              geometria: geometrie[pismoReka] ? {
-                typ: geometrie[pismoReka]!.typ,
-                stosunekDloni: geometrie[pismoReka]!.stosunekDloni,
-                stosunekPalca: geometrie[pismoReka]!.stosunekPalca,
-              } : undefined,
-            }}
-            bierna={{
-              imageBase64: zdjecia[rekaBierna]!.base64, imageMediaType: zdjecia[rekaBierna]!.mediaType,
-              geometria: geometrie[rekaBierna] ? {
-                typ: geometrie[rekaBierna]!.typ,
-                stosunekDloni: geometrie[rekaBierna]!.stosunekDloni,
-                stosunekPalca: geometrie[rekaBierna]!.stosunekPalca,
-              } : undefined,
-            }}
+            wiodaca={{ imageBase64: zdjecia[pismoReka]!.base64, imageMediaType: zdjecia[pismoReka]!.mediaType }}
+            bierna={{ imageBase64: zdjecia[rekaBierna]!.base64, imageMediaType: zdjecia[rekaBierna]!.mediaType }}
             plec={plec}
             imie={imie.trim() || undefined}
           />

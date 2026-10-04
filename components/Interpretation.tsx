@@ -275,7 +275,8 @@ export default function Interpretation({ kind, data, label, compact, onText, zap
   if (!data) return null;
 
   // Przycisk tylko wtedy, gdy jest co zrobić: przed pierwszym odczytem albo po błędzie.
-  const showButton = !text || (!!error && !busy);
+  // W trakcie odsłaniania bez przycisku — stan pokazuje pieczęć ze złotymi myślami.
+  const showButton = !busy && (!text || !!error);
 
   // Zanim cokolwiek odczytane: to najważniejsza rzecz na tej stronie — cała
   // policzona mapa przełożona na konkretny język życia. Wyraźnie wyróżniona
