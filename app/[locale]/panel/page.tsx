@@ -15,10 +15,10 @@ import { ukonczoneSystemyKarmy, type SystemKarmy } from "@/lib/koloKarmyGeometri
  * (localStorage, patrz koloKarmyGeometria.ts) zamiast danych demo z Fazy 1.
  * Gdy komplet — hasło pod kafelkami staje się linkiem do /karma (synteza).
  */
-const SYSTEMY: { id: SystemKarmy; label: string; href: string }[] = [
-  { id: "hiromancja", label: "Chiromancja", href: "/hiromancja" },
-  { id: "astrologia", label: "Astrologia", href: "/kosmogram" },
-  { id: "numerologia", label: "Numerologia", href: "/numerologia" },
+const SYSTEMY: { id: SystemKarmy; label: string; href: string; opis: string }[] = [
+  { id: "hiromancja", label: "Chiromancja", href: "/hiromancja", opis: "ciało — zapis w dłoniach" },
+  { id: "astrologia", label: "Astrologia", href: "/kosmogram", opis: "czas i miejsce urodzenia" },
+  { id: "numerologia", label: "Numerologia", href: "/numerologia", opis: "data urodzenia i imię" },
 ];
 
 /** Astrologia nie ma już icon-astrologia.png (kompas wycięty, zastąpiony
@@ -42,23 +42,28 @@ function IkonaAstrologiiKafelek({ gotowe }: { gotowe: boolean }) {
   );
 }
 
-function Kafelek({ id, label, href, gotowe }: { id: SystemKarmy; label: string; href: string; gotowe: boolean }) {
+/** Kafelek systemu w stylu skrótu z Astrologii (PierscienZnaku + .skrot-hero-*):
+ *  pierścień 108 px o grubości 9 px z ikoną w środku, nazwa, status i kreska z opisem —
+ *  kolory bez zmian: złoty pierścień i ikona po ukończeniu, taupe przed. */
+function Kafelek({ id, label, href, gotowe, opis }: { id: SystemKarmy; label: string; href: string; gotowe: boolean; opis: string }) {
+  const size = 108, stroke = 9, r = size / 2 - stroke / 2;
   return (
-    <Link href={href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textDecoration: "none" }}>
-      <span style={{
-        width: 92, height: 92, borderRadius: "50%",
-        display: "grid", placeItems: "center",
-        border: `2px solid ${gotowe ? "var(--gold)" : "var(--taupe)"}`,
-        transition: "border-color 0.3s",
-      }}>
+    <Link href={href} className="skrot-hero-item" style={{ textDecoration: "none" }}>
+      <span style={{ position: "relative", width: size, height: size, display: "grid", placeItems: "center" }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true" style={{ position: "absolute", inset: 0 }}>
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none"
+            stroke={gotowe ? "var(--gold)" : "var(--taupe)"} strokeWidth={stroke} style={{ transition: "stroke 0.3s" }} />
+        </svg>
         {id === "astrologia"
           ? <IkonaAstrologiiKafelek gotowe={gotowe} />
-          : <img src={`/brand/icon-${id}${gotowe ? "" : "-taupe"}.png`} alt="" style={{ width: 46, height: 46 }} />}
+          : <img src={`/brand/icon-${id}${gotowe ? "" : "-taupe"}.png`} alt="" style={{ width: 46, height: 46, position: "relative" }} />}
       </span>
-      <span style={{ color: "var(--text)", fontSize: "0.95rem" }}>{label}</span>
-      <span className="eyebrow" style={{ color: gotowe ? "var(--gold)" : "var(--muted)", fontSize: "0.68rem" }}>
+      <p className="skrot-hero-znak" style={{ color: "var(--text)" }}>{label}</p>
+      <p className="eyebrow skrot-hero-rola" style={{ color: gotowe ? "var(--gold)" : "var(--muted)", fontSize: "0.68rem" }}>
         {gotowe ? "Ukończone" : "Nie ukończone"}
-      </span>
+      </p>
+      <div className="skrot-hero-podkreslenie" />
+      <p className="muted skrot-hero-detal">{opis}</p>
     </Link>
   );
 }
@@ -106,7 +111,7 @@ export default function Page() {
       <h1 style={{ margin: "28px 0 18px" }}>Twoja Karma</h1>
       <div className="ornament" style={{ marginBottom: 32 }} />
 
-      <div style={{ display: "flex", justifyContent: "center", gap: 36, flexWrap: "wrap" }}>
+      <div className="skrot-hero-rzad">
         {SYSTEMY.map((s) => (
           <Kafelek key={s.id} {...s} gotowe={ukonczone.has(s.id)} />
         ))}
