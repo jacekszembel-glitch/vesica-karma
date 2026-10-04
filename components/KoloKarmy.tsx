@@ -218,12 +218,12 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
       for (const a of kolejka) {
         if (a === "final") {
           timery.push(setTimeout(() => setFinal(true), t));
-          timery.push(setTimeout(() => setFinal(false), t + 3400));
-          t += 3400;
+          timery.push(setTimeout(() => setFinal(false), t + 5400));
+          t += 5400;
         } else {
           timery.push(setTimeout(() => setRozblysk(a), t));
-          timery.push(setTimeout(() => setRozblysk(null), t + 1500));
-          t += 1700;
+          timery.push(setTimeout(() => setRozblysk(null), t + 5000));
+          t += 5000;
         }
       }
     }, { threshold: 0.4 });
@@ -302,7 +302,7 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
               position: "absolute", inset: 0, pointerEvents: "none",
               maskImage: maska, WebkitMaskImage: maska, maskSize: "100% 100%", WebkitMaskSize: "100% 100%",
               ["--cx" as string]: pctX(s.x), ["--cy" as string]: pctY(s.y),
-              animationDelay: rozblysk === id ? "0s" : `${k * 2.7}s`,
+              animationDelay: rozblysk === id ? "0s" : `${k * 4}s`,
             } as React.CSSProperties} />
         );
       })}

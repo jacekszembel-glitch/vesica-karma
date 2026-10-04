@@ -2652,7 +2652,7 @@ p, li, td, th, h1, h2, h3, .badge {
 /* ── Koło Karmy: postęp po interpretacjach ──
    rozbłysk zaliczonego kręgu, finał 3/3 (światło obiega zewnętrzny krąg)
    i stała, „oddychająca" poświata całego koła po ukończeniu wszystkich trzech */
-.kk-rozblysk { opacity: 1 !important; animation: kk-rozblysk 1.5s ease-out; }
+.kk-rozblysk { opacity: 1 !important; animation: kk-rozblysk 3s ease-out; }
 @keyframes kk-rozblysk {
   0% { opacity: 0; filter: brightness(1); }
   35% { opacity: 1; filter: brightness(1.7) drop-shadow(0 0 16px rgba(255, 231, 176, 0.9)); }
@@ -2662,7 +2662,7 @@ p, li, td, th, h1, h2, h3, .badge {
   stroke-dasharray: 22 78;
   stroke-dashoffset: 22;
   opacity: 0;
-  animation: kk-obieg 2.6s cubic-bezier(0.45, 0, 0.25, 1) 0.2s forwards;
+  animation: kk-obieg 4.6s cubic-bezier(0.45, 0, 0.25, 1) 0.2s forwards;
 }
 @keyframes kk-obieg {
   0% { stroke-dasharray: 2 98; stroke-dashoffset: 0; opacity: 0; }
@@ -2690,16 +2690,16 @@ p, li, td, th, h1, h2, h3, .badge {
     rgba(255, 244, 214, 0.55) 348deg, rgba(255, 252, 240, 0.95) 355deg, transparent 360deg);
   mix-blend-mode: screen;
   opacity: 0;
-  animation: kk-blik-obieg 8s linear infinite;
+  animation: kk-blik-obieg 12s linear infinite;
 }
 @keyframes kk-blik-obieg {
   0% { --kk-kat: 0deg; opacity: 0; }
   3% { opacity: 0.85; }
-  32% { opacity: 0.85; }
-  36% { --kk-kat: 360deg; opacity: 0; }
+  42% { opacity: 0.85; }
+  46% { --kk-kat: 360deg; opacity: 0; }
   100% { --kk-kat: 360deg; opacity: 0; }
 }
-.kk-blik-mocny { animation: kk-blik-raz 2.4s ease-in-out 0.3s 1 both; }
+.kk-blik-mocny { animation: kk-blik-raz 4.5s ease-in-out 0.3s 1 both; }
 @keyframes kk-blik-raz {
   0% { --kk-kat: 0deg; opacity: 0; }
   10% { opacity: 1; }
