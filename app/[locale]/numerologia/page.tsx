@@ -43,7 +43,7 @@ export default function NumerologiaPage() {
     setWynik(numerology(input.isoDate, input.name, "wedyjski", rok));
     setZwiniete(true);
     odblokuj("numerologia");
-    odblokujSystemKarmy("numerologia");
+    // krąg Numerologii w Kole Karmy zapala się dopiero po interpretacji (onText niżej)
   }
 
   const aiData = useMemo(() => {
@@ -135,7 +135,8 @@ export default function NumerologiaPage() {
           {/* interpretacja AI — ten sam złoty styl co na kosmogramie */}
           <div className="sekcja-zlota-ai">
             <SekcjaZlota tytul="Interpretacja">
-              <Interpretation kind="numerologia" data={aiData!} label="Numerologia wedyjska" />
+              <Interpretation kind="numerologia" data={aiData!} label="Numerologia wedyjska"
+                onText={(tekst) => { if (tekst.trim().length > 200) odblokujSystemKarmy("numerologia"); }} />
             </SekcjaZlota>
           </div>
         </div>

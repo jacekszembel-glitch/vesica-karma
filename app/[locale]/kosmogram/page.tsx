@@ -126,7 +126,7 @@ export default function KosmogramPage() {
     );
     setZwiniete(true);
     odblokuj("kosmogram");
-    odblokujSystemKarmy("astrologia");
+    // krąg Astrologii w Kole Karmy zapala się dopiero po interpretacji (onText niżej)
   }
 
   /** Kompaktowe dane dla AI — tylko to, co potrzebne do interpretacji. */
@@ -451,6 +451,7 @@ export default function KosmogramPage() {
           <Interpretation
             kind="kosmogram"
             data={aiData}
+            onText={(tekst) => { if (tekst.trim().length > 200) odblokujSystemKarmy("astrologia"); }}
             label={`Kosmogram${birthInput?.name ? ` — ${birthInput.name}` : ""}`}
           />
           </SekcjaZlota>

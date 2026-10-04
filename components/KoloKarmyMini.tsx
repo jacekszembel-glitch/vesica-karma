@@ -16,7 +16,7 @@ export default function KoloKarmyMini({ ukonczone = new Set<SystemKarmy>(), maxW
   const wszystkoZlote = ukonczone.size >= 3;
 
   return (
-    <div aria-hidden="true" style={{ position: "relative", width: "100%", maxWidth, margin: "0 auto" }}>
+    <div aria-hidden="true" className={wszystkoZlote ? "kk-komplet" : undefined} style={{ position: "relative", width: "100%", maxWidth, margin: "0 auto" }}>
       <img src={wszystkoZlote ? "/brand/kolo-karmy-gold-clean.png" : "/brand/kolo-karmy-taupe.png"} alt=""
         style={{ display: "block", width: "100%", height: "auto" }} />
       {!wszystkoZlote && (["astrologia", "hiromancja", "numerologia"] as const).filter((id) => ukonczone.has(id)).map((id) => (

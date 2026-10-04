@@ -2647,3 +2647,35 @@ p, li, td, th, h1, h2, h3, .badge {
   .dlon-wgrywanie-kolumna { width: 140px; }
   .dlon-kolo:not(.dlon-kolo-duze) { width: 128px; height: 128px; border-width: 12px; }
 }
+
+
+/* ── Koło Karmy: postęp po interpretacjach ──
+   rozbłysk zaliczonego kręgu, finał 3/3 (światło obiega zewnętrzny krąg)
+   i stała, „oddychająca" poświata całego koła po ukończeniu wszystkich trzech */
+.kk-rozblysk { opacity: 1 !important; animation: kk-rozblysk 1.5s ease-out; }
+@keyframes kk-rozblysk {
+  0% { opacity: 0; filter: brightness(1); }
+  35% { opacity: 1; filter: brightness(1.7) drop-shadow(0 0 16px rgba(255, 231, 176, 0.9)); }
+  100% { opacity: 1; filter: brightness(1); }
+}
+.kk-final-krag {
+  stroke-dasharray: 22 78;
+  stroke-dashoffset: 22;
+  opacity: 0;
+  animation: kk-obieg 2.6s cubic-bezier(0.45, 0, 0.25, 1) 0.2s forwards;
+}
+@keyframes kk-obieg {
+  0% { stroke-dasharray: 2 98; stroke-dashoffset: 0; opacity: 0; }
+  12% { opacity: 0.95; }
+  80% { stroke-dasharray: 100 0; stroke-dashoffset: -100; opacity: 0.85; }
+  100% { stroke-dasharray: 100 0; stroke-dashoffset: -100; opacity: 0; }
+}
+.kk-komplet { animation: kk-oddech 5s ease-in-out infinite; }
+@keyframes kk-oddech {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(230, 196, 138, 0.22)); }
+  50% { filter: drop-shadow(0 0 24px rgba(230, 196, 138, 0.5)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kk-rozblysk, .kk-final-krag, .kk-komplet { animation: none; }
+  .kk-komplet { filter: drop-shadow(0 0 14px rgba(230, 196, 138, 0.35)); }
+}

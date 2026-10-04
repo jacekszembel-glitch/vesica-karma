@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import MoonStars from "./MoonStars";
 import { useKoloKarmyStart } from "./KoloKarmyStartContext";
-import { SEGMENT_GAPY, type SystemKarmy } from "@/lib/koloKarmyGeometria";
+import { SEGMENT_GAPY, animacjeDoPokazania, wyczyscAnimacje, type SystemKarmy } from "@/lib/koloKarmyGeometria";
+import { usePostepKarmy } from "./usePostepKarmy";
 
 /**
  * Koło Karmy — gotowa grafika (public/brand/kolo-karmy.png) BEZ satelitów
@@ -183,9 +184,47 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   const [tip, setTip] = useState<{ label: string; left: number; top: number } | null>(null);
   const [hoverTytul, setHoverTytul] = useState(false);
   const { wystartowano } = useKoloKarmyStart();
+  // PRAWDZIWY POSTĘP (system zaliczony po interpretacji) — widoczny wszędzie, gdzie jest
+  // koło: na stronie głównej po „Zacznij" (zamiast zgaszonego koła), w nagłówkach
+  // podstron razem z bieżącą sekcją. Komplet 3/3 = całe koło złote + poświata.
+  const postep = usePostepKarmy();
+  const komplet = postep.size >= 3;
   const ukonczone = interaktywnyStart
-    ? (wystartowano ? new Set<SystemKarmy>() : WSZYSTKIE_SYSTEMY)
-    : ukonczoneProp;
+    ? (wystartowano ? postep : WSZYSTKIE_SYSTEMY)
+    : new Set<SystemKarmy>([...ukonczoneProp, ...postep]);
+
+  // Animacje zaliczenia czekają w kolejce, aż koło będzie widoczne na ekranie
+  // (interpretacja jest na dole strony, koło na górze): najpierw rozbłysk
+  // zaliczonego kręgu, po trzecim — światło obiegające zewnętrzny krąg.
+  const koloRef = useRef<HTMLDivElement>(null);
+  const [rozblysk, setRozblysk] = useState<SystemKarmy | null>(null);
+  const [final, setFinal] = useState(false);
+  useEffect(() => {
+    const el = koloRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const timery: ReturnType<typeof setTimeout>[] = [];
+    const obs = new IntersectionObserver((wpisy) => {
+      if (!wpisy.some((w) => w.isIntersecting)) return;
+      const kolejka = animacjeDoPokazania();
+      if (!kolejka.length) return;
+      wyczyscAnimacje();
+      obs.disconnect();
+      let t = 400;
+      for (const a of kolejka) {
+        if (a === "final") {
+          timery.push(setTimeout(() => setFinal(true), t));
+          timery.push(setTimeout(() => setFinal(false), t + 3400));
+          t += 3400;
+        } else {
+          timery.push(setTimeout(() => setRozblysk(a), t));
+          timery.push(setTimeout(() => setRozblysk(null), t + 1500));
+          t += 1700;
+        }
+      }
+    }, { threshold: 0.4 });
+    obs.observe(el);
+    return () => { obs.disconnect(); timery.forEach(clearTimeout); };
+  }, []);
 
   const wskaz = (id: string, label: string) => (e: React.MouseEvent | React.FocusEvent) => {
     setAktywny(id);
@@ -206,7 +245,7 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   // głównej), wracamy do oryginalnej, w pełni złotej grafiki — łącznie
   // z zewnętrznym pierścieniem Karmy i Związkami, których warstwy taupe/gold
   // nie obejmują (dotyczą tylko trzech wewnętrznych pętli-systemów).
-  const wszystkoZlote = ukonczone.size >= 3;
+  const wszystkoZlote = komplet || (interaktywnyStart ? !wystartowano : ukonczoneProp.size >= 3);
 
   // Na stronie glownej, zanim ktos nacisnie "Zacznij", nie mozna wejsc wprost
   // w Astrologie/Numerologie/Hiromancje ani w satelity Astrokartografia/
@@ -216,7 +255,8 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   const startBlokuje = interaktywnyStart && !wystartowano;
 
   return (
-    <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
+    <div ref={koloRef} className={komplet ? "kk-komplet" : undefined}
+      style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
       {/* baza jako dwie nałożone warstwy (taupe pod spodem, złota na wierzchu
           z przejściem opacity) zamiast twardej zmiany `src` — dzięki temu
           "Zacznij" na stronie głównej gasi koło płynnie, nie skokowo. */}
@@ -238,10 +278,27 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
           im dać szansę animować się razem z gaśnięciem bazy. */}
       {(["astrologia", "hiromancja", "numerologia"] as const).map((id) => (
         <img key={`fill-${id}`} src={`/brand/fill-${id}-gold.png`} alt=""
-          className={`kk-fill-hover${ukonczone.has(id) || aktywny === id ? " kk-fill-hover-aktywny" : ""}`}
+          className={`kk-fill-hover${ukonczone.has(id) || aktywny === id ? " kk-fill-hover-aktywny" : ""}${rozblysk === id ? " kk-rozblysk" : ""}`}
           style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
       ))}
       <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia") || aktywny === "astrologia"} />
+
+      {/* finał 3/3 — jasne złote światło obiega zewnętrzny krąg Karmy, potem gaśnie
+          (zostaje stała, „oddychająca" poświata całego koła: .kk-komplet) */}
+      {final && (
+        <svg viewBox={`0 0 ${IMG_W} ${IMG_H}`} aria-hidden="true" className="kk-final"
+          style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
+          <defs>
+            <filter id="kk-final-blask" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="9" result="b" />
+              <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+          </defs>
+          <circle className="kk-final-krag" cx={CX} cy={CY} r={326.5} fill="none"
+            stroke="#fff3d6" strokeWidth={30} strokeLinecap="round" filter="url(#kk-final-blask)"
+            transform={`rotate(-90 ${CX} ${CY})`} pathLength={100} />
+        </svg>
+      )}
 
       {/* poświata pól o nieregularnym kształcie — astrologia/hiromancja/
           numerologia pominięte: hover-feedback dla wszystkich trzech daje
