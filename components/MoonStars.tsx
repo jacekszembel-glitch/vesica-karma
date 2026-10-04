@@ -21,7 +21,7 @@ export default function MoonStars({ box, zlote = false }: {
   };
   return (
     <>
-      <img src="/brand/moonstars-taupe.png" alt="" style={wspolny} />
+      <img src="/brand/moonstars-fiolet.png" alt="" style={wspolny} />
       <img src="/brand/moonstars-gold.png" alt=""
         style={{ ...wspolny, opacity: zlote ? 1 : 0, transition: "opacity 0.7s ease" }} />
     </>

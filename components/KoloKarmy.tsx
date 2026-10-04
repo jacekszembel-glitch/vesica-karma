@@ -141,7 +141,7 @@ function IkonaCrossfade({ id, box, zlote }: {
   };
   return (
     <>
-      <img src={`/brand/icon-${id}-taupe.png`} alt="" style={wspolny} />
+      <img src={`/brand/icon-${id}-fiolet.png`} alt="" style={wspolny} />
       <img src={`/brand/icon-${id}.png`} alt=""
         style={{ ...wspolny, opacity: zlote ? 1 : 0, transition: "opacity 0.7s ease" }} />
     </>
