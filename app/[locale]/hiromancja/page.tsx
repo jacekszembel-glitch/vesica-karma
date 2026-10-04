@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import HiromancjaZdjecie, { type ZdjecieDane } from "@/components/HiromancjaZdjecie";
 import HiromancjaOdczyt from "@/components/HiromancjaOdczyt";
 import SekcjaZlota from "@/components/SekcjaZlota";
+import KoloDanychPanel from "@/components/KoloDanychPanel";
 import ZapisanyOdczyt, { useZapisSekcji } from "@/components/ZapisanyOdczyt";
 
 /**
@@ -81,6 +82,7 @@ export default function HiromancjaPage() {
   const [zdjecia, setZdjecia] = useState<Record<Reka, ZdjecieDane | null>>({ prawa: null, lewa: null });
   const [imie, setImie] = useState("");
   const [plec, setPlec] = useState<"on" | "ona" | "ono">("ona");
+  const [zwiniete, setZwiniete] = useState(false);
 
   function handleZdjecie(reka: Reka, dane: ZdjecieDane) {
     setZdjecia((z) => ({ ...z, [reka]: dane }));
@@ -100,56 +102,51 @@ export default function HiromancjaPage() {
         widoczne linie. To subiektywna obserwacja AI, nie pomiar.
       </p>
 
-      <div style={{ maxWidth: 640, margin: "0 auto" }}>
-        {/* imię i płeć — do tonu odczytu AI; w złotym stylu strony, nad wyborem ręki */}
-        <div className="hiro-osoba">
-          <label htmlFor="hiro-imie" className="hiro-osoba-tytul">Jak masz na imię?</label>
-          <input id="hiro-imie" type="text" className="hiro-osoba-imie" placeholder="np. Jacek"
-            autoComplete="given-name" value={imie} onChange={(e) => setImie(e.target.value)} />
-          <div className="hiro-osoba-plec" role="radiogroup" aria-label="Płeć (do tonu odczytu)">
-            {PLEC_OPCJE.map((p) => (
-              <button key={p.id} type="button" role="radio" aria-checked={plec === p.id}
-                className={plec === p.id ? "aktywna" : undefined} onClick={() => setPlec(p.id)}>
-                {p.label}
-              </button>
-            ))}
+      {/* dane w złotym kole — ten sam panel co w Astrologii i Numerologii (KoloDanychPanel):
+          imię, ręka pisząca i płeć; po „Zapisz” koło zwija się do złotej kropki „Twoje dane” */}
+      <KoloDanychPanel zlozone={zwiniete} onRozwin={() => setZwiniete(false)}>
+        <p className="kolo-danych-tytul">Twoje dane</p>
+        <form className="card" style={{ display: "grid", gap: 18 }}
+          onSubmit={(e) => { e.preventDefault(); setZwiniete(true); }}>
+          <div>
+            <label htmlFor="hiro-imie">Imię</label>
+            <input id="hiro-imie" type="text" placeholder="np. Jacek" autoComplete="given-name"
+              value={imie} onChange={(e) => setImie(e.target.value)} />
           </div>
-        </div>
+          <div className="hiro-kolo-wybory">
+            <div>
+              <label id="hiro-pismo-label">Którą ręką piszesz?</label>
+              <div className="bf-plec" role="radiogroup" aria-labelledby="hiro-pismo-label">
+                {(["lewa", "prawa"] as const).map((r) => (
+                  <button key={r} type="button" role="radio" aria-checked={pismoReka === r}
+                    className={`bf-plec-opcja${pismoReka === r ? " bf-plec-opcja-aktywna" : ""}`}
+                    onClick={() => setPismoReka(r)}>
+                    {r === "lewa" ? "Lewa" : "Prawa"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label id="hiro-plec-label">Płeć</label>
+              <div className="bf-plec" role="radiogroup" aria-labelledby="hiro-plec-label">
+                {PLEC_OPCJE.map((p) => (
+                  <button key={p.id} type="button" role="radio" aria-checked={plec === p.id}
+                    className={`bf-plec-opcja${plec === p.id ? " bf-plec-opcja-aktywna" : ""}`}
+                    onClick={() => setPlec(p.id)}>
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <button type="submit" className="btn btn-primary">Zapisz</button>
+        </form>
+      </KoloDanychPanel>
 
-        <p id="hiro-pismo-label" style={{ textAlign: "center", fontWeight: 700, color: "var(--sand)", marginBottom: 10 }}>
-          Którą ręką piszesz?
-        </p>
-        {/* Prawdziwy wycinek pikseli z chiromanca-2.jpg (scripts/extract-hand-toggle.mjs)
-            zamiast plaskich kolorow CSS — dwa stany (ktora strona zlota) to dwa
-            gotowe obrazki, nie przemalowany na biezaco div. */}
-        <div role="radiogroup" aria-labelledby="hiro-pismo-label"
-          style={{ position: "relative", maxWidth: 320, margin: "0 auto", lineHeight: 0 }}>
-          <img
-            src={pismoReka === "lewa" ? "/brand/toggle-lewa-aktywna.png" : "/brand/toggle-prawa-aktywna.png"}
-            alt="" style={{ width: "100%", height: "auto", display: "block" }}
-          />
-          <button type="button" role="radio" aria-checked={pismoReka === "lewa"} aria-label="Lewa"
-            onClick={() => setPismoReka("lewa")}
-            style={{ position: "absolute", left: 0, top: 0, width: "50%", height: "100%", background: "transparent", border: "none", cursor: "pointer" }} />
-          <button type="button" role="radio" aria-checked={pismoReka === "prawa"} aria-label="Prawa"
-            onClick={() => setPismoReka("prawa")}
-            style={{ position: "absolute", right: 0, top: 0, width: "50%", height: "100%", background: "transparent", border: "none", cursor: "pointer" }} />
-        </div>
-        <div style={{ display: "flex", maxWidth: 320, margin: "6px auto 24px" }}>
-          <span style={{ flex: 1, textAlign: "center", fontSize: "0.68rem", letterSpacing: "0.05em", color: "var(--sand)", fontWeight: 700 }}>
-            {pismoReka === "lewa" ? "DOMINUJĄCA" : ""}
-          </span>
-          <span style={{ flex: 1, textAlign: "center", fontSize: "0.68rem", letterSpacing: "0.05em", color: "var(--sand)", fontWeight: 700 }}>
-            {pismoReka === "prawa" ? "DOMINUJĄCA" : ""}
-          </span>
-        </div>
-
-        <p style={{ fontSize: "0.8rem", textAlign: "center", maxWidth: 480, margin: "0 auto 28px", color: "var(--sand)" }}>
-          Zdjęcia nigdzie nie są zapisywane — trafiają z przeglądarki prosto do modelu AI (dopiero
-          gdy klikniesz „Odczytaj” niżej) i nie są przechowywane na serwerze ani w bazie danych.
-        </p>
-
-      </div>
+      <p style={{ fontSize: "0.8rem", textAlign: "center", maxWidth: 480, margin: "24px auto 28px", color: "var(--sand)" }}>
+        Zdjęcia nigdzie nie są zapisywane — trafiają z przeglądarki prosto do modelu AI (dopiero
+        gdy klikniesz „Odczytaj” niżej) i nie są przechowywane na serwerze ani w bazie danych.
+      </p>
 
       {/* wgrywanie — wzór public/brand/chiromanca-2.jpg: duże koło z dłonią (ZŁOTE = zdjęcie
           wgrane, TAUPE = jeszcze nie), pod nim płaski złoty przycisk i podpis stanu.
