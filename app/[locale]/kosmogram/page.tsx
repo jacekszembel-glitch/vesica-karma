@@ -7,7 +7,6 @@ import BirthForm, { type BirthInput } from "@/components/BirthForm";
 import KoloDanychPanel from "@/components/KoloDanychPanel";
 import { loadBirth } from "@/lib/birthStore";
 import Interpretation from "@/components/Interpretation";
-import Rozmowa from "@/components/Rozmowa";
 import { buildChart, type VedicChart } from "@/lib/astro/chart";
 import { GRAHAS, RASIS, PLANET_ORDER } from "@/lib/astro/constants";
 import { formatDMS } from "@/lib/astro/math";
@@ -477,9 +476,6 @@ export default function KosmogramPage() {
             podpis: `Astrologia — ${birthInput.name || birthInput.isoDate}, ${birthInput.placeName}`,
             dane: { ...birthInput, utc: birthInput.utc.toISOString() },
           }} />}
-          </SekcjaZlota>
-          <SekcjaZlota tytul="Zapytaj o swój kosmogram">
-          <Rozmowa mapa={aiData} tytul="Zapytaj o swój kosmogram" />
           </SekcjaZlota>
           </div>
         </div>
