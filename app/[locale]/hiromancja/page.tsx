@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import HiromancjaZdjecie, { type ZdjecieDane } from "@/components/HiromancjaZdjecie";
 import HiromancjaKalibracja from "@/components/HiromancjaKalibracja";
 import HiromancjaOdczyt from "@/components/HiromancjaOdczyt";
+import SekcjaZlota from "@/components/SekcjaZlota";
 import { OPIS_TYPU_DLONI } from "@/lib/hiromancja-tresc";
 import type { WynikGeometrii } from "@/lib/hiromancja";
 
@@ -223,6 +224,24 @@ export default function HiromancjaPage() {
           zdjecie={zdjecia.prawa} geometria={geometrie.prawa}
           onGeometria={(w) => setGeometrie((g) => ({ ...g, prawa: w }))} />
       </div>
+
+      {/* odczyt dłoni widoczny zawsze — wcześniej pojawiał się dopiero po wgraniu obu zdjęć,
+          więc trudno go było znaleźć; to on zapala krąg Chiromancji w Kole Karmy */}
+      {!obaZdjeciaGotowe && (
+        <SekcjaZlota tytul="Odczyt dłoni">
+          <p style={{ textAlign: "center", maxWidth: 520, margin: "0 auto 18px", lineHeight: 1.6 }}>
+            Odczyt AI obu dłoni zapala krąg Chiromancji w Kole Karmy. Wgraj zdjęcia obu dłoni
+            powyżej — wtedy w tym miejscu pojawi się przycisk odczytu.
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", gap: 28, flexWrap: "wrap" }}>
+            {(["lewa", "prawa"] as const).map((r) => (
+              <span key={r} className={`dlon-status${zdjecia[r] ? " dlon-status-ok" : ""}`} style={{ fontSize: "0.74rem" }}>
+                {r === "lewa" ? "Lewa dłoń" : "Prawa dłoń"}: {zdjecia[r] ? "wgrana ✓" : "brak zdjęcia"}
+              </span>
+            ))}
+          </div>
+        </SekcjaZlota>
+      )}
 
       {obaZdjeciaGotowe && (
         <div className="fade-up" style={{ marginTop: 40, maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
