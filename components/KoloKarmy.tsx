@@ -302,7 +302,7 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
               position: "absolute", inset: 0, pointerEvents: "none",
               maskImage: maska, WebkitMaskImage: maska, maskSize: "100% 100%", WebkitMaskSize: "100% 100%",
               ["--cx" as string]: pctX(s.x), ["--cy" as string]: pctY(s.y),
-              animationDelay: rozblysk === id ? "0s" : `${k * 4}s`,
+              animationDelay: rozblysk === id ? "0s" : `${-k * 2}s`,
             } as React.CSSProperties} />
         );
       })}

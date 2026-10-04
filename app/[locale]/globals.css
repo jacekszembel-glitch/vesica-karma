@@ -2689,15 +2689,12 @@ p, li, td, th, h1, h2, h3, .badge {
     transparent 0deg, transparent 326deg,
     rgba(255, 244, 214, 0.55) 348deg, rgba(255, 252, 240, 0.95) 355deg, transparent 360deg);
   mix-blend-mode: screen;
-  opacity: 0;
-  animation: kk-blik-obieg 12s linear infinite;
+  opacity: 0.85;
+  animation: kk-blik-obieg 6s linear infinite;
 }
 @keyframes kk-blik-obieg {
-  0% { --kk-kat: 0deg; opacity: 0; }
-  3% { opacity: 0.85; }
-  42% { opacity: 0.85; }
-  46% { --kk-kat: 360deg; opacity: 0; }
-  100% { --kk-kat: 360deg; opacity: 0; }
+  from { --kk-kat: 0deg; }
+  to { --kk-kat: 360deg; }
 }
 .kk-blik-mocny { animation: kk-blik-raz 4.5s ease-in-out 0.3s 1 both; }
 @keyframes kk-blik-raz {
