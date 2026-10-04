@@ -2679,3 +2679,36 @@ p, li, td, th, h1, h2, h3, .badge {
   .kk-rozblysk, .kk-final-krag, .kk-komplet { animation: none; }
   .kk-komplet { filter: drop-shadow(0 0 14px rgba(230, 196, 138, 0.35)); }
 }
+
+
+/* ── Blik na ukończonym segmencie Koła Karmy (KoloKarmy.tsx) ──
+   wąski snop jasnego światła obiega pętlę wokół jej środka; maska = kształt pętli */
+@property --kk-kat { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.kk-blik {
+  background: conic-gradient(from var(--kk-kat) at var(--cx) var(--cy),
+    transparent 0deg, transparent 326deg,
+    rgba(255, 244, 214, 0.55) 348deg, rgba(255, 252, 240, 0.95) 355deg, transparent 360deg);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: kk-blik-obieg 8s linear infinite;
+}
+@keyframes kk-blik-obieg {
+  0% { --kk-kat: 0deg; opacity: 0; }
+  3% { opacity: 0.85; }
+  32% { opacity: 0.85; }
+  36% { --kk-kat: 360deg; opacity: 0; }
+  100% { --kk-kat: 360deg; opacity: 0; }
+}
+.kk-blik-mocny { animation: kk-blik-raz 2.4s ease-in-out 0.3s 1 both; }
+@keyframes kk-blik-raz {
+  0% { --kk-kat: 0deg; opacity: 0; }
+  10% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { --kk-kat: 360deg; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .kk-blik { animation: none; opacity: 0; } }
+
+/* przycisk „Zapal krąg" pod przeczytaną interpretacją (components/ZapalKrag.tsx) */
+.zapal-krag { display: grid; justify-items: center; gap: 14px; margin-top: 28px; text-align: center; }
+.zapal-krag p { color: var(--sand); text-align: center; margin: 0; }
+.zapal-krag-info { color: var(--sand); text-align: center; margin-top: 24px; font-size: 0.92rem; }

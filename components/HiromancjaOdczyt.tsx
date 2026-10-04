@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import type { TypDloni } from "@/lib/hiromancja";
 import { zapiszOdczytDloni } from "@/lib/hiromancjaOdczytStore";
-import { odblokujSystemKarmy } from "@/lib/koloKarmyGeometria";
+import ZapalKrag from "./ZapalKrag";
 
 /**
  * ODCZYT AI — uproszczony sibling Interpretation.tsx, świadomie NIE ten sam
@@ -102,7 +102,7 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
       }
       setText(acc);
       zapiszOdczytDloni(acc);
-      odblokujSystemKarmy("hiromancja");
+      // krąg Chiromancji zapala przycisk ZapalKrag pod odczytem (nie automat)
     } catch (e) {
       if ((e as Error).name !== "AbortError") setError((e as Error).message);
     } finally {
@@ -151,6 +151,7 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
             To subiektywny odczyt AI na podstawie zdjęć, nie pomiar. Jakość linii na fotografii zależy
             od oświetlenia, rozdzielczości i kąta — traktuj to jako inspirację do refleksji, nie diagnozę.
           </p>
+          {text.trim().length > 200 && <ZapalKrag system="hiromancja" />}
         </>
       )}
     </div>

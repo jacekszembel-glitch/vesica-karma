@@ -12,7 +12,7 @@ import PredyspozycjeLiczb from "@/components/PredyspozycjeLiczb";
 import NaCoUwazacLiczb from "@/components/NaCoUwazacLiczb";
 import SekcjaZlota from "@/components/SekcjaZlota";
 import { odblokuj } from "@/lib/collection";
-import { odblokujSystemKarmy } from "@/lib/koloKarmyGeometria";
+import ZapalKrag from "@/components/ZapalKrag";
 
 function Num({ label, value, big, note }: {
   label: React.ReactNode; value: number | string | null; big?: boolean; note?: React.ReactNode;
@@ -35,6 +35,7 @@ export default function NumerologiaPage() {
   const [name, setName] = useState<string | undefined>(undefined);
   const [wynik, setWynik] = useState<NumerologyResult | null>(null);
   const [zwiniete, setZwiniete] = useState(false);
+  const [interpretacjaGotowa, setInterpretacjaGotowa] = useState(false);
 
   function handleSubmit(input: BirthInput) {
     const rok = new Date().getFullYear();
@@ -136,7 +137,9 @@ export default function NumerologiaPage() {
           <div className="sekcja-zlota-ai">
             <SekcjaZlota tytul="Interpretacja">
               <Interpretation kind="numerologia" data={aiData!} label="Numerologia wedyjska"
-                onText={(tekst) => { if (tekst.trim().length > 200) odblokujSystemKarmy("numerologia"); }} />
+                onText={(tekst) => { if (tekst.trim().length > 200) setInterpretacjaGotowa(true); }} />
+              {/* po przeczytanej interpretacji — przycisk zapalający krąg Numerologii w Kole Karmy */}
+              {interpretacjaGotowa && <ZapalKrag system="numerologia" />}
             </SekcjaZlota>
           </div>
         </div>

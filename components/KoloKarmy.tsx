@@ -126,6 +126,11 @@ const PIKTOGRAMY_WSPOLNE = [
   { id: "kto", box: [581, 474, 611, 548] as const, pary: ["hiromancja", "numerologia"] as const },
 ];
 
+/** Środki trzech pętli-systemów (dopasowane do grafiki) — oś obrotu blika. */
+const SRODKI_PETLI: Record<SystemKarmy, { x: number; y: number }> = {
+  astrologia: { x: 597.8, y: 254.4 }, hiromancja: { x: 494.3, y: 437.6 }, numerologia: { x: 699.6, y: 437.6 },
+};
+
 function pctX(v: number) { return `${(v / IMG_W) * 100}%`; }
 function pctY(v: number) { return `${(v / IMG_H) * 100}%`; }
 
@@ -255,7 +260,7 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   const startBlokuje = interaktywnyStart && !wystartowano;
 
   return (
-    <div ref={koloRef} className={komplet ? "kk-komplet" : undefined}
+    <div ref={koloRef} data-kolo-karmy="" className={komplet ? "kk-komplet" : undefined}
       style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
       {/* baza jako dwie nałożone warstwy (taupe pod spodem, złota na wierzchu
           z przejściem opacity) zamiast twardej zmiany `src` — dzięki temu
@@ -282,6 +287,25 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
           style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
       ))}
       <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia") || aktywny === "astrologia"} />
+
+      {/* BLIK — znak ukończonego segmentu: jasne światło co kilka sekund przebiega
+          po powierzchni złotej pętli. Maska = kształt tej pętli (fill-<id>-gold.png),
+          więc blik nie wchodzi na pierścienie leżące na wierzchu (przeplot zostaje).
+          Przy zapaleniu kręgu (kolejka animacji) jeden mocniejszy przebieg. */}
+      {(["astrologia", "hiromancja", "numerologia"] as const).filter((id) => postep.has(id)).map((id, k) => {
+        const s = SRODKI_PETLI[id];
+        const maska = `url(/brand/fill-${id}-gold.png)`;
+        return (
+          <div key={`blik-${id}`} aria-hidden="true"
+            className={`kk-blik${rozblysk === id ? " kk-blik-mocny" : ""}`}
+            style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              maskImage: maska, WebkitMaskImage: maska, maskSize: "100% 100%", WebkitMaskSize: "100% 100%",
+              ["--cx" as string]: pctX(s.x), ["--cy" as string]: pctY(s.y),
+              animationDelay: rozblysk === id ? "0s" : `${k * 2.7}s`,
+            } as React.CSSProperties} />
+        );
+      })}
 
       {/* finał 3/3 — jasne złote światło obiega zewnętrzny krąg Karmy, potem gaśnie
           (zostaje stała, „oddychająca" poświata całego koła: .kk-komplet) */}

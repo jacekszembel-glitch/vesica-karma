@@ -41,7 +41,7 @@ import {
   ocenaZdrowotna, ZDROWIE_OPIS, ZDROWIE_UWAGA, ZDROWIE_UWAGA_OPIS,
 } from "@/lib/astro/zdrowieWedyjski";
 import { odblokuj } from "@/lib/collection";
-import { odblokujSystemKarmy } from "@/lib/koloKarmyGeometria";
+import ZapalKrag from "@/components/ZapalKrag";
 
 /**
  * VesicaKarma nie ma "Rodzaju odczytu" (Portret/Dziecko/Finanse/Prognoza) —
@@ -89,6 +89,7 @@ export default function KosmogramPage() {
   const [chart, setChart] = useState<VedicChart | null>(null);
   const [birthInput, setBirthInput] = useState<BirthInput | null>(null);
   const [zwiniete, setZwiniete] = useState(false);
+  const [interpretacjaGotowa, setInterpretacjaGotowa] = useState(false);
 
   useEffect(() => {
     // Panel jest teraz dla jednej osoby (własny profil, wspólny ze wszystkimi
@@ -451,9 +452,11 @@ export default function KosmogramPage() {
           <Interpretation
             kind="kosmogram"
             data={aiData}
-            onText={(tekst) => { if (tekst.trim().length > 200) odblokujSystemKarmy("astrologia"); }}
+            onText={(tekst) => { if (tekst.trim().length > 200) setInterpretacjaGotowa(true); }}
             label={`Kosmogram${birthInput?.name ? ` — ${birthInput.name}` : ""}`}
           />
+          {/* po przeczytanej interpretacji — przycisk zapalający krąg Astrologii w Kole Karmy */}
+          {interpretacjaGotowa && <ZapalKrag system="astrologia" />}
           </SekcjaZlota>
           <SekcjaZlota tytul="Zapytaj o swój kosmogram">
           <Rozmowa mapa={aiData} tytul="Zapytaj o swój kosmogram" />
