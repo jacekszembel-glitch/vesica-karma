@@ -10,7 +10,7 @@ import type { KragKarmy } from "@/lib/koloKarmyGeometria";
 import { ukonczoneSystemyKarmy, type SystemKarmy } from "@/lib/koloKarmyGeometria";
 
 /**
- * Mój Panel — status trzech systemów (Chiromancja/Astrologia/Numerologia)
+ * Twoja Karma (dawniej „Mój panel”) — status trzech systemów (Chiromancja/Astrologia/Numerologia)
  * jako kafelki, wzorowane na mockupach. Faza 2 reskinu: prawdziwe śledzenie
  * (localStorage, patrz koloKarmyGeometria.ts) zamiast danych demo z Fazy 1.
  * Gdy komplet — hasło pod kafelkami staje się linkiem do /karma (synteza).
@@ -103,7 +103,7 @@ export default function Page() {
     <div className="container section" style={{ maxWidth: 640, textAlign: "center" }}>
       <KoloKarmyMini ukonczone={ukonczone} zwiazki={zwiazki} />
 
-      <h1 style={{ margin: "28px 0 18px" }}>Mój panel</h1>
+      <h1 style={{ margin: "28px 0 18px" }}>Twoja Karma</h1>
       <div className="ornament" style={{ marginBottom: 32 }} />
 
       <div style={{ display: "flex", justifyContent: "center", gap: 36, flexWrap: "wrap" }}>

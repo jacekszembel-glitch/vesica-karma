@@ -193,7 +193,7 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   const zwiazkiUkonczone = useZwiazkiUkonczone();
   const router = useRouter();
 
-  /** Środek Koła po ukończeniu wszystkich sekcji: fala złota (fiolet ↔ złoto), potem Mój panel. */
+  /** Środek Koła po ukończeniu wszystkich sekcji: fala złota (fiolet ↔ złoto), potem Twoja Karma (/panel). */
   const wylejKolor = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     const r = e.currentTarget.getBoundingClientRect();
@@ -339,12 +339,16 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
           mahadasze/karma też pominięte — maska (flood fill) nie pasowała
           dokładnie do krzywizny złotego pierścienia, więc poświata wystawała
           poza niego (widoczne jako "skrzydło" na zdjęciu od użytkownika). */}
-      {/* środek Koła (Mój panel) — zawsze zgaszony (szara warstwa z kolo-karmy-taupe.png),
-          złoty tylko pod kursorem; po ukończeniu wszystkich sekcji kliknięcie wylewa złoto na stronę */}
+      {/* środek Koła (Twoja Karma) — złoty tylko na starcie strony głównej (przed „Zacznij”),
+          potem gaśnie razem z resztą (szara warstwa z kolo-karmy-taupe.png). Aktywny dopiero po
+          ukończeniu trzech sekcji: wtedy złoty pod kursorem, a kliknięcie wylewa złoto na stronę */}
       <img src="/brand/fill-panel-taupe.png" alt="" aria-hidden="true"
-        style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none" }} />
+        style={{
+          position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none",
+          opacity: interaktywnyStart && !wystartowano ? 0 : 1, transition: "opacity 0.9s ease",
+        }} />
       <img src="/brand/fill-panel-gold.png" alt="" aria-hidden="true"
-        className={`kk-fill-hover${aktywny === "panel" ? " kk-fill-hover-aktywny" : ""}`}
+        className={`kk-fill-hover${komplet && aktywny === "panel" ? " kk-fill-hover-aktywny" : ""}`}
         style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
       {/* podświetlenie Związków na hover — realny, ostry wycinek własnego
           kształtu ikony (fill-zwiazki-gold.png), ten sam wzorzec co pętle
@@ -501,7 +505,13 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
 
       {/* uchwyty klikalne — Panel i Związki, proste koła w samym środku/rogu,
           nad soczewkami i płatkami, żeby zawsze wygrywały na swoim obszarze. */}
-      {HOTSPOTY.filter((n) => !n.gap).map((n) => (
+      {HOTSPOTY.filter((n) => !n.gap).map((n) => n.id === "panel" && !komplet ? (
+        // środek nieaktywny do ukończenia trzech sekcji — pusty uchwyt tylko przechwytuje
+        // kursor, żeby nie podświetlały się płatki leżące pod spodem
+        <span key={n.id} aria-hidden="true" className="kk-hit" style={{
+          left: pctX(n.x - n.r), top: pctY(n.y - n.r), width: pctX(n.r * 2), height: pctY(n.r * 2), cursor: "default",
+        }} />
+      ) : (
         <Link key={n.id} href={n.href} aria-label={n.label} className="kk-hit"
           onClick={n.id === "panel" && komplet ? wylejKolor : undefined}
           style={{
