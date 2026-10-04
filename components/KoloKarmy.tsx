@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
-import { falaZlota } from "@/lib/odwrocenieKolorow";
+import { zalejZlotem } from "@/lib/odwrocenieKolorow";
 import MoonStars from "./MoonStars";
 import { useKoloKarmyStart } from "./KoloKarmyStartContext";
 import { SEGMENT_GAPY, animacjeDoPokazania, wyczyscAnimacje, type KragKarmy, type SystemKarmy } from "@/lib/koloKarmyGeometria";
@@ -193,11 +193,11 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   const zwiazkiUkonczone = useZwiazkiUkonczone();
   const router = useRouter();
 
-  /** Środek Koła po ukończeniu wszystkich sekcji: złota fala z gwiazdki na całą stronę, potem Twoja Karma (/panel). */
+  /** Środek Koła po ukończeniu wszystkich sekcji: złoto zalewa stronę od gwiazdki (na stałe), potem Twoja Karma (/panel). */
   const wylejKolor = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     const r = e.currentTarget.getBoundingClientRect();
-    void falaZlota(r.left + r.width / 2, r.top + r.height / 2).then(() => router.push("/panel"));
+    void zalejZlotem(r.left + r.width / 2, r.top + r.height / 2).then(() => router.push("/panel"));
   };
   const ukonczone = interaktywnyStart
     ? (wystartowano ? postep : WSZYSTKIE_SYSTEMY)
@@ -291,6 +291,14 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
         left: `${((596 - 351) / 1260) * 100}%`, top: `${((378 - 351) / 761) * 100}%`,
         width: `${(702 / 1260) * 100}%`, height: `${(702 / 761) * 100}%`,
       }} />}
+      {/* tarcza pod kołem — tylko w złotym trybie strony (data-odwrocone): koło zostaje wtedy
+          w oryginalnych kolorach (złote pierścienie i ikony na ciemnych polach) jako ciemny
+          medalion na złotej stronie; pola grafiki są przezroczyste, więc potrzebują tła */}
+      {[{ x: CX, y: CY, r: R_OUTER + 16 }, { x: 1010.5, y: 645.5, r: 98 }].map((d, i) => (
+        <span key={`tarcza-${i}`} aria-hidden="true" className="kk-tarcza" style={{
+          left: pctX(d.x - d.r), top: pctY(d.y - d.r), width: pctX(d.r * 2), height: pctY(d.r * 2),
+        }} />
+      ))}
       {/* baza jako dwie nałożone warstwy (taupe pod spodem, złota na wierzchu
           z przejściem opacity) zamiast twardej zmiany `src` — dzięki temu
           "Zacznij" na stronie głównej gasi koło płynnie, nie skokowo. */}

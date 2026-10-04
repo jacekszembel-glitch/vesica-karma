@@ -1,31 +1,49 @@
 /**
- * Fala złota — nagroda po ukończeniu wszystkich sekcji Koła Karmy. Kliknięcie
- * środka Koła (gwiazdki) wypuszcza z niego złote światło, które rozchodzi się
- * kołem o miękkiej krawędzi po całej stronie i przechodzi dalej — po fali
- * strona zostaje w swoich zwykłych kolorach (wcześniejsze trwałe odwrócenie
- * fiolet ↔ złoto wycofane 2026-10-04 na prośbę użytkownika).
+ * Odwrócenie kolorów strony — nagroda po ukończeniu wszystkich sekcji Koła Karmy.
+ * Kliknięcie środka Koła wylewa złoto na całą stronę: fiolet ↔ złoto.
+ *
+ * Działa jednym filtrem SVG na <html> (#vk-odwroc w layout.tsx), który dla każdego
+ * kanału liczy c' = (fiolet + złoto) − c — dokładnie zamienia #170f28 z #e6c48a,
+ * także w grafikach Koła. Turkusowy tekst w tym trybie dostaje złoty kolor przed
+ * filtrem (globals.css), więc po filtrze jest ciemnofioletowy na złotym tle.
+ * Fala: View Transitions API — złoty widok zalewa stronę kołem o ostrej krawędzi
+ * od gwiazdki w środku Koła na zewnątrz. Po ukończeniu wszystkich sekcji strona
+ * zostaje złota na stałe (bez powrotu do fioletu). Bez wsparcia przeglądarki albo
+ * przy ograniczeniu ruchu: od razu.
  */
 
-/** Dawny klucz trwałego odwrócenia — czyszczony, żeby nikt nie został w złotym trybie. */
-const KLUCZ_ODWROCENIA = "vk_odwrocone";
+export const KLUCZ_ODWROCENIA = "vk_odwrocone";
+export const ATRYBUT_ODWROCENIA = "data-odwrocone";
 
-/** Skrypt do <head>. Na localhost: ?reset w adresie czyści postęp Koła (testy od zera). */
+/** Skrypt do <head> — ustawia tryb przed pierwszym malowaniem (bez mignięcia fioletu).
+ *  Na localhost dodatkowo: ?reset w adresie czyści postęp (do testów od zera). */
 export const SKRYPT_ODWROCENIA =
-  `try{var h=location.hostname;if((h==="localhost"||h==="127.0.0.1")&&/[?&]reset(=|&|$)/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf("vk_")===0}).forEach(function(k){localStorage.removeItem(k)});history.replaceState(null,"",location.pathname)}}catch(e){}` +
-  `try{localStorage.removeItem("${KLUCZ_ODWROCENIA}")}catch(e){}`;
+  // tylko na localhost: adres z ?reset czyści cały postęp Koła (vk_*) — test „od pierwszego kroku”
+  `try{var h=location.hostname;if((h==="localhost"||h==="127.0.0.1")&&/[?&]reset(=|&|$)/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf("vk_")===0}).forEach(function(k){localStorage.removeItem(k)});history.replaceState(null,"",location.pathname)}}catch(e){}`+
+  `try{if(localStorage.getItem("${KLUCZ_ODWROCENIA}")==="1")document.documentElement.setAttribute("${ATRYBUT_ODWROCENIA}","")}catch(e){}`;
 
-/** Złota fala z punktu (x, y) w pikselach okna; kończy się, gdy przejdzie przez cały ekran. */
-export function falaZlota(x: number, y: number): Promise<void> {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return Promise.resolve();
-  return new Promise((koniec) => {
-    const fala = document.createElement("div");
-    fala.className = "vk-fala-zlota";
-    fala.setAttribute("aria-hidden", "true");
-    fala.style.setProperty("--fala-x", `${x}px`);
-    fala.style.setProperty("--fala-y", `${y}px`);
-    document.body.appendChild(fala);
-    const zakoncz = () => { fala.remove(); koniec(); };
-    fala.addEventListener("animationend", zakoncz, { once: true });
-    setTimeout(zakoncz, 3500); // zabezpieczenie, gdyby animationend nie przyszło
-  });
+export function czyOdwrocone(): boolean {
+  return typeof document !== "undefined" && document.documentElement.hasAttribute(ATRYBUT_ODWROCENIA);
+}
+
+/** Zalewa stronę złotem falą z punktu (x, y) w pikselach okna; kończy się po animacji.
+ *  Gdy strona już jest złota — nic nie robi (złoto zostaje na stałe). */
+export async function zalejZlotem(x: number, y: number): Promise<void> {
+  const html = document.documentElement;
+  if (czyOdwrocone()) return;
+  const zmien = () => {
+    html.setAttribute(ATRYBUT_ODWROCENIA, "");
+    try { localStorage.setItem(KLUCZ_ODWROCENIA, "1"); } catch { /* tryb prywatny */ }
+  };
+  const bezRuchu = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } };
+  if (!doc.startViewTransition || bezRuchu) { zmien(); return; }
+  html.style.setProperty("--fala-x", `${x}px`);
+  html.style.setProperty("--fala-y", `${y}px`);
+  html.classList.add("vk-fala");
+  try {
+    await doc.startViewTransition(zmien).finished;
+  } finally {
+    html.classList.remove("vk-fala");
+  }
 }
