@@ -2757,3 +2757,36 @@ p, li, td, th, h1, h2, h3, .badge {
 .loshu-wniosek { display: grid; gap: 10px; width: 100%; border-top: 1px solid rgba(230, 196, 138, 0.22); padding-top: 18px; }
 .loshu-wniosek .eyebrow { text-align: center; }
 .loshu-wniosek p:not(.eyebrow) { margin: 0; font-size: 0.9rem; line-height: 1.6; }
+
+/* ── Odwrócenie kolorów po ukończeniu Koła Karmy (lib/odwrocenieKolorow.ts) ──
+   filtr na <html> zamienia fiolet ↔ złoto; turkusowe teksty i linie dostają przed
+   filtrem złoty kolor, więc po filtrze są ciemnofioletowe na złotym tle */
+html[data-odwrocone] { filter: url(#vk-odwroc); }
+html[data-odwrocone] {
+  --text: #e6c48a;
+  --muted: #d9b97f;
+  --teal: #e6c48a;
+  --teal-soft: #e6c48a;
+  --accent: #e6c48a;
+  --line: rgba(230, 196, 138, 0.28);
+  --line-soft: rgba(230, 196, 138, 0.12);
+  /* ciemniejsze złoto też w czysty fiolet po filtrze (inaczej wychodzi indygo) */
+  --gold: #e6c48a;
+  --primary: #e6c48a;
+  --primary-soft: #e6c48a;
+  --line-gold: rgba(230, 196, 138, 0.45);
+}
+/* nagłówki mają turkus na sztywno (#7fd0d8) — po filtrze byłyby czerwone */
+html[data-odwrocone] :is(h1, h2, h3, h4) { color: #e6c48a; }
+/* fala: nowy widok odsłania się kołem o miękkiej, świetlistej krawędzi ze środka Koła */
+@property --fala-r { syntax: "<length>"; inherits: false; initial-value: 0px; }
+html.vk-fala::view-transition-old(root),
+html.vk-fala::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html.vk-fala::view-transition-new(root) {
+  -webkit-mask-image: radial-gradient(circle at var(--fala-x) var(--fala-y),
+    #000 calc(var(--fala-r) - 160px), rgba(0, 0, 0, 0.55) calc(var(--fala-r) - 60px), transparent var(--fala-r));
+  mask-image: radial-gradient(circle at var(--fala-x) var(--fala-y),
+    #000 calc(var(--fala-r) - 160px), rgba(0, 0, 0, 0.55) calc(var(--fala-r) - 60px), transparent var(--fala-r));
+  animation: vk-fala 2.4s cubic-bezier(0.5, 0, 0.35, 1) forwards;
+}
+@keyframes vk-fala { from { --fala-r: 0px; } to { --fala-r: calc(150vmax + 160px); } }

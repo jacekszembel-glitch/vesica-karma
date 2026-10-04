@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
+import { przelaczKolory } from "@/lib/odwrocenieKolorow";
 import MoonStars from "./MoonStars";
 import { useKoloKarmyStart } from "./KoloKarmyStartContext";
 import { SEGMENT_GAPY, animacjeDoPokazania, wyczyscAnimacje, type KragKarmy, type SystemKarmy } from "@/lib/koloKarmyGeometria";
@@ -38,14 +39,6 @@ type Hotspot = {
   gap?: readonly [number, number, number, number];
 };
 
-/** Te cztery mają nieregularny kształt (przenikają się z sąsiadami) — ich
- *  poświata to maska wycięta z samej grafiki metodą wypełnienia (flood fill)
- *  od piktogramu do najbliższej złotej linii — public/brand/glow-<id>.png,
- *  ten sam układ współrzędnych co główny obraz. */
-const KSZTALTNE = new Set([
-  "astrologia", "hiromancja", "numerologia", "panel",
-  "astrokartografia", "mahadasze", "karma",
-]);
 
 const HOTSPOTY_BAZA: Hotspot[] = [
   { id: "astrologia", x: 598, y: 175, r: 85, href: "/kosmogram", gap: SEGMENT_GAPY.astrologia },
@@ -198,6 +191,14 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   // Związki (mały krąg w rogu) — zawsze szare, złote tylko na hover albo po
   // ukończeniu sekcji Związki (interpretacja pary na /dopasowanie).
   const zwiazkiUkonczone = useZwiazkiUkonczone();
+  const router = useRouter();
+
+  /** Środek Koła po ukończeniu wszystkich sekcji: fala złota (fiolet ↔ złoto), potem Mój panel. */
+  const wylejKolor = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    const r = e.currentTarget.getBoundingClientRect();
+    void przelaczKolory(r.left + r.width / 2, r.top + r.height / 2).then(() => router.push("/panel"));
+  };
   const ukonczone = interaktywnyStart
     ? (wystartowano ? postep : WSZYSTKIE_SYSTEMY)
     : new Set<SystemKarmy>([...ukonczoneProp, ...postep]);
@@ -338,11 +339,13 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
           mahadasze/karma też pominięte — maska (flood fill) nie pasowała
           dokładnie do krzywizny złotego pierścienia, więc poświata wystawała
           poza niego (widoczne jako "skrzydło" na zdjęciu od użytkownika). */}
-      {[...KSZTALTNE].filter((id) => !["astrologia", "hiromancja", "numerologia", "astrokartografia", "mahadasze", "karma"].includes(id)).map((id) => (
-        <img key={`glow-${id}`} src={`/brand/glow-${id}.png`} alt=""
-          className={`kk-glow-ksztalt${aktywny === id ? " kk-glow-aktywny" : ""}`}
-          style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
-      ))}
+      {/* środek Koła (Mój panel) — zawsze zgaszony (szara warstwa z kolo-karmy-taupe.png),
+          złoty tylko pod kursorem; po ukończeniu wszystkich sekcji kliknięcie wylewa złoto na stronę */}
+      <img src="/brand/fill-panel-taupe.png" alt="" aria-hidden="true"
+        style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none" }} />
+      <img src="/brand/fill-panel-gold.png" alt="" aria-hidden="true"
+        className={`kk-fill-hover${aktywny === "panel" ? " kk-fill-hover-aktywny" : ""}`}
+        style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
       {/* podświetlenie Związków na hover — realny, ostry wycinek własnego
           kształtu ikony (fill-zwiazki-gold.png), ten sam wzorzec co pętle
           systemów wyżej, zamiast poprzedniej rozmytej poświaty (radial-
@@ -500,6 +503,7 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
           nad soczewkami i płatkami, żeby zawsze wygrywały na swoim obszarze. */}
       {HOTSPOTY.filter((n) => !n.gap).map((n) => (
         <Link key={n.id} href={n.href} aria-label={n.label} className="kk-hit"
+          onClick={n.id === "panel" && komplet ? wylejKolor : undefined}
           style={{
             left: pctX(n.x - n.r), top: pctY(n.y - n.r),
             width: pctX(n.r * 2), height: pctY(n.r * 2),

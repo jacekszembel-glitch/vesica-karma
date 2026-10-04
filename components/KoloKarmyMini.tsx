@@ -26,6 +26,9 @@ export default function KoloKarmyMini({ ukonczone = new Set<SystemKarmy>(), zwia
           style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }} />
       ))}
       <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} />
+      {/* środek Koła — zawsze zgaszony (jak w KoloKarmy.tsx) */}
+      <img src="/brand/fill-panel-taupe.png" alt=""
+        style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }} />
       {/* Związki — szare, dopóki sekcja Związki nie jest ukończona (jak w KoloKarmy.tsx) */}
       <img src={zwiazki ? "/brand/fill-zwiazki-gold.png" : "/brand/fill-zwiazki-taupe.png"} alt=""
         style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }} />
