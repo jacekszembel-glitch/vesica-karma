@@ -600,6 +600,8 @@ main, .site-header, footer { position: relative; z-index: 1; }
   border-bottom: 1px solid var(--line-soft);
 }
 .interpretation p { margin-bottom: 15px; }
+/* tekst interpretacji zawsze złoty (wcześniej globalny turkus --text w kartach poza .sekcja-zlota) */
+.interpretation p, .interpretation li { color: var(--sand); }
 .interpretation strong { color: var(--primary-soft); }
 
 /* ═══ animacje ═══ */
@@ -2675,7 +2677,6 @@ p, li, td, th, h1, h2, h3, .badge {
   position: absolute; border-radius: 50%; pointer-events: none; z-index: -1;
   animation: kk-oddech 5s ease-in-out infinite;
 }
-html[data-odwrocone] .kk-luna { display: none; }
 @keyframes kk-oddech {
   0%, 100% { box-shadow: 0 0 10px 0 rgba(230, 196, 138, 0.2); }
   50% { box-shadow: 0 0 34px 4px rgba(230, 196, 138, 0.45); }
@@ -2748,43 +2749,18 @@ html[data-odwrocone] .kk-luna { display: none; }
 .loshu-wniosek .eyebrow { text-align: center; }
 .loshu-wniosek p:not(.eyebrow) { margin: 0; font-size: 0.9rem; line-height: 1.6; }
 
-/* ── Odwrócenie kolorów po ukończeniu Koła Karmy (lib/odwrocenieKolorow.ts) ──
-   filtr na <html> zamienia fiolet ↔ złoto; turkusowe teksty i linie dostają przed
-   filtrem złoty kolor, więc po filtrze są ciemnofioletowe na złotym tle */
-html[data-odwrocone] { filter: url(#vk-odwroc); }
-html[data-odwrocone] {
-  --text: #e6c48a;
-  --muted: #d9b97f;
-  --teal: #e6c48a;
-  --teal-soft: #e6c48a;
-  --accent: #e6c48a;
-  --line: rgba(230, 196, 138, 0.28);
-  --line-soft: rgba(230, 196, 138, 0.12);
-  /* ciemniejsze złoto też w czysty fiolet po filtrze (inaczej wychodzi indygo) */
-  --gold: #e6c48a;
-  --primary: #e6c48a;
-  --primary-soft: #e6c48a;
-  --line-gold: rgba(230, 196, 138, 0.45);
-}
-/* nagłówki mają turkus na sztywno (#7fd0d8) — po filtrze byłyby czerwone */
-html[data-odwrocone] :is(h1, h2, h3, h4) { color: #e6c48a; }
-/* fala: nowy widok odsłania się kołem o miękkiej, świetlistej krawędzi ze środka Koła */
+/* ── Złota fala po ukończeniu Koła Karmy (lib/odwrocenieKolorow.ts) ──
+   złote światło wychodzi z gwiazdki w środku Koła i rozchodzi się pierścieniem
+   o miękkich krawędziach po całej stronie; za falą strona wraca do swoich kolorów */
 @property --fala-r { syntax: "<length>"; inherits: false; initial-value: 0px; }
-html.vk-fala::view-transition-old(root),
-html.vk-fala::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-html.vk-fala::view-transition-new(root) {
-  -webkit-mask-image: radial-gradient(circle at var(--fala-x) var(--fala-y),
-    #000 calc(var(--fala-r) - 160px), rgba(0, 0, 0, 0.55) calc(var(--fala-r) - 60px), transparent var(--fala-r));
-  mask-image: radial-gradient(circle at var(--fala-x) var(--fala-y),
-    #000 calc(var(--fala-r) - 160px), rgba(0, 0, 0, 0.55) calc(var(--fala-r) - 60px), transparent var(--fala-r));
-  animation: vk-fala 2.4s cubic-bezier(0.5, 0, 0.35, 1) forwards;
+.vk-fala-zlota {
+  position: fixed; inset: 0; z-index: 1000; pointer-events: none;
+  background: radial-gradient(circle at var(--fala-x) var(--fala-y),
+    transparent calc(var(--fala-r) - 420px),
+    rgba(230, 196, 138, 0.55) calc(var(--fala-r) - 220px),
+    rgba(255, 238, 200, 0.95) calc(var(--fala-r) - 60px),
+    rgba(230, 196, 138, 0.9) var(--fala-r),
+    transparent calc(var(--fala-r) + 90px));
+  animation: vk-fala 3.2s cubic-bezier(0.25, 0.1, 0.5, 1) forwards;
 }
-@keyframes vk-fala { from { --fala-r: 0px; } to { --fala-r: calc(150vmax + 160px); } }
-/* Koło Karmy w złotym trybie: drugi raz ten sam filtr przywraca oryginalne kolory koła
-   (złote ikony na ciemnych polach) — ciemny medalion na złotej stronie, bez poświaty */
-.kk-tarcza { display: none; }
-html[data-odwrocone] [data-kolo-karmy] { filter: url(#vk-odwroc); animation: none; }
-html[data-odwrocone] .kk-tarcza {
-  display: block; position: absolute; z-index: -1; border-radius: 50%;
-  background: var(--bg); pointer-events: none;
-}
+@keyframes vk-fala { from { --fala-r: 0px; } to { --fala-r: calc(75vmax + 520px); } }

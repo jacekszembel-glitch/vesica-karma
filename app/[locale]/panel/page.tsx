@@ -26,7 +26,7 @@ const SYSTEMY: { id: SystemKarmy; label: string; href: string; opis: string }[] 
  *  skalowany do kwadratowego kafelka. */
 function IkonaAstrologiiKafelek({ gotowe }: { gotowe: boolean }) {
   return (
-    <svg viewBox="0 0 46 46" width="46" height="46" aria-hidden="true"
+    <svg viewBox="0 0 46 46" width="62" height="62" aria-hidden="true"
       style={{ color: gotowe ? "var(--sand)" : "var(--taupe)" }}>
       <mask id="kafelek-ks-mask">
         <rect x="0" y="0" width="46" height="46" fill="black" />
@@ -37,6 +37,38 @@ function IkonaAstrologiiKafelek({ gotowe }: { gotowe: boolean }) {
       {[[36, 12, 3], [8, 30, 2.6], [34, 34, 2]].map(([x, y, s], i) => (
         <path key={i} fill="currentColor"
           d={`M ${x} ${y - s} L ${x + s * 0.28} ${y - s * 0.28} L ${x + s} ${y} L ${x + s * 0.28} ${y + s * 0.28} L ${x} ${y + s} L ${x - s * 0.28} ${y + s * 0.28} L ${x - s} ${y} L ${x - s * 0.28} ${y - s * 0.28} Z`} />
+      ))}
+    </svg>
+  );
+}
+
+/** Chiromancja — para dużych dłoni (dlon-*-duza.png, te same co na stronie Chiromancji),
+ *  ułożona po skosie jak na Kole Karmy; zachowane proporcje (wcześniejsza ikona 150×170
+ *  była ściskana do kwadratu i rozmyta). */
+function IkonaDloniKafelek({ gotowe }: { gotowe: boolean }) {
+  const kolor = gotowe ? "" : "-taupe";
+  const styl = { position: "absolute" as const, width: 36, height: "auto" };
+  return (
+    <span aria-hidden="true" style={{ position: "relative", width: 64, height: 66, display: "block" }}>
+      <img src={`/brand/dlon-lewa-duza${kolor}.png`} alt="" style={{ ...styl, left: 0, top: 0 }} />
+      <img src={`/brand/dlon-prawa-duza${kolor}.png`} alt="" style={{ ...styl, right: 0, bottom: 0 }} />
+    </span>
+  );
+}
+
+/** Numerologia — wektorowe cyfry w kroju strony (Outfit), układ jak na Kole Karmy:
+ *  duża 7 w środku, wokół mniejsze — ostre w każdej wielkości. */
+function IkonaLiczbKafelek({ gotowe }: { gotowe: boolean }) {
+  const cyfry: [string, number, number, number][] = [
+    ["6", 30, 10, 9], ["4", 39, 15, 13], ["1", 23, 19, 9], ["8", 42, 26, 9],
+    ["3", 9, 35, 14], ["7", 24, 41, 27], ["5", 38, 40, 16], ["9", 4, 52, 14], ["2", 19, 52, 9],
+  ];
+  return (
+    <svg width="66" height="68" viewBox="0 0 54 56" aria-hidden="true"
+      style={{ color: gotowe ? "var(--sand)" : "var(--taupe)", position: "relative" }}>
+      {cyfry.map(([c, x, y, rozmiar]) => (
+        <text key={c} x={x} y={y} fontSize={rozmiar} fontWeight={700} fill="currentColor"
+          fontFamily="var(--font-sans)">{c}</text>
       ))}
     </svg>
   );
@@ -54,9 +86,9 @@ function Kafelek({ id, label, href, gotowe, opis }: { id: SystemKarmy; label: st
           <circle cx={size / 2} cy={size / 2} r={r} fill="none"
             stroke={gotowe ? "var(--gold)" : "var(--taupe)"} strokeWidth={stroke} style={{ transition: "stroke 0.3s" }} />
         </svg>
-        {id === "astrologia"
-          ? <IkonaAstrologiiKafelek gotowe={gotowe} />
-          : <img src={`/brand/icon-${id}${gotowe ? "" : "-taupe"}.png`} alt="" style={{ width: 46, height: 46, position: "relative" }} />}
+        {id === "astrologia" ? <IkonaAstrologiiKafelek gotowe={gotowe} />
+          : id === "hiromancja" ? <IkonaDloniKafelek gotowe={gotowe} />
+          : <IkonaLiczbKafelek gotowe={gotowe} />}
       </span>
       <p className="skrot-hero-znak" style={{ color: "var(--text)" }}>{label}</p>
       <p className="eyebrow skrot-hero-rola" style={{ color: gotowe ? "var(--gold)" : "var(--muted)", fontSize: "0.68rem" }}>

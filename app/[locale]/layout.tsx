@@ -57,19 +57,11 @@ export default async function RootLayout({
   const t = await getTranslations("Footer");
 
   return (
-    // suppressHydrationWarning: atrybut data-odwrocone ustawia skrypt przed hydratacją
-    <html lang={locale} className={outfit.variable} suppressHydrationWarning>
+    <html lang={locale} className={outfit.variable}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: SKRYPT_ODWROCENIA }} />
       </head>
       <body>
-        {/* filtr odwrócenia kolorów (lib/odwrocenieKolorow.ts): c' = (fiolet + złoto) − c */}
-        <svg width="0" height="0" aria-hidden="true" style={{ position: "absolute" }}>
-          <filter id="vk-odwroc" colorInterpolationFilters="sRGB">
-            <feColorMatrix type="matrix"
-              values="-1 0 0 0 0.9922  0 -1 0 0 0.8275  0 0 -1 0 0.6980  0 0 0 1 0" />
-          </filter>
-        </svg>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <SiteHeader />
           <main>{children}</main>

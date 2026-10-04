@@ -1,46 +1,31 @@
 /**
- * Odwrócenie kolorów strony — nagroda po ukończeniu wszystkich sekcji Koła Karmy.
- * Kliknięcie środka Koła wylewa złoto na całą stronę: fiolet ↔ złoto.
- *
- * Działa jednym filtrem SVG na <html> (#vk-odwroc w layout.tsx), który dla każdego
- * kanału liczy c' = (fiolet + złoto) − c — dokładnie zamienia #170f28 z #e6c48a,
- * także w grafikach Koła. Turkusowy tekst w tym trybie dostaje złoty kolor przed
- * filtrem (globals.css), więc po filtrze jest ciemnofioletowy na złotym tle.
- * Fala: View Transitions API — nowy widok odsłania się kołem o miękkiej krawędzi
- * ze środka Koła. Bez wsparcia przeglądarki albo przy ograniczeniu ruchu: od razu.
+ * Fala złota — nagroda po ukończeniu wszystkich sekcji Koła Karmy. Kliknięcie
+ * środka Koła (gwiazdki) wypuszcza z niego złote światło, które rozchodzi się
+ * kołem o miękkiej krawędzi po całej stronie i przechodzi dalej — po fali
+ * strona zostaje w swoich zwykłych kolorach (wcześniejsze trwałe odwrócenie
+ * fiolet ↔ złoto wycofane 2026-10-04 na prośbę użytkownika).
  */
 
-export const KLUCZ_ODWROCENIA = "vk_odwrocone";
-export const ATRYBUT_ODWROCENIA = "data-odwrocone";
+/** Dawny klucz trwałego odwrócenia — czyszczony, żeby nikt nie został w złotym trybie. */
+const KLUCZ_ODWROCENIA = "vk_odwrocone";
 
-/** Skrypt do <head> — ustawia tryb przed pierwszym malowaniem (bez mignięcia fioletu).
- *  Na localhost dodatkowo: ?reset w adresie czyści postęp (do testów od zera). */
+/** Skrypt do <head>. Na localhost: ?reset w adresie czyści postęp Koła (testy od zera). */
 export const SKRYPT_ODWROCENIA =
-  // tylko na localhost: adres z ?reset czyści cały postęp Koła (vk_*) — test „od pierwszego kroku”
-  `try{var h=location.hostname;if((h==="localhost"||h==="127.0.0.1")&&/[?&]reset(=|&|$)/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf("vk_")===0}).forEach(function(k){localStorage.removeItem(k)});history.replaceState(null,"",location.pathname)}}catch(e){}`+
-  `try{if(localStorage.getItem("${KLUCZ_ODWROCENIA}")==="1")document.documentElement.setAttribute("${ATRYBUT_ODWROCENIA}","")}catch(e){}`;
+  `try{var h=location.hostname;if((h==="localhost"||h==="127.0.0.1")&&/[?&]reset(=|&|$)/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf("vk_")===0}).forEach(function(k){localStorage.removeItem(k)});history.replaceState(null,"",location.pathname)}}catch(e){}` +
+  `try{localStorage.removeItem("${KLUCZ_ODWROCENIA}")}catch(e){}`;
 
-export function czyOdwrocone(): boolean {
-  return typeof document !== "undefined" && document.documentElement.hasAttribute(ATRYBUT_ODWROCENIA);
-}
-
-/** Przełącza kolory falą ze punktu (x, y) w pikselach okna; kończy się po animacji. */
-export async function przelaczKolory(x: number, y: number): Promise<void> {
-  const html = document.documentElement;
-  const nowy = !czyOdwrocone();
-  const zmien = () => {
-    html.toggleAttribute(ATRYBUT_ODWROCENIA, nowy);
-    try { localStorage.setItem(KLUCZ_ODWROCENIA, nowy ? "1" : "0"); } catch { /* tryb prywatny */ }
-  };
-  const bezRuchu = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } };
-  if (!doc.startViewTransition || bezRuchu) { zmien(); return; }
-  html.style.setProperty("--fala-x", `${x}px`);
-  html.style.setProperty("--fala-y", `${y}px`);
-  html.classList.add("vk-fala");
-  try {
-    await doc.startViewTransition(zmien).finished;
-  } finally {
-    html.classList.remove("vk-fala");
-  }
+/** Złota fala z punktu (x, y) w pikselach okna; kończy się, gdy przejdzie przez cały ekran. */
+export function falaZlota(x: number, y: number): Promise<void> {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return Promise.resolve();
+  return new Promise((koniec) => {
+    const fala = document.createElement("div");
+    fala.className = "vk-fala-zlota";
+    fala.setAttribute("aria-hidden", "true");
+    fala.style.setProperty("--fala-x", `${x}px`);
+    fala.style.setProperty("--fala-y", `${y}px`);
+    document.body.appendChild(fala);
+    const zakoncz = () => { fala.remove(); koniec(); };
+    fala.addEventListener("animationend", zakoncz, { once: true });
+    setTimeout(zakoncz, 3500); // zabezpieczenie, gdyby animationend nie przyszło
+  });
 }
