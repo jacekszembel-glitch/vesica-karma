@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import KoloKarmyMini from "@/components/KoloKarmyMini";
+import { useZwiazkiUkonczone } from "@/components/usePostepKarmy";
+import ZapisanyOdczyt from "@/components/ZapisanyOdczyt";
+import { wczytajSekcje, type ZapisSekcji } from "@/lib/zapisSekcji";
+import type { KragKarmy } from "@/lib/koloKarmyGeometria";
 import { ukonczoneSystemyKarmy, type SystemKarmy } from "@/lib/koloKarmyGeometria";
 
 /**
@@ -80,10 +84,16 @@ export default function Page() {
   // localStorage dostępny dopiero po zamontowaniu — start z pustym zbiorem,
   // zeby SSR i pierwszy render klienta sie zgadzaly, potem hydratacja.
   const [ukonczone, setUkonczone] = useState<Set<SystemKarmy>>(new Set());
+  // odczyty ukończonych sekcji (zapisane przy zapaleniu kręgu) — do podglądu w każdej chwili
+  const [zapisy, setZapisy] = useState<ZapisSekcji[]>([]);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- hydratacja z localStorage po zamontowaniu
     setUkonczone(ukonczoneSystemyKarmy());
+    setZapisy((["hiromancja", "astrologia", "numerologia", "zwiazki"] as KragKarmy[])
+      .map((id) => wczytajSekcje(id)).filter((z): z is ZapisSekcji => !!z));
   }, []);
+
+  const zwiazki = useZwiazkiUkonczone();
 
   const brakujace = SYSTEMY.filter((s) => !ukonczone.has(s.id));
   const strzalkaPasuje = brakujace.length > 0 && brakujace[0].id === SYSTEMY[0].id;
@@ -91,7 +101,7 @@ export default function Page() {
 
   return (
     <div className="container section" style={{ maxWidth: 640, textAlign: "center" }}>
-      <KoloKarmyMini ukonczone={ukonczone} />
+      <KoloKarmyMini ukonczone={ukonczone} zwiazki={zwiazki} />
 
       <h1 style={{ margin: "28px 0 18px" }}>Mój panel</h1>
       <div className="ornament" style={{ marginBottom: 32 }} />
@@ -120,6 +130,21 @@ export default function Page() {
           </Link>
         )}
       </div>
+
+      {zapisy.length > 0 && (
+        <>
+          <div className="ornament" style={{ margin: "36px 0 20px" }} />
+          <p className="eyebrow" style={{ marginBottom: 14 }}>Twoje zapisane odczyty</p>
+          <div className="panel-odczyty">
+            {zapisy.map((z) => (
+              <details key={z.podpis + z.zapisano} className="panel-odczyt">
+                <summary>{z.podpis}</summary>
+                <ZapisanyOdczyt zapis={z} bezPodpisu />
+              </details>
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="ornament" style={{ margin: "36px 0 20px" }} />
 

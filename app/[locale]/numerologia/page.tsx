@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Interpretation from "@/components/Interpretation";
 import { numerology, type NumerologyResult } from "@/lib/astro/numerology";
@@ -13,6 +13,11 @@ import NaCoUwazacLiczb from "@/components/NaCoUwazacLiczb";
 import SekcjaZlota from "@/components/SekcjaZlota";
 import { odblokuj } from "@/lib/collection";
 import ZapalKrag from "@/components/ZapalKrag";
+import SiatkaLoShu from "@/components/SiatkaLoShu";
+import { wczytajSekcje } from "@/lib/zapisSekcji";
+
+/** Dane, z których liczona była ukończona sekcja (zapis przy zapaleniu kręgu). */
+interface DaneNumerologii { isoDate: string; name?: string; rok: number }
 
 function Num({ label, value, big, note }: {
   label: React.ReactNode; value: number | string | null; big?: boolean; note?: React.ReactNode;
@@ -36,11 +41,29 @@ export default function NumerologiaPage() {
   const [wynik, setWynik] = useState<NumerologyResult | null>(null);
   const [zwiniete, setZwiniete] = useState(false);
   const [interpretacjaGotowa, setInterpretacjaGotowa] = useState(false);
+  const [tekstInterpretacji, setTekstInterpretacji] = useState("");
+  const [rok, setRok] = useState(() => new Date().getFullYear());
+
+  // Ukończona sekcja wraca od razu z zapisanymi liczbami i interpretacją —
+  // ten sam rok, więc ten sam skrót danych i ta sama zapisana interpretacja.
+  useEffect(() => {
+    const zapis = wczytajSekcje("numerologia");
+    const d = zapis?.dane as DaneNumerologii | undefined;
+    if (!d?.isoDate) return;
+    /* eslint-disable react-hooks/set-state-in-effect -- odtworzenie z localStorage po zamontowaniu */
+    setDate(d.isoDate);
+    setName(d.name);
+    setRok(d.rok);
+    setWynik(numerology(d.isoDate, d.name, "wedyjski", d.rok));
+    setZwiniete(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, []);
 
   function handleSubmit(input: BirthInput) {
     const rok = new Date().getFullYear();
     setDate(input.isoDate);
     setName(input.name);
+    setRok(rok);
     setWynik(numerology(input.isoDate, input.name, "wedyjski", rok));
     setZwiniete(true);
     odblokuj("numerologia");
@@ -120,6 +143,11 @@ export default function NumerologiaPage() {
               </p>
           </SekcjaZlota>
 
+          {/* siatka Lo Shu — cyfry daty urodzenia w magicznym kwadracie 3×3 */}
+          <SekcjaZlota tytul={<Term k="loshu" plain>Siatka Lo Shu</Term>}>
+            <SiatkaLoShu numerology={wynik} />
+          </SekcjaZlota>
+
           {/* Mulank↔Bhagyank przez przyjaźń planet — tak łączy je klasyczna numerologia wedyjska (nie sumą) */}
           <SekcjaZlota tytul={<Term k="relacjamulankbhagyank" plain>Mulank i Bhagyank</Term>}>
             <RelacjaMulankBhagyank numerology={wynik} />
@@ -137,9 +165,12 @@ export default function NumerologiaPage() {
           <div className="sekcja-zlota-ai">
             <SekcjaZlota tytul="Interpretacja">
               <Interpretation kind="numerologia" data={aiData!} label="Numerologia wedyjska"
-                onText={(tekst) => { if (tekst.trim().length > 200) setInterpretacjaGotowa(true); }} />
+                onText={(tekst) => { if (tekst.trim().length > 200) { setInterpretacjaGotowa(true); setTekstInterpretacji(tekst); } }} />
               {/* po przeczytanej interpretacji — przycisk zapalający krąg Numerologii w Kole Karmy */}
-              {interpretacjaGotowa && <ZapalKrag system="numerologia" />}
+              {interpretacjaGotowa && <ZapalKrag system="numerologia" zapis={{
+                tekst: tekstInterpretacji, podpis: `Numerologia — ${name || date}`,
+                dane: { isoDate: date, name, rok } satisfies DaneNumerologii,
+              }} />}
             </SekcjaZlota>
           </div>
         </div>

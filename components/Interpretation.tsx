@@ -17,7 +17,7 @@ function akapitHtml(t: string): string {
  * własny kafelek, a jego akapity zostają w środku. Kafelki wchodzą kaskadą
  * (--i steruje opóźnieniem) — całość objawia się sekcja po sekcji.
  */
-function renderMd(md: string) {
+export function renderMd(md: string) {
   const sekcje: { tytul: string | null; akapity: string[] }[] = [];
   for (const block of md.split(/\n{2,}/)) {
     const t = block.trim();
@@ -61,15 +61,18 @@ const MADROSCI = [
   "Vargottama: gdy to, co pokazujesz światu, i to, kim jesteś w środku, mówią jednym głosem.",
 ];
 
-/** Pieczęć oczekiwania — obracające się pierścienie wokół bindu + mądrości. */
-function PieczecOdslaniania() {
-  const [start] = useState(() => Math.floor(Math.random() * MADROSCI.length));
+/** Pieczęć oczekiwania — obracające się pierścienie wokół bindu + mądrości.
+ *  Eksportowana: ten sam ekran czekania w każdej sekcji (np. odczyt dłoni). */
+export function PieczecOdslaniania({ tytul = "Mapa się odsłania…", mysli = MADROSCI, podpis = "odczyt powstaje z Twoich policzonych danych" }: {
+  tytul?: string; mysli?: readonly string[]; podpis?: string;
+} = {}) {
+  const [start] = useState(() => Math.floor(Math.random() * mysli.length));
   const [krok, setKrok] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setKrok((k) => k + 1), 7000);
     return () => clearInterval(t);
   }, []);
-  const mysl = MADROSCI[(start + krok) % MADROSCI.length];
+  const mysl = mysli[(start + krok) % mysli.length];
   return (
     <div className="interp-czekanie" role="status" aria-live="polite">
       <svg viewBox="0 0 96 96" width="82" height="82" fill="none" aria-hidden="true">
@@ -80,12 +83,12 @@ function PieczecOdslaniania() {
         <circle cx="48" cy="48" r="17" stroke="rgba(230,196,138,0.5)" strokeWidth="1" />
         <path d="M48 41 l3.4 4 -3.4 4 -3.4 -4 Z" fill="#e6c48a" className="interp-bindu" />
       </svg>
-      <p>Mapa się odsłania…</p>
+      <p>{tytul}</p>
       <p key={krok} className="interp-mysl">
         {mysl}
       </p>
       <p className="muted" style={{ fontSize: "0.74rem" }}>
-        odczyt powstaje z Twoich policzonych danych
+        {podpis}
       </p>
     </div>
   );
@@ -108,6 +111,9 @@ interface Props {
   /** Wywoływane z pełnym tekstem, gdy tylko jest znany (z cache albo po wygenerowaniu) —
    *  do wyciągnięcia np. samego tytułu przez rodzica, bez duplikowania logiki wczytywania. */
   onText?: (text: string) => void;
+  /** Tekst zapisany przy ukończeniu sekcji (lib/zapisSekcji.ts) — pokazywany, gdy pod
+   *  bieżącym skrótem danych nic nie ma (np. zmieniły się nadchodzące okresy dasz). */
+  zapasowy?: string;
 }
 
 /** Stabilny skrót danych — ten sam kosmogram daje ten sam klucz.
@@ -131,7 +137,7 @@ const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
  * Zalogowani mają historię w bazie (dostępną z każdego urządzenia),
  * niezalogowani — w pamięci przeglądarki.
  */
-export default function Interpretation({ kind, data, label, compact, onText }: Props) {
+export default function Interpretation({ kind, data, label, compact, onText, zapasowy }: Props) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -142,6 +148,8 @@ export default function Interpretation({ kind, data, label, compact, onText }: P
   // wersje bez wywolywania powtornych efektow/petli.
   const onTextRef = useRef(onText);
   onTextRef.current = onText;
+  const zapasowyRef = useRef(zapasowy);
+  zapasowyRef.current = zapasowy;
 
   const dataHash = data ? hash(JSON.stringify(data)) : null;
   const lsKey = dataHash ? `${PREFIX}${kind}_${dataHash}` : null;
@@ -178,8 +186,10 @@ export default function Interpretation({ kind, data, label, compact, onText }: P
       try {
         const saved = localStorage.getItem(lsKey);
         if (!alive) return;
-        if (saved) { setText(saved); setOrigin("przegladarka"); onTextRef.current?.(saved); }
+        if (saved) { setText(saved); setOrigin("przegladarka"); onTextRef.current?.(saved); return; }
       } catch { /* tryb prywatny */ }
+      // 3) zapis ukończonej sekcji
+      if (zapasowyRef.current) { setText(zapasowyRef.current); setOrigin("przegladarka"); onTextRef.current?.(zapasowyRef.current); }
     })();
 
     return () => { alive = false; };
@@ -296,7 +306,7 @@ export default function Interpretation({ kind, data, label, compact, onText }: P
           </div>
         )}
         {error && <p style={{ color: "var(--warn)", marginTop: 10, fontSize: "0.85rem" }}>{error}</p>}
-        {busy && !text && <p className="muted" style={{ fontSize: "0.85rem" }}>Mapa się odsłania…</p>}
+        {busy && !text && <PieczecOdslaniania />}
         {text && (
           <div className="interpretation interp-odslona" style={{ fontSize: "0.9rem" }}>
             {renderMd(text)}

@@ -35,7 +35,7 @@ export const ZDARZENIE_POSTEPU = "vk-postep";
 /** Kolejka animacji do pokazania („astrologia" | … | "final"), gdy koło będzie widoczne
  *  na ekranie — interpretacja jest na dole strony, koło na górze, więc animacja czeka. */
 const KLUCZ_DO_POKAZANIA = "vk_karma_do_pokazania";
-export type AnimacjaKarmy = SystemKarmy | "final";
+export type AnimacjaKarmy = SystemKarmy | "zwiazki" | "final";
 
 export function animacjeDoPokazania(): AnimacjaKarmy[] {
   if (typeof window === "undefined") return [];
@@ -63,5 +63,26 @@ export function odblokujSystemKarmy(id: SystemKarmy): void {
   } catch {
     /* tryb prywatny — postęp po prostu się nie zapamięta */
   }
+  window.dispatchEvent(new CustomEvent(ZDARZENIE_POSTEPU, { detail: id }));
+}
+
+/** Związki — osobny, mały krąg w rogu Koła (/dopasowanie). Nie wlicza się do kompletu 3/3
+ *  (to nie system Karmy), więc ma własny zapis; szary, dopóki para nie dostanie interpretacji. */
+export type KragKarmy = SystemKarmy | "zwiazki";
+const KLUCZ_ZWIAZKOW = "vk_zwiazki_karmy";
+
+export function zwiazkiUkonczone(): boolean {
+  if (typeof window === "undefined") return false;
+  try { return localStorage.getItem(KLUCZ_ZWIAZKOW) === "1"; } catch { return false; }
+}
+
+/** Zapala krąg danej sekcji — trzy systemy przez odblokujSystemKarmy, Związki osobno. */
+export function zapalKragKarmy(id: KragKarmy): void {
+  if (id !== "zwiazki") { odblokujSystemKarmy(id); return; }
+  if (typeof window === "undefined" || zwiazkiUkonczone()) return;
+  try {
+    localStorage.setItem(KLUCZ_ZWIAZKOW, "1");
+    localStorage.setItem(KLUCZ_DO_POKAZANIA, JSON.stringify([...animacjeDoPokazania(), "zwiazki"]));
+  } catch { /* tryb prywatny */ }
   window.dispatchEvent(new CustomEvent(ZDARZENIE_POSTEPU, { detail: id }));
 }

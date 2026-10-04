@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DateTime } from "luxon";
 import Interpretation from "@/components/Interpretation";
+import ZapalKrag from "@/components/ZapalKrag";
+import { wczytajSekcje } from "@/lib/zapisSekcji";
 import ParyNav from "@/components/ParyNav";
 import { gunaMilan, type GunaMilanResult } from "@/lib/astro/gunamilan";
 import { allPlanets } from "@/lib/astro/ephemeris";
@@ -72,9 +74,15 @@ export default function DopasowaniePage() {
   const [miejsca, setMiejsca] = useState<{ best: CouplePlace[]; hard: CouplePlace[] } | null>(null);
   const [linie, setLinie] = useState<{ a: PlanetLines[]; b: PlanetLines[] } | null>(null);
   const [sprawdzaneMiejsce, setSprawdzaneMiejsce] = useState<Place | null>(null);
+  const [interpretacjaGotowa, setInterpretacjaGotowa] = useState(false);
+  const [tekstInterpretacji, setTekstInterpretacji] = useState("");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    policz(a, b);
+  }
+
+  function policz(a: PersonInput, b: PersonInput) {
     const moonA = moonLongitude(a);
     const moonB = moonLongitude(b);
     setResult({ gm: gunaMilan(moonA, moonB), moonA, moonB });
@@ -314,7 +322,14 @@ export default function DopasowaniePage() {
             );
           })()}
 
-          <Interpretation kind="para" data={aiData} />
+          <Interpretation kind="para" data={aiData}
+            onText={(tekst) => { if (tekst.trim().length > 200) { setInterpretacjaGotowa(true); setTekstInterpretacji(tekst); } }} />
+          {/* po przeczytanej interpretacji pary — przycisk zapalający krąg Związków w Kole Karmy */}
+          {interpretacjaGotowa && <ZapalKrag system="zwiazki" zapis={{
+            tekst: tekstInterpretacji,
+            podpis: `Związki — ${a.name || "Osoba 1"} i ${b.name || "Osoba 2"}`,
+            dane: { a, b },
+          }} />}
         </div>
       )}
       <Konwencje />

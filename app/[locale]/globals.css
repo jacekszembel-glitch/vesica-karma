@@ -2709,3 +2709,26 @@ p, li, td, th, h1, h2, h3, .badge {
 .zapal-krag { display: grid; justify-items: center; gap: 14px; margin-top: 28px; text-align: center; }
 .zapal-krag p { color: var(--sand); text-align: center; margin: 0; }
 .zapal-krag-info { color: var(--sand); text-align: center; margin-top: 24px; font-size: 0.92rem; }
+
+/* ── Siatka Lo Shu (components/SiatkaLoShu.tsx) — złoty styl działów, bez ramek ── */
+.loshu { display: grid; gap: 20px; justify-items: center; }
+.loshu-wstep { font-size: 0.86rem; line-height: 1.55; max-width: 60ch; }
+.loshu-siatka { width: 100%; max-width: 300px; display: block; overflow: visible; }
+.loshu-pole { cursor: pointer; outline: none; }
+.loshu-pole:focus-visible rect { stroke: var(--sand); stroke-width: 1; }
+.loshu-opis { min-height: 3.2em; max-width: 60ch; text-align: center !important; font-size: 0.92rem; line-height: 1.55; margin: 0; }
+.loshu-strzalki { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 18px 32px; width: 100%; }
+.loshu-strzalki > div { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.loshu-strzalka { margin: 0; font-size: 0.88rem; line-height: 1.5; cursor: default; text-align: left !important; }
+
+/* ── Mój panel: zapisane odczyty ukończonych sekcji — rozwijane, bez ramek ── */
+.panel-odczyty { display: grid; gap: 4px; text-align: left; }
+.panel-odczyt { border-bottom: 1px solid rgba(230, 196, 138, 0.22); padding: 10px 0; }
+.panel-odczyt > summary {
+  cursor: pointer; list-style: none; color: var(--sand); font-family: var(--font-serif);
+  font-size: 1.1rem; display: flex; justify-content: space-between; gap: 12px;
+}
+.panel-odczyt > summary::-webkit-details-marker { display: none; }
+.panel-odczyt > summary::after { content: "+"; color: var(--sand); transition: transform 0.2s; }
+.panel-odczyt[open] > summary::after { transform: rotate(45deg); }
+.panel-odczyt[open] > summary { margin-bottom: 14px; }

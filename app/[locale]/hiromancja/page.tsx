@@ -7,6 +7,7 @@ import HiromancjaZdjecie, { type ZdjecieDane } from "@/components/HiromancjaZdje
 import HiromancjaKalibracja from "@/components/HiromancjaKalibracja";
 import HiromancjaOdczyt from "@/components/HiromancjaOdczyt";
 import SekcjaZlota from "@/components/SekcjaZlota";
+import ZapisanyOdczyt, { useZapisSekcji } from "@/components/ZapisanyOdczyt";
 import { OPIS_TYPU_DLONI } from "@/lib/hiromancja-tresc";
 import type { WynikGeometrii } from "@/lib/hiromancja";
 
@@ -144,6 +145,8 @@ export default function HiromancjaPage() {
   }
 
   const obaZdjeciaGotowe = zdjecia.prawa && zdjecia.lewa;
+  // ukończona sekcja — zapisany odczyt widoczny od razu, bez ponownego wgrywania zdjęć
+  const zapis = useZapisSekcji("hiromancja");
   const rekaBierna: Reka = pismoReka === "prawa" ? "lewa" : "prawa";
 
   return (
@@ -227,7 +230,17 @@ export default function HiromancjaPage() {
 
       {/* odczyt dłoni widoczny zawsze — wcześniej pojawiał się dopiero po wgraniu obu zdjęć,
           więc trudno go było znaleźć; to on zapala krąg Chiromancji w Kole Karmy */}
-      {!obaZdjeciaGotowe && (
+      {!obaZdjeciaGotowe && zapis && (
+        <div className="sekcja-zlota-ai">
+          <SekcjaZlota tytul="Twój odczyt dłoni">
+            <ZapisanyOdczyt zapis={zapis} />
+            <p className="zapal-krag-info">
+              ✦ Krąg Chiromancji świeci w Kole Karmy. Chcesz nowy odczyt? Wgraj zdjęcia obu dłoni powyżej.
+            </p>
+          </SekcjaZlota>
+        </div>
+      )}
+      {!obaZdjeciaGotowe && !zapis && (
         <SekcjaZlota tytul="Odczyt dłoni">
           <p style={{ textAlign: "center", maxWidth: 520, margin: "0 auto 18px", lineHeight: 1.6 }}>
             Odczyt AI obu dłoni zapala krąg Chiromancji w Kole Karmy. Wgraj zdjęcia obu dłoni

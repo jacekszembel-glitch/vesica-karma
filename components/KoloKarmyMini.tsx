@@ -7,8 +7,10 @@ import { SEGMENT_GAPY, type SystemKarmy } from "@/lib/koloKarmyGeometria";
  * hotspotów/linków KoloKarmy.tsx. Te same warstwy assetów (taupe baza +
  * złote wypełnienie per ukończony system), tylko mniejszy i nieklikalny.
  */
-export default function KoloKarmyMini({ ukonczone = new Set<SystemKarmy>(), maxWidth = 260 }: {
+export default function KoloKarmyMini({ ukonczone = new Set<SystemKarmy>(), zwiazki = false, maxWidth = 260 }: {
   ukonczone?: Set<SystemKarmy>;
+  /** Czy sekcja Związki jest ukończona (krąg w rogu złoty zamiast szarego). */
+  zwiazki?: boolean;
   maxWidth?: number;
 }) {
   // Jak w KoloKarmy.tsx: przy komplecie (3/3) wracamy do oryginalnej, w pełni
@@ -24,6 +26,9 @@ export default function KoloKarmyMini({ ukonczone = new Set<SystemKarmy>(), maxW
           style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }} />
       ))}
       <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia")} />
+      {/* Związki — szare, dopóki sekcja Związki nie jest ukończona (jak w KoloKarmy.tsx) */}
+      <img src={zwiazki ? "/brand/fill-zwiazki-gold.png" : "/brand/fill-zwiazki-taupe.png"} alt=""
+        style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }} />
     </div>
   );
 }

@@ -4,6 +4,21 @@ import { useCallback, useRef, useState } from "react";
 import type { TypDloni } from "@/lib/hiromancja";
 import { zapiszOdczytDloni } from "@/lib/hiromancjaOdczytStore";
 import ZapalKrag from "./ZapalKrag";
+import { PieczecOdslaniania } from "./Interpretation";
+
+/** Złote myśli na czas odczytu dłoni — w duchu chiromancji, bez wróżenia. */
+const MYSLI_DLONI = [
+  "Dłoń bierna pokazuje, z czym przychodzisz. Wiodąca — co z tym zrobiłeś.",
+  "Linie dłoni zmieniają się wolno, ale się zmieniają. Nic tu nie jest wyryte na zawsze.",
+  "Linia życia nie mówi, jak długo żyjesz, tylko jak mocno w nim jesteś.",
+  "Linia głowy to sposób myślenia, nie poziom inteligencji.",
+  "Linia serca opowiada, jak kochasz — nie kogo i nie kiedy.",
+  "Kształt dłoni to żywioł: ziemia, powietrze, ogień albo woda w Twoim charakterze.",
+  "Różnica między dwiema dłońmi to droga, którą już przeszedłeś.",
+  "Dłoń nie przepowiada losu. Pokazuje skłonności — wybór zostaje przy Tobie.",
+  "Kciuk to wola. Im wyraźniejszy, tym łatwiej Ci stawiać granice.",
+  "Brak linii losu nie znaczy braku drogi — tylko że piszesz ją sam, bez schematu.",
+];
 
 /**
  * ODCZYT AI — uproszczony sibling Interpretation.tsx, świadomie NIE ten sam
@@ -140,7 +155,7 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
         </div>
       )}
       {error && <p style={{ color: "var(--warn)", marginTop: 12, fontSize: "0.85rem" }}>{error}</p>}
-      {busy && !text && <p className="muted" style={{ fontSize: "0.85rem", marginTop: 14 }}>Odczytuję obie dłonie…</p>}
+      {busy && !text && <PieczecOdslaniania tytul="Dłonie się odsłaniają…" mysli={MYSLI_DLONI} podpis="odczyt powstaje z Twoich zdjęć obu dłoni" />}
       {text && (
         <>
           <hr className="gold-rule" style={{ margin: "16px 0" }} />
@@ -151,7 +166,8 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
             To subiektywny odczyt AI na podstawie zdjęć, nie pomiar. Jakość linii na fotografii zależy
             od oświetlenia, rozdzielczości i kąta — traktuj to jako inspirację do refleksji, nie diagnozę.
           </p>
-          {text.trim().length > 200 && <ZapalKrag system="hiromancja" />}
+          {text.trim().length > 200 && <ZapalKrag system="hiromancja"
+            zapis={{ tekst: text, podpis: `Chiromancja — ${imie || "obie dłonie"}` }} />}
         </>
       )}
     </div>

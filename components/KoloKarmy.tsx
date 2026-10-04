@@ -6,8 +6,8 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import MoonStars from "./MoonStars";
 import { useKoloKarmyStart } from "./KoloKarmyStartContext";
-import { SEGMENT_GAPY, animacjeDoPokazania, wyczyscAnimacje, type SystemKarmy } from "@/lib/koloKarmyGeometria";
-import { usePostepKarmy } from "./usePostepKarmy";
+import { SEGMENT_GAPY, animacjeDoPokazania, wyczyscAnimacje, type KragKarmy, type SystemKarmy } from "@/lib/koloKarmyGeometria";
+import { usePostepKarmy, useZwiazkiUkonczone } from "./usePostepKarmy";
 
 /**
  * Koło Karmy — gotowa grafika (public/brand/kolo-karmy.png) BEZ satelitów
@@ -127,8 +127,9 @@ const PIKTOGRAMY_WSPOLNE = [
 ];
 
 /** Środki trzech pętli-systemów (dopasowane do grafiki) — oś obrotu blika. */
-const SRODKI_PETLI: Record<SystemKarmy, { x: number; y: number }> = {
+const SRODKI_PETLI: Record<KragKarmy, { x: number; y: number }> = {
   astrologia: { x: 597.8, y: 254.4 }, hiromancja: { x: 494.3, y: 437.6 }, numerologia: { x: 699.6, y: 437.6 },
+  zwiazki: { x: 1010.5, y: 645.5 },
 };
 
 function pctX(v: number) { return `${(v / IMG_W) * 100}%`; }
@@ -194,6 +195,9 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   // podstron razem z bieżącą sekcją. Komplet 3/3 = całe koło złote + poświata.
   const postep = usePostepKarmy();
   const komplet = postep.size >= 3;
+  // Związki (mały krąg w rogu) — zawsze szare, złote tylko na hover albo po
+  // ukończeniu sekcji Związki (interpretacja pary na /dopasowanie).
+  const zwiazkiUkonczone = useZwiazkiUkonczone();
   const ukonczone = interaktywnyStart
     ? (wystartowano ? postep : WSZYSTKIE_SYSTEMY)
     : new Set<SystemKarmy>([...ukonczoneProp, ...postep]);
@@ -202,7 +206,7 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   // (interpretacja jest na dole strony, koło na górze): najpierw rozbłysk
   // zaliczonego kręgu, po trzecim — światło obiegające zewnętrzny krąg.
   const koloRef = useRef<HTMLDivElement>(null);
-  const [rozblysk, setRozblysk] = useState<SystemKarmy | null>(null);
+  const [rozblysk, setRozblysk] = useState<KragKarmy | null>(null);
   const [final, setFinal] = useState(false);
   useEffect(() => {
     const el = koloRef.current;
@@ -259,6 +263,25 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   // ograniczeniem — to osobne funkcje, nie "systemy"/etapy Karmy.
   const startBlokuje = interaktywnyStart && !wystartowano;
 
+  /** BLIK — znak ukończonego segmentu: jasne światło stale krąży po powierzchni
+   *  złotej pętli. Maska = kształt tej pętli (fill-<id>-gold.png), więc blik nie
+   *  wchodzi na pierścienie leżące na wierzchu (przeplot zostaje). Przy zapaleniu
+   *  kręgu (kolejka animacji) jeden mocniejszy przebieg. */
+  const blik = (id: KragKarmy, k: number) => {
+    const s = SRODKI_PETLI[id];
+    const maska = `url(/brand/fill-${id}-gold.png)`;
+    return (
+      <div key={`blik-${id}`} aria-hidden="true"
+        className={`kk-blik${rozblysk === id ? " kk-blik-mocny" : ""}`}
+        style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          maskImage: maska, WebkitMaskImage: maska, maskSize: "100% 100%", WebkitMaskSize: "100% 100%",
+          ["--cx" as string]: pctX(s.x), ["--cy" as string]: pctY(s.y),
+          animationDelay: rozblysk === id ? "0s" : `${-k * 2}s`,
+        } as React.CSSProperties} />
+    );
+  };
+
   return (
     <div ref={koloRef} data-kolo-karmy="" className={komplet ? "kk-komplet" : undefined}
       style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
@@ -288,24 +311,8 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
       ))}
       <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia") || aktywny === "astrologia"} />
 
-      {/* BLIK — znak ukończonego segmentu: jasne światło co kilka sekund przebiega
-          po powierzchni złotej pętli. Maska = kształt tej pętli (fill-<id>-gold.png),
-          więc blik nie wchodzi na pierścienie leżące na wierzchu (przeplot zostaje).
-          Przy zapaleniu kręgu (kolejka animacji) jeden mocniejszy przebieg. */}
-      {(["astrologia", "hiromancja", "numerologia"] as const).filter((id) => postep.has(id)).map((id, k) => {
-        const s = SRODKI_PETLI[id];
-        const maska = `url(/brand/fill-${id}-gold.png)`;
-        return (
-          <div key={`blik-${id}`} aria-hidden="true"
-            className={`kk-blik${rozblysk === id ? " kk-blik-mocny" : ""}`}
-            style={{
-              position: "absolute", inset: 0, pointerEvents: "none",
-              maskImage: maska, WebkitMaskImage: maska, maskSize: "100% 100%", WebkitMaskSize: "100% 100%",
-              ["--cx" as string]: pctX(s.x), ["--cy" as string]: pctY(s.y),
-              animationDelay: rozblysk === id ? "0s" : `${-k * 2}s`,
-            } as React.CSSProperties} />
-        );
-      })}
+      {/* blik na ukończonych pętlach-systemach (Związki — niżej, nad ich warstwami) */}
+      {(["astrologia", "hiromancja", "numerologia"] as const).filter((id) => postep.has(id)).map((id, k) => blik(id, k))}
 
       {/* finał 3/3 — jasne złote światło obiega zewnętrzny krąg Karmy, potem gaśnie
           (zostaje stała, „oddychająca" poświata całego koła: .kk-komplet) */}
@@ -340,9 +347,14 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
           kształtu ikony (fill-zwiazki-gold.png), ten sam wzorzec co pętle
           systemów wyżej, zamiast poprzedniej rozmytej poświaty (radial-
           gradient + mix-blend-mode). */}
+      {/* szara warstwa Związków (wycinek z kolo-karmy-taupe.png) — przykrywa złoto
+          pełnej grafiki, bo Związki świecą tylko na hover albo po ukończeniu */}
+      <img src="/brand/fill-zwiazki-taupe.png" alt="" aria-hidden="true"
+        style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none" }} />
       <img src="/brand/fill-zwiazki-gold.png" alt=""
-        className={`kk-fill-hover${aktywny === "zwiazki" ? " kk-fill-hover-aktywny" : ""}`}
+        className={`kk-fill-hover${zwiazkiUkonczone || aktywny === "zwiazki" ? " kk-fill-hover-aktywny" : ""}${rozblysk === "zwiazki" ? " kk-rozblysk" : ""}`}
         style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
+      {zwiazkiUkonczone && blik("zwiazki", 3)}
 
       {/* piktogramy — leżą idealnie na tle. Zapalają się złotem razem z
           pętlą na hover (nie tylko gdy trwale "ukończone"), tą samą

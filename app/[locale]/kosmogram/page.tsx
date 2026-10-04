@@ -42,6 +42,7 @@ import {
 } from "@/lib/astro/zdrowieWedyjski";
 import { odblokuj } from "@/lib/collection";
 import ZapalKrag from "@/components/ZapalKrag";
+import { wczytajSekcje } from "@/lib/zapisSekcji";
 
 /**
  * VesicaKarma nie ma "Rodzaju odczytu" (Portret/Dziecko/Finanse/Prognoza) —
@@ -90,8 +91,18 @@ export default function KosmogramPage() {
   const [birthInput, setBirthInput] = useState<BirthInput | null>(null);
   const [zwiniete, setZwiniete] = useState(false);
   const [interpretacjaGotowa, setInterpretacjaGotowa] = useState(false);
+  const [tekstInterpretacji, setTekstInterpretacji] = useState("");
+
+  // Zapis ukończonej sekcji (lib/zapisSekcji.ts) — dane urodzenia i tekst interpretacji.
+  const [zapisSekcji, setZapisSekcji] = useState<ReturnType<typeof wczytajSekcje>>(null);
 
   useEffect(() => {
+    const zapis = wczytajSekcje("astrologia");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- odczyt z localStorage po zamontowaniu
+    setZapisSekcji(zapis);
+    // Ukończona sekcja wraca z danymi, z których była liczona (nawet gdy profil się zmienił)
+    const zd = zapis?.dane as (Omit<BirthInput, "utc"> & { utc: string }) | undefined;
+    if (zd?.utc) { handleSubmit({ ...zd, utc: new Date(zd.utc) }); return; }
     // Panel jest teraz dla jednej osoby (własny profil, wspólny ze wszystkimi
     // modułami serwisu) — wracający użytkownik od razu widzi swój kosmogram,
     // bez ponownego wypełniania formularza.
@@ -452,11 +463,20 @@ export default function KosmogramPage() {
           <Interpretation
             kind="kosmogram"
             data={aiData}
-            onText={(tekst) => { if (tekst.trim().length > 200) setInterpretacjaGotowa(true); }}
+            onText={(tekst) => { if (tekst.trim().length > 200) { setInterpretacjaGotowa(true); setTekstInterpretacji(tekst); } }}
+            zapasowy={zapisSekcji && birthInput
+              && (zapisSekcji.dane as { isoDate?: string; placeName?: string; localTime?: string } | undefined)?.isoDate === birthInput.isoDate
+              && (zapisSekcji.dane as { placeName?: string }).placeName === birthInput.placeName
+              && (zapisSekcji.dane as { localTime?: string }).localTime === birthInput.localTime
+              ? zapisSekcji.tekst : undefined}
             label={`Kosmogram${birthInput?.name ? ` — ${birthInput.name}` : ""}`}
           />
           {/* po przeczytanej interpretacji — przycisk zapalający krąg Astrologii w Kole Karmy */}
-          {interpretacjaGotowa && <ZapalKrag system="astrologia" />}
+          {interpretacjaGotowa && birthInput && <ZapalKrag system="astrologia" zapis={{
+            tekst: tekstInterpretacji,
+            podpis: `Astrologia — ${birthInput.name || birthInput.isoDate}, ${birthInput.placeName}`,
+            dane: { ...birthInput, utc: birthInput.utc.toISOString() },
+          }} />}
           </SekcjaZlota>
           <SekcjaZlota tytul="Zapytaj o swój kosmogram">
           <Rozmowa mapa={aiData} tytul="Zapytaj o swój kosmogram" />
