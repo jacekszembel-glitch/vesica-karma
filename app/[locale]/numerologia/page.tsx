@@ -55,7 +55,7 @@ export default function NumerologiaPage() {
     setName(d.name);
     setRok(d.rok);
     setWynik(numerology(d.isoDate, d.name, "wedyjski", d.rok));
-    setZwiniete(true);
+    // koło danych zostaje rozwinięte — zwija się dopiero po kliknięciu „Oblicz liczby”
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 

@@ -101,7 +101,7 @@ export default function KosmogramPage() {
     setZapisSekcji(zapis);
     // Ukończona sekcja wraca z danymi, z których była liczona (nawet gdy profil się zmienił)
     const zd = zapis?.dane as (Omit<BirthInput, "utc"> & { utc: string }) | undefined;
-    if (zd?.utc) { handleSubmit({ ...zd, utc: new Date(zd.utc) }); return; }
+    if (zd?.utc) { handleSubmit({ ...zd, utc: new Date(zd.utc) }, false); return; }
     // Panel jest teraz dla jednej osoby (własny profil, wspólny ze wszystkimi
     // modułami serwisu) — wracający użytkownik od razu widzi swój kosmogram,
     // bez ponownego wypełniania formularza.
@@ -121,11 +121,13 @@ export default function KosmogramPage() {
       plec: b.plec ?? "ona",
       name: b.name,
       place: b.place,
-    });
+    }, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- tylko przy montowaniu, handleSubmit stabilny w obrębie renderu
   }, []);
 
-  function handleSubmit(input: BirthInput) {
+  /** zwin=false przy wejściu na stronę (dane z pamięci) — koło danych zostaje rozwinięte,
+   *  zwija się dopiero po kliknięciu „Zapisz”, żeby nie zajmowało miejsca. */
+  function handleSubmit(input: BirthInput, zwin = true) {
     setBirthInput(input);
     setChart(
       buildChart({
@@ -135,7 +137,7 @@ export default function KosmogramPage() {
         timeKnown: input.timeKnown,
       }),
     );
-    setZwiniete(true);
+    if (zwin) setZwiniete(true);
     odblokuj("kosmogram");
     // krąg Astrologii w Kole Karmy zapala się dopiero po interpretacji (onText niżej)
   }
