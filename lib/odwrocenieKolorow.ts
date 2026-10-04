@@ -40,10 +40,18 @@ export async function zalejZlotem(x: number, y: number): Promise<void> {
   if (!doc.startViewTransition || bezRuchu) { zmien(); return; }
   html.style.setProperty("--fala-x", `${x}px`);
   html.style.setProperty("--fala-y", `${y}px`);
+  // 1) fala: złoto wychodzi z gwiazdki i odwraca WSZYSTKIE kolory, także samo Koło
+  //    (klasa vk-fala wyłącza na ten czas ciemny medalion Koła — patrz globals.css)
   html.classList.add("vk-fala");
   try {
     await doc.startViewTransition(zmien).finished;
   } finally {
-    html.classList.remove("vk-fala");
+    // 2) zaraz po fali Koło płynnie wraca do swojego wyglądu (ciemny medalion, złote ikony)
+    html.classList.add("vk-fala-powrot");
+    try {
+      await doc.startViewTransition(() => html.classList.remove("vk-fala")).finished;
+    } finally {
+      html.classList.remove("vk-fala", "vk-fala-powrot");
+    }
   }
 }

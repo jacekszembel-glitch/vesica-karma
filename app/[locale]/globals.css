@@ -2677,7 +2677,7 @@ p, li, td, th, h1, h2, h3, .badge {
   position: absolute; border-radius: 50%; pointer-events: none; z-index: -1;
   animation: kk-oddech 5s ease-in-out infinite;
 }
-html[data-odwrocone] .kk-luna { display: none; }
+html[data-odwrocone]:not(.vk-fala) .kk-luna { display: none; }
 @keyframes kk-oddech {
   0%, 100% { box-shadow: 0 0 10px 0 rgba(230, 196, 138, 0.2); }
   50% { box-shadow: 0 0 34px 4px rgba(230, 196, 138, 0.45); }
@@ -2777,14 +2777,15 @@ html.vk-fala::view-transition-new(root) { animation: none; mix-blend-mode: norma
 html.vk-fala::view-transition-new(root) {
   /* ostra krawędź koła — bez rozmycia */
   clip-path: circle(var(--fala-r) at var(--fala-x) var(--fala-y));
-  animation: vk-fala 2.4s cubic-bezier(0.5, 0, 0.35, 1) forwards;
+  animation: vk-fala 2.8s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
 }
-@keyframes vk-fala { from { --fala-r: 0px; } to { --fala-r: 150vmax; } }
+@keyframes vk-fala { from { --fala-r: 0px; } to { --fala-r: 115vmax; } }
 /* Koło Karmy w złotym trybie: drugi raz ten sam filtr przywraca oryginalne kolory koła
    (złote ikony na ciemnych polach) — ciemny medalion na złotej stronie, bez poświaty */
 .kk-tarcza { display: none; }
-html[data-odwrocone] [data-kolo-karmy] { filter: url(#vk-odwroc); animation: none; }
-html[data-odwrocone] .kk-tarcza {
+/* w trakcie fali (.vk-fala) medalion wyłączony — Koło odwraca się razem ze stroną */
+html[data-odwrocone]:not(.vk-fala) [data-kolo-karmy] { filter: url(#vk-odwroc); animation: none; }
+html[data-odwrocone]:not(.vk-fala) .kk-tarcza {
   display: block; position: absolute; z-index: -1; border-radius: 50%;
   background: var(--bg); pointer-events: none;
 }
@@ -2794,3 +2795,7 @@ html[data-odwrocone] .kk-tarcza {
   background: none; border-radius: 0; width: auto; height: auto;
   color: var(--sand); font-weight: 600; line-height: 1; font-family: var(--font-sans);
 }
+
+/* powrót Koła do wyglądu medalionu zaraz po fali — płynne przenikanie */
+html.vk-fala-powrot::view-transition-old(root),
+html.vk-fala-powrot::view-transition-new(root) { animation-duration: 0.9s; }
