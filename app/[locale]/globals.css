@@ -2790,3 +2790,11 @@ html.vk-fala::view-transition-new(root) {
   animation: vk-fala 2.4s cubic-bezier(0.5, 0, 0.35, 1) forwards;
 }
 @keyframes vk-fala { from { --fala-r: 0px; } to { --fala-r: calc(150vmax + 160px); } }
+/* Koło Karmy w złotym trybie: drugi raz ten sam filtr przywraca oryginalne kolory koła
+   (złote ikony na ciemnych polach) — ciemny medalion na złotej stronie, bez poświaty */
+.kk-tarcza { display: none; }
+html[data-odwrocone] [data-kolo-karmy] { filter: url(#vk-odwroc); animation: none; }
+html[data-odwrocone] .kk-tarcza {
+  display: block; position: absolute; z-index: -1; border-radius: 50%;
+  background: var(--bg); pointer-events: none;
+}

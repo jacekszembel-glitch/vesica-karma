@@ -286,6 +286,14 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   return (
     <div ref={koloRef} data-kolo-karmy="" className={komplet ? "kk-komplet" : undefined}
       style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
+      {/* tarcza pod kołem — tylko w złotym trybie strony (data-odwrocone): koło zostaje wtedy
+          w oryginalnych kolorach (złote pierścienie i ikony na ciemnych polach) jako ciemny
+          medalion na złotej stronie; pola grafiki są przezroczyste, więc potrzebują tła */}
+      {[{ x: CX, y: CY, r: R_OUTER + 16 }, { x: 1010.5, y: 645.5, r: 98 }].map((d, i) => (
+        <span key={`tarcza-${i}`} aria-hidden="true" className="kk-tarcza" style={{
+          left: pctX(d.x - d.r), top: pctY(d.y - d.r), width: pctX(d.r * 2), height: pctY(d.r * 2),
+        }} />
+      ))}
       {/* baza jako dwie nałożone warstwy (taupe pod spodem, złota na wierzchu
           z przejściem opacity) zamiast twardej zmiany `src` — dzięki temu
           "Zacznij" na stronie głównej gasi koło płynnie, nie skokowo. */}
