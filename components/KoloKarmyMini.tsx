@@ -18,7 +18,12 @@ export default function KoloKarmyMini({ ukonczone = new Set<SystemKarmy>(), zwia
   const wszystkoZlote = ukonczone.size >= 3;
 
   return (
-    <div aria-hidden="true" className={wszystkoZlote ? "kk-komplet" : undefined} style={{ position: "relative", width: "100%", maxWidth, margin: "0 auto" }}>
+    <div aria-hidden="true" className={wszystkoZlote ? "kk-komplet" : undefined} style={{ position: "relative", isolation: "isolate", width: "100%", maxWidth, margin: "0 auto" }}>
+      {/* poświata kompletu — okrąg pod zewnętrznym pierścieniem Karmy (nie obejmuje Związków) */}
+      {wszystkoZlote && <span aria-hidden="true" className="kk-luna" style={{
+        left: `${((596 - 351) / 1260) * 100}%`, top: `${((378 - 351) / 761) * 100}%`,
+        width: `${(702 / 1260) * 100}%`, height: `${(702 / 761) * 100}%`,
+      }} />}
       <img src={wszystkoZlote ? "/brand/kolo-karmy-gold-clean.png" : "/brand/kolo-karmy-taupe.png"} alt=""
         style={{ display: "block", width: "100%", height: "auto" }} />
       {!wszystkoZlote && (["astrologia", "hiromancja", "numerologia"] as const).filter((id) => ukonczone.has(id)).map((id) => (

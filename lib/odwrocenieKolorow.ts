@@ -13,8 +13,11 @@
 export const KLUCZ_ODWROCENIA = "vk_odwrocone";
 export const ATRYBUT_ODWROCENIA = "data-odwrocone";
 
-/** Skrypt do <head> — ustawia tryb przed pierwszym malowaniem (bez mignięcia fioletu). */
+/** Skrypt do <head> — ustawia tryb przed pierwszym malowaniem (bez mignięcia fioletu).
+ *  Na localhost dodatkowo: ?reset w adresie czyści postęp (do testów od zera). */
 export const SKRYPT_ODWROCENIA =
+  // tylko na localhost: adres z ?reset czyści cały postęp Koła (vk_*) — test „od pierwszego kroku”
+  `try{var h=location.hostname;if((h==="localhost"||h==="127.0.0.1")&&/[?&]reset(=|&|$)/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf("vk_")===0}).forEach(function(k){localStorage.removeItem(k)});history.replaceState(null,"",location.pathname)}}catch(e){}`+
   `try{if(localStorage.getItem("${KLUCZ_ODWROCENIA}")==="1")document.documentElement.setAttribute("${ATRYBUT_ODWROCENIA}","")}catch(e){}`;
 
 export function czyOdwrocone(): boolean {

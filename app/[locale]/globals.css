@@ -2670,14 +2670,19 @@ p, li, td, th, h1, h2, h3, .badge {
   80% { stroke-dasharray: 100 0; stroke-dashoffset: -100; opacity: 0.85; }
   100% { stroke-dasharray: 100 0; stroke-dashoffset: -100; opacity: 0; }
 }
-.kk-komplet { animation: kk-oddech 5s ease-in-out infinite; }
+/* poświata kompletu — tylko wokół głównego koła (.kk-luna), bez Związków w rogu */
+.kk-luna {
+  position: absolute; border-radius: 50%; pointer-events: none; z-index: -1;
+  animation: kk-oddech 5s ease-in-out infinite;
+}
+html[data-odwrocone] .kk-luna { display: none; }
 @keyframes kk-oddech {
-  0%, 100% { filter: drop-shadow(0 0 8px rgba(230, 196, 138, 0.22)); }
-  50% { filter: drop-shadow(0 0 24px rgba(230, 196, 138, 0.5)); }
+  0%, 100% { box-shadow: 0 0 10px 0 rgba(230, 196, 138, 0.2); }
+  50% { box-shadow: 0 0 34px 4px rgba(230, 196, 138, 0.45); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .kk-rozblysk, .kk-final-krag, .kk-komplet { animation: none; }
-  .kk-komplet { filter: drop-shadow(0 0 14px rgba(230, 196, 138, 0.35)); }
+  .kk-rozblysk, .kk-final-krag, .kk-luna { animation: none; }
+  .kk-luna { box-shadow: 0 0 22px 2px rgba(230, 196, 138, 0.3); }
 }
 
 

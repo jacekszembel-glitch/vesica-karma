@@ -285,7 +285,12 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
 
   return (
     <div ref={koloRef} data-kolo-karmy="" className={komplet ? "kk-komplet" : undefined}
-      style={{ position: "relative", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
+      style={{ position: "relative", isolation: "isolate", maxWidth: 1000, margin: "0 auto", containerType: "inline-size" } as React.CSSProperties}>
+      {/* poświata kompletu — okrąg pod zewnętrznym pierścieniem Karmy (nie obejmuje Związków) */}
+      {komplet && <span aria-hidden="true" className="kk-luna" style={{
+        left: `${((596 - 351) / 1260) * 100}%`, top: `${((378 - 351) / 761) * 100}%`,
+        width: `${(702 / 1260) * 100}%`, height: `${(702 / 761) * 100}%`,
+      }} />}
       {/* tarcza pod kołem — tylko w złotym trybie strony (data-odwrocone): koło zostaje wtedy
           w oryginalnych kolorach (złote pierścienie i ikony na ciemnych polach) jako ciemny
           medalion na złotej stronie; pola grafiki są przezroczyste, więc potrzebują tła */}
@@ -324,7 +329,7 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
       {(["astrologia", "hiromancja", "numerologia"] as const).filter((id) => postep.has(id)).map((id, k) => blik(id, k))}
 
       {/* finał 3/3 — jasne złote światło obiega zewnętrzny krąg Karmy, potem gaśnie
-          (zostaje stała, „oddychająca" poświata całego koła: .kk-komplet) */}
+          (zostaje stała, „oddychająca" poświata głównego koła: .kk-luna) */}
       {final && (
         <svg viewBox={`0 0 ${IMG_W} ${IMG_H}`} aria-hidden="true" className="kk-final"
           style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
