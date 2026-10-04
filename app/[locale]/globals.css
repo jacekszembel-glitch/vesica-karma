@@ -2764,3 +2764,9 @@ p, li, td, th, h1, h2, h3, .badge {
   animation: vk-fala 3.2s cubic-bezier(0.25, 0.1, 0.5, 1) forwards;
 }
 @keyframes vk-fala { from { --fala-r: 0px; } to { --fala-r: calc(75vmax + 520px); } }
+
+/* Numerologia: zamiast gwiazdek malutkie migoczące cyfry (Starfield cyfry) */
+.star-cyfra {
+  background: none; border-radius: 0; width: auto; height: auto;
+  color: var(--sand); font-weight: 600; line-height: 1; font-family: var(--font-sans);
+}

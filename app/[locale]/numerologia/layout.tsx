@@ -14,7 +14,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <>
       <div className="container" style={{ paddingTop: 36 }}>
         <div className="kolo-karmy-wrap" style={{ position: "relative", margin: "0 auto" }}>
-          <Starfield count={50} centerX={47.3} centerY={49.7} />
+          <Starfield count={50} centerX={47.3} centerY={49.7} cyfry />
           <div style={{ position: "relative", zIndex: 1 }}>
             <KoloKarmy ukonczone={new Set(["numerologia"])} />
           </div>
