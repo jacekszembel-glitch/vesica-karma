@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Term from "@/components/Term";
-import { Link } from "@/i18n/navigation";
 import HiromancjaZdjecie, { type ZdjecieDane } from "@/components/HiromancjaZdjecie";
 import HiromancjaOdczyt from "@/components/HiromancjaOdczyt";
 import SekcjaZlota from "@/components/SekcjaZlota";
@@ -205,22 +204,15 @@ export default function HiromancjaPage() {
       )}
 
       {obaZdjeciaGotowe && (
-        <div className="fade-up" style={{ marginTop: 40, maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
-          <div className="skrot-hero-linia" style={{ marginTop: 0 }} />
-          <div className="sekcja-zlota-ai">
+        <div className="fade-up sekcja-zlota-ai">
+          <SekcjaZlota tytul="Odczyt dłoni">
           <HiromancjaOdczyt
             wiodaca={{ imageBase64: zdjecia[pismoReka]!.base64, imageMediaType: zdjecia[pismoReka]!.mediaType }}
             bierna={{ imageBase64: zdjecia[rekaBierna]!.base64, imageMediaType: zdjecia[rekaBierna]!.mediaType }}
             plec={plec}
             imie={imie.trim() || undefined}
           />
-          </div>
-
-          <p className="muted" style={{ fontSize: "0.78rem", marginTop: 20, textAlign: "center" }}>
-            To na razie samodzielna strona — w przyszłości ten odczyt dołączy do{" "}
-            <Link href="/karma" style={{ color: "var(--sand)", textDecoration: "underline" }}>Karmy</Link> jako trzeci filar, obok
-            numerologii i astrologii.
-          </p>
+          </SekcjaZlota>
         </div>
       )}
     </div>

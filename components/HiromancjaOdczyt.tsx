@@ -127,42 +127,43 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
 
   const przedOdczytem = !text && !busy;
 
+  // Ten sam układ co Interpretation.tsx (kosmogram, numerologia): w .sekcja-zlota-ai karta jest
+  // rozebrana z ramek, własne nagłówki h3 schowane (tytuł daje SekcjaZlota), a przycisk
+  // odczytu to złote koło — dzięki temu odczyt dłoni wygląda jak reszta strony.
   return (
     <div className="card" style={przedOdczytem ? {
-      marginTop: 20, textAlign: "center", border: "1px solid var(--line-gold)",
-      background: "rgba(230,196,138,0.05)",
-    } : { marginTop: 20 }}>
+      marginTop: 24, textAlign: "center", border: "1px solid var(--line-gold)",
+      background: "rgba(230,196,138,0.05)", boxShadow: "0 0 32px -14px var(--primary)",
+    } : { marginTop: 24 }}>
       {przedOdczytem ? (
         <>
-          <p className="eyebrow" style={{ marginBottom: 6 }}>Odczyt AI — obserwacja jakościowa</p>
-          <p className="muted" style={{ maxWidth: 480, margin: "0 auto 18px", lineHeight: 1.6, fontSize: "0.88rem" }}>
+          <h3 style={{ color: "var(--primary-soft)", fontSize: "1.5rem" }}>✦ Odczyt dłoni</h3>
+          <p className="muted" style={{ maxWidth: 480, margin: "8px auto 20px", lineHeight: 1.6 }}>
             Claude spojrzy na obie dłonie naraz i opisze ich kształt oraz widoczne linie serca, głowy,
-            życia i losu — osobno dla wiodącej i biernej, plus co je łączy lub różni. To subiektywny
-            odczyt AI, nie pomiar.
+            życia i losu — osobno dla wiodącej i biernej, plus co je łączy lub różni.
           </p>
-          <button className="btn btn-primary" onClick={generate}>
-            {error ? "Spróbuj ponownie" : "Odczytaj obie dłonie (AI)"}
+          <button className="btn btn-primary" onClick={generate} style={{ padding: "14px 36px", fontSize: "1rem" }}>
+            {error ? "Spróbuj ponownie" : "Odczytaj dłonie"}
           </button>
         </>
       ) : (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-          <p className="eyebrow" style={{ margin: 0 }}>Odczyt AI — obserwacja jakościowa</p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+          <h3 style={{ color: "var(--primary-soft)" }}>✦ Odczyt dłoni</h3>
           {!busy && (!text || !!error) && (
-            <button className="btn btn-ghost" onClick={generate} disabled={busy} style={{ fontSize: "0.82rem" }}>
-              {busy ? "Odczytuję…" : "Spróbuj ponownie"}
-            </button>
+            <button className="btn btn-ghost" onClick={generate}>Spróbuj ponownie</button>
           )}
         </div>
       )}
-      {error && <p style={{ color: "var(--warn)", marginTop: 12, fontSize: "0.85rem" }}>{error}</p>}
+      {error && <p style={{ color: "var(--warn)", marginTop: 12 }}>{error}</p>}
       {busy && !text && <PieczecOdslaniania tytul="Dłonie się odsłaniają…" mysli={MYSLI_DLONI} podpis="odczyt powstaje z Twoich zdjęć obu dłoni" />}
       {text && (
         <>
-          <hr className="gold-rule" style={{ margin: "16px 0" }} />
-          <div className="interpretation interp-odslona" style={{ fontSize: "0.9rem", textAlign: "left" }}>
+          <hr className="gold-rule" style={{ margin: "18px 0" }} />
+          <div className="interpretation interp-odslona">
             {renderMd(text)}
+            {!busy && <span className="interp-skan" aria-hidden="true" />}
           </div>
-          <p className="muted" style={{ fontSize: "0.8rem", marginTop: 16 }}>
+          <p className="muted" style={{ fontSize: "0.8rem", marginTop: 18 }}>
             To subiektywny odczyt AI na podstawie zdjęć, nie pomiar. Jakość linii na fotografii zależy
             od oświetlenia, rozdzielczości i kąta — traktuj to jako inspirację do refleksji, nie diagnozę.
           </p>
