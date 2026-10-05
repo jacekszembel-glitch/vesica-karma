@@ -70,6 +70,8 @@ export default async function RootLayout({
               values="-1 0 0 0 0.9922  0 -1 0 0 0.8275  0 0 -1 0 0.6980  0 0 0 1 0" />
           </filter>
         </svg>
+        {/* warstwa odwracająca kolory na złotej stronie (globals.css .vk-odwracacz) */}
+        <div className="vk-odwracacz" aria-hidden="true" />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <SiteHeader />
           <main>{children}</main>

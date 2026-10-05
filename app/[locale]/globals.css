@@ -2753,7 +2753,15 @@ html[data-odwrocone]:not(.vk-fala) .kk-luna { display: none; }
 /* ── Odwrócenie kolorów po ukończeniu Koła Karmy (lib/odwrocenieKolorow.ts) ──
    filtr na <html> zamienia fiolet ↔ złoto; turkusowe teksty i linie dostają przed
    filtrem złoty kolor, więc po filtrze są ciemnofioletowe na złotym tle */
-html[data-odwrocone] { filter: url(#vk-odwroc); }
+/* odwrócenie robi warstwa wielkości ekranu z trybem „difference” (|K − c| = K − c dla
+   K = fiolet + złoto) — wcześniejszy filtr SVG na całym <html> przeglądarka z kartą
+   graficzną potrafiła pominąć przy długich stronach (strona zostawała fioletowa,
+   a samo Koło w negatywie). Warstwa ma rozmiar okna, więc działa przy każdej długości. */
+.vk-odwracacz { display: none; }
+html[data-odwrocone] .vk-odwracacz {
+  display: block; position: fixed; inset: 0; z-index: 2147483000; pointer-events: none;
+  background: rgb(253, 211, 178); mix-blend-mode: difference;
+}
 html[data-odwrocone] {
   --text: #e6c48a;
   --muted: #d9b97f;
