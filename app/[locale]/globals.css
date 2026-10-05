@@ -2795,9 +2795,11 @@ html[data-odwrocone]:not(.vk-fala) .kk-tarcza {
   color: var(--sand); font-weight: 600; line-height: 1; font-family: var(--font-sans);
 }
 
-/* powrót Koła do wyglądu medalionu zaraz po fali — płynne przenikanie */
+/* powrót Koła do wyglądu medalionu zaraz po fali — druga plama z gwiazdki, tylko do brzegu Koła */
 html.vk-fala-powrot::view-transition-old(root),
-html.vk-fala-powrot::view-transition-new(root) { animation-duration: 0.9s; }
+html.vk-fala-powrot::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html.vk-fala-powrot::view-transition-new(root) { animation: vk-fala-kolo 1.3s cubic-bezier(0.4, 0.1, 0.6, 0.9) forwards; }
+@keyframes vk-fala-kolo { from { --fala-r: 0px; } to { --fala-r: var(--fala-kolo-r, 700px); } }
 
 /* przed złotą falą znikają wszystkie napisy pod Kołem (zostaje samo Koło);
    strona Twoja Karma zdejmuje klasę po wejściu, więc jej treść łagodnie się pojawia */
