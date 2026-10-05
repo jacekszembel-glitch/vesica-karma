@@ -24,6 +24,10 @@ export const SKRYPT_ODWROCENIA =
   `try{var h2=location.hostname;if((h2==="localhost"||h2==="127.0.0.1")&&/[?&]komplet(=|&|$)/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf("vk_")===0}).forEach(function(k){localStorage.removeItem(k)});localStorage.setItem("vk_systemy_karmy",'["astrologia","hiromancja","numerologia"]');history.replaceState(null,"",location.pathname)}}catch(e){}`+
   `try{if(localStorage.getItem("${KLUCZ_ODWROCENIA}")==="1")document.documentElement.setAttribute("${ATRYBUT_ODWROCENIA}","")}catch(e){}`;
 
+/** Klasa na <html>: treść pod Kołem znika przed falą (globals.css). Zdejmuje ją dopiero
+ *  strona Twoja Karma po wejściu — jej napisy wtedy łagodnie się pojawiają. */
+export const KLASA_ZNIKANIA = "vk-znikaj";
+
 export function czyOdwrocone(): boolean {
   return typeof document !== "undefined" && document.documentElement.hasAttribute(ATRYBUT_ODWROCENIA);
 }
@@ -40,6 +44,9 @@ export async function zalejZlotem(x: number, y: number): Promise<void> {
   const bezRuchu = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } };
   if (!doc.startViewTransition || bezRuchu) { zmien(); return; }
+  // 0) najpierw znikają wszystkie napisy pod Kołem — zostaje samo Koło, dopiero potem fala
+  html.classList.add(KLASA_ZNIKANIA);
+  await new Promise((r) => setTimeout(r, 650));
   // nieregularny kształt „rozlanego mleka”: wielokąt wokół gwiazdki, promień w każdym
   // kierunku to fala (--fala-r) razy współczynnik z nałożonych sinusów — za każdym razem
   // trochę inne łaty, wypustki i zatoczki. Reguła wstrzykiwana do <style>, bo --fala-r

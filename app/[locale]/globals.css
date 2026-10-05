@@ -2798,3 +2798,10 @@ html[data-odwrocone]:not(.vk-fala) .kk-tarcza {
 /* powrót Koła do wyglądu medalionu zaraz po fali — płynne przenikanie */
 html.vk-fala-powrot::view-transition-old(root),
 html.vk-fala-powrot::view-transition-new(root) { animation-duration: 0.9s; }
+
+/* przed złotą falą znikają wszystkie napisy pod Kołem (zostaje samo Koło);
+   strona Twoja Karma zdejmuje klasę po wejściu, więc jej treść łagodnie się pojawia */
+main > *, footer { transition: opacity 0.6s ease; }
+html.vk-znikaj main > :not(:has([data-kolo-karmy])),
+html.vk-znikaj footer,
+html.vk-znikaj .kk-tip { opacity: 0; pointer-events: none; }

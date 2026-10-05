@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import ZapisanyOdczyt from "@/components/ZapisanyOdczyt";
 import { wczytajSekcje, type ZapisSekcji } from "@/lib/zapisSekcji";
+import { KLASA_ZNIKANIA } from "@/lib/odwrocenieKolorow";
 import type { KragKarmy } from "@/lib/koloKarmyGeometria";
 import { ukonczoneSystemyKarmy, type SystemKarmy } from "@/lib/koloKarmyGeometria";
 
@@ -121,6 +122,12 @@ export default function Page() {
   const [ukonczone, setUkonczone] = useState<Set<SystemKarmy>>(new Set());
   // odczyty ukończonych sekcji (zapisane przy zapaleniu kręgu) — do podglądu w każdej chwili
   const [zapisy, setZapisy] = useState<ZapisSekcji[]>([]);
+  // po złotej fali (lib/odwrocenieKolorow.ts) treść przychodzi ukryta — pokaż ją łagodnie
+  useEffect(() => {
+    const t = setTimeout(() => document.documentElement.classList.remove(KLASA_ZNIKANIA), 200);
+    return () => clearTimeout(t);
+  }, []);
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- hydratacja z localStorage po zamontowaniu
     setUkonczone(ukonczoneSystemyKarmy());
