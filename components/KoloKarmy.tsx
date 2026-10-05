@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { zalejZlotem } from "@/lib/odwrocenieKolorow";
@@ -148,7 +147,19 @@ function IkonaCrossfade({ id, box, zlote }: {
   );
 }
 
-const TIP_W = 168;
+/** Podpisy elementów Koła w stylu satelitów (zamiast dymków): kropka na elemencie, kreska
+ *  wychodząca poza Koło do łokcia, krótka pozioma kreska i nazwa obok — bez ramki.
+ *  Współrzędne w przestrzeni pliku (IMG_W × IMG_H); strona = w którą stronę idzie podpis. */
+const PODPISY: Record<string, { kropka: [number, number]; lokiec: [number, number]; strona: "left" | "right" }> = {
+  astrologia: { kropka: [650, 118], lokiec: [965, 62], strona: "right" },
+  kiedy: { kropka: [733, 298], lokiec: [985, 262], strona: "right" },
+  numerologia: { kropka: [800, 430], lokiec: [985, 380], strona: "right" },
+  gdzie: { kropka: [462, 298], lokiec: [335, 262], strona: "left" },
+  panel: { kropka: [566, 340], lokiec: [215, 150], strona: "left" },
+  hiromancja: { kropka: [400, 470], lokiec: [210, 540], strona: "left" },
+  kto: { kropka: [596, 545], lokiec: [300, 735], strona: "left" },
+  zwiazki: { kropka: [1010, 560], lokiec: [1095, 505], strona: "right" },
+};
 
 // SystemKarmy — systemy, które mogą mieć stan „ukończony" (wtedy ich pętla
 // świeci złotem zamiast domyślnego taupe; Faza 1 reskinu: stan na sztywno
@@ -180,7 +191,6 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
     lines: [t(`satelity.${s.id}.linia1`), t(`satelity.${s.id}.linia2`)],
   }));
   const [aktywny, setAktywny] = useState<string | null>(null);
-  const [tip, setTip] = useState<{ label: string; left: number; top: number } | null>(null);
   const [hoverTytul, setHoverTytul] = useState(false);
   const { wystartowano } = useKoloKarmyStart();
   // PRAWDZIWY POSTĘP (system zaliczony po interpretacji) — widoczny wszędzie, gdzie jest
@@ -236,20 +246,12 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
     return () => { obs.disconnect(); timery.forEach(clearTimeout); };
   }, []);
 
-  const wskaz = (id: string, label: string) => (e: React.MouseEvent | React.FocusEvent) => {
-    setAktywny(id);
-    if (id === "astrokartografia" || id === "mahadasze" || id === "karma") return; // mają własny stały podpis
-    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    let left = r.left + r.width / 2 - TIP_W / 2;
-    left = Math.max(10, Math.min(left, window.innerWidth - TIP_W - 10));
-    setTip({ label, left, top: r.top - 44 });
-  };
-  const schowaj = () => { setAktywny(null); setTip(null); };
-
-  const dymek = tip && typeof document !== "undefined" ? createPortal(
-    <span className="kk-tip" style={{ left: tip.left, top: tip.top, width: TIP_W }}>{tip.label}</span>,
-    document.body,
-  ) : null;
+  // nazwa elementu pod kursorem — podpis z kropką i kreską (PODPISY niżej), jak przy satelitach
+  const wskaz = (id: string, _label: string) => () => { void _label; setAktywny(id); };
+  const schowaj = () => setAktywny(null);
+  const etykiety: Record<string, string> = Object.fromEntries(
+    [...HOTSPOTY, ...DANE_WSPOLNE].map((h) => [h.id, h.label]),
+  );
 
   // Gdy wszystkie trzy systemy są „ukończone" (domyślny stan na stronie
   // głównej), wracamy do oryginalnej, w pełni złotej grafiki — łącznie
@@ -407,6 +409,20 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
           onMouseEnter={() => setHoverTytul(true)}
           onMouseLeave={() => setHoverTytul(false)}
         />
+        {/* podpisy elementów Koła (bez dymków) — ten sam styl co satelity */}
+        {Object.entries(PODPISY).map(([id, pd]) => {
+          const [kx, ky] = pd.kropka, [lx, ly] = pd.lokiec;
+          const kx2 = lx + (pd.strona === "left" ? -55 : 55);
+          return (
+            <g key={`podpis-${id}`} className={`kk-ramie kk-podpis${aktywny === id ? " kk-ramie-aktywna" : ""}`}>
+              <circle cx={kx} cy={ky} r="7" />
+              <line x1={kx} y1={ky} x2={lx} y2={ly} />
+              <line x1={lx} y1={ly} x2={kx2} y2={ly} />
+              <text x={kx2 + (pd.strona === "left" ? -8 : 8)} y={ly + 5}
+                textAnchor={pd.strona === "left" ? "end" : "start"} className="kk-satelita-tekst">{etykiety[id]}</text>
+            </g>
+          );
+        })}
         {SATELITY.map((s) => {
           const active = aktywny === s.id;
           const out = naOkregu(s.angle, R_OUTER + s.out);
@@ -538,7 +554,6 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
         />
       ))}
 
-      {dymek}
     </div>
   );
 }

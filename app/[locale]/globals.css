@@ -2816,3 +2816,8 @@ html:not([data-odwrocone]) .kk-srodek-puls { animation: kk-srodek-puls 2.6s ease
 @media (prefers-reduced-motion: reduce) {
   html:not([data-odwrocone]) .kk-srodek-puls { animation: none; opacity: 0.6; }
 }
+
+/* podpisy elementów Koła (zamiast dymków) — cieńsza kreska niż ramiona satelitów,
+   bo przechodzi przez pierścienie w środku Koła */
+.kk-podpis { stroke-width: 2.5; }
+.kk-podpis circle { stroke-width: 3; }
