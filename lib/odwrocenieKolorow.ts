@@ -65,30 +65,41 @@ export async function zalejZlotem(x: number, y: number): Promise<void> {
   // kierunku to fala (--fala-r) razy współczynnik z nałożonych sinusów — za każdym razem
   // trochę inne łaty, wypustki i zatoczki. Reguła wstrzykiwana do <style>, bo --fala-r
   // animuje się na samym pseudo-elemencie przejścia.
-  // Druga fala (powrót Koła ze złotego negatywu) ma własny, inny kształt plamy i zasięg
-  // tylko do brzegu Koła razem ze Związkami (--fala-kolo-r).
-  const kolo = document.querySelector("[data-kolo-karmy]")?.getBoundingClientRect();
-  const zasiegKola = kolo ? (kolo.width * 620) / 1260 / 0.66 : 700;
-  html.style.setProperty("--fala-kolo-r", `${Math.round(zasiegKola)}px`);
   let styl = document.getElementById("vk-fala-ksztalt");
   if (!styl) { styl = document.createElement("style"); styl.id = "vk-fala-ksztalt"; document.head.appendChild(styl); }
-  styl.textContent =
-    `html.vk-fala::view-transition-new(root){clip-path:${ksztaltPlamy(x, y)}}` +
-    `html.vk-fala-powrot::view-transition-new(root){clip-path:${ksztaltPlamy(x, y)}}`;
+  styl.textContent = `html.vk-fala::view-transition-new(root){clip-path:${ksztaltPlamy(x, y)}}`;
   // 1) fala: złoto wychodzi z gwiazdki i odwraca WSZYSTKIE kolory, także samo Koło
   //    (klasa vk-fala wyłącza na ten czas ciemny medalion Koła — patrz globals.css)
   html.classList.add("vk-fala");
+  const przejscie = doc.startViewTransition(zmien);
+  // 2) tuż za nią druga plama z gwiazdki — tylko w obrębie Koła — przywraca mu złoto
+  //    z negatywu. Nowy widok przejścia jest „na żywo”, więc druga fala to zwykły klon
+  //    Koła w wyglądzie medalionu, odsłaniany własną plamą, nałożony na oryginał.
+  const druga = new Promise<void>((koniec) => setTimeout(() => {
+    const kolo = document.querySelector<HTMLElement>("[data-kolo-karmy]");
+    if (!kolo) { koniec(); return; }
+    const r = kolo.getBoundingClientRect();
+    const klon = kolo.cloneNode(true) as HTMLElement;
+    klon.removeAttribute("data-kolo-karmy");
+    klon.classList.add("vk-kolo-klon");
+    klon.setAttribute("aria-hidden", "true");
+    Object.assign(klon.style, {
+      position: "absolute", left: `${kolo.offsetLeft}px`, top: `${kolo.offsetTop}px`,
+      width: `${kolo.offsetWidth}px`, margin: "0", maxWidth: "none",
+    });
+    // zasięg do brzegu Koła razem ze Związkami
+    klon.style.setProperty("--fala-kolo-r", `${Math.round((r.width * 620) / 1260 / 0.66)}px`);
+    klon.style.clipPath = ksztaltPlamy(x - r.left, y - r.top);
+    klon.addEventListener("animationend", (e) => { if (e.target === klon) koniec(); });
+    setTimeout(koniec, 2500); // zabezpieczenie
+    kolo.parentElement?.appendChild(klon);
+  }, 280));
   try {
-    await doc.startViewTransition(zmien).finished;
+    await Promise.all([przejscie.finished, druga]);
   } finally {
-    // 2) zaraz po fali druga taka sama plama z gwiazdki — tylko w obrębie Koła — przywraca
-    //    mu złoto z negatywu (ciemny medalion, złote pierścienie i ikony); reszta strony
-    //    jest w obu widokach identyczna, więc druga fala widać wyłącznie na Kole
-    html.classList.add("vk-fala-powrot");
-    try {
-      await doc.startViewTransition(() => html.classList.remove("vk-fala")).finished;
-    } finally {
-      html.classList.remove("vk-fala", "vk-fala-powrot");
-    }
+    // oryginał przechodzi w medalion (identyczny z klonem), klon znika — bez mignięcia
+    html.classList.remove("vk-fala");
+    document.querySelectorAll(".vk-kolo-klon").forEach((k) => k.remove());
   }
+
 }

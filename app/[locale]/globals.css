@@ -2795,10 +2795,17 @@ html[data-odwrocone]:not(.vk-fala) .kk-tarcza {
   color: var(--sand); font-weight: 600; line-height: 1; font-family: var(--font-sans);
 }
 
-/* powrót Koła do wyglądu medalionu zaraz po fali — druga plama z gwiazdki, tylko do brzegu Koła */
-html.vk-fala-powrot::view-transition-old(root),
-html.vk-fala-powrot::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-html.vk-fala-powrot::view-transition-new(root) { animation: vk-fala-kolo 1.3s cubic-bezier(0.4, 0.1, 0.6, 0.9) forwards; }
+/* druga fala tuż za pierwszą: klon Koła w wyglądzie medalionu (lib/odwrocenieKolorow.ts)
+   odsłaniany od gwiazdki własną plamą, tylko do brzegu Koła */
+.vk-kolo-klon {
+  filter: url(#vk-odwroc); pointer-events: none; z-index: 2;
+  animation: vk-fala-kolo 1.3s cubic-bezier(0.4, 0.1, 0.6, 0.9) forwards;
+}
+.vk-kolo-klon .kk-tarcza {
+  display: block; position: absolute; z-index: -1; border-radius: 50%;
+  background: var(--bg); pointer-events: none;
+}
+.vk-kolo-klon .kk-ramie, .vk-kolo-klon .kk-tytul, .vk-kolo-klon .kk-luna { display: none; }
 @keyframes vk-fala-kolo { from { --fala-r: 0px; } to { --fala-r: var(--fala-kolo-r, 700px); } }
 
 /* przed złotą falą znikają wszystkie napisy pod Kołem (zostaje samo Koło);
@@ -2806,7 +2813,9 @@ html.vk-fala-powrot::view-transition-new(root) { animation: vk-fala-kolo 1.3s cu
 main > *, footer { transition: opacity 0.6s ease; }
 html.vk-znikaj main > :not(:has([data-kolo-karmy])),
 html.vk-znikaj footer,
-html.vk-znikaj .kk-tip { opacity: 0; pointer-events: none; }
+html.vk-znikaj .kk-tip,
+html.vk-znikaj .kk-ramie,
+html.vk-znikaj .kk-tytul { opacity: 0; pointer-events: none; }
 
 /* środek Koła (gwiazdka) po ukończeniu trzech systemów — delikatnie pulsuje złotem,
    zapraszając do kliknięcia; po zalaniu strony złotem już nie pulsuje */
