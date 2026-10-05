@@ -361,7 +361,7 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
           opacity: interaktywnyStart && !wystartowano ? 0 : 1, transition: "opacity 0.9s ease",
         }} />
       <img src="/brand/fill-panel-gold.png" alt="" aria-hidden="true"
-        className={`kk-fill-hover${komplet && aktywny === "panel" ? " kk-fill-hover-aktywny" : ""}`}
+        className={`kk-fill-hover${komplet && aktywny === "panel" ? " kk-fill-hover-aktywny" : ""}${komplet && aktywny !== "panel" ? " kk-srodek-puls" : ""}`}
         style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
       {/* podświetlenie Związków na hover — realny, ostry wycinek własnego
           kształtu ikony (fill-zwiazki-gold.png), ten sam wzorzec co pętle

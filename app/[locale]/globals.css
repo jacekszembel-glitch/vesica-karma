@@ -2805,3 +2805,14 @@ main > *, footer { transition: opacity 0.6s ease; }
 html.vk-znikaj main > :not(:has([data-kolo-karmy])),
 html.vk-znikaj footer,
 html.vk-znikaj .kk-tip { opacity: 0; pointer-events: none; }
+
+/* środek Koła (gwiazdka) po ukończeniu trzech systemów — delikatnie pulsuje złotem,
+   zapraszając do kliknięcia; po zalaniu strony złotem już nie pulsuje */
+html:not([data-odwrocone]) .kk-srodek-puls { animation: kk-srodek-puls 2.6s ease-in-out infinite; }
+@keyframes kk-srodek-puls {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.85; filter: drop-shadow(0 0 10px rgba(230, 196, 138, 0.55)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-odwrocone]) .kk-srodek-puls { animation: none; opacity: 0.6; }
+}
