@@ -2837,3 +2837,7 @@ html:not([data-odwrocone]) .kk-srodek-puls { animation: kk-srodek-puls 2.6s ease
    (podpisy elementów, satelity i tytuł „Twoje Koło Karmy”) — tu są zbędne */
 html[data-odwrocone] .kk-ramie,
 html[data-odwrocone] .kk-tytul { display: none; }
+
+/* złota strona: środek z gwiazdką zostaje złoty na stałe — funkcja Koła wypełniona */
+html[data-odwrocone] .kk-srodek-taupe { opacity: 0 !important; }
+html[data-odwrocone] .kk-srodek-zloty { opacity: 1 !important; animation: none; }

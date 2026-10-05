@@ -357,13 +357,13 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
       {/* środek Koła (Twoja Karma) — złoty tylko na starcie strony głównej (przed „Zacznij”),
           potem gaśnie razem z resztą (szara warstwa z kolo-karmy-taupe.png). Aktywny dopiero po
           ukończeniu trzech sekcji: wtedy złoty pod kursorem, a kliknięcie wylewa złoto na stronę */}
-      <img src="/brand/fill-panel-taupe.png" alt="" aria-hidden="true"
+      <img src="/brand/fill-panel-taupe.png" alt="" aria-hidden="true" className="kk-srodek-taupe"
         style={{
           position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none",
           opacity: interaktywnyStart && !wystartowano ? 0 : 1, transition: "opacity 0.9s ease",
         }} />
       <img src="/brand/fill-panel-gold.png" alt="" aria-hidden="true"
-        className={`kk-fill-hover${komplet && aktywny === "panel" ? " kk-fill-hover-aktywny" : ""}${komplet && aktywny !== "panel" ? " kk-srodek-puls" : ""}`}
+        className={`kk-fill-hover kk-srodek-zloty${komplet && aktywny === "panel" ? " kk-fill-hover-aktywny" : ""}${komplet && aktywny !== "panel" ? " kk-srodek-puls" : ""}`}
         style={{ left: 0, top: 0, width: "100%", height: "100%" }} />
       {/* podświetlenie Związków na hover — realny, ostry wycinek własnego
           kształtu ikony (fill-zwiazki-gold.png), ten sam wzorzec co pętle
