@@ -2841,3 +2841,17 @@ html[data-odwrocone] .kk-tytul { display: none; }
 /* złota strona: środek z gwiazdką zostaje złoty na stałe — funkcja Koła wypełniona */
 html[data-odwrocone] .kk-srodek-taupe { opacity: 0 !important; }
 html[data-odwrocone] .kk-srodek-zloty { opacity: 1 !important; animation: none; }
+
+/* blik krążący po największym pierścieniu (krąg Karmy) — tylko na złotej stronie;
+   maska to pas pierścienia (r 294–351 px grafiki 1260 px szerokości, w jednostkach cqw) */
+.kk-blik-krag { display: none; }
+html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
+  display: block;
+  --krag-wew: calc(294 / 1260 * 100cqw);
+  --krag-zew: calc(351 / 1260 * 100cqw);
+  -webkit-mask-image: radial-gradient(circle at var(--cx) var(--cy),
+    transparent calc(var(--krag-wew) - 1px), #000 var(--krag-wew), #000 var(--krag-zew), transparent calc(var(--krag-zew) + 1px));
+  mask-image: radial-gradient(circle at var(--cx) var(--cy),
+    transparent calc(var(--krag-wew) - 1px), #000 var(--krag-wew), #000 var(--krag-zew), transparent calc(var(--krag-zew) + 1px));
+  animation-duration: 9s;
+}

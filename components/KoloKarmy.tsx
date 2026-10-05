@@ -327,6 +327,12 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
       ))}
       <MoonStars box={SEGMENT_GAPY.astrologia} zlote={ukonczone.has("astrologia") || aktywny === "astrologia"} />
 
+      {/* blik na największym pierścieniu (krąg Karmy) — tylko na złotej stronie, po wylaniu
+          złota z gwiazdki; maska = sam pas pierścienia (globals.css .kk-blik-krag) */}
+      <div aria-hidden="true" className="kk-blik kk-blik-krag" style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        ["--cx" as string]: pctX(CX), ["--cy" as string]: pctY(CY),
+      } as React.CSSProperties} />
       {/* blik na ukończonych pętlach-systemach (Związki bez blika — tylko spokojne złoto) */}
       {(["astrologia", "hiromancja", "numerologia"] as const).filter((id) => postep.has(id)).map((id, k) => blik(id, k))}
 
