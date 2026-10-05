@@ -197,7 +197,7 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   const wylejKolor = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     const r = e.currentTarget.getBoundingClientRect();
-    void zalejZlotem(r.left + r.width / 2, r.top + r.height / 2).then(() => router.push("/panel"));
+    void zalejZlotem(r.left + r.width / 2, r.top + r.height / 2).then(() => router.push("/panel", { scroll: false }));
   };
   const ukonczone = interaktywnyStart
     ? (wystartowano ? postep : WSZYSTKIE_SYSTEMY)

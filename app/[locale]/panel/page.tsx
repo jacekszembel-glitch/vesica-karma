@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import KoloKarmyMini from "@/components/KoloKarmyMini";
-import { useZwiazkiUkonczone } from "@/components/usePostepKarmy";
 import ZapisanyOdczyt from "@/components/ZapisanyOdczyt";
 import { wczytajSekcje, type ZapisSekcji } from "@/lib/zapisSekcji";
 import type { KragKarmy } from "@/lib/koloKarmyGeometria";
@@ -130,7 +128,6 @@ export default function Page() {
       .map((id) => wczytajSekcje(id)).filter((z): z is ZapisSekcji => !!z));
   }, []);
 
-  const zwiazki = useZwiazkiUkonczone();
 
   const brakujace = SYSTEMY.filter((s) => !ukonczone.has(s.id));
   const strzalkaPasuje = brakujace.length > 0 && brakujace[0].id === SYSTEMY[0].id;
@@ -138,7 +135,6 @@ export default function Page() {
 
   return (
     <div className="container section" style={{ maxWidth: 640, textAlign: "center" }}>
-      <KoloKarmyMini ukonczone={ukonczone} zwiazki={zwiazki} />
 
       <h1 style={{ margin: "28px 0 18px" }}>Twoja Karma</h1>
       <div className="ornament" style={{ marginBottom: 32 }} />
