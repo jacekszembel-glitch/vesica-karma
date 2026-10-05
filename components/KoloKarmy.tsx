@@ -151,7 +151,7 @@ function IkonaCrossfade({ id, box, zlote }: {
  *  wychodząca poza Koło do łokcia, krótka pozioma kreska i nazwa obok — bez ramki.
  *  Współrzędne w przestrzeni pliku (IMG_W × IMG_H); strona = w którą stronę idzie podpis. */
 const PODPISY: Record<string, { kropka: [number, number]; lokiec: [number, number]; strona: "left" | "right" }> = {
-  astrologia: { kropka: [650, 118], lokiec: [965, 62], strona: "right" },
+  astrologia: { kropka: [650, 118], lokiec: [800, 58], strona: "right" },
   kiedy: { kropka: [733, 298], lokiec: [985, 262], strona: "right" },
   numerologia: { kropka: [800, 430], lokiec: [985, 380], strona: "right" },
   gdzie: { kropka: [462, 298], lokiec: [335, 262], strona: "left" },
