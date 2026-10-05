@@ -2821,3 +2821,8 @@ html:not([data-odwrocone]) .kk-srodek-puls { animation: kk-srodek-puls 2.6s ease
    bo przechodzi przez pierścienie w środku Koła */
 .kk-podpis { stroke-width: 2.5; }
 .kk-podpis circle { stroke-width: 3; }
+
+/* złota strona (po ukończeniu trzech systemów): bez podpisów-sond po najechaniu na Koło
+   (podpisy elementów, satelity i tytuł „Twoje Koło Karmy”) — tu są zbędne */
+html[data-odwrocone] .kk-ramie,
+html[data-odwrocone] .kk-tytul { display: none; }
