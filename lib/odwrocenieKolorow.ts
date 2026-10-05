@@ -20,6 +20,8 @@ export const ATRYBUT_ODWROCENIA = "data-odwrocone";
 export const SKRYPT_ODWROCENIA =
   // tylko na localhost: adres z ?reset czyści cały postęp Koła (vk_*) — test „od pierwszego kroku”
   `try{var h=location.hostname;if((h==="localhost"||h==="127.0.0.1")&&/[?&]reset(=|&|$)/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf("vk_")===0}).forEach(function(k){localStorage.removeItem(k)});history.replaceState(null,"",location.pathname)}}catch(e){}`+
+  // tylko na localhost: ?komplet — od zera, ale z trzema ukończonymi sekcjami (test fali złota)
+  `try{var h2=location.hostname;if((h2==="localhost"||h2==="127.0.0.1")&&/[?&]komplet(=|&|$)/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf("vk_")===0}).forEach(function(k){localStorage.removeItem(k)});localStorage.setItem("vk_systemy_karmy",'["astrologia","hiromancja","numerologia"]');history.replaceState(null,"",location.pathname)}}catch(e){}`+
   `try{if(localStorage.getItem("${KLUCZ_ODWROCENIA}")==="1")document.documentElement.setAttribute("${ATRYBUT_ODWROCENIA}","")}catch(e){}`;
 
 export function czyOdwrocone(): boolean {
@@ -38,8 +40,21 @@ export async function zalejZlotem(x: number, y: number): Promise<void> {
   const bezRuchu = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } };
   if (!doc.startViewTransition || bezRuchu) { zmien(); return; }
-  html.style.setProperty("--fala-x", `${x}px`);
-  html.style.setProperty("--fala-y", `${y}px`);
+  // nieregularny kształt „rozlanego mleka”: wielokąt wokół gwiazdki, promień w każdym
+  // kierunku to fala (--fala-r) razy współczynnik z nałożonych sinusów — za każdym razem
+  // trochę inne łaty, wypustki i zatoczki. Reguła wstrzykiwana do <style>, bo --fala-r
+  // animuje się na samym pseudo-elemencie przejścia.
+  const fazy = [Math.random() * 6.3, Math.random() * 6.3, Math.random() * 6.3];
+  const punkty: string[] = [];
+  for (let i = 0; i < 72; i++) {
+    const kat = (i / 72) * Math.PI * 2;
+    const k = 1 + 0.16 * Math.sin(3 * kat + fazy[0]) + 0.1 * Math.sin(5 * kat + fazy[1]) + 0.06 * Math.sin(9 * kat + fazy[2]);
+    const dx = (Math.cos(kat) * k).toFixed(3), dy = (Math.sin(kat) * k).toFixed(3);
+    punkty.push(`calc(${x}px + var(--fala-r) * ${dx}) calc(${y}px + var(--fala-r) * ${dy})`);
+  }
+  let styl = document.getElementById("vk-fala-ksztalt");
+  if (!styl) { styl = document.createElement("style"); styl.id = "vk-fala-ksztalt"; document.head.appendChild(styl); }
+  styl.textContent = `html.vk-fala::view-transition-new(root){clip-path:polygon(${punkty.join(",")})}`;
   // 1) fala: złoto wychodzi z gwiazdki i odwraca WSZYSTKIE kolory, także samo Koło
   //    (klasa vk-fala wyłącza na ten czas ciemny medalion Koła — patrz globals.css)
   html.classList.add("vk-fala");

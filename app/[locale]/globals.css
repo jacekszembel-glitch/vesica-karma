@@ -2770,16 +2770,15 @@ html[data-odwrocone] {
 }
 /* nagłówki mają turkus na sztywno (#7fd0d8) — po filtrze byłyby czerwone */
 html[data-odwrocone] :is(h1, h2, h3, h4) { color: #e6c48a; }
-/* fala: złoty widok zalewa stronę kołem o ostrej krawędzi od gwiazdki na zewnątrz */
+/* fala: złoto rozlewa się od gwiazdki jak mleko — nieregularna plama o ostrej krawędzi */
 @property --fala-r { syntax: "<length>"; inherits: false; initial-value: 0px; }
 html.vk-fala::view-transition-old(root),
 html.vk-fala::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 html.vk-fala::view-transition-new(root) {
-  /* ostra krawędź koła — bez rozmycia */
-  clip-path: circle(var(--fala-r) at var(--fala-x) var(--fala-y));
-  animation: vk-fala 2.8s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+  /* kształt: nieregularna plama (wielokąt wstrzykiwany w lib/odwrocenieKolorow.ts), ostra krawędź */
+  animation: vk-fala 1.8s cubic-bezier(0.4, 0.1, 0.6, 0.9) forwards;
 }
-@keyframes vk-fala { from { --fala-r: 0px; } to { --fala-r: 115vmax; } }
+@keyframes vk-fala { from { --fala-r: 0px; } to { --fala-r: 125vmax; } }
 /* Koło Karmy w złotym trybie: drugi raz ten sam filtr przywraca oryginalne kolory koła
    (złote ikony na ciemnych polach) — ciemny medalion na złotej stronie, bez poświaty */
 .kk-tarcza { display: none; }
