@@ -22,7 +22,15 @@ import { ocenyNumerologii, PLANETA_CYFRA, type DlonWLiczbach, type LiniaDloni, t
  */
 
 export type StanWskazania = "tak" | "czesciowo" | "nie" | "nie_dotyczy" | "brak_danych";
-export interface Wskazanie { stan: StanWskazania; opis: string }
+export interface Wskazanie {
+  stan: StanWskazania;
+  opis: string;
+  /** Siła wskazania w tym systemie — do wyboru najważniejszego tematu każdego systemu
+   *  (suma wszystkich spełnionych warunków tematu, nie tylko najlepszego). */
+  moc?: number;
+  /** Wszystkie spełnione warunki tematu w tym systemie (opis = najmocniejszy z nich). */
+  dowody?: string[];
+}
 export type SystemTematu = "kosmogram" | "dlon" | "numerologia";
 
 export interface TematWspolny {
@@ -60,15 +68,21 @@ const DOPELNIACZ: Record<PlanetId, string> = {
   venus: "Wenus", saturn: "Saturna", rahu: "Rahu", ketu: "Ketu",
 };
 
-const tak = (opis: string): Wskazanie => ({ stan: "tak", opis });
-const czesciowo = (opis: string): Wskazanie => ({ stan: "czesciowo", opis });
+const tak = (opis: string, moc = 2): Wskazanie => ({ stan: "tak", opis, moc });
+const czesciowo = (opis: string, moc = 1): Wskazanie => ({ stan: "czesciowo", opis, moc });
 const nie = (opis = ""): Wskazanie => ({ stan: "nie", opis });
 const brakDanych: Wskazanie = { stan: "brak_danych", opis: "" };
 
-/** Najmocniejsze z kilku wskazań (tak > częściowo > nie). */
+/** Najmocniejsze z kilku wskazań (tak > częściowo > nie); siła = suma wszystkich spełnionych. */
 function najlepsze(...w: (Wskazanie | null)[]): Wskazanie | null {
   const lista = w.filter((x): x is Wskazanie => !!x);
-  return lista.find((x) => x.stan === "tak") ?? lista.find((x) => x.stan === "czesciowo") ?? null;
+  const najl = lista.find((x) => x.stan === "tak") ?? lista.find((x) => x.stan === "czesciowo");
+  if (!najl) return null;
+  return {
+    ...najl,
+    moc: lista.reduce((s, x) => s + (x.moc ?? 0), 0),
+    dowody: lista.flatMap((x) => x.dowody ?? [x.opis]),
+  };
 }
 
 export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: DlonWLiczbach | null): TematWspolny[] {
@@ -95,12 +109,12 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     const najl = ids.map((id) => ({ id, p: procentTalentu.get(id) ?? 0 })).sort((a, b) => b.p - a.p)[0];
     if (!najl) return null;
     const opis = `talent: ${NAZWA_TALENTU[najl.id]} — wyżej niż u ${Math.round(najl.p)}% osób`;
-    return najl.p >= 75 ? tak(opis) : najl.p >= 60 ? czesciowo(opis) : null;
+    return najl.p >= 75 ? tak(opis, najl.p / 25) : najl.p >= 60 ? czesciowo(opis, najl.p / 40) : null;
   };
   // jogakaraka — planeta, która dla tej lagny rządzi jednocześnie kendrą i trikoną (najlepsza w horoskopie)
   const jk = domy ? jogakaraka(chart.angles!.lagnaSign) : null;
   const jogakarakaTo = (p: PlanetId): Wskazanie | null =>
-    jk === p ? tak(`${MIANOWNIK[p]} — jogakaraka (władca kendry i trikony)`) : null;
+    jk === p ? tak(`${MIANOWNIK[p]} — jogakaraka (władca kendry i trikony)`, 3) : null;
 
   // Finanse — te same wyliczenia co zakładka Finanse: joga bogactwa (dhana) albo planeta-wskaźnik
   // finansów (władca 2./11. domu, karaka bogactwa…) mocniejsza niż u 75% / 60% osób.
@@ -114,7 +128,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     const najl = czynniki[0];
     const opisPl = najl ? `${MIANOWNIK[najl.f.planeta]} (${najl.f.role[0]?.split(" — ")[0] ?? "wskaźnik finansów"}) — wyżej niż u ${Math.round(najl.p)}% osób` : "";
     return najlepsze(
-      dhana ? tak(`joga bogactwa (${dhana.nazwa})`) : null,
+      dhana ? tak(`joga bogactwa (${dhana.nazwa})`, 2.5) : null,
       najl && najl.p >= 75 ? tak(opisPl) : najl && najl.p >= 60 ? czesciowo(opisPl) : null,
     );
   };
@@ -135,14 +149,17 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     return null;
   };
   const znakNa = (m: MiejsceZnaku, rodzaje?: RodzajZnaku[]): Wskazanie | null => {
-    const z = znaki.find((x) => x.miejsce === m && (!rodzaje || rodzaje.includes(x.znak)));
-    if (!z) return null;
+    const wszystkie = znaki.filter((x) => x.miejsce === m && (!rodzaje || rodzaje.includes(x.znak)));
+    if (!wszystkie.length) return null;
+    const z = wszystkie.find((x) => x.pewnosc === "wyrazny") ?? wszystkie[0];
     const gdzie = m === "czworobok" ? "" : ` na wzgórku ${DOPELNIACZ[m as PlanetId]}`;
-    const opis = `${NAZWA_ZNAKU[z.znak]}${gdzie}${z.zrodlo === "osoba" ? " (zgłoszony przez Ciebie)" : ""}`;
-    return z.pewnosc === "delikatny" ? czesciowo(opis + ", delikatny") : tak(opis);
+    const ile = wszystkie.length > 1 ? ` (razem znaków: ${wszystkie.length})` : "";
+    const opis = `${NAZWA_ZNAKU[z.znak]}${gdzie}${z.zrodlo === "osoba" ? " (zgłoszony przez Ciebie)" : ""}${ile}`;
+    const moc = wszystkie.reduce((s, x) => s + (x.pewnosc === "wyrazny" ? 2 : 1), 0);
+    return z.pewnosc === "delikatny" ? czesciowo(opis + ", delikatny", moc) : tak(opis, moc);
   };
   const wzgorek = (p: PlanetId): Wskazanie | null =>
-    dlon?.planety[p] === 1 ? tak(`wydatny wzgórek ${DOPELNIACZ[p]}`) : null;
+    dlon?.planety[p] === 1 ? tak(`wydatny wzgórek ${DOPELNIACZ[p]}`, 1.5) : null;
   const reka = (f: () => Wskazanie | null): Wskazanie => (maDane ? f() ?? nie() : brakDanych);
 
   /* ---------- numerologia ---------- */
@@ -151,8 +168,10 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     const c = PLANETA_CYFRA[p];
     const r = powody[p];
     const role = [r.mulank && "Mulank", r.bhagyank && "Bhagyank", r.imie && "liczba imienia"].filter(Boolean);
-    if (role.length) return tak(`${c} (${MIANOWNIK[p]}) — ${role.join(", ")}`);
-    if (r.wDacie >= 2) return czesciowo(`${c} (${MIANOWNIK[p]}) ×${r.wDacie} w dacie`);
+    // Bhagyank (droga życia) waży najwięcej, potem Mulank, potem liczba imienia
+    const moc = (r.bhagyank ? 3 : 0) + (r.mulank ? 2.5 : 0) + (r.imie ? 2 : 0) + r.wDacie * 0.5;
+    if (role.length) return tak(`${c} (${MIANOWNIK[p]}) — ${role.join(", ")}`, moc);
+    if (r.wDacie >= 2) return czesciowo(`${c} (${MIANOWNIK[p]}) ×${r.wDacie} w dacie`, moc);
     return null;
   };
   const liczby = (...ps: PlanetId[]): Wskazanie => najlepsze(...ps.map(cyfra)) ?? nie();
@@ -164,12 +183,12 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       znaczenie: "Życie ma wyraźnie zaznaczony kierunek — coś, ku czemu się zmierza.",
       wniosek: "Twoje życie ma wyraźnie zaznaczony kierunek. To nie jest droga „jak wyjdzie” — warto świadomie nazwać swój cel i trzymać się go, bo wszystko w Tobie pracuje w jedną stronę.",
       wskazania: {
-        kosmogram: astro(() => skupisko && skupisko.ps.length >= 3 ? tak(`skupisko w ${skupisko.d}. domu: ${lista(skupisko.ps)}`)
+        kosmogram: astro(() => skupisko && skupisko.ps.length >= 3 ? tak(`skupisko w ${skupisko.d}. domu: ${lista(skupisko.ps)}`, skupisko.ps.length)
           : w(10).length >= 2 ? tak(`10. dom: ${lista(w(10))}`)
             : w(10).length === 1 ? czesciowo(`10. dom: ${lista(w(10))}`) : null),
         dlon: reka(() => linia("losu")),
-        numerologia: num.destiny === num.birthdayRoot ? tak(`Bhagyank = Mulank (${num.destiny}) — jeden kierunek`)
-          : powody[CYFRA(num.destiny)].imie ? tak(`Bhagyank = liczba imienia (${num.destiny})`) : nie(),
+        numerologia: num.destiny === num.birthdayRoot ? tak(`Bhagyank = Mulank (${num.destiny}) — jeden kierunek`, 3)
+          : powody[CYFRA(num.destiny)].imie ? tak(`Bhagyank = liczba imienia (${num.destiny})`, 3) : nie(),
       },
     },
     {
@@ -326,3 +345,47 @@ function CYFRA(c: number): PlanetId {
   return (Object.entries(PLANETA_CYFRA).find(([, v]) => v === c)?.[0] ?? "sun") as PlanetId;
 }
 
+
+/* ---------- najważniejszy temat według każdego systemu ---------- */
+
+export interface GlosSystemu {
+  system: SystemTematu;
+  temat: TematWspolny;
+  /** Pozostałe systemy, które ten sam temat też wyraźnie wskazują. */
+  takze: SystemTematu[];
+}
+
+const SYSTEMY_T: SystemTematu[] = ["kosmogram", "dlon", "numerologia"];
+
+/**
+ * Każdy system dostaje swój najmocniejszy temat (wg siły wskazań), ale zawsze TRZY RÓŻNE:
+ * spośród trzech najmocniejszych tematów każdego systemu wybieramy układ bez powtórzeń
+ * o największej łącznej sile (siła liczona względem najmocniejszego tematu danego systemu,
+ * bo skale systemów są różne). Gdy dwa systemy mają ten sam najmocniejszy temat, jeden
+ * bierze następny — a przy karcie widać, że tamten system też go wskazuje.
+ */
+export function najwazniejszeTematy(tematy: TematWspolny[]): GlosSystemu[] {
+  const moc = (t: TematWspolny, s: SystemTematu) => {
+    const w = t.wskazania[s];
+    return w.stan === "tak" || w.stan === "czesciowo" ? w.moc ?? (w.stan === "tak" ? 2 : 1) : 0;
+  };
+  const kandydaci = SYSTEMY_T.map((s) => {
+    const lista = tematy.filter((t) => moc(t, s) > 0).sort((a, b) => moc(b, s) - moc(a, s)).slice(0, 4);
+    const max = lista[0] ? moc(lista[0], s) : 1;
+    return lista.map((t) => ({ t, w: moc(t, s) / max }));
+  });
+  let najl: { wynik: number; wybor: (TematWspolny | null)[] } = { wynik: -1, wybor: [null, null, null] };
+  const opcje = (i: number) => [...kandydaci[i], { t: null as TematWspolny | null, w: 0 }];
+  for (const a of opcje(0)) for (const b of opcje(1)) for (const c of opcje(2)) {
+    const ids = [a.t?.id, b.t?.id, c.t?.id].filter(Boolean);
+    if (new Set(ids).size !== ids.length) continue;
+    const wynik = a.w + b.w + c.w;
+    if (wynik > najl.wynik) najl = { wynik, wybor: [a.t, b.t, c.t] };
+  }
+  return SYSTEMY_T.flatMap((s, i) => {
+    const t = najl.wybor[i];
+    if (!t) return [];
+    const takze = SYSTEMY_T.filter((x) => x !== s && t.wskazania[x].stan === "tak");
+    return [{ system: s, temat: t, takze }];
+  });
+}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { StanWskazania, SystemTematu, TematWspolny } from "@/lib/astro/tematy";
+import { najwazniejszeTematy, type StanWskazania, type SystemTematu, type TematWspolny } from "@/lib/astro/tematy";
+import GlosySystemow from "./GlosySystemow";
 
 /**
  * Wspólne tematy trzech systemów (lib/astro/tematy.ts) — jeden sens życiowy w wierszu,
@@ -139,6 +140,9 @@ export default function TematyWspolne({ tematy }: { tematy: TematWspolny[] }) {
         droga, tylko czy dany temat jest w Twoim życiu wyraźnie zaznaczony — i w ilu systemach naraz.
       </p>
 
+
+      {/* trzy głosy: najważniejszy temat według każdego systemu — nad tabelą */}
+      <GlosySystemow glosy={najwazniejszeTematy(tematy)} />
 
       <div className="tw-uklad">
       <Zestawienie tematy={tematy} />
