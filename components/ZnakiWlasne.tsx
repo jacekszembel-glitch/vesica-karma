@@ -18,10 +18,10 @@ export default function ZnakiWlasne({ znaki, onZmiana }: { znaki: ZnakWlasny[]; 
 
   return (
     <div className="zw">
-      <p className="hs-tytul" style={{ textAlign: "center" }}>Znaki, które widzisz na swojej dłoni</p>
+      <p className="hs-tytul" style={{ textAlign: "center" }}>Dopisz, czego brakuje</p>
       <p className="hs-instrukcja" style={{ textAlign: "center", maxWidth: 560, margin: "0 auto 12px" }}>
-        Oko widzi więcej niż zdjęcie. Jeśli masz na dłoni znak, który znasz — zgłoś go. W odczycie będzie
-        podpisany jako Twoja obserwacja, a AI osobno napisze, czy widzi go też na zdjęciach.
+        Oko widzi więcej niż zdjęcie. Czego brakuje na liście wyżej — dopisz tutaj. W odczycie i na
+        Twojej Karmie będzie podpisane jako Twoja obserwacja.
       </p>
       <div className="zw-formularz">
         <select value={reka} onChange={(e) => setReka(e.target.value as Reka)} aria-label="Ręka">

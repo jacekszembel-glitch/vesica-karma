@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { checkRate, clientIp } from "@/lib/ratelimit";
+import { dloniSchema, blokiReki, ogledziny } from "@/lib/hiromancjaAI";
 
 /**
  * Endpoint odczytu AI linii dłoni — OSOBNY od /api/interpret, świadomie:
@@ -29,28 +30,6 @@ export const maxDuration = 300;
 
 const client = new Anthropic(); // ANTHROPIC_API_KEY z env
 
-const dloniSchema = z.object({
-  /** Surowy base64, bez prefiksu "data:image/...;base64,". */
-  imageBase64: z.string().min(100).max(2_000_000),
-  imageMediaType: z.enum(["image/jpeg", "image/png", "image/webp"]),
-  /**
-   * Policzone deterministycznie w przeglądarce (lib/hiromancja.ts), TYLKO
-   * jeśli użytkownik skorzystał z opcjonalnej ręcznej kalibracji — kontekst
-   * dla Claude'a, nie do przeliczenia. Bez tego Claude ocenia kształt
-   * wyłącznie jakościowo, patrząc na zdjęcie.
-   */
-  geometria: z.object({
-    typ: z.enum(["ziemia", "powietrze", "ogien", "woda"]),
-    stosunekDloni: z.number(),
-    stosunekPalca: z.number(),
-  }).optional(),
-  /** Zbliżenia stref dłoni wycięte z oryginału w przeglądarce (lib/hiromancjaObraz.ts). */
-  strefy: z.array(z.object({
-    opis: z.string().max(400),
-    imageBase64: z.string().min(100).max(1_500_000),
-  })).max(14).optional(),
-});
-
 const requestSchema = z.object({
   /** Ręka, którą użytkownik pisze — klasyczny wyznacznik "aktywnej/wiodącej" dłoni w chiromancji. */
   wiodaca: dloniSchema,
@@ -64,6 +43,13 @@ const requestSchema = z.object({
     miejsce: z.string().max(40),
     znak: z.string().max(40),
   })).max(12).optional(),
+  /** Krok 1 (/api/hiromancja-ogledziny): lista znaków i linii, które AI zobaczyło, po sprawdzeniu przez osobę. */
+  inwentarz: z.object({
+    znaki: z.array(z.string().max(200)).max(60),
+    linie: z.array(z.string().max(200)).max(60),
+  }).optional(),
+  /** Surowe oględziny zbliżeń z kroku 1 — żeby nie oglądać ich drugi raz. */
+  ogledzinyTekst: z.string().max(40_000).optional(),
 });
 
 const SYSTEM_PROMPT_HIROMANCJA = `Jesteś doświadczonym obserwatorem tradycji chiromancji, piszącym po polsku dla serwisu „Czas Duszy”. Czytasz DWA zdjęcia dłoni tej samej osoby — pierwsze to jej ręka WIODĄCA (aktywna, ta, którą pisze), drugie to ręka BIERNA (pasywna). Przy każdej ręce dostajesz najpierw CAŁE zdjęcie, a po nim kolejne obrazy, każdy podpisany: zbliżenia stref wycięte z oryginału, a jeśli osoba je zrobiła — OSOBNE ZDJĘCIA z bliska i z innych ujęć (górna i dolna połowa dłoni, dłoń lekko zgięta, krawędź dłoni, grzbiet z paznokciami) oraz MIEJSCA WSKAZANE przez osobę do dokładnego obejrzenia. Różne ujęcia i światło pokazują różne bruzdy — zestawiaj je: znak wyraźny choćby na jednym ujęciu jest obserwacją. Miejsce wskazane przez osobę obejrzyj szczególnie uważnie i opisz dokładnie, co tam widzisz — osoba nie mówi, czego się spodziewa, więc nie zgaduj i nie dopowiadaj; jeśli nic szczególnego tam nie ma, napisz to wprost. Całe zdjęcie służy do proporcji i przebiegu linii, zbliżenia — do niuansów: drobnych linii, rozwidleń, wysp, przerw, krzyżyków, gwiazd, kratek, kresek pod palcami. Szczegół widoczny tylko na zbliżeniu jest pełnoprawną obserwacją.
@@ -145,61 +131,6 @@ Dopisz jedną linię w dokładnie takim formacie — to ukryte dane do porównan
 ZNAKI ZGŁOSZONE PRZEZ OSOBĘ (jeśli są w danych):
 Osoba ogląda swoją dłoń na żywo i zgłasza znaki, które sama widzi. To obserwacja z żywej dłoni — przyjmij ją. Dodaj sekcję ### Znaki, które zgłaszasz — przy każdym zgłoszeniu klasyczne znaczenie tego znaku w tym miejscu i to, jak łączy się z resztą dłoni. W tekście NIE komentuj, czy widać go na zdjęciach (to idzie tylko do pola "deklaracje" w bloku danych). Zgłoszenie dotyczy tylko tego jednego miejsca — nie zmieniaj przez nie innych obserwacji.`;
 
-type Blok = Anthropic.Messages.ContentBlockParam;
-
-/**
- * OGLĘDZINY — zanim powstanie odczyt, każde zbliżenie (wycinek, osobne ujęcie, wskazane miejsce)
- * idzie do AI OSOBNO z jednym zadaniem: wypisać znaki i linie, bez interpretacji. Model skupiony
- * na jednym fragmencie widzi znacznie więcej drobnych przecięć niż przy całym odczycie naraz
- * (wcześniej np. X na wzgórku Jowisza ginął jako „kilka kresek”). Wyniki trafiają do odczytu.
- */
-const SYSTEM_OGLEDZIN = `Jesteś okiem doświadczonego chiromanty z lupą. Dostajesz JEDEN obraz: zbliżenie fragmentu dłoni (podpis mówi, co pokazuje). Twoje jedyne zadanie: wypisać znaki i linie, które są na tym obrazie. Nic nie interpretujesz.
-
-Jak patrzysz:
-- Przejdź obraz systematycznie, fragment po fragmencie (góra, środek, dół; od lewej do prawej). Patrz na bruzdy — wyraźne linie odróżniające się od drobnej faktury skóry.
-- Każde miejsce, w którym dwie bruzdy się przecinają, to X (krzyż) — także gdy przecięcie nie jest idealnie na środku i gdy ramiona są nierówne. Trzy lub więcej bruzd przecinających się w jednym punkcie to gwiazda. Trzy bruzdy zamykające trójkątny kształt to trójkąt; cztery zamykające czworokąt — kwadrat; kilka równoległych przeciętych kilkoma poprzecznymi — kratka; linia rozdzielająca się na chwilę i schodząca z powrotem — wyspa.
-- Dłuższe bruzdy opisz jako linie: kierunek (pionowa/pozioma/ukośna), skąd dokąd, czy ciągła czy z odcinków.
-- Miejsce podaj względem dłoni (np. „pod palcem wskazującym, tuż nad końcem linii serca”, „na krawędzi dłoni, w dolnej części”), korzystając z podpisu obrazu.
-
-Format odpowiedzi — sama lista, każda pozycja w osobnej linii:
-- [znak albo linia] — [dokładne miejsce] — [wyraźny / delikatny]
-Wypisz tylko to, co jest. Bez wstępu, bez podsumowania, bez „nie widać”.`;
-
-async function ogledziny(reka: string, strefy: { opis: string; imageBase64: string }[] | undefined): Promise<string[]> {
-  const wyniki = await Promise.all((strefy ?? []).map(async (s) => {
-    try {
-      const msg = await client.messages.create({
-        model: "claude-opus-5",
-        max_tokens: 6000,
-        thinking: { type: "adaptive" },
-        output_config: { effort: "medium" },
-        system: SYSTEM_OGLEDZIN,
-        messages: [{
-          role: "user",
-          content: [
-            { type: "text", text: `RĘKA ${reka} — ${s.opis}` },
-            { type: "image", source: { type: "base64", media_type: "image/jpeg", data: s.imageBase64 } },
-          ],
-        }],
-      });
-      const tekst = msg.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
-      return tekst ? `RĘKA ${reka} — ${s.opis}:\n${tekst}` : null;
-    } catch (err) {
-      console.error("hiromancja ogledziny error:", err); // bez danych — zawierają zdjęcie
-      return null;
-    }
-  }));
-  return wyniki.filter((w): w is string => !!w);
-}
-
-/** Zbliżenia jednej ręki: podpis + obraz, w kolejności z przeglądarki. */
-function blokiStref(reka: string, strefy: { opis: string; imageBase64: string }[] | undefined): Blok[] {
-  return (strefy ?? []).flatMap((s): Blok[] => [
-    { type: "text", text: `RĘKA ${reka} — ${s.opis}:` },
-    { type: "image", source: { type: "base64", media_type: "image/jpeg", data: s.imageBase64 } },
-  ]);
-}
-
 export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {
     return new Response(JSON.stringify({ error: "Odczyty są chwilowo niedostępne. Spróbuj później." }), { status: 503 });
@@ -240,12 +171,18 @@ export async function POST(req: Request) {
       : null,
   ].filter(Boolean).join("\n");
 
-  // oględziny wszystkich zbliżeń obu rąk równolegle — przed odczytem
-  const [ogledzinyW, ogledzinyB] = await Promise.all([
-    ogledziny("WIODĄCA", parsed.wiodaca.strefy),
-    ogledziny("BIERNA", parsed.bierna.strefy),
-  ]);
-  const ogledzinyTekst = [...ogledzinyW, ...ogledzinyB].join("\n\n");
+  // oględziny zbliżeń: z kroku 1, a gdy ich nie ma — teraz, równolegle dla obu rąk
+  let ogledzinyTekst = parsed.ogledzinyTekst ?? "";
+  if (!ogledzinyTekst) {
+    const [ogledzinyW, ogledzinyB] = await Promise.all([
+      ogledziny(client, "WIODĄCA", parsed.wiodaca.strefy),
+      ogledziny(client, "BIERNA", parsed.bierna.strefy),
+    ]);
+    ogledzinyTekst = [...ogledzinyW, ...ogledzinyB].join("\n\n");
+  }
+  const inwentarzTekst = parsed.inwentarz
+    ? `INWENTARZ DŁONI — sprawdzony przez osobę. Te znaki i linie AI zauważyło przy oględzinach, a osoba porównała je ze swoją dłonią i potwierdziła (pozycje, których nie ma, usunęła). Opisz WSZYSTKIE w odczycie, w odpowiednich sekcjach, i wpisz je do bloku danych. Nie dopisuj znaków spoza tej listy (poza zgłoszonymi przez osobę).\nZnaki:\n${parsed.inwentarz.znaki.map((z) => "- " + z).join("\n") || "- (brak)"}\nLinie:\n${parsed.inwentarz.linie.map((l) => "- " + l).join("\n") || "- (brak)"}`
+    : "";
 
   const stream = client.messages.stream({
     model: "claude-opus-5",
@@ -264,13 +201,10 @@ export async function POST(req: Request) {
       {
         role: "user",
         content: [
-          { type: "text", text: "RĘKA WIODĄCA (aktywna — ta, którą osoba pisze) — całe zdjęcie:" },
-          { type: "image", source: { type: "base64", media_type: parsed.wiodaca.imageMediaType, data: parsed.wiodaca.imageBase64 } },
-          ...blokiStref("WIODĄCA", parsed.wiodaca.strefy),
-          { type: "text", text: "RĘKA BIERNA (pasywna) — całe zdjęcie:" },
-          { type: "image", source: { type: "base64", media_type: parsed.bierna.imageMediaType, data: parsed.bierna.imageBase64 } },
-          ...blokiStref("BIERNA", parsed.bierna.strefy),
+          ...blokiReki("WIODĄCA", parsed.wiodaca),
+          ...blokiReki("BIERNA", parsed.bierna),
           { type: "text", text: kontekstTekst },
+          ...(inwentarzTekst ? [{ type: "text" as const, text: inwentarzTekst }] : []),
           ...(ogledzinyTekst ? [{
             type: "text" as const,
             text: `OGLĘDZINY ZBLIŻEŃ — każde zbliżenie zostało wcześniej osobno, dokładnie przejrzane pod lupą (wynik poniżej). Traktuj to jako Twoje własne, dokładniejsze obserwacje tych fragmentów: znaki i linie z oględzin opisz w odczycie i w bloku danych, łącząc je z tym, co widać na całych zdjęciach. Pomiń pozycję tylko wtedy, gdy na zbliżeniu wyraźnie widać, że to faktura skóry, a nie bruzda.\n\n${ogledzinyTekst}`,

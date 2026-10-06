@@ -1,0 +1,84 @@
+import Anthropic from "@anthropic-ai/sdk";
+import { z } from "zod";
+import { checkRate, clientIp } from "@/lib/ratelimit";
+import { dloniSchema, blokiReki, ogledziny } from "@/lib/hiromancjaAI";
+
+/**
+ * KROK 1 CHIROMANCJI — „co AI widzi”: oględziny każdego zbliżenia osobno, a potem jedno
+ * zestawienie wszystkich znaków i linii obu rąk jako lista (bez interpretacji). Osoba
+ * sprawdza tę listę ze swoją dłonią, usuwa pomyłki, dopisuje brakujące — i dopiero z tą
+ * listą idzie krok 2 (/api/hiromancja, pełny odczyt).
+ * PRYWATNOŚĆ jak w /api/hiromancja: zdjęcia tylko w treści zapytania, nigdy w logach.
+ */
+
+export const runtime = "nodejs";
+export const maxDuration = 300;
+
+const client = new Anthropic();
+
+const requestSchema = z.object({ wiodaca: dloniSchema, bierna: dloniSchema });
+
+const SYSTEM_INWENTARZ = `Jesteś okiem doświadczonego chiromanty. Dostajesz zdjęcia obu dłoni jednej osoby (całe zdjęcia i zbliżenia, podpisane) oraz wynik oględzin każdego zbliżenia pod lupą. Twoje jedyne zadanie: sporządzić INWENTARZ — listę znaków i linii, które są na dłoniach. Nic nie interpretujesz, nie opisujesz znaczeń.
+
+Zasady:
+- Wypisz wszystko, co widać na zdjęciach albo w oględzinach: znaki na wzgórkach i w czworoboku oraz linie. Rzeczy delikatne też wpisz — z "pewnosc":"delikatny".
+- Każde przecięcie dwóch bruzd na wzgórku to X; trzy i więcej w jednym punkcie — gwiazda; krzyżyk w czworoboku między linią serca a głowy (także utworzony przez linię losu) — krzyż mistyczny; trójkąt między linią głowy a linią losu — trójkąt w czworoboku.
+- Linia złożona z odcinków w jednym kierunku to ta linia ("stan":"odcinkowa"). Linii, których nie ma, nie wpisuj.
+- Nie powtarzaj tego samego znaku dwa razy z różnych zbliżeń tej samej ręki.
+
+Odpowiedz WYŁĄCZNIE jednym obiektem JSON, bez żadnego tekstu przed ani po:
+{"znaki":[{"reka":"wiodaca|bierna","wzgorek":"jowisz|saturn|slonce|merkury|wenus|ksiezyc|mars|rahu|ketu|czworobok","znak":"x|gwiazda|kwadrat|trojkat|kratka|wyspa|krzyz_mistyczny","pewnosc":"wyrazny|delikatny","gdzie":"krótko, dokładne miejsce"}],
+ "linie":[{"reka":"wiodaca|bierna","linia":"zycia|glowy|serca|losu|slonca|merkurego|intuicji|podrozy|relacji|pas_wenus|pierscien_salomona|marsa","stan":"wyrazna|odcinkowa|slaba","gdzie":"krótko, przebieg"}]}
+(rahu = środek dłoni, ketu = nad nadgarstkiem między Wenus a Księżycem — wg chiromancji indyjskiej).`;
+
+export async function POST(req: Request) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return Response.json({ error: "Oględziny są chwilowo niedostępne. Spróbuj później." }, { status: 503 });
+  }
+  const verdict = checkRate(clientIp(req));
+  if (!verdict.ok) {
+    return Response.json({ error: "Zbyt wiele zapytań. Wróć za kilka minut." }, {
+      status: 429, headers: { "Retry-After": String(verdict.retryAfter) },
+    });
+  }
+  let parsed;
+  try {
+    parsed = requestSchema.parse(await req.json());
+  } catch {
+    return Response.json({ error: "Nieprawidłowe dane wejściowe" }, { status: 400 });
+  }
+
+  try {
+    const [w, b] = await Promise.all([
+      ogledziny(client, "WIODĄCA", parsed.wiodaca.strefy),
+      ogledziny(client, "BIERNA", parsed.bierna.strefy),
+    ]);
+    const ogledzinyTekst = [...w, ...b].join("\n\n");
+
+    const msg = await client.messages.create({
+      model: "claude-opus-5",
+      max_tokens: 12000,
+      thinking: { type: "adaptive" },
+      output_config: { effort: "high" },
+      system: SYSTEM_INWENTARZ,
+      messages: [{
+        role: "user",
+        content: [
+          ...blokiReki("WIODĄCA", parsed.wiodaca),
+          ...blokiReki("BIERNA", parsed.bierna),
+          { type: "text", text: `OGLĘDZINY ZBLIŻEŃ POD LUPĄ:\n\n${ogledzinyTekst || "(brak zbliżeń)"}` },
+        ],
+      }],
+    });
+    const tekst = msg.content.filter((x) => x.type === "text").map((x) => x.text).join("");
+    const json = tekst.slice(tekst.indexOf("{"), tekst.lastIndexOf("}") + 1);
+    const wynik = JSON.parse(json) as { znaki?: unknown[]; linie?: unknown[] };
+    return Response.json(
+      { znaki: Array.isArray(wynik.znaki) ? wynik.znaki : [], linie: Array.isArray(wynik.linie) ? wynik.linie : [], ogledzinyTekst },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  } catch (err) {
+    console.error("hiromancja-ogledziny error:", err); // NIGDY nie logować `parsed` — zawiera zdjęcia
+    return Response.json({ error: "Nie udało się obejrzeć dłoni. Spróbuj ponownie." }, { status: 502 });
+  }
+}

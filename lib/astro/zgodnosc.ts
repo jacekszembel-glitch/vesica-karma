@@ -221,6 +221,17 @@ const KLUCZE_PLANET: Record<string, PlanetId> = {
 const RODZAJE_ZNAKOW: RodzajZnaku[] = ["x", "gwiazda", "kwadrat", "trojkat", "kratka", "wyspa", "krzyz_mistyczny"];
 const STANY_LINII: StanLinii[] = ["wyrazna", "odcinkowa", "slaba", "brak"];
 
+/** Klucz z odpowiedzi AI („jowisz”, „czworobok”…) → miejsce znaku. */
+export function miejsceZKlucza(k: string): MiejsceZnaku | null {
+  return k === "czworobok" ? "czworobok" : KLUCZE_PLANET[k] ?? null;
+}
+
+export const NAZWY_LINII: Record<LiniaDloni, string> = {
+  zycia: "linia życia", glowy: "linia głowy", serca: "linia serca", losu: "linia losu", slonca: "linia Słońca",
+  merkurego: "linia Merkurego", intuicji: "linia intuicji", podrozy: "linie podróży", relacji: "linie relacji",
+  pas_wenus: "pas Wenus", pierscien_salomona: "pierścień Salomona", marsa: "linia Marsa (siostrzana)",
+};
+
 /** Znak z bloku danych → ZnakDloni (albo null, gdy niepełny). */
 function znakZDanych(z: Record<string, unknown>, zrodlo: "ai" | "osoba"): ZnakDloni | null {
   const miejsce = z.wzgorek === "czworobok" ? "czworobok" : KLUCZE_PLANET[String(z.wzgorek)];

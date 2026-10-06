@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { TypDloni } from "@/lib/hiromancja";
 import { zapiszOdczytDloni } from "@/lib/hiromancjaOdczytStore";
 import { rozdzielOdczytDloni, znakiWlasneDoDloni, MIEJSCA_ZNAKOW, RODZAJE_ZNAKOW_NAZWY, type ZnakWlasny } from "@/lib/astro/zgodnosc";
@@ -82,11 +82,15 @@ interface Props {
   bierna: DloniDane;
   /** Znaki, które osoba widzi na żywo — AI odpowiada, czy widzi je na zdjęciach. */
   deklaracje?: ZnakWlasny[];
+  /** Krok 1: lista znaków i linii sprawdzona przez osobę + surowe oględziny (żeby ich nie powtarzać). */
+  inwentarz?: { znaki: string[]; linie: string[]; ogledzinyTekst: string };
+  /** Odczyt rusza sam (po „Dalej” w kroku 1), bez osobnego przycisku. */
+  autoStart?: boolean;
   plec?: "on" | "ona" | "ono";
   imie?: string;
 }
 
-export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie, deklaracje = [] }: Props) {
+export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie, deklaracje = [], inwentarz, autoStart }: Props) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -106,6 +110,10 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie, deklarac
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           wiodaca, bierna, plec, imie,
+          ...(inwentarz ? {
+            inwentarz: { znaki: inwentarz.znaki, linie: inwentarz.linie },
+            ogledzinyTekst: inwentarz.ogledzinyTekst || undefined,
+          } : {}),
           deklaracje: deklaracje.map((d) => ({
             reka: d.reka,
             miejsce: MIEJSCA_ZNAKOW.find((m) => m.id === d.miejsce)?.nazwa ?? d.miejsce,
@@ -138,7 +146,13 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie, deklarac
     } finally {
       setBusy(false);
     }
-  }, [wiodaca, bierna, plec, imie, deklaracje]);
+  }, [wiodaca, bierna, plec, imie, deklaracje, inwentarz]);
+
+  // po „Dalej” w kroku 1 odczyt rusza sam — raz
+  const wystartowal = useRef(false);
+  useEffect(() => {
+    if (autoStart && !wystartowal.current) { wystartowal.current = true; void generate(); }
+  }, [autoStart, generate]);
 
   const przedOdczytem = !text && !busy;
 

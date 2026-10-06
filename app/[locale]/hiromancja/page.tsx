@@ -5,7 +5,7 @@ import Term from "@/components/Term";
 import HiromancjaZdjecie, { type ZdjecieDane } from "@/components/HiromancjaZdjecie";
 import HiromancjaOdczyt from "@/components/HiromancjaOdczyt";
 import HiromancjaSesja from "@/components/HiromancjaSesja";
-import ZnakiWlasne from "@/components/ZnakiWlasne";
+import HiromancjaInwentarz, { type InwentarzPotwierdzony } from "@/components/HiromancjaInwentarz";
 import { wczytajZnakiWlasne, zapiszZnakiWlasne } from "@/lib/hiromancjaOdczytStore";
 import type { ZnakWlasny } from "@/lib/astro/zgodnosc";
 import { UJECIA, wytnijMiejsce, type Miejsce, type Strefa, type TypUjecia, type Ujecie } from "@/lib/hiromancjaObraz";
@@ -114,8 +114,11 @@ export default function HiromancjaPage() {
   // eslint-disable-next-line react-hooks/set-state-in-effect -- hydratacja z localStorage po zamontowaniu
   useEffect(() => { setZnakiWlasne(wczytajZnakiWlasne()); }, []);
   const zmienZnakiWlasne = (z: ZnakWlasny[]) => { setZnakiWlasne(z); zapiszZnakiWlasne(z); };
+  // krok 1 (co AI widzi) → „Dalej” → krok 2 (odczyt z tą listą)
+  const [inwentarz, setInwentarz] = useState<InwentarzPotwierdzony | null>(null);
 
   function handleZdjecie(reka: Reka, dane: ZdjecieDane) {
+    setInwentarz(null); // nowe zdjęcie — lista znaków do zrobienia od nowa
     setZdjecia((z) => {
       // nowe zdjęcie główne (inny plik) — wskazane miejsca dotyczyły starego
       if (z[reka] && z[reka]!.zrodlo !== dane.zrodlo) {
@@ -256,7 +259,6 @@ export default function HiromancjaPage() {
                 onMiejsca={(m) => setMiejsca((s) => ({ ...s, [r]: m }))} />
             ))}
           </div>
-          <ZnakiWlasne znaki={znakiWlasne} onZmiana={zmienZnakiWlasne} />
       </div>
 
       {/* odczyt dłoni widoczny zawsze — wcześniej pojawiał się dopiero po wgraniu obu zdjęć,
@@ -281,15 +283,35 @@ export default function HiromancjaPage() {
         </SekcjaZlota>
       )}
 
-      {obaZdjeciaGotowe && (
+      {obaZdjeciaGotowe && !inwentarz && (
         <div className="fade-up sekcja-zlota-ai">
-          <SekcjaZlota tytul="Odczyt dłoni">
+          <SekcjaZlota tytul="Krok 1 — co widać na Twoich dłoniach">
+            <HiromancjaInwentarz
+              wiodaca={doOdczytu(zdjecia[pismoReka]!, ujecia[pismoReka], miejsca[pismoReka])}
+              bierna={doOdczytu(zdjecia[rekaBierna]!, ujecia[rekaBierna], miejsca[rekaBierna])}
+              nazwyRak={{ wiodaca: pismoReka, bierna: rekaBierna }}
+              znakiWlasne={znakiWlasne}
+              onZnakiWlasne={zmienZnakiWlasne}
+              onDalej={setInwentarz}
+            />
+          </SekcjaZlota>
+        </div>
+      )}
+
+      {obaZdjeciaGotowe && inwentarz && (
+        <div className="fade-up sekcja-zlota-ai">
+          <SekcjaZlota tytul="Krok 2 — odczyt dłoni">
+          <p style={{ textAlign: "center", marginBottom: 6 }}>
+            <button type="button" className="hs-usun" onClick={() => setInwentarz(null)}>← wróć do listy znaków</button>
+          </p>
           <HiromancjaOdczyt
             wiodaca={doOdczytu(zdjecia[pismoReka]!, ujecia[pismoReka], miejsca[pismoReka])}
             bierna={doOdczytu(zdjecia[rekaBierna]!, ujecia[rekaBierna], miejsca[rekaBierna])}
             plec={plec}
             imie={imie.trim() || undefined}
             deklaracje={znakiWlasne}
+            inwentarz={inwentarz}
+            autoStart
           />
           </SekcjaZlota>
         </div>

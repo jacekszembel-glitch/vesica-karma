@@ -3042,3 +3042,11 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
   .tw-otwarty { animation: tw-rozwin 0.25s ease-out; }
 }
 @keyframes tw-rozwin { from { opacity: 0.6; } to { opacity: 1; } }
+
+/* Chiromancja, krok 1: lista znaków i linii od AI (components/HiromancjaInwentarz.tsx) */
+.inw-rece { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 28px; text-align: left; }
+.inw-grupa { font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sand); opacity: 0.75; margin: 12px 0 4px; text-align: left; }
+.inw-lista { list-style: none; margin: 0; padding: 0; display: grid; }
+.inw-lista li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 7px 0; border-bottom: 1px solid var(--line-soft); font-size: 0.86rem; color: var(--sand); }
+.inw-lista li small { display: block; font-size: 0.72rem; opacity: 0.75; margin-top: 2px; }
+.inw-lista .hs-usun { white-space: nowrap; flex-shrink: 0; }
