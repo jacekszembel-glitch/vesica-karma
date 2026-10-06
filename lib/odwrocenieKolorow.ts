@@ -22,6 +22,9 @@ export const SKRYPT_ODWROCENIA =
   `try{var h=location.hostname;if((h==="localhost"||h==="127.0.0.1")&&/[?&]reset(=|&|$)/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf("vk_")===0}).forEach(function(k){localStorage.removeItem(k)});history.replaceState(null,"",location.pathname)}}catch(e){}`+
   // tylko na localhost: ?komplet — od zera, ale z trzema ukończonymi sekcjami (test fali złota)
   `try{var h2=location.hostname;if((h2==="localhost"||h2==="127.0.0.1")&&/[?&]komplet(=|&|$)/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf("vk_")===0}).forEach(function(k){localStorage.removeItem(k)});localStorage.setItem("vk_systemy_karmy",'["astrologia","hiromancja","numerologia"]');history.replaceState(null,"",location.pathname)}}catch(e){}`+
+  // tylko na localhost: ?zlota — od razu złota Twoja Karma z trzema ukończonymi sekcjami, BEZ kasowania
+  // zapisów (odczyt dłoni, dane urodzenia zostają) — podgląd porównania systemów na prawdziwych danych
+  `try{var h3=location.hostname;if((h3==="localhost"||h3==="127.0.0.1")&&/[?&]zlota(=|&|$)/.test(location.search)){localStorage.setItem("vk_systemy_karmy",'["astrologia","hiromancja","numerologia"]');localStorage.setItem("${KLUCZ_ODWROCENIA}","1");history.replaceState(null,"",location.pathname)}}catch(e){}`+
   `try{if(localStorage.getItem("${KLUCZ_ODWROCENIA}")==="1")document.documentElement.setAttribute("${ATRYBUT_ODWROCENIA}","")}catch(e){}`;
 
 /** Klasa na <html>: treść pod Kołem znika przed falą (globals.css). Zdejmuje ją dopiero
