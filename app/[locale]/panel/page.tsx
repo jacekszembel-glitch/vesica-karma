@@ -194,8 +194,8 @@ export default function Page() {
   const [dlonZapisano, setDlonZapisano] = useState<number | null>(null);
   // po złotej fali (lib/odwrocenieKolorow.ts) treść przychodzi ukryta — pokaż ją łagodnie
   useEffect(() => {
-    const t = setTimeout(() => document.documentElement.classList.remove(KLASA_ZNIKANIA), 200);
-    return () => clearTimeout(t);
+    const t = requestAnimationFrame(() => document.documentElement.classList.remove(KLASA_ZNIKANIA));
+    return () => cancelAnimationFrame(t);
   }, []);
 
   // Twoja Karma po złotej fali to etap końcowy — przycisk „Wstecz” przeglądarki zostaje tutaj

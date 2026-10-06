@@ -202,6 +202,9 @@ export default function KoloKarmy({ ukonczone: ukonczoneProp = WSZYSTKIE_SYSTEMY
   // ukończeniu sekcji Związki (interpretacja pary na /dopasowanie).
   const zwiazkiUkonczone = useZwiazkiUkonczone();
   const router = useRouter();
+  // gwiazdka aktywna = za chwilę przejście na Twoją Karmę — pobierz ją od razu, żeby napisy
+  // pod Kołem pojawiły się zaraz po fali, a nie po wczytaniu strony
+  useEffect(() => { if (komplet) router.prefetch("/panel"); }, [komplet, router]);
 
   /** Środek Koła po ukończeniu wszystkich sekcji: złoto zalewa stronę od gwiazdki (na stałe), potem Twoja Karma (/panel). */
   const wylejKolor = (e: React.MouseEvent<HTMLElement>) => {

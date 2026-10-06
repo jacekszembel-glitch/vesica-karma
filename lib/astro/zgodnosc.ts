@@ -485,7 +485,7 @@ const WARUNKI: Record<"proba" | "blask" | "ochrona" | "talent" | "rozproszenie",
       const pl = c.planets[p];
       if (znaneDomy(c) && [6, 8, 12].includes(pl.house)) return `${MIANOWNIK[p]} w ${pl.house}. domu`;
       if (pl.dignity === "upadek") return `${MIANOWNIK[p]} w upadku`;
-      if (pl.combust) return `${MIANOWNIK[p]} spalony przy Słońcu`;
+      if (pl.combust) return `${MIANOWNIK[p]} — spalenie przy Słońcu`;
       const z = ZLOCZYNCY.find((m) => wZnaku(c, p, m));
       return z ? `${MIANOWNIK[p]} w jednym znaku z: ${MIANOWNIK[z]}` : null;
     },

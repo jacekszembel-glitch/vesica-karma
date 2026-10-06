@@ -28,6 +28,9 @@ export const SKRYPT_ODWROCENIA =
   // tylko na localhost: ?etap — ostatni etap: astrologia i numerologia ukończone, chiromancja do
   // zrobienia, bez złota; bez kasowania zapisów (dane urodzenia, odczyty) — test końcówki na prawdziwych danych
   `try{var h4=location.hostname;if((h4==="localhost"||h4==="127.0.0.1")&&/[?&]etap(=|&|$)/.test(location.search)){localStorage.setItem("vk_systemy_karmy",'["astrologia","numerologia"]');localStorage.removeItem("${KLUCZ_ODWROCENIA}");history.replaceState(null,"",location.pathname)}}catch(e){}`+
+  // tylko na localhost: ?gwiazdka — moment pulsującej gwiazdki: trzy sekcje ukończone, bez złota,
+  // bez kasowania zapisów (dane urodzenia, odczyt dłoni, znaki) — test fali i Twojej Karmy na prawdziwych danych
+  `try{var h5=location.hostname;if((h5==="localhost"||h5==="127.0.0.1")&&/[?&]gwiazdka(=|&|$)/.test(location.search)){localStorage.setItem("vk_systemy_karmy",'["astrologia","hiromancja","numerologia"]');localStorage.removeItem("${KLUCZ_ODWROCENIA}");history.replaceState(null,"",location.pathname)}}catch(e){}`+
   `try{if(localStorage.getItem("${KLUCZ_ODWROCENIA}")==="1")document.documentElement.setAttribute("${ATRYBUT_ODWROCENIA}","")}catch(e){}`;
 
 /** Klasa na <html>: treść pod Kołem znika przed falą (globals.css). Zdejmuje ją dopiero
