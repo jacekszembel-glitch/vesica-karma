@@ -36,12 +36,29 @@ Oceń cztery rzeczy:
 
 Odpowiedz WYŁĄCZNIE w tym formacie, bez niczego dodatkowego:
 OCENA: OK albo PROBLEM
-KOMENTARZ: jedno krótkie zdanie po polsku — jeśli PROBLEM, co dokładnie poprawić (np. "Nadgarstek jest ucięty, zrób zdjęcie z większej odległości"); jeśli OK, zostaw puste.`;
+KOMENTARZ: jedno krótkie zdanie po polsku — jeśli PROBLEM, co dokładnie poprawić (np. "Nadgarstek jest ucięty, zrób zdjęcie z większej odległości"); jeśli OK, zostaw puste.
+DLON: x0 y0 x1 y1
+PALCE: x0 y0 x1 y1
 
-function sparsuj(tekst: string): { ok: boolean; komentarz: string | null } {
+DLON to prostokąt obejmujący samo wnętrze dłoni BEZ palców (od nasady palców do nadgarstka, od krawędzi do krawędzi, razem z nasadą kciuka). PALCE to prostokąt obejmujący wszystkie palce razem z kciukiem. Współrzędne w promilach rozmiaru zdjęcia: 0 0 = lewy górny róg, 1000 1000 = prawy dolny. Jeśli dłoni nie widać — wpisz "brak".`;
+
+type Ramka = [number, number, number, number];
+
+function ramka(tekst: string, klucz: string): Ramka | null {
+  const m = new RegExp(`${klucz}:[ \\t]*(\\d+)[\\s,]+(\\d+)[\\s,]+(\\d+)[\\s,]+(\\d+)`, "i").exec(tekst);
+  if (!m) return null;
+  const [x0, y0, x1, y1] = m.slice(1, 5).map((v) => Math.min(1000, Number(v)) / 1000);
+  return x1 > x0 && y1 > y0 ? [x0, y0, x1, y1] : null;
+}
+
+function sparsuj(tekst: string): { ok: boolean; komentarz: string | null; ramki: { dlon: Ramka | null; palce: Ramka | null } } {
   const ocena = /OCENA:\s*(OK|PROBLEM)/i.exec(tekst)?.[1]?.toUpperCase();
-  const komentarz = /KOMENTARZ:\s*(.*)/i.exec(tekst)?.[1]?.trim() || null;
-  return { ok: ocena !== "PROBLEM", komentarz: ocena === "PROBLEM" ? komentarz : null };
+  const komentarz = /KOMENTARZ:[ \t]*(.*)/i.exec(tekst)?.[1]?.trim() || null;
+  return {
+    ok: ocena !== "PROBLEM",
+    komentarz: ocena === "PROBLEM" ? komentarz : null,
+    ramki: { dlon: ramka(tekst, "DLON"), palce: ramka(tekst, "PALCE") },
+  };
 }
 
 export async function POST(req: Request) {
@@ -67,7 +84,7 @@ export async function POST(req: Request) {
   try {
     const msg = await client.messages.create({
       model: "claude-opus-5",
-      max_tokens: 150,
+      max_tokens: 300,
       thinking: { type: "disabled" },
       output_config: { effort: "low" },
       system: SYSTEM_PROMPT_SPRAWDZENIE,

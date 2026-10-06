@@ -2863,3 +2863,87 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
     transparent calc(var(--krag-wew) - 1px), #000 var(--krag-wew), #000 var(--krag-zew), transparent calc(var(--krag-zew) + 1px));
   animation-duration: 9s;
 }
+
+/* ---------- Twoja Karma: zgodność trzech systemów (components/PorownanieSystemow.tsx) ---------- */
+.porownanie-tytul { font-size: 2.6rem; color: var(--sand); margin-bottom: 16px; text-align: center; }
+.porownanie-wynik { display: flex; align-items: center; gap: 22px; margin-top: 22px; }
+.porownanie-liczba {
+  font-family: var(--font-serif); font-size: clamp(3rem, 9vw, 4.4rem); line-height: 1;
+  color: var(--gold); font-variant-numeric: tabular-nums; flex-shrink: 0; text-align: center;
+}
+.porownanie-werdykt { font-family: var(--font-serif); font-size: 1.25rem; color: var(--sand); margin-bottom: 4px; text-align: left; }
+.porownanie-vesica { display: block; width: 100%; max-width: 464px; margin: 0 auto; overflow: visible; }
+.porownanie-kolo-podpis { font-family: var(--font-serif); font-size: 15px; fill: var(--sand); letter-spacing: 0.04em; }
+.porownanie-symbol { font-size: 15px; fill: var(--gold); font-family: "Segoe UI Symbol", "DejaVu Sans", sans-serif; pointer-events: none; }
+.porownanie-nazwa { font-size: 10.5px; fill: var(--text); pointer-events: none; }
+.porownanie-tabela-wrap { overflow-x: auto; }
+.porownanie-tabela { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.porownanie-tabela th {
+  font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+  font-weight: 600; padding: 0 8px 10px; text-align: center; border-bottom: 1px solid var(--line-gold);
+}
+.porownanie-tabela th:first-child { text-align: left; padding-left: 0; }
+.porownanie-tabela td { padding: 9px 8px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; transition: opacity 0.2s; }
+.porownanie-tabela td:first-child { padding-left: 0; color: var(--text); }
+.porownanie-tabela td.srodek { text-align: center; }
+.porownanie-tabela tr { transition: opacity 0.2s; }
+.porownanie-tabela tr.aktywny td { background: rgba(230, 196, 138, 0.08); }
+.porownanie-symbol-tab { color: var(--gold); font-family: "Segoe UI Symbol", "DejaVu Sans", sans-serif; }
+.porownanie-pod { display: block; font-size: 0.72rem; margin-top: 2px; }
+.pz-brak { color: var(--muted); display: inline-block; width: 18px; text-align: center; }
+.porownanie-rodzaj { font-size: 0.72rem; letter-spacing: 0.06em; white-space: nowrap; color: var(--muted); }
+.porownanie-rodzaj.r-zgodnosc3 { color: var(--gold); font-weight: 700; }
+.porownanie-rodzaj.r-zgodnosc2 { color: var(--sand); font-weight: 600; }
+.porownanie-rodzaj.r-roznica { color: var(--warn); font-weight: 600; }
+.pz-krotkie { display: none; }
+.porownanie-legenda { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.78rem; margin-top: 12px; }
+.porownanie-legenda svg { vertical-align: middle; }
+.porownanie-paski { display: grid; gap: 12px; }
+.porownanie-pasek { display: grid; grid-template-columns: 110px 1fr 46px; align-items: center; gap: 12px; font-size: 0.88rem; }
+.porownanie-pasek-nazwa { color: var(--text); }
+.porownanie-pasek-tor { position: relative; height: 8px; border-radius: 4px; background: var(--line-soft); }
+.porownanie-pasek-wypelnienie { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--gold); }
+.porownanie-pasek-przypadek { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--sand); opacity: 0.9; }
+.porownanie-pasek-liczba { text-align: right; color: var(--gold); font-variant-numeric: tabular-nums; }
+@media (max-width: 520px) {
+  .porownanie-wynik { flex-direction: column; gap: 10px; }
+  .porownanie-werdykt { text-align: center; }
+  .porownanie-pasek { grid-template-columns: 92px 1fr 40px; }
+  .porownanie-tabela { font-size: 0.84rem; }
+  .porownanie-tabela th { font-size: 0.6rem; letter-spacing: 0.06em; padding: 0 4px 10px; }
+  .porownanie-tabela td { padding: 8px 4px; }
+  .porownanie-tabela td:first-child { white-space: nowrap; }
+  .porownanie-pod { display: none; }
+  .pz-dlugie { display: none; }
+  .pz-krotkie { display: inline; }
+}
+
+/* Chiromancja: wskazówki do zdjęcia nad wgrywaniem */
+.dlon-wskazowki { max-width: 520px; margin: 0 auto 30px; color: var(--sand); }
+.dlon-wskazowki ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 0.86rem; line-height: 1.55; }
+
+/* Chiromancja: sesja zdjęć (components/HiromancjaSesja.tsx) */
+.hs-sekcja { margin: 8px auto 36px; max-width: 980px; }
+.hs-rece { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 28px; }
+.hs { min-width: 0; }
+.hs-tytul { font-weight: 700; color: var(--sand); letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.78rem; margin-bottom: 10px; text-align: left; }
+.hs-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.hs-ujecie { display: grid; grid-template-columns: 54px 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line-soft); }
+.hs-ujecie:first-child { border-top: 1px solid var(--line-soft); }
+.hs-opis { min-width: 0; }
+.hs-nazwa { font-size: 0.88rem; font-weight: 600; color: var(--sand); margin: 0; text-align: left; }
+.hs-znacznik { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8c7f6f; margin-left: 4px; }
+.hs-ujecie-jest .hs-znacznik { color: var(--sand); }
+.hs-instrukcja { font-size: 0.76rem; line-height: 1.45; color: var(--sand); opacity: 0.8; margin: 3px 0 0; text-align: left; }
+.hs-ostrzezenie { font-size: 0.74rem; color: var(--warn); margin: 4px 0 0; line-height: 1.4; text-align: left; }
+.hs-akcje { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.hs-miniatura { width: 46px; height: 46px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line-gold); }
+.hs-usun { background: none; border: none; color: #8c7f6f; font-size: 0.68rem; cursor: pointer; padding: 0; text-decoration: underline; }
+.hs-miejsca { margin-top: 16px; }
+.hs-obraz { position: relative; display: inline-block; max-width: 100%; margin-top: 10px; line-height: 0; user-select: none; }
+.hs-obraz img { display: block; max-width: 100%; max-height: 420px; border-radius: 8px; }
+.hs-punkt {
+  position: absolute; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%;
+  background: var(--sand); color: var(--bg); border: 2px solid var(--bg); font-weight: 700; font-size: 0.8rem;
+  cursor: pointer; line-height: 1; box-shadow: 0 0 0 6px rgba(230, 196, 138, 0.25);
+}

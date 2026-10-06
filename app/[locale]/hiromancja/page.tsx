@@ -4,6 +4,8 @@ import { useState } from "react";
 import Term from "@/components/Term";
 import HiromancjaZdjecie, { type ZdjecieDane } from "@/components/HiromancjaZdjecie";
 import HiromancjaOdczyt from "@/components/HiromancjaOdczyt";
+import HiromancjaSesja from "@/components/HiromancjaSesja";
+import { UJECIA, wytnijMiejsce, type Miejsce, type Strefa, type TypUjecia, type Ujecie } from "@/lib/hiromancjaObraz";
 import SekcjaZlota from "@/components/SekcjaZlota";
 import KoloDanychPanel from "@/components/KoloDanychPanel";
 import ZapisanyOdczyt, { useZapisSekcji } from "@/components/ZapisanyOdczyt";
@@ -41,6 +43,27 @@ import ZapisanyOdczyt, { useZapisSekcji } from "@/components/ZapisanyOdczyt";
  */
 
 type Reka = "prawa" | "lewa";
+
+/** Vercel przyjmuje ~4,5 MB na zapytanie — na obie ręce (base64) zostawiamy zapas. */
+const LIMIT_ZNAKOW_NA_REKE = 2_000_000;
+
+/**
+ * Wszystko o jednej ręce w kształcie, którego oczekuje /api/hiromancja. Kolejność = priorytet,
+ * gdy całość nie mieści się w limicie: wskazane miejsca, potem osobne ujęcia (wg UJECIA),
+ * na końcu automatyczne wycinki — te ostatnie pomijamy, gdy są już prawdziwe zbliżenia z bliska.
+ */
+function doOdczytu(z: ZdjecieDane, ujecia: Partial<Record<TypUjecia, Ujecie>>, miejsca: Miejsce[]) {
+  const wskazane = miejsca.map((m, i) => wytnijMiejsce(z.zrodlo, m, i + 1));
+  const osobne: Strefa[] = UJECIA.filter((u) => ujecia[u.typ]).map((u) => ({ opis: u.opisDlaAI, base64: ujecia[u.typ]!.base64 }));
+  const saZblizenia = !!(ujecia.gora || ujecia.dol);
+  const kolejka = [...wskazane, ...osobne, ...(saZblizenia ? [] : z.strefy)];
+  let suma = z.base64.length;
+  const strefy = kolejka.filter((s) => (suma += s.base64.length) <= LIMIT_ZNAKOW_NA_REKE);
+  return {
+    imageBase64: z.base64, imageMediaType: z.mediaType,
+    strefy: strefy.map((s) => ({ opis: s.opis, imageBase64: s.base64 })),
+  };
+}
 
 const PLEC_OPCJE: { id: "on" | "ona" | "ono"; label: string }[] = [
   { id: "on", label: "On" }, { id: "ona", label: "Ona" },
@@ -82,9 +105,15 @@ export default function HiromancjaPage() {
   const [imie, setImie] = useState("");
   const [plec, setPlec] = useState<"on" | "ona" | "ono">("ona");
   const [zwiniete, setZwiniete] = useState(false);
+  const [ujecia, setUjecia] = useState<Record<Reka, Partial<Record<TypUjecia, Ujecie>>>>({ prawa: {}, lewa: {} });
+  const [miejsca, setMiejsca] = useState<Record<Reka, Miejsce[]>>({ prawa: [], lewa: [] });
 
   function handleZdjecie(reka: Reka, dane: ZdjecieDane) {
-    setZdjecia((z) => ({ ...z, [reka]: dane }));
+    setZdjecia((z) => {
+      // nowe zdjęcie główne (inny plik) — wskazane miejsca dotyczyły starego
+      if (z[reka] && z[reka]!.zrodlo !== dane.zrodlo) setMiejsca((m) => ({ ...m, [reka]: [] }));
+      return { ...z, [reka]: dane };
+    });
   }
 
   const obaZdjeciaGotowe = zdjecia.prawa && zdjecia.lewa;
@@ -150,6 +179,16 @@ export default function HiromancjaPage() {
       {/* wgrywanie — wzór public/brand/chiromanca-2.jpg: duże koło z dłonią (ZŁOTE = zdjęcie
           wgrane, TAUPE = jeszcze nie), pod nim płaski złoty przycisk i podpis stanu.
           Dominującą rękę pokazuje przełącznik wyżej, nie kolor koła. */}
+      {/* jak zrobić zdjęcie, na którym widać niuanse — od tego zależy jakość odczytu */}
+      <div className="dlon-wskazowki">
+        <p className="eyebrow" style={{ marginBottom: 8, color: "var(--sand)" }}>Jak zrobić dobre zdjęcie</p>
+        <ul>
+          <li>Światło z boku — najlepiej przy oknie w dzień. Bez lampy błyskowej: spłaszcza linie.</li>
+          <li>Dłoń płasko, palce lekko rozsunięte, cała dłoń z nadgarstkiem w kadrze.</li>
+          <li>Telefon równolegle do dłoni, ok. 25–30 cm nad nią; stuknij w dłoń na ekranie, żeby ustawić ostrość.</li>
+        </ul>
+      </div>
+
       <div className="dlon-wgrywanie">
         {(["lewa", "prawa"] as const).map((r) => (
           <div key={r} className="dlon-wgrywanie-kolumna">
@@ -164,6 +203,32 @@ export default function HiromancjaPage() {
           </div>
         ))}
       </div>
+
+      {/* sesja zdjęć: dodatkowe ujęcia i wskazane miejsca — po wgraniu zdjęcia głównego danej ręki */}
+      {(zdjecia.lewa || zdjecia.prawa) && (
+        <div className="hs-sekcja">
+          <p className="eyebrow" style={{ textAlign: "center", color: "var(--sand)", marginBottom: 6 }}>Dokładniejszy odczyt</p>
+          <p style={{ textAlign: "center", maxWidth: 560, margin: "0 auto 22px", fontSize: "0.86rem", lineHeight: 1.6, color: "var(--sand)" }}>
+            Znaki takie jak krzyże, gwiazdy czy kratki najlepiej widać na zdjęciach z bliska i przy świetle z boku.
+            Każde dodatkowe ujęcie to więcej prawdziwych szczegółów do odczytu.
+          </p>
+          <div className="hs-rece">
+            {(["lewa", "prawa"] as const).map((r) => zdjecia[r] && (
+              <HiromancjaSesja key={r} idBaza={`hs-${r}`}
+                etykieta={`${r === "lewa" ? "Lewa" : "Prawa"} dłoń — ${r === pismoReka ? "wiodąca" : "bierna"}`}
+                dataUrlGlowne={zdjecia[r]!.dataUrl}
+                ujecia={ujecia[r]}
+                onUjecie={(typ, u) => setUjecia((s) => {
+                  const nowe = { ...s[r] };
+                  if (u) nowe[typ] = u; else delete nowe[typ];
+                  return { ...s, [r]: nowe };
+                })}
+                miejsca={miejsca[r]}
+                onMiejsca={(m) => setMiejsca((s) => ({ ...s, [r]: m }))} />
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="skrot-hero-linia" />
 
@@ -207,8 +272,8 @@ export default function HiromancjaPage() {
         <div className="fade-up sekcja-zlota-ai">
           <SekcjaZlota tytul="Odczyt dłoni">
           <HiromancjaOdczyt
-            wiodaca={{ imageBase64: zdjecia[pismoReka]!.base64, imageMediaType: zdjecia[pismoReka]!.mediaType }}
-            bierna={{ imageBase64: zdjecia[rekaBierna]!.base64, imageMediaType: zdjecia[rekaBierna]!.mediaType }}
+            wiodaca={doOdczytu(zdjecia[pismoReka]!, ujecia[pismoReka], miejsca[pismoReka])}
+            bierna={doOdczytu(zdjecia[rekaBierna]!, ujecia[rekaBierna], miejsca[rekaBierna])}
             plec={plec}
             imie={imie.trim() || undefined}
           />

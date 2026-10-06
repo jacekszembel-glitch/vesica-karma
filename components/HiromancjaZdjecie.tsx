@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { przygotujZdjecie, wytnijStrefy, type RamkiDloni, type ZdjecieDloni } from "@/lib/hiromancjaObraz";
 
 /**
  * ZDJĘCIE DŁONI — wybór pliku (na telefonie `capture="environment"` od razu
  * otwiera aparat) + przeskalowanie po stronie przeglądarki, zanim
- * cokolwiek trafi na serwer: maks. 1000px dłuższego boku, JPEG q=0.8.
+ * cokolwiek trafi na serwer: całe zdjęcie 1568 px + zbliżenia stref z oryginału
+ * (lib/hiromancjaObraz.ts), do tego lokalna ocena ostrości i jasności.
  * Bez `getUserMedia`/`<video>` — świadomie poza zakresem v1, plik
  * wystarcza i działa wszędzie.
  *
@@ -13,28 +15,7 @@ import { useState } from "react";
  * lokalnie i przekazane do rodzica przez `onZdjecieGotowe`.
  */
 
-export interface ZdjecieDane {
-  dataUrl: string;
-  /** Bez prefiksu "data:image/jpeg;base64,". */
-  base64: string;
-  mediaType: "image/jpeg";
-}
-
-async function wczytajIPrzeskaluj(file: File): Promise<ZdjecieDane> {
-  const bitmap = await createImageBitmap(file);
-  const skala = Math.min(1, 1000 / Math.max(bitmap.width, bitmap.height));
-  const w = Math.max(1, Math.round(bitmap.width * skala));
-  const h = Math.max(1, Math.round(bitmap.height * skala));
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Brak kontekstu canvas");
-  ctx.drawImage(bitmap, 0, 0, w, h);
-  const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
-  const base64 = dataUrl.split(",")[1] ?? "";
-  return { dataUrl, base64, mediaType: "image/jpeg" };
-}
+export type ZdjecieDane = ZdjecieDloni;
 
 export default function HiromancjaZdjecie({ id, onZdjecieGotowe, maZdjecie, etykieta }: {
   /** Unikalny id pola pliku — strona ma dwa takie komponenty naraz (lewa/prawa dłoń). */
@@ -48,6 +29,7 @@ export default function HiromancjaZdjecie({ id, onZdjecieGotowe, maZdjecie, etyk
   const [przetwarzam, setPrzetwarzam] = useState(false);
   const [sprawdzanie, setSprawdzanie] = useState(false);
   const [werdykt, setWerdykt] = useState<{ ok: boolean; komentarz: string | null } | null>(null);
+  const [lokalnyProblem, setLokalnyProblem] = useState<string | null>(null);
 
   /** Szybkie, tanie sprawdzenie jakości zdjęcia — miękkie ostrzeżenie, NIE blokuje dalszego kroku. */
   async function sprawdzZdjecie(dane: ZdjecieDane) {
@@ -59,7 +41,12 @@ export default function HiromancjaZdjecie({ id, onZdjecieGotowe, maZdjecie, etyk
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageBase64: dane.base64, imageMediaType: dane.mediaType }),
       });
-      if (res.ok) setWerdykt(await res.json());
+      if (res.ok) {
+        const w = (await res.json()) as { ok: boolean; komentarz: string | null; ramki?: RamkiDloni | null };
+        setWerdykt(w);
+        // ramki stref z AI — wycinamy zbliżenia dokładnie tam, gdzie leży dłoń i palce
+        if (w.ramki?.dlon) onZdjecieGotowe({ ...dane, strefy: wytnijStrefy(dane.zrodlo, w.ramki) });
+      }
     } catch {
       /* sprawdzenie jest tylko podpowiedzią — cicha awaria, użytkownik i tak może kontynuować */
     } finally {
@@ -73,9 +60,11 @@ export default function HiromancjaZdjecie({ id, onZdjecieGotowe, maZdjecie, etyk
     if (!file) return;
     setBlad(null);
     setWerdykt(null);
+    setLokalnyProblem(null);
     setPrzetwarzam(true);
     try {
-      const dane = await wczytajIPrzeskaluj(file);
+      const dane = await przygotujZdjecie(file);
+      setLokalnyProblem(dane.lokalnie.problem);
       onZdjecieGotowe(dane);
       void sprawdzZdjecie(dane); // w tle, nie blokuje przejścia dalej
     } catch {
@@ -94,6 +83,9 @@ export default function HiromancjaZdjecie({ id, onZdjecieGotowe, maZdjecie, etyk
         {przetwarzam ? "Wczytuję…" : maZdjecie ? "Zmień zdjęcie" : etykieta}
       </label>
       {blad && <p style={{ color: "var(--warn)", fontSize: "0.85rem", marginTop: 10 }}>{blad}</p>}
+      {lokalnyProblem && (
+        <p style={{ color: "var(--warn)", fontSize: "0.8rem", marginTop: 10, lineHeight: 1.45 }}>⚠ {lokalnyProblem}</p>
+      )}
       {sprawdzanie && <p className="muted" style={{ fontSize: "0.78rem", marginTop: 10 }}>Sprawdzam zdjęcie…</p>}
       {werdykt && !werdykt.ok && werdykt.komentarz && (
         <p style={{ color: "var(--warn)", fontSize: "0.8rem", marginTop: 10, lineHeight: 1.45 }}>

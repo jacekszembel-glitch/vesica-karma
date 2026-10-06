@@ -7,17 +7,21 @@
  * — to jest tylko druga, osobna kopia OSTATNIEGO wyniku dla Karmy.
  */
 
+import type { DlonWLiczbach } from "./astro/zgodnosc";
+
 const KLUCZ = "vk_hiromancja_odczyt";
 
 export interface OdczytDloniZapisany {
   text: string;
   savedAt: number;
+  /** Wzgórki planet i żywioł w liczbach (z bloku danych odczytu) — do porównania trzech systemów. */
+  dane?: DlonWLiczbach | null;
 }
 
-export function zapiszOdczytDloni(text: string): void {
+export function zapiszOdczytDloni(text: string, dane: DlonWLiczbach | null = null): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(KLUCZ, JSON.stringify({ text, savedAt: Date.now() }));
+    localStorage.setItem(KLUCZ, JSON.stringify({ text, savedAt: Date.now(), dane }));
   } catch {
     /* tryb prywatny — synteza po prostu obejdzie się bez trzeciego głosu */
   }

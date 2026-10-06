@@ -1,0 +1,320 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { GRAHAS, type PlanetId } from "@/lib/astro/constants";
+import {
+  MIEJSCE_W_DLONI, PLANETA_CYFRA, SYSTEMY_ZGODNOSCI,
+  type Ocena, type PlanetaPorownania, type SystemZgodnosci, type WynikZgodnosci,
+} from "@/lib/astro/zgodnosc";
+import type { TypDloni } from "@/lib/hiromancja";
+
+/**
+ * Porównanie trzech systemów na Twojej Karmie (tylko złota część, po fali).
+ * Wyliczenia w lib/astro/zgodnosc.ts — tu wyłącznie obraz:
+ *  1. spójność całego obrazu na tle przypadku,
+ *  2. Vesica Piscis — trzy koła = trzy systemy, planeta leży tam, gdzie system
+ *     uznaje ją za mocną (środek = mocna we wszystkich trzech),
+ *  3. tabela 9 planet × 3 systemy z rodzajem zgodności,
+ *  4. zgodność każdego systemu z dwoma pozostałymi, żywioły, wnioski słowami.
+ */
+
+const NAZWA: Record<SystemZgodnosci, string> = {
+  astrologia: "Astrologia", numerologia: "Numerologia", chiromancja: "Chiromancja",
+};
+const ZYWIOL: Record<TypDloni, string> = { ziemia: "Ziemia", powietrze: "Powietrze", ogien: "Ogień", woda: "Woda" };
+
+/* Geometria diagramu: A u góry z lewej, N u góry z prawej, Ch na dole. */
+const R = 112;
+const KOLA: Record<SystemZgodnosci, { cx: number; cy: number; lx: number; ly: number; anchor: "start" | "end" | "middle" }> = {
+  astrologia: { cx: 172, cy: 150, lx: 66, ly: 34, anchor: "start" },
+  numerologia: { cx: 292, cy: 150, lx: 398, ly: 34, anchor: "end" },
+  chiromancja: { cx: 232, cy: 254, lx: 232, ly: 392, anchor: "middle" },
+};
+/** Środek każdego obszaru diagramu — klucz to posortowana lista systemów, w których planeta jest mocna. */
+const OBSZARY: Record<string, [number, number]> = {
+  "astrologia": [118, 128],
+  "numerologia": [346, 128],
+  "chiromancja": [232, 318],
+  "astrologia+numerologia": [232, 112],
+  "astrologia+chiromancja": [172, 236],
+  "chiromancja+numerologia": [292, 236],
+  "astrologia+chiromancja+numerologia": [232, 188],
+};
+
+function ZnakOceny({ o }: { o: Ocena | null }) {
+  if (o === null) return <span className="pz-brak" title="brak danych">–</span>;
+  const tytul = o === 1 ? "mocna" : o === 0 ? "przeciętna" : "słaba";
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" role="img" aria-label={tytul}>
+      <title>{tytul}</title>
+      {o === 1 && <circle cx="9" cy="9" r="7" fill="var(--gold)" />}
+      {o === 0 && (
+        <>
+          <circle cx="9" cy="9" r="6.3" fill="none" stroke="var(--gold)" strokeWidth="1.4" />
+          <path d="M 9 2.7 A 6.3 6.3 0 0 1 9 15.3 Z" fill="var(--gold)" />
+        </>
+      )}
+      {o === -1 && <circle cx="9" cy="9" r="6.3" fill="none" stroke="var(--gold)" strokeWidth="1.4" />}
+    </svg>
+  );
+}
+
+const RODZAJ: Record<PlanetaPorownania["rodzaj"], string> = {
+  zgodnosc3: "zgodne ×3",
+  zgodnosc2: "zgodne ×2",
+  roznica: "różnica",
+  mieszane: "blisko",
+  jeden: "za mało danych",
+};
+
+function lista(nazwy: string[]): string {
+  if (nazwy.length <= 1) return nazwy.join("");
+  return `${nazwy.slice(0, -1).join(", ")} i ${nazwy[nazwy.length - 1]}`;
+}
+
+
+function werdykt(w: WynikZgodnosci): { tytul: string; opis: string } {
+  const roznica = w.spojnosc - w.przypadek;
+  if (roznica >= 0.12) return {
+    tytul: "Obraz wyraźnie spójny",
+    opis: "Trzy systemy zgadzają się ze sobą znacznie częściej, niż wynikałoby z przypadku — to, co mówią o Tobie, wzajemnie się potwierdza.",
+  };
+  if (roznica >= 0.05) return {
+    tytul: "Obraz raczej spójny",
+    opis: "Systemy częściej się zgadzają, niż przeczą — rdzeń obrazu się potwierdza, a różnice pokazują miejsca, gdzie warto czytać uważniej.",
+  };
+  if (roznica > -0.05) return {
+    tytul: "Obraz mieszany",
+    opis: "Zgodności jest mniej więcej tyle, ile dałby przypadek — każdy system mówi tu własnym głosem. Najcenniejsze są pojedyncze planety, w których jednak się spotykają.",
+  };
+  return {
+    tytul: "Systemy się rozchodzą",
+    opis: "Systemy zgadzają się rzadziej, niż wynikałoby z przypadku — to nie błąd, tylko wyraźne napięcie między tym, co wrodzone (czas, imię), a tym, co rozwinięte (dłoń).",
+  };
+}
+
+export default function PorownanieSystemow({ wynik, dlonZrodlo, dlonZapisano }: {
+  wynik: WynikZgodnosci; dlonZrodlo: "odczyt" | "tekst" | null; dlonZapisano: number | null;
+}) {
+  const [aktywna, setAktywna] = useState<PlanetId | null>(null);
+  const w = werdykt(wynik);
+  const proc = (x: number) => `${Math.round(x * 100)}%`;
+
+  // planety w obszarach diagramu
+  const wObszarze = new Map<string, PlanetId[]>();
+  const poza: PlanetId[] = [];
+  for (const p of wynik.planety) {
+    if (!p.mocnaW.length) { poza.push(p.planeta); continue; }
+    const k = [...p.mocnaW].sort().join("+");
+    wObszarze.set(k, [...(wObszarze.get(k) ?? []), p.planeta]);
+  }
+
+  const nazwa = (p: PlanetId) => GRAHAS[p].pl;
+  const mocneRdzen = wynik.planety.filter((p) => (p.rodzaj === "zgodnosc3" || p.rodzaj === "zgodnosc2")
+    && Object.values(p.oceny).filter((o) => o === 1).length >= 2);
+  const slabeRdzen = wynik.planety.filter((p) => (p.rodzaj === "zgodnosc3" || p.rodzaj === "zgodnosc2")
+    && Object.values(p.oceny).filter((o) => o === -1).length >= 2);
+  const roznice = wynik.planety.filter((p) => p.rodzaj === "roznica");
+  const brakDloni = wynik.systemy.chiromancja.par === 0;
+
+  const przygas = (p: PlanetId) => (aktywna && aktywna !== p ? 0.28 : 1);
+
+  return (
+    <section className="porownanie" style={{ textAlign: "left" }}>
+      <h2 className="porownanie-tytul">Zgodność trzech systemów</h2>
+      <p className="muted" style={{ fontSize: "0.92rem", lineHeight: 1.75 }}>
+        Astrologia, numerologia i chiromancja mówią wspólnym językiem dziewięciu planet. Każdy system
+        ocenia każdą planetę jako mocną, przeciętną albo słabą — tu widać, gdzie te oceny się spotykają,
+        a gdzie rozchodzą.
+      </p>
+
+      {/* 1. Spójność na tle przypadku */}
+      <div className="porownanie-wynik">
+        <p className="porownanie-liczba">{proc(wynik.spojnosc)}</p>
+        <div>
+          <p className="porownanie-werdykt">{w.tytul}</p>
+          <p className="muted" style={{ fontSize: "0.86rem", lineHeight: 1.6 }}>
+            Średnia zgodność ocen planet między parami systemów ({wynik.par} porównań; ta sama ocena liczy się
+            w całości, sąsiednia w połowie, przeciwna wcale). Sam przypadek dałby około{" "}
+            <strong>{proc(wynik.przypadek)}</strong>. {w.opis}
+          </p>
+        </div>
+      </div>
+
+      <div className="ornament" style={{ margin: "30px 0 22px" }} />
+
+      {/* 2. Vesica Piscis */}
+      <p className="eyebrow" style={{ textAlign: "center", marginBottom: 6 }}>Gdzie planeta jest mocna</p>
+      <svg viewBox="0 0 464 410" className="porownanie-vesica" role="img"
+        aria-label="Diagram trzech kół: planety mocne w jednym, dwóch albo trzech systemach">
+        {SYSTEMY_ZGODNOSCI.map((s) => {
+          const k = KOLA[s];
+          return (
+            <g key={s}>
+              <circle cx={k.cx} cy={k.cy} r={R} fill="var(--gold)" fillOpacity="0.05" stroke="var(--gold)" strokeWidth="1.4" />
+              <text x={k.lx} y={k.ly} textAnchor={k.anchor} className="porownanie-kolo-podpis">{NAZWA[s]}</text>
+            </g>
+          );
+        })}
+        {[...wObszarze.entries()].map(([k, planety]) => {
+          const [x, y] = OBSZARY[k];
+          const krok = 42;
+          return planety.map((p, i) => {
+            const wRzedzie = Math.min(planety.length, 3);
+            const rzad = Math.floor(i / 3), kol = i % 3;
+            const px = x + (kol - (wRzedzie - 1) / 2) * krok;
+            const py = y + rzad * 38 - (planety.length > 3 ? 18 : 0);
+            return (
+              <g key={p} style={{ cursor: "pointer", opacity: przygas(p), transition: "opacity 0.2s" }}
+                onMouseEnter={() => setAktywna(p)} onMouseLeave={() => setAktywna(null)}
+                onClick={() => setAktywna((a) => (a === p ? null : p))}>
+                <circle cx={px} cy={py} r={aktywna === p ? 15 : 13} fill="var(--bg, #0c0a1a)"
+                  stroke="var(--gold)" strokeWidth={aktywna === p ? 2 : 1} style={{ transition: "r 0.2s" }} />
+                <text x={px} y={py + 5} textAnchor="middle" className="porownanie-symbol">{GRAHAS[p].symbol}</text>
+                <text x={px} y={py + 26} textAnchor="middle" className="porownanie-nazwa">{nazwa(p)}</text>
+              </g>
+            );
+          });
+        })}
+      </svg>
+      {poza.length > 0 && (
+        <p className="muted" style={{ fontSize: "0.82rem", textAlign: "center", marginTop: 4 }}>
+          Poza kołami (żaden system nie uznaje ich za mocne): {lista(poza.map(nazwa))}.
+        </p>
+      )}
+
+      <div className="ornament" style={{ margin: "30px 0 22px" }} />
+
+      {/* 3. Tabela */}
+      <div className="porownanie-tabela-wrap">
+        <table className="porownanie-tabela">
+          <thead>
+            <tr>
+              <th>Planeta</th>
+              {SYSTEMY_ZGODNOSCI.map((s) => (
+                <th key={s}><span className="pz-dlugie">{NAZWA[s]}</span><span className="pz-krotkie">{NAZWA[s].slice(0, 4)}.</span></th>
+              ))}
+              <th>Wynik</th>
+            </tr>
+          </thead>
+          <tbody>
+            {wynik.planety.map((p) => (
+              <tr key={p.planeta} className={aktywna === p.planeta ? "aktywny" : undefined}
+                style={{ opacity: przygas(p.planeta) }}
+                onMouseEnter={() => setAktywna(p.planeta)} onMouseLeave={() => setAktywna(null)}>
+                <td>
+                  <span className="porownanie-symbol-tab">{GRAHAS[p.planeta].symbol}</span> {nazwa(p.planeta)}
+                  <span className="muted porownanie-pod">cyfra {PLANETA_CYFRA[p.planeta]}{MIEJSCE_W_DLONI[p.planeta] ? ` · ${MIEJSCE_W_DLONI[p.planeta]}` : ""}</span>
+                </td>
+                {SYSTEMY_ZGODNOSCI.map((s) => <td key={s} className="srodek"><ZnakOceny o={p.oceny[s]} /></td>)}
+                <td><span className={`porownanie-rodzaj r-${p.rodzaj}`}>{RODZAJ[p.rodzaj]}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="muted porownanie-legenda">
+        <ZnakOceny o={1} /> mocna <ZnakOceny o={0} /> przeciętna <ZnakOceny o={-1} /> słaba <span className="pz-brak">–</span> brak danych
+      </p>
+
+      {dlonZapisano && (
+        <p className="muted" style={{ fontSize: "0.78rem", marginTop: 8 }}>
+          Chiromancja: odczyt dłoni z {new Date(dlonZapisano).toLocaleString("pl-PL", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
+          {dlonZrodlo === "odczyt" ? " — oceny podane wprost przez odczyt." : " — oceny wyłuskane z tekstu odczytu."}
+          {" "}Astrologia i numerologia liczą się zawsze z tych samych danych urodzenia, więc zmienia je tylko inna data, godzina lub imię.
+        </p>
+      )}
+
+      <div className="ornament" style={{ margin: "30px 0 22px" }} />
+
+      {/* 4. Każdy system na tle dwóch pozostałych */}
+      <p className="eyebrow" style={{ marginBottom: 14 }}>Każdy system na tle pozostałych</p>
+      <div className="porownanie-paski">
+        {SYSTEMY_ZGODNOSCI.map((s) => {
+          const d = wynik.systemy[s];
+          return (
+            <div key={s} className="porownanie-pasek">
+              <span className="porownanie-pasek-nazwa">{NAZWA[s]}</span>
+              <span className="porownanie-pasek-tor">
+                {d.zgodnosc !== null && <span className="porownanie-pasek-wypelnienie" style={{ width: proc(d.zgodnosc) }} />}
+                {d.przypadek !== null && <span className="porownanie-pasek-przypadek" style={{ left: proc(d.przypadek) }} title="przypadek" />}
+              </span>
+              <span className="porownanie-pasek-liczba">{d.zgodnosc !== null ? proc(d.zgodnosc) : "–"}</span>
+            </div>
+          );
+        })}
+      </div>
+      <p className="muted" style={{ fontSize: "0.78rem", marginTop: 8 }}>
+        Pasek — jak często system zgadza się z dwoma pozostałymi; pionowa kreska — ile dałby przypadek.
+      </p>
+
+      {/* 5. Żywioły */}
+      <p className="eyebrow" style={{ margin: "26px 0 10px" }}>Żywioł</p>
+      <p style={{ fontSize: "0.92rem", lineHeight: 1.7 }}>
+        Dłoń: <strong>{wynik.zywioly.dlon ? ZYWIOL[wynik.zywioly.dlon] : "brak danych"}</strong>
+        {" · "}Ascendent: <strong>{wynik.zywioly.lagna ? ZYWIOL[wynik.zywioly.lagna as TypDloni] : "bez godziny"}</strong>
+        {" · "}Księżyc: <strong>{ZYWIOL[wynik.zywioly.ksiezyc as TypDloni]}</strong>
+        {wynik.zywioly.dlon && (
+          <span className="muted">
+            {" — "}
+            {wynik.zywioly.dlon === wynik.zywioly.lagna || wynik.zywioly.dlon === wynik.zywioly.ksiezyc
+              ? `dłoń powtarza żywioł ${wynik.zywioly.dlon === wynik.zywioly.lagna ? "ascendentu" : "Księżyca"}: ciało i niebo mówią tu to samo.`
+              : "dłoń ma inny żywioł niż ascendent i Księżyc — ciało pokazuje stronę, której mapa nieba nie podkreśla."}
+          </span>
+        )}
+      </p>
+
+      <div className="ornament" style={{ margin: "30px 0 22px" }} />
+
+      {/* 6. Wnioski słowami — z tabeli, nie zgadywane */}
+      <p className="eyebrow" style={{ marginBottom: 10 }}>Co z tego wynika</p>
+      <div style={{ fontSize: "0.92rem", lineHeight: 1.75, display: "grid", gap: 12 }}>
+        {mocneRdzen.length > 0 && (
+          <p>
+            <strong>Rdzeń potwierdzony:</strong> {lista(mocneRdzen.map((p) => nazwa(p.planeta)))} —
+            mocne w co najmniej dwóch systemach naraz. To tematy, na których możesz polegać najpewniej.
+          </p>
+        )}
+        {slabeRdzen.length > 0 && (
+          <p>
+            <strong>Zgodnie słabsze:</strong> {lista(slabeRdzen.map((p) => nazwa(p.planeta)))} — kilka systemów
+            widzi tu mniej siły. Nie wyrok, tylko obszar do świadomego rozwijania.
+          </p>
+        )}
+        {roznice.map((p) => {
+          const mocne = SYSTEMY_ZGODNOSCI.filter((s) => p.oceny[s] === 1).map((s) => NAZWA[s].toLowerCase());
+          const slabe = SYSTEMY_ZGODNOSCI.filter((s) => p.oceny[s] === -1).map((s) => NAZWA[s].toLowerCase());
+          return (
+            <p key={p.planeta}>
+              <strong>Różnica — {nazwa(p.planeta)}:</strong> {lista(mocne)} widzi ją jako mocną, {lista(slabe)} jako
+              słabą. W takich miejscach to, co wrodzone, i to, co rozwinięte, rozeszło się —
+              warto zapytać, dlaczego.
+            </p>
+          );
+        })}
+        {!mocneRdzen.length && !slabeRdzen.length && !roznice.length && (
+          <p>Żadna planeta nie wyróżnia się zgodnie w dwóch systemach — obraz jest rozproszony.</p>
+        )}
+      </div>
+
+      {(brakDloni || dlonZrodlo === "tekst") && (
+        <p className="muted" style={{ fontSize: "0.8rem", marginTop: 18, lineHeight: 1.6 }}>
+          {brakDloni
+            ? "Chiromancja nie ma jeszcze ocen wzgórków — porównanie obejmuje na razie astrologię i numerologię. "
+            : "Oceny dłoni wyłuskane z tekstu wcześniejszego odczytu — pełniejsze będą po nowym odczycie. "}
+          <Link href="/hiromancja" style={{ color: "var(--gold)" }}>Odczytaj dłonie ponownie →</Link>
+        </p>
+      )}
+      <p className="muted" style={{ fontSize: "0.74rem", marginTop: 14, lineHeight: 1.6 }}>
+        Jak liczymy: astrologia — jak mocno planeta kształtuje Twój horoskop: władca ascendentu i znaku
+        Księżyca, atmakaraka, planety w ascendencie i na osiach, aspekt na ascendent, własny znak lub
+        egzaltacja, bieżąca mahadasza (trzy najwyrazistsze, trzy najmniej);
+        numerologia — cyfra planety jako Mulank, Bhagyank, liczba imienia albo powtórzona w dacie
+        (mocna), nieobecna w dacie (słaba); chiromancja — wzgórek, palec i linia planety, porównane
+        między sobą w Twojej dłoni. Rahu i Ketu nie mają
+        w dłoni klasycznego miejsca. Nic nie jest tu oceniane „na oko” — wszystko wynika z tych reguł.
+      </p>
+    </section>
+  );
+}

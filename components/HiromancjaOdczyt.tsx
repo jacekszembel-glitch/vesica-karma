@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import type { TypDloni } from "@/lib/hiromancja";
 import { zapiszOdczytDloni } from "@/lib/hiromancjaOdczytStore";
+import { rozdzielOdczytDloni } from "@/lib/astro/zgodnosc";
 import ZapalKrag from "./ZapalKrag";
 import { PieczecOdslaniania } from "./Interpretation";
 
@@ -72,6 +73,8 @@ export interface DloniDane {
   imageMediaType: "image/jpeg";
   /** Tylko jeśli użytkownik dodatkowo skorzystał z opcjonalnej, ręcznej kalibracji. */
   geometria?: { typ: TypDloni; stosunekDloni: number; stosunekPalca: number };
+  /** Zbliżenia stref dłoni (lib/hiromancjaObraz.ts). */
+  strefy?: { opis: string; imageBase64: string }[];
 }
 
 interface Props {
@@ -115,8 +118,10 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
         if (done) break;
         acc += decoder.decode(value, { stream: true });
       }
-      setText(acc);
-      zapiszOdczytDloni(acc);
+      // na końcu odczytu AI dopisuje ukryty blok danych (wzgórki, żywioł) — do porównania systemów, nie do czytania
+      const { tekst, dane } = rozdzielOdczytDloni(acc);
+      setText(tekst);
+      zapiszOdczytDloni(tekst, dane);
       // krąg Chiromancji zapala przycisk ZapalKrag pod odczytem (nie automat)
     } catch (e) {
       if ((e as Error).name !== "AbortError") setError((e as Error).message);
@@ -139,8 +144,9 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
         <>
           <h3 style={{ color: "var(--primary-soft)", fontSize: "1.5rem" }}>✦ Odczyt dłoni</h3>
           <p className="muted" style={{ maxWidth: 480, margin: "8px auto 20px", lineHeight: 1.6 }}>
-            Claude spojrzy na obie dłonie naraz i opisze ich kształt oraz widoczne linie serca, głowy,
-            życia i losu — osobno dla wiodącej i biernej, plus co je łączy lub różni.
+            Claude obejrzy obie dłonie w całości i w zbliżeniach — kształt, palce, linie główne
+            i drobne, wzgórki i znaki — osobno dla wiodącej i biernej, plus co je łączy lub różni.
+            Dokładny odczyt trwa około 1–2 minut.
           </p>
           <button className="btn btn-primary" onClick={generate} style={{ padding: "14px 36px", fontSize: "1rem" }}>
             {error ? "Spróbuj ponownie" : "Odczytaj dłonie"}
@@ -155,7 +161,7 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
         </div>
       )}
       {error && <p style={{ color: "var(--warn)", marginTop: 12 }}>{error}</p>}
-      {busy && !text && <PieczecOdslaniania tytul="Dłonie się odsłaniają…" mysli={MYSLI_DLONI} podpis="odczyt powstaje z Twoich zdjęć obu dłoni" />}
+      {busy && !text && <PieczecOdslaniania tytul="Dłonie się odsłaniają…" mysli={MYSLI_DLONI} podpis="oglądam obie dłonie strefa po strefie — to potrwa 1–2 minuty" />}
       {text && (
         <>
           <hr className="gold-rule" style={{ margin: "18px 0" }} />

@@ -1,10 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { DateTime } from "luxon";
+import PorownanieSystemow from "@/components/PorownanieSystemow";
+import { buildChart } from "@/lib/astro/chart";
+import { numerology } from "@/lib/astro/numerology";
+import { porownajSystemy, dlonZTekstu, type DlonWLiczbach } from "@/lib/astro/zgodnosc";
+import { loadBirth, type StoredBirth } from "@/lib/birthStore";
+import { wczytajOdczytDloni } from "@/lib/hiromancjaOdczytStore";
 import Link from "next/link";
 import ZapisanyOdczyt from "@/components/ZapisanyOdczyt";
 import { wczytajSekcje, type ZapisSekcji } from "@/lib/zapisSekcji";
-import { KLASA_ZNIKANIA } from "@/lib/odwrocenieKolorow";
+import { KLASA_ZNIKANIA, ATRYBUT_ODWROCENIA } from "@/lib/odwrocenieKolorow";
 import type { KragKarmy } from "@/lib/koloKarmyGeometria";
 import { ukonczoneSystemyKarmy, type SystemKarmy } from "@/lib/koloKarmyGeometria";
 
@@ -99,6 +106,62 @@ function Kafelek({ id, label, href, gotowe, opis }: { id: SystemKarmy; label: st
   );
 }
 
+/** Dodatki pod trzema systemami (po ukończeniu): Mahadasze i Astrokartografia —
+ *  mniejsze pierścienie w tym samym stylu, linki jak satelity Koła Karmy. */
+const DODATKI = [
+  { id: "mahadasze", label: "Mahadasze", href: "/sade-sati", opis: "okresy planet w życiu" },
+  { id: "astrokartografia", label: "Astrokartografia", href: "/astrokartografia", opis: "miejsca na mapie świata" },
+] as const;
+
+/** Mahadasze — tarcza podzielona na okresy, jeden wycinek wyróżniony (bieżący okres). */
+function IkonaMahadasz() {
+  return (
+    <svg viewBox="0 0 40 40" width="38" height="38" aria-hidden="true" style={{ color: "var(--sand)" }}>
+      <circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      {Array.from({ length: 9 }, (_, i) => {
+        const a = (i / 9) * Math.PI * 2 - Math.PI / 2;
+        return <line key={i} x1={20 + Math.cos(a) * 9} y1={20 + Math.sin(a) * 9}
+          x2={20 + Math.cos(a) * 15} y2={20 + Math.sin(a) * 15} stroke="currentColor" strokeWidth="1.4" />;
+      })}
+      <path d={`M 20 5 A 15 15 0 0 1 ${20 + Math.cos(-Math.PI / 2 + 2 * Math.PI / 9) * 15} ${20 + Math.sin(-Math.PI / 2 + 2 * Math.PI / 9) * 15} L 20 20 Z`}
+        fill="currentColor" opacity="0.85" />
+      <circle cx="20" cy="20" r="2.4" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Astrokartografia — glob z południkami i równoleżnikami. */
+function IkonaGlobu() {
+  return (
+    <svg viewBox="0 0 40 40" width="38" height="38" aria-hidden="true" style={{ color: "var(--sand)" }}>
+      <g fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="20" cy="20" r="14" />
+        <ellipse cx="20" cy="20" rx="6" ry="14" />
+        <line x1="20" y1="6" x2="20" y2="34" />
+        <line x1="6" y1="20" x2="34" y2="20" />
+        <path d="M 8.5 12.5 Q 20 16 31.5 12.5 M 8.5 27.5 Q 20 24 31.5 27.5" />
+      </g>
+    </svg>
+  );
+}
+
+function MalyKafelek({ id, label, href, opis }: (typeof DODATKI)[number]) {
+  const size = 76, stroke = 7, r = size / 2 - stroke / 2;
+  return (
+    <Link href={href} className="skrot-hero-item" style={{ textDecoration: "none" }}>
+      <span style={{ position: "relative", width: size, height: size, display: "grid", placeItems: "center" }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true" style={{ position: "absolute", inset: 0 }}>
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--gold)" strokeWidth={stroke} />
+        </svg>
+        {id === "mahadasze" ? <IkonaMahadasz /> : <IkonaGlobu />}
+      </span>
+      <p className="skrot-hero-znak" style={{ color: "var(--text)", fontSize: "0.95rem" }}>{label}</p>
+      <div className="skrot-hero-podkreslenie" />
+      <p className="muted skrot-hero-detal">{opis}</p>
+    </Link>
+  );
+}
+
 /** Strzałka od podpowiedzi do pierwszego nieukończonego kafelka — narysowana
  *  pod pozycję lewego (pierwszego) kafelka w rzędzie, tak jak w referencji.
  *  Faza 1: układ na sztywno pod demo-stan (Chiromancja zawsze pierwsza). */
@@ -122,10 +185,25 @@ export default function Page() {
   const [ukonczone, setUkonczone] = useState<Set<SystemKarmy>>(new Set());
   // odczyty ukończonych sekcji (zapisane przy zapaleniu kręgu) — do podglądu w każdej chwili
   const [zapisy, setZapisy] = useState<ZapisSekcji[]>([]);
+  // złota część (po fali) — tylko tam porównanie trzech systemów
+  const [zlota, setZlota] = useState(false);
+  const [urodzenie, setUrodzenie] = useState<StoredBirth | null>(null);
+  const [dlon, setDlon] = useState<DlonWLiczbach | null>(null);
+  const [dlonZapisano, setDlonZapisano] = useState<number | null>(null);
   // po złotej fali (lib/odwrocenieKolorow.ts) treść przychodzi ukryta — pokaż ją łagodnie
   useEffect(() => {
     const t = setTimeout(() => document.documentElement.classList.remove(KLASA_ZNIKANIA), 200);
     return () => clearTimeout(t);
+  }, []);
+
+  // Twoja Karma po złotej fali to etap końcowy — przycisk „Wstecz” przeglądarki zostaje tutaj
+  // (menu i kafelki nadal prowadzą do sekcji). Dokładamy wpis historii i odnawiamy go przy każdym cofnięciu.
+  useEffect(() => {
+    if (!document.documentElement.hasAttribute(ATRYBUT_ODWROCENIA)) return;
+    const zostan = () => history.pushState(history.state, "", location.href);
+    zostan();
+    window.addEventListener("popstate", zostan);
+    return () => window.removeEventListener("popstate", zostan);
   }, []);
 
   useEffect(() => {
@@ -133,7 +211,24 @@ export default function Page() {
     setUkonczone(ukonczoneSystemyKarmy());
     setZapisy((["hiromancja", "astrologia", "numerologia", "zwiazki"] as KragKarmy[])
       .map((id) => wczytajSekcje(id)).filter((z): z is ZapisSekcji => !!z));
+    setZlota(document.documentElement.hasAttribute(ATRYBUT_ODWROCENIA));
+    setUrodzenie(loadBirth());
+    const odczyt = wczytajOdczytDloni();
+    setDlon(odczyt ? odczyt.dane ?? dlonZTekstu(odczyt.text) : null);
+    setDlonZapisano(odczyt?.savedAt ?? null);
   }, []);
+
+  const porownanie = useMemo(() => {
+    if (!zlota || !urodzenie) return null;
+    const czas = urodzenie.timeKnown ? urodzenie.time : "12:00";
+    const lokalnie = DateTime.fromISO(`${urodzenie.date}T${czas}`, { zone: urodzenie.place.tz });
+    if (!lokalnie.isValid) return null;
+    const chart = buildChart({
+      date: lokalnie.toUTC().toJSDate(), latitude: urodzenie.place.lat, longitude: urodzenie.place.lon, timeKnown: urodzenie.timeKnown,
+    });
+    const num = numerology(urodzenie.date, urodzenie.name ?? "", "wedyjski", new Date().getFullYear());
+    return porownajSystemy(chart, num, dlon);
+  }, [zlota, urodzenie, dlon]);
 
 
   const brakujace = SYSTEMY.filter((s) => !ukonczone.has(s.id));
@@ -151,6 +246,12 @@ export default function Page() {
           <Kafelek key={s.id} {...s} gotowe={ukonczone.has(s.id)} />
         ))}
       </div>
+
+      {komplet && (
+        <div className="skrot-hero-rzad" style={{ marginTop: 34 }}>
+          {DODATKI.map((d) => <MalyKafelek key={d.id} {...d} />)}
+        </div>
+      )}
 
       <div className="ornament" style={{ margin: "36px 0 20px" }} />
 
@@ -205,6 +306,20 @@ export default function Page() {
           (przeszłości, teraźniejszości i przyszłości).
         </p>
       </div>
+
+      {zlota && komplet && (
+        <>
+          <div className="ornament" style={{ margin: "44px 0 26px" }} />
+          {porownanie ? (
+            <PorownanieSystemow wynik={porownanie} dlonZrodlo={dlon?.zrodlo ?? null} dlonZapisano={dlonZapisano} />
+          ) : (
+            <p className="muted" style={{ fontSize: "0.9rem" }}>
+              Porównanie trzech systemów potrzebuje danych urodzenia —{" "}
+              <Link href="/kosmogram" style={{ color: "var(--gold)" }}>uzupełnij je w Astrologii →</Link>
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 }
