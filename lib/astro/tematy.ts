@@ -25,6 +25,8 @@ export interface TematWspolny {
   nazwa: string;
   /** Co temat znaczy — jedno zdanie, bez przesądzania, jaka to droga. */
   znaczenie: string;
+  /** Wniosek dla osoby, gdy temat potwierdzają co najmniej dwa systemy. */
+  wniosek: string;
   wskazania: Record<SystemTematu, Wskazanie>;
   /** Ile systemów wskazuje temat: „tak” = 1, „częściowo” = ½. */
   sila: number;
@@ -118,6 +120,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     {
       id: "cel", nazwa: "Wyraźny cel, droga życiowa",
       znaczenie: "Życie ma wyraźnie zaznaczony kierunek — coś, ku czemu się zmierza.",
+      wniosek: "Twoje życie ma wyraźnie zaznaczony kierunek. To nie jest droga „jak wyjdzie” — warto świadomie nazwać swój cel i trzymać się go, bo wszystko w Tobie pracuje w jedną stronę.",
       wskazania: {
         kosmogram: astro(() => skupisko && skupisko.ps.length >= 3 ? tak(`skupisko w ${skupisko.d}. domu: ${lista(skupisko.ps)}`)
           : w(10).length >= 2 ? tak(`10. dom: ${lista(w(10))}`)
@@ -130,6 +133,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     {
       id: "podroze", nazwa: "Dalekie podróże, zagranica",
       znaczenie: "Życie ciągnie w dal — wyjazdy, obce miejsca, życie z dala od miejsca urodzenia.",
+      wniosek: "Dal Cię przyciąga — wyjazdy, obce miejsca, życie z dala od miejsca urodzenia. Ważne sprawy często rozstrzygają się w drodze albo za granicą.",
       wskazania: {
         kosmogram: astro(() => najlepsze(
           ...(["moon", "rahu"] as PlanetId[]).map((p) => (wDomach(p, [9, 12]) ? tak(`${MIANOWNIK[p]} w ${dom(p)}. domu`) : null)),
@@ -143,6 +147,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     {
       id: "duchowosc", nazwa: "Intuicja, duchowość",
       znaczenie: "Silny kontakt z tym, co niewidoczne — intuicja, wiara, życie wewnętrzne.",
+      wniosek: "Masz silny kontakt z tym, co niewidoczne. Intuicji warto ufać — podpowiada trafniej niż chłodna kalkulacja, a życie wewnętrzne jest Twoim źródłem siły.",
       wskazania: {
         kosmogram: astro(() => najlepsze(
           ...(["ketu", "jupiter"] as PlanetId[]).map((p) => (wDomach(p, [1, 5, 9, 12]) ? tak(`${MIANOWNIK[p]} w ${dom(p)}. domu`) : null)),
@@ -156,6 +161,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     {
       id: "uznanie", nazwa: "Uznanie, twórczość, widoczność",
       znaczenie: "Talent do bycia zauważonym — twórczość, scena, dobre imię.",
+      wniosek: "Masz w sobie coś, co przyciąga uwagę. Twórczość i bycie widocznym to Twoja naturalna przestrzeń — warto pozwolić się zauważyć.",
       wskazania: {
         kosmogram: astro(() => wDomach("sun", [1, 5, 9, 10]) ? tak(`Słońce w ${dom("sun")}. domu`)
           : silna("sun") ? tak(`Słońce — ${chart.planets.sun.dignity}`) : null),
@@ -166,6 +172,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     {
       id: "ambicja", nazwa: "Ambicja, przywództwo, nauczanie",
       znaczenie: "Potrzeba prowadzenia innych, rozwoju, autorytetu.",
+      wniosek: "Masz w sobie potrzebę prowadzenia i rozwoju. Dobrze odnajdujesz się tam, gdzie można uczyć, doradzać albo brać odpowiedzialność za innych.",
       wskazania: {
         kosmogram: astro(() => wDomach("jupiter", [...KENDRY, 5, 9]) ? tak(`Jowisz w ${dom("jupiter")}. domu`)
           : silna("jupiter") ? tak(`Jowisz — ${chart.planets.jupiter.dignity}`) : null),
@@ -176,6 +183,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     {
       id: "zwiazek", nazwa: "Związek, uczucia",
       znaczenie: "Relacje i uczucia zajmują w życiu ważne miejsce.",
+      wniosek: "Relacje i uczucia są dla Ciebie centralne. Dużo w życiu dzieje się przez bliskich ludzi — dobry związek wzmacnia wszystko inne.",
       wskazania: {
         kosmogram: astro(() => najlepsze(
           silna("venus") ? tak(`Wenus — ${chart.planets.venus.dignity}`) : null,
@@ -188,6 +196,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     {
       id: "umysl", nazwa: "Umysł, słowo, handel",
       znaczenie: "Siła myśli i komunikacji — nauka, pisanie, rozmowa, interesy.",
+      wniosek: "Twoją siłą jest umysł i słowo. Nauka, pisanie, rozmowa i interesy to obszary, w których najłatwiej się realizujesz.",
       wskazania: {
         kosmogram: astro(() => najlepsze(
           wDomach("mercury", KENDRY) ? tak(`Merkury w ${dom("mercury")}. domu`) : silna("mercury") ? tak(`Merkury — ${chart.planets.mercury.dignity}`) : null,
@@ -200,6 +209,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     {
       id: "energia", nazwa: "Energia, odwaga, działanie",
       znaczenie: "Dużo siły życiowej i odwagi do działania.",
+      wniosek: "Masz dużo siły życiowej i odwagi do działania. Najlepiej Ci, gdy możesz działać, a nie czekać.",
       wskazania: {
         kosmogram: astro(() => wDomach("mars", [...KENDRY, 3, 6, 11]) ? tak(`Mars w ${dom("mars")}. domu`)
           : silna("mars") ? tak(`Mars — ${chart.planets.mars.dignity}`) : null),
@@ -210,6 +220,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     {
       id: "praca", nazwa: "Praca, obowiązek, wytrwałość",
       znaczenie: "Rzetelność i wytrwałość — budowanie krok po kroku.",
+      wniosek: "Twoją siłą jest wytrwałość. Budujesz krok po kroku — powoli, ale trwale.",
       wskazania: {
         kosmogram: astro(() => wDomach("saturn", [...KENDRY, 6, 11]) ? tak(`Saturn w ${dom("saturn")}. domu`)
           : silna("saturn") ? tak(`Saturn — ${chart.planets.saturn.dignity}`) : null),
@@ -220,6 +231,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     {
       id: "przemiana", nazwa: "Przemiany, kryzysy, odrodzenie",
       znaczenie: "Życie z wyraźnymi zakrętami — przełomy, po których zaczyna się na nowo.",
+      wniosek: "Twoje życie ma wyraźne zakręty i przełomy. Kryzysy są u Ciebie początkiem nowego etapu, nie końcem.",
       wskazania: {
         kosmogram: astro(() => w(8).length >= 2 ? tak(`8. dom: ${lista(w(8))}`) : w(8).length === 1 ? czesciowo(`8. dom: ${lista(w(8))}`) : null),
         dlon: reka(() => najlepsze(

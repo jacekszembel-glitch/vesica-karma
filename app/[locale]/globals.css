@@ -2991,3 +2991,21 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
   .tw-komorka { flex-direction: row; align-items: baseline; gap: 8px; }
   .tw-system { display: inline; font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); width: 92px; flex-shrink: 0; }
 }
+
+/* Wspólne tematy: szerszy układ (tabela + zestawienie z boku) — wychodzi poza wąską kolumnę Twojej Karmy */
+.tw-sekcja { width: min(1120px, calc(100vw - 32px)); margin-left: calc(50% - min(560px, 50vw - 16px)); }
+.tw-sekcja > h2, .tw-sekcja > p { max-width: 640px; margin-left: auto; margin-right: auto; }
+.tw-uklad { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 32px; align-items: start; margin-top: 10px; }
+.tw-glowna { min-width: 0; grid-column: 1; grid-row: 1; }
+.tw-zestawienie { grid-column: 2; grid-row: 1; position: sticky; top: 90px; border-left: 1px solid var(--line-gold); padding: 4px 0 4px 22px; }
+.tw-zest-tytul { font-family: var(--font-serif); font-size: 1.35rem; color: var(--sand); margin: 0 0 10px; text-align: left; }
+.tw-zest-tekst { font-size: 0.84rem; line-height: 1.6; color: var(--text); margin: 0; }
+.tw-zest-lista { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 16px; }
+.tw-zest-nazwa { font-weight: 700; color: var(--gold); font-size: 0.9rem; margin: 0 0 4px; text-align: left; display: flex; justify-content: space-between; gap: 8px; }
+.tw-zest-nazwa span { font-size: 0.64rem; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; white-space: nowrap; }
+.tw-zest-zrodla { font-size: 0.72rem; line-height: 1.5; color: var(--muted); margin: 5px 0 0; text-align: left; }
+@media (max-width: 900px) {
+  .tw-uklad { grid-template-columns: 1fr; }
+  .tw-zestawienie { grid-column: 1; grid-row: 1; position: static; border-left: none; border-top: 1px solid var(--line-gold); border-bottom: 1px solid var(--line-gold); padding: 16px 0; }
+  .tw-glowna { grid-row: 2; }
+}

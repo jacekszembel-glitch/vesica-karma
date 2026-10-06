@@ -30,10 +30,52 @@ function etykieta(t: TematWspolny): string | null {
   return null;
 }
 
-export default function TematyWspolne({ tematy }: { tematy: TematWspolny[] }) {
+const NAZWA_SYSTEMU: Record<SystemTematu, string> = { kosmogram: "kosmogram", dlon: "dłoń", numerologia: "numerologia" };
+
+/** Zestawienie z boku tabeli: same potwierdzone tematy, od najmocniejszych, z wnioskiem i źródłami. */
+function Zestawienie({ tematy }: { tematy: TematWspolny[] }) {
   const potwierdzone = tematy.filter((t) => etykieta(t));
+  const trzy = potwierdzone.filter((t) => etykieta(t) === "potwierdza 3 systemy");
   return (
-    <section style={{ textAlign: "left" }}>
+    <aside className="tw-zestawienie">
+      <p className="tw-zest-tytul">Co się zgadza</p>
+      {potwierdzone.length === 0 ? (
+        <p className="tw-zest-tekst">
+          Żaden temat nie jest jeszcze potwierdzony w dwóch systemach naraz. Nowy odczyt dłoni zapisze więcej
+          linii — wtedy zestawienie może się wypełnić.
+        </p>
+      ) : (
+        <>
+          <p className="tw-zest-tekst">
+            {trzy.length > 0
+              ? <>Najmocniej — bo wskazują je wszystkie trzy systemy niezależnie od siebie — w Twoim życiu
+                zapisane są: <strong>{trzy.map((t) => t.nazwa.toLowerCase()).join("; ")}</strong>.</>
+              : <>Te tematy wskazują co najmniej dwa systemy niezależnie od siebie:</>}
+          </p>
+          <ol className="tw-zest-lista">
+            {potwierdzone.map((t) => {
+              const zrodla = (Object.keys(t.wskazania) as SystemTematu[])
+                .filter((s) => t.wskazania[s].stan === "tak" || t.wskazania[s].stan === "czesciowo");
+              return (
+                <li key={t.id}>
+                  <p className="tw-zest-nazwa">{t.nazwa}<span>{zrodla.length === 3 ? "3 z 3" : "2 z 3"}</span></p>
+                  <p className="tw-zest-tekst">{t.wniosek}</p>
+                  <p className="tw-zest-zrodla">
+                    {zrodla.map((s) => `${NAZWA_SYSTEMU[s]}: ${t.wskazania[s].opis}`).join(" · ")}
+                  </p>
+                </li>
+              );
+            })}
+          </ol>
+        </>
+      )}
+    </aside>
+  );
+}
+
+export default function TematyWspolne({ tematy }: { tematy: TematWspolny[] }) {
+  return (
+    <section className="tw-sekcja" style={{ textAlign: "left" }}>
       <h2 className="porownanie-tytul">Wspólne tematy</h2>
       <p className="muted" style={{ fontSize: "0.92rem", lineHeight: 1.75 }}>
         Ten sam sens życiowy może być zapisany w niebie, w dłoni i w liczbach — np. skupisko planet
@@ -41,12 +83,10 @@ export default function TematyWspolne({ tematy }: { tematy: TematWspolny[] }) {
         droga, tylko czy dany temat jest w Twoim życiu wyraźnie zaznaczony — i w ilu systemach naraz.
       </p>
 
-      <p style={{ fontSize: "0.95rem", margin: "16px 0 6px" }}>
-        {potwierdzone.length > 0
-          ? <><strong>Potwierdzone w kilku systemach:</strong> {potwierdzone.map((t) => t.nazwa.toLowerCase()).join("; ")}.</>
-          : "Żaden temat nie jest jeszcze potwierdzony w dwóch systemach naraz."}
-      </p>
 
+      <div className="tw-uklad">
+      <Zestawienie tematy={tematy} />
+      <div className="tw-glowna">
       <div className="tw-tabela" role="table" aria-label="Wspólne tematy trzech systemów">
         <div className="tw-wiersz tw-naglowek" role="row">
           <span role="columnheader">Temat</span>
@@ -83,6 +123,8 @@ export default function TematyWspolne({ tematy }: { tematy: TematWspolny[] }) {
         ma zbieżność: dwa albo trzy niezależne systemy wskazujące ten sam temat. Linie dłoni pochodzą
         z ostatniego odczytu dłoni (nowsze odczyty zapisują ich więcej).
       </p>
+      </div>
+      </div>
     </section>
   );
 }
