@@ -164,9 +164,21 @@ function MostyDloni({ mosty }: { mosty: Most[] }) {
   );
 }
 
-export default function PorownanieSystemow({ wynik, mosty, dlonZrodlo, dlonZapisano }: {
+export default function PorownanieSystemow({ wynik, mosty, dlonZrodlo, dlonZapisano, korekty = {}, onKorekta, ocenyAI = {} }: {
   wynik: WynikZgodnosci; mosty: Most[]; dlonZrodlo: "odczyt" | "tekst" | null; dlonZapisano: number | null;
+  /** Oceny wzgórków ustawione przez osobę (nadpisują AI). */
+  korekty?: Partial<Record<PlanetId, Ocena>>;
+  onKorekta?: (p: PlanetId, o: Ocena | null) => void;
+  /** Oceny dłoni z odczytu AI — do pokazania, co zmieniła korekta. */
+  ocenyAI?: Partial<Record<PlanetId, Ocena | null>>;
 }) {
+  // kliknięcie w ocenę dłoni: mocna → przeciętna → słaba → z powrotem ocena AI
+  const nastepna = (p: PlanetId) => {
+    const teraz = korekty[p];
+    const kolejne: (Ocena | null)[] = [1, 0, -1, null];
+    const start = teraz === undefined ? -1 : kolejne.indexOf(teraz);
+    onKorekta?.(p, kolejne[(start + 1) % kolejne.length]);
+  };
   const [aktywna, setAktywna] = useState<PlanetId | null>(null);
   const w = werdykt(wynik);
   const proc = (x: number) => `${Math.round(x * 100)}%`;
@@ -283,7 +295,18 @@ export default function PorownanieSystemow({ wynik, mosty, dlonZrodlo, dlonZapis
                   <span className="porownanie-symbol-tab">{GRAHAS[p.planeta].symbol}</span> {nazwa(p.planeta)}
                   <span className="muted porownanie-pod">cyfra {PLANETA_CYFRA[p.planeta]}{MIEJSCE_W_DLONI[p.planeta] ? ` · ${MIEJSCE_W_DLONI[p.planeta]}` : ""}</span>
                 </td>
-                {SYSTEMY_ZGODNOSCI.map((s) => <td key={s} className="srodek"><ZnakOceny o={p.oceny[s]} /></td>)}
+                {SYSTEMY_ZGODNOSCI.map((s) => (
+                  <td key={s} className="srodek">
+                    {s === "chiromancja" && onKorekta ? (
+                      <button type="button" className={`pz-korekta${korekty[p.planeta] !== undefined ? " pz-korekta-ty" : ""}`}
+                        title="Kliknij, żeby ustawić ocenę dłoni samemu (mocna → przeciętna → słaba → ocena AI)"
+                        onClick={() => nastepna(p.planeta)}>
+                        <ZnakOceny o={p.oceny[s]} />
+                        {korekty[p.planeta] !== undefined && <span className="pz-ty">Ty</span>}
+                      </button>
+                    ) : <ZnakOceny o={p.oceny[s]} />}
+                  </td>
+                ))}
                 <td>
                   <span className={`porownanie-rodzaj r-${p.rodzaj}`}>{RODZAJ[p.rodzaj]}</span>
                   {p.odstaje && <span className="porownanie-odstaje">{NAZWA[p.odstaje].toLowerCase()} inaczej</span>}
@@ -293,6 +316,13 @@ export default function PorownanieSystemow({ wynik, mosty, dlonZrodlo, dlonZapis
           </tbody>
         </table>
       </div>
+      {onKorekta && (
+        <p className="muted" style={{ fontSize: "0.78rem", marginTop: 10, lineHeight: 1.5 }}>
+          Znasz swoją dłoń lepiej niż zdjęcie? Kliknij ocenę w kolumnie Chiromancja, żeby ją ustawić samemu
+          (mocna → przeciętna → słaba → z powrotem ocena AI). Twoje ustawienia mają podpis „Ty”
+          {Object.keys(korekty).length > 0 && ` — zmieniono: ${Object.keys(korekty).length}, ocena AI była: ${Object.entries(korekty).map(([pl]) => `${GRAHAS[pl as PlanetId].pl} ${ocenyAI[pl as PlanetId] === 1 ? "mocna" : ocenyAI[pl as PlanetId] === -1 ? "słaba" : ocenyAI[pl as PlanetId] === 0 ? "przeciętna" : "brak"}`).join(", ")}`}.
+        </p>
+      )}
       <p className="muted porownanie-legenda">
         <ZnakOceny o={1} /> mocna <ZnakOceny o={0} /> przeciętna <ZnakOceny o={-1} /> słaba <span className="pz-brak">–</span> brak danych
       </p>

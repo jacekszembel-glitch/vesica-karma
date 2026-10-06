@@ -1,5 +1,5 @@
 import type { PlanetId } from "./constants";
-import { PLANET_ORDER } from "./constants";
+import { PLANET_ORDER, RASIS } from "./constants";
 import type { VedicChart } from "./chart";
 import type { NumerologyResult } from "./numerology";
 import { dziedzinyTalentu, type DziedzinaTalentu } from "./dziedzinyTalentu";
@@ -138,6 +138,11 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     ? [...Array(12).keys()].map((i) => ({ d: i + 1, ps: w(i + 1) })).sort((a, b) => b.ps.length - a.ps.length)[0]
     : null;
 
+  // skupisko pokazuje DROGĘ, nie tylko siłę: liczba planet, dom (dziedzina życia) i znak (sposób)
+  const opisSkupiska = () => skupisko
+    ? `skupisko ${skupisko.ps.length} planet w ${skupisko.d}. domu, w znaku ${RASIS[chart.planets[skupisko.ps[0]].sign].pl}: ${lista(skupisko.ps)}`
+    : "";
+
   /* ---------- dłoń ---------- */
   const linie = dlon?.linie ?? {};
   const znaki = [...(dlon?.znaki ?? []), ...(dlon?.wlasne ?? [])];
@@ -183,7 +188,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       znaczenie: "Życie ma wyraźnie zaznaczony kierunek — coś, ku czemu się zmierza.",
       wniosek: "Twoje życie ma wyraźnie zaznaczony kierunek. To nie jest droga „jak wyjdzie” — warto świadomie nazwać swój cel i trzymać się go, bo wszystko w Tobie pracuje w jedną stronę.",
       wskazania: {
-        kosmogram: astro(() => skupisko && skupisko.ps.length >= 3 ? tak(`skupisko w ${skupisko.d}. domu: ${lista(skupisko.ps)}`, skupisko.ps.length)
+        kosmogram: astro(() => skupisko && skupisko.ps.length >= 3 ? tak(opisSkupiska(), skupisko.ps.length * 2)
           : w(10).length >= 2 ? tak(`10. dom: ${lista(w(10))}`)
             : w(10).length === 1 ? czesciowo(`10. dom: ${lista(w(10))}`) : null),
         dlon: reka(() => linia("losu")),
@@ -331,6 +336,22 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       },
     },
   ];
+
+  // Skupisko (3+ planety w jednym domu) wzmacnia też tematy TEGO domu — klasyczne znaczenia domów.
+  const DOM_TEMATY: Record<number, string[]> = {
+    1: ["energia"], 2: ["finanse"], 3: ["umysl"], 5: ["uznanie"], 6: ["praca"], 7: ["zwiazek"],
+    8: ["przemiana"], 9: ["podroze", "duchowosc", "ambicja"], 10: ["praca"], 11: ["finanse"], 12: ["podroze", "duchowosc"],
+  };
+  if (skupisko && skupisko.ps.length >= 3) {
+    for (const t of tematy) {
+      if (!(DOM_TEMATY[skupisko.d] ?? []).includes(t.id)) continue;
+      const w = t.wskazania.kosmogram;
+      const dodatek = tak(opisSkupiska(), skupisko.ps.length);
+      t.wskazania.kosmogram = w.stan === "tak" || w.stan === "czesciowo"
+        ? { ...w, stan: "tak", moc: (w.moc ?? 0) + (dodatek.moc ?? 0), dowody: [dodatek.opis, ...(w.dowody ?? [w.opis])] }
+        : { ...dodatek, dowody: [dodatek.opis] };
+    }
+  }
 
   return tematy.map((t) => {
     const ws = Object.values(t.wskazania);

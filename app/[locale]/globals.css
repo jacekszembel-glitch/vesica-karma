@@ -3086,3 +3086,9 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 .gs-dowody { margin: 2px 0 0; padding-left: 16px; display: grid; gap: 3px; font-size: 0.74rem; line-height: 1.45; color: var(--muted); }
 .gs-takze { font-size: 0.7rem; color: var(--gold); font-weight: 600; margin: auto 0 0; padding-top: 6px; text-align: left; }
 @media (max-width: 900px) { .gs-karty { grid-template-columns: 1fr; } }
+
+/* Porównanie: ocena dłoni ustawiana przez osobę */
+.pz-korekta { all: unset; cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 8px; border-radius: 8px; border: 1px dashed transparent; }
+.pz-korekta:hover, .pz-korekta:focus-visible { border-color: var(--line-gold); }
+.pz-korekta-ty { border-color: var(--gold); }
+.pz-ty { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); line-height: 1; }

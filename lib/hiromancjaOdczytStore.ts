@@ -7,7 +7,25 @@
  * — to jest tylko druga, osobna kopia OSTATNIEGO wyniku dla Karmy.
  */
 
-import type { DlonWLiczbach, ZnakWlasny } from "./astro/zgodnosc";
+import type { DlonWLiczbach, Ocena, ZnakWlasny } from "./astro/zgodnosc";
+import type { PlanetId } from "./astro/constants";
+
+const KLUCZ_KOREKT = "vk_dlon_korekty";
+
+/** Oceny wzgórków poprawione przez osobę (zna swoją dłoń lepiej niż zdjęcie) — mają pierwszeństwo przed AI. */
+export function wczytajKorektyDloni(): Partial<Record<PlanetId, Ocena>> {
+  if (typeof window === "undefined") return {};
+  try {
+    const v = JSON.parse(localStorage.getItem(KLUCZ_KOREKT) ?? "{}");
+    return v && typeof v === "object" ? v : {};
+  } catch {
+    return {};
+  }
+}
+
+export function zapiszKorektyDloni(k: Partial<Record<PlanetId, Ocena>>): void {
+  try { localStorage.setItem(KLUCZ_KOREKT, JSON.stringify(k)); } catch { /* tryb prywatny */ }
+}
 
 const KLUCZ_ZNAKOW = "vk_znaki_wlasne";
 

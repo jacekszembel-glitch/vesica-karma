@@ -9,7 +9,9 @@ import { buildChart } from "@/lib/astro/chart";
 import { numerology } from "@/lib/astro/numerology";
 import { porownajSystemy, dlonZTekstu, mostyDlonHoroskop, znakiWlasneDoDloni, type DlonWLiczbach } from "@/lib/astro/zgodnosc";
 import { loadBirth, type StoredBirth } from "@/lib/birthStore";
-import { wczytajOdczytDloni, wczytajZnakiWlasne } from "@/lib/hiromancjaOdczytStore";
+import { wczytajOdczytDloni, wczytajZnakiWlasne, wczytajKorektyDloni, zapiszKorektyDloni } from "@/lib/hiromancjaOdczytStore";
+import type { PlanetId } from "@/lib/astro/constants";
+import type { Ocena } from "@/lib/astro/zgodnosc";
 import Link from "next/link";
 import ZapisanyOdczyt from "@/components/ZapisanyOdczyt";
 import { wczytajSekcje, type ZapisSekcji } from "@/lib/zapisSekcji";
@@ -192,6 +194,14 @@ export default function Page() {
   const [urodzenie, setUrodzenie] = useState<StoredBirth | null>(null);
   const [dlon, setDlon] = useState<DlonWLiczbach | null>(null);
   const [dlonZapisano, setDlonZapisano] = useState<number | null>(null);
+  // oceny wzgórków ustawione przez osobę — nadpisują ocenę AI (oznaczone „Ty”)
+  const [korekty, setKorekty] = useState<Partial<Record<PlanetId, Ocena>>>({});
+  const zmienKorekte = (p: PlanetId, o: Ocena | null) => setKorekty((k) => {
+    const n = { ...k };
+    if (o === null) delete n[p]; else n[p] = o;
+    zapiszKorektyDloni(n);
+    return n;
+  });
   // po złotej fali (lib/odwrocenieKolorow.ts) treść przychodzi ukryta — pokaż ją łagodnie
   useEffect(() => {
     const t = requestAnimationFrame(() => document.documentElement.classList.remove(KLASA_ZNIKANIA));
@@ -221,7 +231,15 @@ export default function Page() {
     const wlasne = wczytajZnakiWlasne();
     setDlon(d && !d.wlasne?.length && wlasne.length ? { ...d, wlasne: znakiWlasneDoDloni(wlasne) } : d);
     setDlonZapisano(odczyt?.savedAt ?? null);
+    setKorekty(wczytajKorektyDloni());
   }, []);
+
+  // dłoń do wszystkich wyliczeń: odczyt AI + korekty osoby (korekta wygrywa)
+  const dlonPoKorekcie = useMemo<DlonWLiczbach | null>(() => {
+    if (!Object.keys(korekty).length) return dlon;
+    const baza: DlonWLiczbach = dlon ?? { planety: {}, zywiol: null, zrodlo: "odczyt" };
+    return { ...baza, planety: { ...baza.planety, ...korekty } };
+  }, [dlon, korekty]);
 
   const porownanie = useMemo(() => {
     if (!zlota || !urodzenie) return null;
@@ -232,8 +250,8 @@ export default function Page() {
       date: lokalnie.toUTC().toJSDate(), latitude: urodzenie.place.lat, longitude: urodzenie.place.lon, timeKnown: urodzenie.timeKnown,
     });
     const num = numerology(urodzenie.date, urodzenie.name ?? "", "wedyjski", new Date().getFullYear());
-    return { wynik: porownajSystemy(chart, num, dlon), mosty: mostyDlonHoroskop(chart, dlon), tematy: tematyWspolne(chart, num, dlon) };
-  }, [zlota, urodzenie, dlon]);
+    return { wynik: porownajSystemy(chart, num, dlonPoKorekcie), mosty: mostyDlonHoroskop(chart, dlonPoKorekcie), tematy: tematyWspolne(chart, num, dlonPoKorekcie) };
+  }, [zlota, urodzenie, dlonPoKorekcie]);
 
 
   const brakujace = SYSTEMY.filter((s) => !ukonczone.has(s.id));
@@ -317,7 +335,8 @@ export default function Page() {
           <div className="ornament" style={{ margin: "44px 0 26px" }} />
           {porownanie ? (
             <>
-              <PorownanieSystemow wynik={porownanie.wynik} mosty={porownanie.mosty} dlonZrodlo={dlon?.zrodlo ?? null} dlonZapisano={dlonZapisano} />
+              <PorownanieSystemow wynik={porownanie.wynik} mosty={porownanie.mosty} dlonZrodlo={dlon?.zrodlo ?? null} dlonZapisano={dlonZapisano}
+                korekty={korekty} onKorekta={zmienKorekte} ocenyAI={dlon?.planety ?? {}} />
               <div className="ornament" style={{ margin: "44px 0 26px" }} />
               <TematyWspolne tematy={porownanie.tematy} />
             </>
