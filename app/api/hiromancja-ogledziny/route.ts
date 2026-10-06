@@ -18,6 +18,44 @@ const client = new Anthropic();
 
 const requestSchema = z.object({ wiodaca: dloniSchema, bierna: dloniSchema });
 
+/** Wymuszony format odpowiedzi (structured outputs) — AI nie może odpowiedzieć prozą zamiast listy. */
+const SCHEMAT_INWENTARZA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["znaki", "linie"],
+  properties: {
+    znaki: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["reka", "wzgorek", "znak", "pewnosc", "gdzie"],
+        properties: {
+          reka: { type: "string", enum: ["wiodaca", "bierna"] },
+          wzgorek: { type: "string", enum: ["jowisz", "saturn", "slonce", "merkury", "wenus", "ksiezyc", "mars", "rahu", "ketu", "czworobok"] },
+          znak: { type: "string", enum: ["x", "gwiazda", "kwadrat", "trojkat", "kratka", "wyspa", "krzyz_mistyczny"] },
+          pewnosc: { type: "string", enum: ["wyrazny", "delikatny"] },
+          gdzie: { type: "string" },
+        },
+      },
+    },
+    linie: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["reka", "linia", "stan", "gdzie"],
+        properties: {
+          reka: { type: "string", enum: ["wiodaca", "bierna"] },
+          linia: { type: "string", enum: ["zycia", "glowy", "serca", "losu", "slonca", "merkurego", "intuicji", "podrozy", "relacji", "pas_wenus", "pierscien_salomona", "marsa"] },
+          stan: { type: "string", enum: ["wyrazna", "odcinkowa", "slaba"] },
+          gdzie: { type: "string" },
+        },
+      },
+    },
+  },
+};
+
 const SYSTEM_INWENTARZ = `Jesteś okiem doświadczonego chiromanty. Dostajesz zdjęcia obu dłoni jednej osoby (całe zdjęcia i zbliżenia, podpisane) oraz wynik oględzin każdego zbliżenia pod lupą. Twoje jedyne zadanie: sporządzić INWENTARZ — listę znaków i linii, które są na dłoniach. Nic nie interpretujesz, nie opisujesz znaczeń.
 
 Zasady:
@@ -57,9 +95,9 @@ export async function POST(req: Request) {
 
     const msg = await client.messages.create({
       model: "claude-opus-5",
-      max_tokens: 12000,
+      max_tokens: 16000,
       thinking: { type: "adaptive" },
-      output_config: { effort: "high" },
+      output_config: { effort: "high", format: { type: "json_schema", schema: SCHEMAT_INWENTARZA } },
       system: SYSTEM_INWENTARZ,
       messages: [{
         role: "user",
@@ -71,14 +109,20 @@ export async function POST(req: Request) {
       }],
     });
     const tekst = msg.content.filter((x) => x.type === "text").map((x) => x.text).join("");
-    const json = tekst.slice(tekst.indexOf("{"), tekst.lastIndexOf("}") + 1);
-    const wynik = JSON.parse(json) as { znaki?: unknown[]; linie?: unknown[] };
+    let wynik: { znaki?: unknown[]; linie?: unknown[] } = {};
+    try {
+      wynik = JSON.parse(tekst.slice(tekst.indexOf("{"), tekst.lastIndexOf("}") + 1));
+    } catch {
+      // np. zdjęcie bez dłoni albo urwana odpowiedź — pusta lista zamiast błędu; osoba może dopisać sama
+      console.error("hiromancja-ogledziny: odpowiedź bez JSON, stop_reason =", msg.stop_reason);
+    }
     return Response.json(
       { znaki: Array.isArray(wynik.znaki) ? wynik.znaki : [], linie: Array.isArray(wynik.linie) ? wynik.linie : [], ogledzinyTekst },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (err) {
     console.error("hiromancja-ogledziny error:", err); // NIGDY nie logować `parsed` — zawiera zdjęcia
-    return Response.json({ error: "Nie udało się obejrzeć dłoni. Spróbuj ponownie." }, { status: 502 });
+    const dev = process.env.NODE_ENV === "development" ? ` [dev] ${(err as Error)?.message ?? String(err)}` : "";
+    return Response.json({ error: "Nie udało się obejrzeć dłoni. Spróbuj ponownie." + dev }, { status: 502 });
   }
 }
