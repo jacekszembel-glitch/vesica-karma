@@ -288,7 +288,7 @@ export const GLOSSARY: Record<string, Term> = {
   // ── Astrokartografia ──────────────────────────────────
   zasieg: {
     title: "Zasięg oddziaływania",
-    text: "Linia na mapie to nie granica — działa też w pasie wokół siebie. Jim Lewis, twórca astrokartografii, przyjmował ok. 1125 km (700 mil) po obu stronach jako granicę odczuwalnego wpływu, a najmocniej działa pas do jakichś 250 km. Nowsze obserwacje wskazują raczej na tę węższą wartość. Praktycznie: nie musisz mieszkać na linii, żeby ją czuć, ale im bliżej, tym wyraźniej.",
+    text: "Linia na mapie to nie granica — działa też w pasie wokół siebie. Do ok. 150 km od linii wpływ jest maksymalny: tematy planety dominują w codziennym życiu. Od 150 do 500 km jest silny do umiarkowanego — wyraźny, ale bardziej zrównoważony. Od 500 do 700 km słaby, subtelny: wpływ tła, odczuwalny dla wrażliwych albo w określonych tranzytach. Powyżej 700 km linia już nie działa bezpośrednio. Im bliżej linii, tym wyraźniej ją czujesz.",
   },
   liniaplanetarna: {
     title: "Linia planetarna",

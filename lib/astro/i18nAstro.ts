@@ -69,9 +69,9 @@ export function bodyMotyw(b: BodyInfo, locale: AstroLocale): string {
 }
 
 const SILA_ZASIEGU_NAZWA: Record<string, { pl: string; en: string }> = {
-  silna: { pl: "silna", en: "strong" },
-  średnia: { pl: "średnia", en: "medium" },
-  słaba: { pl: "słaba", en: "weak" },
+  silna: { pl: "maksymalna", en: "maximal" },
+  średnia: { pl: "silna do umiarkowanej", en: "strong to moderate" },
+  słaba: { pl: "słaba (subtelna)", en: "weak (subtle)" },
 };
 
 /** Etykieta trzystopniowej sily zasiegu linii (silaZasiegu() w astrocarto.ts) —

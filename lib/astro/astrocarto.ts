@@ -228,24 +228,25 @@ export function opisSzerszyLinii(planet: BodyId, angle: keyof typeof ANGLE_MEANI
 /**
  * ZASIĘG ODDZIAŁYWANIA LINII
  *
- * Jim Lewis, twórca astrokartografii, przyjmował ok. 700 mil (≈1125 km) po obu
- * stronach linii jako granicę odczuwalnego wpływu — to nasze ORB_KM. Współcześni
- * praktycy (np. opracowania cytowane w astroannalei.com, "How Far Do
- * Astrocartography Lines Work?") rozbijają to dalej na progi zbliżone do:
- *   ~0–200 mil (~320 km)  — silny, wyraźnie odczuwalny wpływ,
- *   ~200–500 mil (~800 km) — umiarkowany, obecny w tle,
- *   ~500–700 mil (~1125 km) — wpływ zanika, ale jeszcze odczuwalny.
- * Stąd nasze progi: silny do 250 km (nieco ostrożniej niż 320 km), średni do
- * 800 km, słaby do klasycznej granicy Lewisa (1125 km).
+ * Progi (ustalone z użytkownikiem 2026-10-07, wg współczesnej praktyki astrokartografii):
+ *   0–150 km   (0–100 mil)   — EKSTREMALNA (maksymalna): pełna, bezpośrednia aktywacja planety,
+ *                               jej wydarzenia i archetypy dominują w codziennym życiu;
+ *   150–500 km (100–300 mil) — SILNA DO UMIARKOWANEJ: efekty wyraźne i łatwo zauważalne,
+ *                               ale energia bardziej zrównoważona niż na samej linii;
+ *   500–700 km (300–400 mil) — SŁABA (subtelna): wpływ tła, odczuwalny dla wrażliwych
+ *                               albo w określonych tranzytach;
+ *   powyżej 700 km            — NEUTRALNA: brak bezpośredniego wpływu tej linii.
+ * Wewnętrzne nazwy poziomów zostają ("silna"/"średnia"/"słaba" — porównania w kodzie),
+ * a nazwy dla czytelnika daje silaZasieguNazwa() w i18nAstro.ts.
  */
-export const ORB_KM = 1125;
-export const ORB_STRONG_KM = 250;
+export const ORB_KM = 700;
+export const ORB_STRONG_KM = 150;
 
 /** Krycie pasa zasięgu na mapie wg siły planety 0–1 (brak danych = środek skali). */
 export function krycieWgSily(sila: number | undefined): number {
   return 0.08 + 0.34 * (sila ?? 0.5);
 }
-export const ORB_MEDIUM_KM = 800;
+export const ORB_MEDIUM_KM = 500;
 
 export type SilaZasiegu = "silna" | "średnia" | "słaba";
 
@@ -276,7 +277,7 @@ export interface NearbyLine {
   km: number;
   /** Siła oddziaływania: 1 na linii, 0 na granicy zasięgu. */
   strength: number;
-  /** Czy miejsce leży w pasie najsilniejszego działania (≤250 km). */
+  /** Czy miejsce leży w pasie najsilniejszego działania (≤150 km, ORB_STRONG_KM). */
   strong: boolean;
   /** Trzystopniowa siła (silna/średnia/słaba) — patrz silaZasiegu(). */
   sila: SilaZasiegu;

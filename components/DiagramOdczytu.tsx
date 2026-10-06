@@ -34,14 +34,14 @@ const KAT_KOLOR: Record<string, string> = {
   MC: "var(--sand)", IC: "#d0a05c", ASC: "var(--teal-soft)", DSC: "#8fb8d8",
 };
 
-/** 0 km = pełny pasek; ORB_KM (1125 km — granica odczuwalnego wpływu) = tło. */
+/** 0 km = pełny pasek; ORB_KM (700 km — granica wpływu linii) = tło. */
 function sila(km: number): number {
   return Math.max(0.06, 1 - km / ORB_KM);
 }
 
 /** Ta sama trzystopniowa skala co wszędzie indziej (silaZasiegu w astrocarto.ts) —
  *  wczesniej ten diagram mial WLASNE, inne progi (30/100/200 km), niezgodne
- *  z tymi opisanymi w kartach mapy (250/500/1125 km). */
+ *  z tymi opisanymi w kartach mapy (150/500/700 km). */
 function opisBliskosci(km: number): string {
   return silaZasiegu(km);
 }
@@ -78,8 +78,8 @@ function PasekLinii({ linie }: { linie: LiniaWPoblizu[] }) {
         );
       })}
       <p className="muted" style={{ fontSize: "0.72rem", marginTop: 2 }}>
-        Im pełniejszy pasek, tym bliżej przebiega linia — silna do {ORB_STRONG_KM} km,
-        średnia do {ORB_MEDIUM_KM} km, słaba (ale odczuwalna) do {ORB_KM} km.
+        Im pełniejszy pasek, tym bliżej przebiega linia — maksymalna do {ORB_STRONG_KM} km,
+        silna do umiarkowanej do {ORB_MEDIUM_KM} km, słaba (subtelna) do {ORB_KM} km; dalej linia już nie działa.
       </p>
     </div>
   );

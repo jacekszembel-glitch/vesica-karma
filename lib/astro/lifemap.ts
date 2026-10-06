@@ -184,7 +184,7 @@ export interface RankingMiejsc {
  * Ranking miejsc — szukamy po CAŁYM ŚWIECIE (lista polska + 400 największych
  * miast świata wg GeoNames), nie tylko po garstce polskich miast. Kwalifikacja
  * NIE jest oparta o sumaryczny wynik (score) — to on wczesniej potrafil
- * wykluczyc miejsce z realnie bliska (≤250 km, ORB_STRONG_KM) linia benefika
+ * wykluczyc miejsce z realnie bliska (≤150 km, ORB_STRONG_KM) linia benefika
  * tylko dlatego, ze w poblizu bylo tez kilka linii maleficznych, ktore
  * sciagaly sume w dol ponizej progu. Miejsce trafia na liste "sprzyjajace",
  * gdy ma choc jedna SILNA linie DOBROCZYNNEJ planety (nature===1) — kropka,
