@@ -2,7 +2,7 @@ import type { PlanetId } from "./constants";
 import { PLANET_ORDER, RASIS } from "./constants";
 import type { VedicChart } from "./chart";
 import { ocenaWladcy, aspektuje } from "./sila";
-import { atmakaraka } from "./karaki";
+import { atmakaraka, jogakaraka } from "./karaki";
 import { reduce, type NumerologyResult } from "./numerology";
 import { wykryteJogiPosortowane } from "./yogas";
 import type { TypDloni } from "../hiromancja";
@@ -142,8 +142,17 @@ export function wyrazistoscPlanety(chart: VedicChart, p: PlanetId, jogi = wykryt
   const lagna = chart.angles?.lagnaSign ?? null;
   if (lagna !== null) {
     if (RASIS[lagna].lord === p) dodaj(3, "władca ascendentu");
+    // jogakaraka — władca kendry i trikony naraz, funkcjonalnie najlepsza planeta tej lagny
+    if (jogakaraka(lagna) === p) dodaj(3, "jogakaraka (władca kendry i trikony)");
+    else {
+      // władca trikony (5., 9.) albo 10. domu — planeta z ważną rolą w tym horoskopie
+      const wladane = RASIS.filter((r) => r.lord === p).map((r) => ((r.index - lagna + 12) % 12) + 1);
+      const rola = wladane.filter((d) => [5, 9, 10].includes(d));
+      if (rola.length) dodaj(1, `władca ${rola.join(". i ")}. domu`);
+    }
     if (pl.house === 1) dodaj(3, "w ascendencie");
     else if ([4, 7, 10].includes(pl.house)) dodaj(1.5, `na osi (${pl.house}. dom)`);
+    else if ([5, 9].includes(pl.house)) dodaj(1, `w trikonie (${pl.house}. dom)`);
     if (p !== "moon" && aspektuje(chart, p, lagna)) dodaj(1, "aspektuje ascendent");
   }
   if (RASIS[chart.moonSign].lord === p) dodaj(2, "władca znaku Księżyca");
@@ -152,8 +161,11 @@ export function wyrazistoscPlanety(chart: VedicChart, p: PlanetId, jogi = wykryt
   if (atmakaraka(chart).planeta === p) dodaj(2, "atmakaraka");
   if (GODNOSC_WLASNA.has(pl.dignity)) dodaj(1.5, pl.dignity);
   if (chart.currentDasha[0]?.lord === p) dodaj(1, "bieżąca mahadasza");
-  // rozstrzygnięcie remisów — siła planety, z małą wagą
-  punkty += ocenaWladcy(chart, p, jogi).punkty * 0.05;
+  // siła planety (godność, układy, aspekty — ta sama ocena co w Predyspozycjach); dodatnia
+  // wzmacnia wyrazistość, ujemna ją osłabia
+  const sila = ocenaWladcy(chart, p, jogi).punkty;
+  punkty += sila * 0.5;
+  powody.push(`siła planety ${sila >= 0 ? "+" : ""}${sila.toFixed(1)}`);
   return { punkty, powody };
 }
 
