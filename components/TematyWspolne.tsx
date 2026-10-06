@@ -1,11 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import type { StanWskazania, SystemTematu, TematWspolny } from "@/lib/astro/tematy";
 
 /**
  * Wspólne tematy trzech systemów (lib/astro/tematy.ts) — jeden sens życiowy w wierszu,
  * a w kolumnach to, co go pokazuje w kosmogramie, w dłoni i w numerologii. Wiersz,
  * który wskazują co najmniej dwa systemy, jest wyróżniony — to temat potwierdzony.
+ *
+ * Telefon: zestawienie „Co się zgadza” z boku się nie mieści — chowamy je, a każdy temat
+ * w tabeli jest zwinięty (nazwa + punkty); stuknięcie rozwija go w dół: co pokazuje każdy
+ * system i — przy temacie potwierdzonym — wniosek z zestawienia. Komputer i tablet bez zmian.
  */
 
 const KOLUMNY: { id: SystemTematu; nazwa: string }[] = [
@@ -110,6 +115,12 @@ function Zestawienie({ tematy }: { tematy: TematWspolny[] }) {
 }
 
 export default function TematyWspolne({ tematy }: { tematy: TematWspolny[] }) {
+  const [otwarte, setOtwarte] = useState<Set<string>>(new Set());
+  const przelacz = (id: string) => setOtwarte((s) => {
+    const n = new Set(s);
+    if (n.has(id)) n.delete(id); else n.add(id);
+    return n;
+  });
   return (
     <section className="tw-sekcja" style={{ textAlign: "left" }}>
       <h2 className="porownanie-tytul">Wspólne tematy</h2>
@@ -132,9 +143,14 @@ export default function TematyWspolne({ tematy }: { tematy: TematWspolny[] }) {
         {tematy.map((t) => {
           const e = etykieta(t);
           return (
-            <div key={t.id} className={`tw-wiersz${e ? " tw-potwierdzony" : ""}`} role="row">
+            <div key={t.id} className={`tw-wiersz${e ? " tw-potwierdzony" : ""}${otwarte.has(t.id) ? " tw-otwarty" : ""}`} role="row">
               <div className="tw-temat" role="cell">
-                <p className="tw-nazwa">{t.nazwa}</p>
+                {/* na telefonie nagłówek tematu jest przyciskiem rozwijającym wiersz */}
+                <button type="button" className="tw-rozwin" aria-expanded={otwarte.has(t.id)} onClick={() => przelacz(t.id)}>
+                  <span className="tw-nazwa">{t.nazwa}</span>
+                  <span className="tw-rozwin-pkt">{punkty(t.sila)}<small> / 3</small></span>
+                  <span className="tw-strzalka" aria-hidden="true">▾</span>
+                </button>
                 <p className="tw-znaczenie">{t.znaczenie}</p>
                 {e && <p className="tw-etykieta">✦ {e}</p>}
               </div>
@@ -152,6 +168,8 @@ export default function TematyWspolne({ tematy }: { tematy: TematWspolny[] }) {
                 <span className="tw-system">Punkty</span>
                 <span className="tw-pkt-liczba">{punkty(t.sila)}</span><span className="tw-pkt-max"> / 3</span>
               </div>
+              {/* tylko telefon: wniosek z „Co się zgadza” pod rozwiniętym tematem */}
+              {e && <p className="tw-wniosek-tel">{t.wniosek}</p>}
             </div>
           );
         })}

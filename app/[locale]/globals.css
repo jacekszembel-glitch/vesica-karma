@@ -3022,3 +3022,23 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
   .tw-wiersz { grid-template-columns: 1fr; }
   .tw-pkt { text-align: left; display: flex; align-items: baseline; gap: 8px; }
 }
+
+/* Wspólne tematy: przycisk rozwijania — na komputerze wygląda jak zwykły nagłówek */
+.tw-rozwin { all: unset; display: block; cursor: default; }
+.tw-rozwin .tw-nazwa { display: block; }
+.tw-rozwin-pkt, .tw-strzalka, .tw-wniosek-tel { display: none; }
+@media (max-width: 640px) {
+  .tw-zestawienie { display: none; }
+  .tw-rozwin { display: flex; align-items: baseline; gap: 10px; width: 100%; cursor: pointer; }
+  .tw-rozwin .tw-nazwa { flex: 1; min-width: 0; }
+  .tw-rozwin-pkt { display: inline; font-family: var(--font-serif); font-size: 1.15rem; color: var(--gold); white-space: nowrap; }
+  .tw-rozwin-pkt small { font-size: 0.68rem; color: var(--muted); font-family: var(--font-sans); }
+  .tw-strzalka { display: inline; color: var(--sand); transition: transform 0.2s; }
+  .tw-otwarty .tw-strzalka { transform: rotate(180deg); }
+  .tw-wiersz:not(.tw-suma):not(.tw-otwarty) .tw-komorka,
+  .tw-wiersz:not(.tw-suma):not(.tw-otwarty) .tw-znaczenie,
+  .tw-wiersz:not(.tw-suma) .tw-pkt { display: none; }
+  .tw-otwarty .tw-wniosek-tel { display: block; font-size: 0.84rem; line-height: 1.6; color: var(--text); margin: 6px 0 0; padding-top: 8px; border-top: 1px dashed var(--line-gold); }
+  .tw-otwarty { animation: tw-rozwin 0.25s ease-out; }
+}
+@keyframes tw-rozwin { from { opacity: 0.6; } to { opacity: 1; } }
