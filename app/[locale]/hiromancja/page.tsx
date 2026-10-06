@@ -126,8 +126,8 @@ export default function HiromancjaPage() {
       <h1 style={{ textAlign: "center", color: "var(--sand)", marginBottom: 16 }}><Term k="hiromancja" plain>Chiromancja</Term></h1>
       <div className="skrot-hero-linia" />
       <p className="section-sub" style={{ color: "var(--sand)" }}>
-        Prześlij zdjęcia obu dłoni — Claude spojrzy na nie i jakościowo opisze kształt dłoni oraz
-        widoczne linie. To subiektywna obserwacja AI, nie pomiar.
+        Zrób kilka zdjęć każdej dłoni: całą dłoń i zbliżenia z bliska — Claude obejrzy je razem
+        i opisze kształt dłoni, linie i znaki. To subiektywna obserwacja AI, nie pomiar.
       </p>
 
       {/* dane w złotym kole — ten sam panel co w Astrologii i Numerologii (KoloDanychPanel):
@@ -195,7 +195,7 @@ export default function HiromancjaPage() {
             <div className={`dlon-kolo${zdjecia[r] ? "" : " dlon-kolo-czeka"}`}>
               <img src={zdjecia[r] ? IKONA_DLONI[r] : `/brand/dlon-${r}-duza-taupe.png`} alt="" />
             </div>
-            <HiromancjaZdjecie id={`hiromancja-plik-${r}`} etykieta={`Prześlij zdjęcie — ${r === "lewa" ? "LEWA" : "PRAWA"} DŁOŃ`}
+            <HiromancjaZdjecie id={`hiromancja-plik-${r}`} etykieta={`Zdjęcie 1: cała dłoń — ${r === "lewa" ? "LEWA" : "PRAWA"}`}
               maZdjecie={!!zdjecia[r]} onZdjecieGotowe={(d) => handleZdjecie(r, d)} />
             <p className={`dlon-status${zdjecia[r] ? " dlon-status-ok" : ""}`}>
               {zdjecia[r] ? "Wgrane poprawnie" : "Wgraj zdjęcie"}
@@ -204,19 +204,20 @@ export default function HiromancjaPage() {
         ))}
       </div>
 
-      {/* sesja zdjęć: dodatkowe ujęcia i wskazane miejsca — po wgraniu zdjęcia głównego danej ręki */}
-      {(zdjecia.lewa || zdjecia.prawa) && (
-        <div className="hs-sekcja">
-          <p className="eyebrow" style={{ textAlign: "center", color: "var(--sand)", marginBottom: 6 }}>Dokładniejszy odczyt</p>
+      {/* sesja zdjęć: dodatkowe ujęcia i wskazane miejsca — widoczna od początku, żeby było jasne,
+          że zdjęć jest kilka; „obejrzyj to miejsce” pojawia się po wgraniu zdjęcia całej dłoni */}
+      <div className="hs-sekcja">
+          <p className="eyebrow" style={{ textAlign: "center", color: "var(--sand)", marginBottom: 6 }}>Kolejne zdjęcia każdej dłoni</p>
           <p style={{ textAlign: "center", maxWidth: 560, margin: "0 auto 22px", fontSize: "0.86rem", lineHeight: 1.6, color: "var(--sand)" }}>
-            Znaki takie jak krzyże, gwiazdy czy kratki najlepiej widać na zdjęciach z bliska i przy świetle z boku.
-            Każde dodatkowe ujęcie to więcej prawdziwych szczegółów do odczytu.
+            Poza zdjęciem całej dłoni zrób zbliżenia i ujęcia z poniższej listy — znaki takie jak krzyże,
+            gwiazdy czy kratki najlepiej widać z bliska i przy świetle z boku. Każde ujęcie to więcej
+            prawdziwych szczegółów do odczytu.
           </p>
           <div className="hs-rece">
-            {(["lewa", "prawa"] as const).map((r) => zdjecia[r] && (
+            {(["lewa", "prawa"] as const).map((r) => (
               <HiromancjaSesja key={r} idBaza={`hs-${r}`}
                 etykieta={`${r === "lewa" ? "Lewa" : "Prawa"} dłoń — ${r === pismoReka ? "wiodąca" : "bierna"}`}
-                dataUrlGlowne={zdjecia[r]!.dataUrl}
+                dataUrlGlowne={zdjecia[r]?.dataUrl ?? null}
                 ujecia={ujecia[r]}
                 onUjecie={(typ, u) => setUjecia((s) => {
                   const nowe = { ...s[r] };
@@ -227,8 +228,7 @@ export default function HiromancjaPage() {
                 onMiejsca={(m) => setMiejsca((s) => ({ ...s, [r]: m }))} />
             ))}
           </div>
-        </div>
-      )}
+      </div>
 
       <div className="skrot-hero-linia" />
 

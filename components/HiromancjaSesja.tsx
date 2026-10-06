@@ -126,6 +126,11 @@ export default function HiromancjaSesja({ etykieta, idBaza, dataUrlGlowne, ujeci
       </ul>
       {blad && <p className="hs-ostrzezenie">{blad}</p>}
 
+      {!dataUrlGlowne && (
+        <p className="hs-instrukcja" style={{ marginTop: 14 }}>
+          Po wgraniu zdjęcia całej dłoni (wyżej) możesz też wskazać na nim miejsca, którym AI ma się przyjrzeć z bliska.
+        </p>
+      )}
       {dataUrlGlowne && (
         <div className="hs-miejsca">
           <p className="hs-nazwa">Obejrzyj to miejsce <span className="hs-znacznik">opcjonalne</span></p>
