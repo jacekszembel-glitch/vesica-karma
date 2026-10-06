@@ -4,7 +4,8 @@ import type { VedicChart } from "./chart";
 import type { NumerologyResult } from "./numerology";
 import { dziedzinyTalentu, type DziedzinaTalentu } from "./dziedzinyTalentu";
 import { ROZKLADY_TALENTU } from "./srednieTalentu";
-import { procentNizej } from "./srednieBilansu";
+import { procentNizej, SREDNIE_BILANSU } from "./srednieBilansu";
+import { ocenaFinansowa } from "./finanseWedyjskie";
 import { jogakaraka } from "./karaki";
 import { ocenyNumerologii, PLANETA_CYFRA, type DlonWLiczbach, type LiniaDloni, type MiejsceZnaku, type RodzajZnaku, type StanLinii } from "./zgodnosc";
 
@@ -100,6 +101,23 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
   const jk = domy ? jogakaraka(chart.angles!.lagnaSign) : null;
   const jogakarakaTo = (p: PlanetId): Wskazanie | null =>
     jk === p ? tak(`${MIANOWNIK[p]} — jogakaraka (władca kendry i trikony)`) : null;
+
+  // Finanse — te same wyliczenia co zakładka Finanse: joga bogactwa (dhana) albo planeta-wskaźnik
+  // finansów (władca 2./11. domu, karaka bogactwa…) mocniejsza niż u 75% / 60% osób.
+  const finanse = (): Wskazanie | null => {
+    const fin = ocenaFinansowa(chart);
+    const dhana = fin.dhanaJogi[0];
+    const czynniki = fin.planety.map((f) => {
+      const r = SREDNIE_BILANSU.finanse[f.planeta];
+      return { f, p: r ? procentNizej(f.ocena.punkty, r) : 0 };
+    }).sort((a, b) => b.p - a.p);
+    const najl = czynniki[0];
+    const opisPl = najl ? `${MIANOWNIK[najl.f.planeta]} (${najl.f.role[0]?.split(" — ")[0] ?? "wskaźnik finansów"}) — wyżej niż u ${Math.round(najl.p)}% osób` : "";
+    return najlepsze(
+      dhana ? tak(`joga bogactwa (${dhana.nazwa})`) : null,
+      najl && najl.p >= 75 ? tak(opisPl) : najl && najl.p >= 60 ? czesciowo(opisPl) : null,
+    );
+  };
 
   // skupisko: dom z co najmniej trzema planetami
   const skupisko = domy
@@ -267,6 +285,16 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
         )),
         dlon: reka(() => najlepsze(wzgorek("saturn"), znakNa("saturn", ["kwadrat", "trojkat"]))),
         numerologia: liczby("saturn"),
+      },
+    },
+    {
+      id: "finanse", nazwa: "Pieniądze, dobrobyt",
+      znaczenie: "Zdolność do zarabiania i budowania zasobów — materialne zaplecze życia.",
+      wniosek: "Temat pieniędzy i dobrobytu jest u Ciebie wyraźnie zaznaczony. Masz predyspozycje do budowania zasobów — warto z nich świadomie korzystać, zamiast zostawiać je przypadkowi.",
+      wskazania: {
+        kosmogram: astro(finanse),
+        dlon: reka(() => najlepsze(linia("slonca"), linia("merkurego"), znakNa("czworobok", ["trojkat"]), znakNa("mercury", ["trojkat", "gwiazda"]))),
+        numerologia: liczby("venus", "saturn"),
       },
     },
     {
