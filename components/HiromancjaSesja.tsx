@@ -75,7 +75,7 @@ export default function HiromancjaSesja({ etykieta, idBaza, dataUrlGlowne, ujeci
     try {
       onUjecie(typ, await przygotujUjecie(file, typ));
     } catch {
-      setBlad("Nie udało się wczytać tego zdjęcia. Spróbuj innego pliku.");
+      setBlad("Nie udało się wczytać tego zdjęcia. Jeśli to plik HEIC z iPhone’a, zapisz go jako JPG albo zrób zdjęcie bezpośrednio z tej strony.");
     } finally {
       setWczytuje(null);
     }

@@ -121,6 +121,24 @@ export default function HiromancjaPage() {
   const zapis = useZapisSekcji("hiromancja");
   const rekaBierna: Reka = pismoReka === "prawa" ? "lewa" : "prawa";
 
+  // co jeszcze trzeba, żeby pojawił się przycisk odczytu — widoczne przy samym odczycie
+  const brakuje = (
+    <div className="hiro-braki">
+      <p>Przycisk „Odczytaj dłonie” pojawi się tutaj, gdy wgrasz <strong>Zdjęcie 1: cała dłoń</strong> dla obu rąk:</p>
+      <ul>
+        {(["lewa", "prawa"] as const).map((r) => {
+          const dodatkowe = Object.keys(ujecia[r]).length;
+          return (
+            <li key={r} className={zdjecia[r] ? "ok" : undefined}>
+              {r === "lewa" ? "Lewa" : "Prawa"} dłoń — zdjęcie całej dłoni: {zdjecia[r] ? "wgrane ✓" : "brak"}
+              {dodatkowe > 0 && ` · dodatkowe ujęcia: ${dodatkowe}`}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+
   return (
     <div className="container section" style={{ paddingTop: 40 }}>
       <h1 style={{ textAlign: "center", color: "var(--sand)", marginBottom: 16 }}><Term k="hiromancja" plain>Chiromancja</Term></h1>
@@ -230,16 +248,6 @@ export default function HiromancjaPage() {
           </div>
       </div>
 
-      <div className="skrot-hero-linia" />
-
-      <div style={{ display: "grid", gap: 40, marginTop: 40 }}>
-        <SekcjaDloni reka="lewa" dominujaca={pismoReka === "lewa"} />
-
-        <div className="skrot-hero-linia" style={{ width: "100%", margin: 0 }} />
-
-        <SekcjaDloni reka="prawa" dominujaca={pismoReka === "prawa"} />
-      </div>
-
       {/* odczyt dłoni widoczny zawsze — wcześniej pojawiał się dopiero po wgraniu obu zdjęć,
           więc trudno go było znaleźć; to on zapala krąg Chiromancji w Kole Karmy */}
       {!obaZdjeciaGotowe && zapis && (
@@ -249,22 +257,16 @@ export default function HiromancjaPage() {
             <p className="zapal-krag-info">
               ✦ Krąg Chiromancji świeci w Kole Karmy. Chcesz nowy odczyt? Wgraj zdjęcia obu dłoni powyżej.
             </p>
+            {brakuje}
           </SekcjaZlota>
         </div>
       )}
       {!obaZdjeciaGotowe && !zapis && (
         <SekcjaZlota tytul="Odczyt dłoni">
           <p style={{ textAlign: "center", maxWidth: 520, margin: "0 auto 18px", lineHeight: 1.6 }}>
-            Odczyt AI obu dłoni zapala krąg Chiromancji w Kole Karmy. Wgraj zdjęcia obu dłoni
-            powyżej — wtedy w tym miejscu pojawi się przycisk odczytu.
+            Odczyt AI obu dłoni zapala krąg Chiromancji w Kole Karmy.
           </p>
-          <div style={{ display: "flex", justifyContent: "center", gap: 28, flexWrap: "wrap" }}>
-            {(["lewa", "prawa"] as const).map((r) => (
-              <span key={r} className={`dlon-status${zdjecia[r] ? " dlon-status-ok" : ""}`} style={{ fontSize: "0.74rem" }}>
-                {r === "lewa" ? "Lewa dłoń" : "Prawa dłoń"}: {zdjecia[r] ? "wgrana ✓" : "brak zdjęcia"}
-              </span>
-            ))}
-          </div>
+          {brakuje}
         </SekcjaZlota>
       )}
 
@@ -280,6 +282,17 @@ export default function HiromancjaPage() {
           </SekcjaZlota>
         </div>
       )}
+
+      <div className="skrot-hero-linia" />
+
+      <div style={{ display: "grid", gap: 40, marginTop: 40 }}>
+        <SekcjaDloni reka="lewa" dominujaca={pismoReka === "lewa"} />
+
+        <div className="skrot-hero-linia" style={{ width: "100%", margin: 0 }} />
+
+        <SekcjaDloni reka="prawa" dominujaca={pismoReka === "prawa"} />
+      </div>
+
     </div>
   );
 }

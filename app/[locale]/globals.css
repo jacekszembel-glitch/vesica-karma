@@ -2947,3 +2947,9 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
   background: var(--sand); color: var(--bg); border: 2px solid var(--bg); font-weight: 700; font-size: 0.8rem;
   cursor: pointer; line-height: 1; box-shadow: 0 0 0 6px rgba(230, 196, 138, 0.25);
 }
+
+.hiro-braki { max-width: 520px; margin: 14px auto 0; font-size: 0.84rem; line-height: 1.6; color: var(--sand); }
+.hiro-braki p { text-align: center; }
+.hiro-braki ul { margin: 8px 0 0; padding-left: 18px; }
+.hiro-braki li { color: #8c7f6f; }
+.hiro-braki li.ok { color: var(--sand); }

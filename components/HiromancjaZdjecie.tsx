@@ -68,7 +68,7 @@ export default function HiromancjaZdjecie({ id, onZdjecieGotowe, maZdjecie, etyk
       onZdjecieGotowe(dane);
       void sprawdzZdjecie(dane); // w tle, nie blokuje przejścia dalej
     } catch {
-      setBlad("Nie udało się wczytać tego zdjęcia. Spróbuj innego pliku.");
+      setBlad("Nie udało się wczytać tego zdjęcia. Jeśli to plik HEIC z iPhone’a, zapisz go jako JPG albo zrób zdjęcie bezpośrednio z tej strony.");
     } finally {
       setPrzetwarzam(false);
     }
