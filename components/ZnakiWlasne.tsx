@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import IlustracjaDloni from "./IlustracjaDloni";
 import { MIEJSCA_ZNAKOW, RODZAJE_ZNAKOW_NAZWY, type MiejsceZnaku, type Reka, type RodzajZnaku, type ZnakWlasny } from "@/lib/astro/zgodnosc";
 
 /**
@@ -8,7 +9,12 @@ import { MIEJSCA_ZNAKOW, RODZAJE_ZNAKOW_NAZWY, type MiejsceZnaku, type Reka, typ
  * Zgłoszenie trafia do odczytu jako jawnie podpisana obserwacja osoby: AI osobno mówi,
  * czy widzi to samo na zdjęciach, a na Twojej Karmie znak ma źródło „Ty”, nie „AI”.
  */
-export default function ZnakiWlasne({ znaki, onZmiana }: { znaki: ZnakWlasny[]; onZmiana: (z: ZnakWlasny[]) => void }) {
+export default function ZnakiWlasne({ znaki, onZmiana, nazwyRak }: {
+  znaki: ZnakWlasny[];
+  onZmiana: (z: ZnakWlasny[]) => void;
+  /** Która fizyczna ręka jest wiodąca — rysunek dłoni odbija się dla lewej. */
+  nazwyRak?: Record<Reka, string>;
+}) {
   const [reka, setReka] = useState<Reka>("wiodaca");
   const [miejsce, setMiejsce] = useState<MiejsceZnaku>("jupiter");
   const [znak, setZnak] = useState<RodzajZnaku>("x");
@@ -23,6 +29,15 @@ export default function ZnakiWlasne({ znaki, onZmiana }: { znaki: ZnakWlasny[]; 
         Oko widzi więcej niż zdjęcie. Czego brakuje na liście wyżej — dopisz tutaj. W odczycie i na
         Twojej Karmie będzie podpisane jako Twoja obserwacja.
       </p>
+      {/* rysunek: wybrane miejsce świeci, kliknięcie w rysunek wybiera miejsce */}
+      <div className="zw-rysunek">
+        <IlustracjaDloni lewa={nazwyRak?.[reka] === "lewa"} szerokosc={200}
+          aktywne={znak === "krzyz_mistyczny" ? "czworobok" : miejsce}
+          onWybierz={(m) => { setMiejsce(m); if (m !== "czworobok" && znak === "krzyz_mistyczny") setZnak("x"); }} />
+        <p className="hs-instrukcja" style={{ textAlign: "center" }}>
+          {nazwyRak ? `${reka === "wiodaca" ? "Ręka wiodąca" : "Ręka bierna"} — ${nazwyRak[reka]} dłoń od wewnątrz. ` : ""}Kliknij miejsce na rysunku albo wybierz je z listy.
+        </p>
+      </div>
       <div className="zw-formularz">
         <select value={reka} onChange={(e) => setReka(e.target.value as Reka)} aria-label="Ręka">
           <option value="wiodaca">ręka wiodąca</option>

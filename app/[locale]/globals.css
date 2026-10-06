@@ -3050,3 +3050,22 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 .inw-lista li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 7px 0; border-bottom: 1px solid var(--line-soft); font-size: 0.86rem; color: var(--sand); }
 .inw-lista li small { display: block; font-size: 0.72rem; opacity: 0.75; margin-top: 2px; }
 .inw-lista .hs-usun { white-space: nowrap; flex-shrink: 0; }
+
+/* Ilustracja dłoni (components/IlustracjaDloni.tsx) */
+.ilu-dlon { display: block; max-width: 100%; height: auto; margin: 0 auto; overflow: visible; }
+.ilu-zarys { fill: rgba(230, 196, 138, 0.06); stroke: var(--sand); stroke-width: 1.6; stroke-linejoin: round; }
+.ilu-linia { fill: none; stroke: var(--sand); stroke-width: 1.1; opacity: 0.55; }
+.ilu-linia-los { stroke-dasharray: 4 3; }
+.ilu-kolo { fill: transparent; stroke: var(--sand); stroke-width: 1; opacity: 0.45; transition: r 0.2s, opacity 0.2s; }
+.ilu-jest .ilu-kolo { opacity: 0.9; stroke-width: 1.4; }
+.ilu-kropka { fill: var(--gold); }
+.ilu-aktywny .ilu-kolo { fill: rgba(230, 196, 138, 0.35); opacity: 1; stroke-width: 2; }
+.ilu-podpis { font-size: 9px; fill: var(--sand); opacity: 0.75; pointer-events: none; }
+.ilu-aktywny .ilu-podpis { opacity: 1; font-weight: 700; }
+.inw-reka-uklad { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 18px; align-items: start; }
+.inw-lista li { cursor: default; }
+.zw-rysunek { margin: 4px auto 14px; max-width: 260px; }
+@media (max-width: 520px) {
+  .inw-reka-uklad { grid-template-columns: 1fr; }
+  .inw-rysunek { max-width: 190px; margin: 0 auto; }
+}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ZnakiWlasne from "./ZnakiWlasne";
+import IlustracjaDloni from "./IlustracjaDloni";
 import { PieczecOdslaniania } from "./Interpretation";
 import {
   MIEJSCA_ZNAKOW, NAZWY_LINII, RODZAJE_ZNAKOW_NAZWY, miejsceZKlucza,
@@ -60,6 +61,8 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, znakiWl
   const [busy, setBusy] = useState(false);
   const [blad, setBlad] = useState<string | null>(null);
   const [wynik, setWynik] = useState<{ znaki: ZnakInw[]; linie: LiniaInw[]; ogledzinyTekst: string } | null>(null);
+  // pozycja listy pod kursorem — jej miejsce podświetla się na rysunku dłoni
+  const [najechane, setNajechane] = useState<{ reka: Reka; miejsce: MiejsceZnaku } | null>(null);
 
   async function obejrzyj() {
     setBusy(true); setBlad(null); setWynik(null);
@@ -122,11 +125,19 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, znakiWl
           return (
             <div key={reka} className="inw-reka">
               <p className="hs-tytul">{reka === "wiodaca" ? "Ręka wiodąca" : "Ręka bierna"} ({nazwyRak[reka]})</p>
+              <div className="inw-reka-uklad">
+              <div className="inw-rysunek">
+                <IlustracjaDloni lewa={nazwyRak[reka] === "lewa"} szerokosc={170}
+                  zaznaczone={zn.map(({ z }) => z.miejsce)}
+                  aktywne={najechane?.reka === reka ? najechane.miejsce : null} />
+              </div>
+              <div className="inw-listy">
               <p className="inw-grupa">Znaki</p>
               {zn.length === 0 ? <p className="hs-instrukcja">AI nie zauważyło znaków na tej ręce.</p> : (
                 <ul className="inw-lista">
                   {zn.map(({ z, i }) => (
-                    <li key={i}>
+                    <li key={i} onMouseEnter={() => setNajechane({ reka, miejsce: z.miejsce })} onMouseLeave={() => setNajechane(null)}
+                      onClick={() => setNajechane({ reka, miejsce: z.miejsce })}>
                       <span><strong>{nazwaZnaku(z.znak)}</strong> — {nazwaMiejsca(z.miejsce)}{z.pewnosc === "delikatny" ? ", delikatny" : ""}
                         {z.gdzie && <small>{z.gdzie}</small>}</span>
                       <button type="button" className="hs-usun" onClick={() => usunZnak(i)}>nie mam</button>
@@ -145,12 +156,14 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, znakiWl
                   ))}
                 </ul>
               )}
+              </div>
+              </div>
             </div>
           );
         })}
       </div>
 
-      <ZnakiWlasne znaki={znakiWlasne} onZmiana={onZnakiWlasne} />
+      <ZnakiWlasne znaki={znakiWlasne} onZmiana={onZnakiWlasne} nazwyRak={nazwyRak} />
 
       <div style={{ textAlign: "center", marginTop: 26 }}>
         <button className="btn btn-primary" onClick={dalej} style={{ padding: "14px 36px", fontSize: "1rem" }}>
