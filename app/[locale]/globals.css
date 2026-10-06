@@ -3009,3 +3009,16 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
   .tw-zestawienie { grid-column: 1; grid-row: 1; position: static; border-left: none; border-top: 1px solid var(--line-gold); border-bottom: 1px solid var(--line-gold); padding: 16px 0; }
   .tw-glowna { grid-row: 2; }
 }
+
+/* Wspólne tematy: punkty 0–3 i podsumowanie */
+.tw-wiersz { grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)) 64px; }
+.tw-pkt { text-align: right; white-space: nowrap; }
+.tw-pkt-kol { text-align: right; }
+.tw-pkt-liczba { font-family: var(--font-serif); font-size: 1.3rem; color: var(--gold); font-variant-numeric: tabular-nums; }
+.tw-pkt-max { font-size: 0.72rem; color: var(--muted); }
+.tw-suma { border-top: 2px solid var(--line-gold); border-bottom: none; margin-top: 4px; }
+.tw-pkt-razem { font-size: 1.9rem; }
+@media (max-width: 640px) {
+  .tw-wiersz { grid-template-columns: 1fr; }
+  .tw-pkt { text-align: left; display: flex; align-items: baseline; gap: 8px; }
+}

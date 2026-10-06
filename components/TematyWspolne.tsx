@@ -30,6 +30,42 @@ function etykieta(t: TematWspolny): string | null {
   return null;
 }
 
+/** ½ zapisane po polsku: 2,5 zamiast 2.5. */
+const punkty = (x: number) => (Number.isInteger(x) ? String(x) : x.toFixed(1).replace(".", ","));
+
+/**
+ * Podsumowanie pod tabelą: każdy temat 0–3 punkty (system wskazuje = 1, częściowo = ½),
+ * razem z 30. To miara ZBIEŻNOŚCI systemów, nie „ilości talentów” — wysoki wynik znaczy,
+ * że trzy systemy często mówią o Tobie to samo.
+ */
+function Podsumowanie({ tematy }: { tematy: TematWspolny[] }) {
+  const suma = tematy.reduce((s, t) => s + t.sila, 0);
+  const max = tematy.length * 3;
+  const pelne = tematy.filter((t) => t.sila === 3).length;
+  const trzy = tematy.filter((t) => Object.values(t.wskazania).every((w) => w.stan === "tak" || w.stan === "czesciowo")).length;
+  const wsystem = (s: SystemTematu) => tematy.reduce((x, t) => x + (t.wskazania[s].stan === "tak" ? 1 : t.wskazania[s].stan === "czesciowo" ? 0.5 : 0), 0);
+  return (
+    <div className="tw-wiersz tw-suma" role="row">
+      <div className="tw-temat" role="cell">
+        <p className="tw-nazwa">Razem — zbieżność systemów</p>
+        <p className="tw-znaczenie">
+          {tematy.length} tematów, każdy 0–3 punkty. {`Wskazanych przez wszystkie trzy systemy: ${trzy}, w tym z kompletem 3 punktów: ${pelne}.`}
+        </p>
+      </div>
+      {KOLUMNY.map((k) => (
+        <div key={k.id} className="tw-komorka" role="cell">
+          <span className="tw-system">{k.nazwa}</span>
+          <span className="tw-opis">wskazuje {punkty(wsystem(k.id))} z {tematy.length}</span>
+        </div>
+      ))}
+      <div className="tw-pkt" role="cell">
+        <span className="tw-system">Razem</span>
+        <span className="tw-pkt-liczba tw-pkt-razem">{punkty(suma)}</span><span className="tw-pkt-max"> / {max}</span>
+      </div>
+    </div>
+  );
+}
+
 const NAZWA_SYSTEMU: Record<SystemTematu, string> = { kosmogram: "kosmogram", dlon: "dłoń", numerologia: "numerologia" };
 
 /** Zestawienie z boku tabeli: same potwierdzone tematy, od najmocniejszych, z wnioskiem i źródłami. */
@@ -91,6 +127,7 @@ export default function TematyWspolne({ tematy }: { tematy: TematWspolny[] }) {
         <div className="tw-wiersz tw-naglowek" role="row">
           <span role="columnheader">Temat</span>
           {KOLUMNY.map((k) => <span key={k.id} role="columnheader">{k.nazwa}</span>)}
+          <span role="columnheader" className="tw-pkt-kol">Punkty</span>
         </div>
         {tematy.map((t) => {
           const e = etykieta(t);
@@ -111,12 +148,17 @@ export default function TematyWspolne({ tematy }: { tematy: TematWspolny[] }) {
                   </div>
                 );
               })}
+              <div className="tw-pkt" role="cell">
+                <span className="tw-system">Punkty</span>
+                <span className="tw-pkt-liczba">{punkty(t.sila)}</span><span className="tw-pkt-max"> / 3</span>
+              </div>
             </div>
           );
         })}
+        <Podsumowanie tematy={tematy} />
       </div>
       <p className="muted porownanie-legenda" style={{ marginTop: 12 }}>
-        ✦ wyraźnie zaznaczone · ◐ częściowo · · niezaznaczone · — ten system nie mówi o tym temacie · ? brak danych
+        ✦ wyraźnie zaznaczone (1 pkt) · ◐ częściowo (½ pkt) · · niezaznaczone (0) · ? brak danych
       </p>
       <p className="muted" style={{ fontSize: "0.74rem", marginTop: 10, lineHeight: 1.6 }}>
         Pojedyncze wskazanie zdarza się często — każdy horoskop i każda dłoń coś podkreśla. Znaczenie

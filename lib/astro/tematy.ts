@@ -58,7 +58,6 @@ const DOPELNIACZ: Record<PlanetId, string> = {
 const tak = (opis: string): Wskazanie => ({ stan: "tak", opis });
 const czesciowo = (opis: string): Wskazanie => ({ stan: "czesciowo", opis });
 const nie = (opis = ""): Wskazanie => ({ stan: "nie", opis });
-const nieDotyczy: Wskazanie = { stan: "nie_dotyczy", opis: "" };
 const brakDanych: Wskazanie = { stan: "brak_danych", opis: "" };
 
 /** Najmocniejsze z kilku wskazań (tak > częściowo > nie). */
@@ -238,7 +237,8 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
           znaki.some((z) => z.znak === "wyspa") ? tak("wyspy na liniach") : null,
           znaki.some((z) => z.znak === "kratka") ? czesciowo("kratki na wzgórkach") : null,
         )),
-        numerologia: nieDotyczy,
+        // 4 = Rahu — w numerologii wedyjskiej liczba nagłych zmian i przewrotów
+        numerologia: liczby("rahu"),
       },
     },
   ];
