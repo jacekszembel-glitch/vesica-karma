@@ -2970,3 +2970,24 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 .mosty-zrodlo { margin-left: 8px; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .mosty-warunek { font-size: 0.78rem; line-height: 1.5; margin: 2px 0 0; text-align: left; }
 .porownanie-odstaje { display: block; font-size: 0.64rem; color: var(--muted); margin-top: 2px; white-space: nowrap; }
+
+/* Twoja Karma: wspólne tematy (components/TematyWspolne.tsx) */
+.tw-tabela { display: grid; margin-top: 14px; }
+.tw-wiersz { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 14px; padding: 12px 6px; border-bottom: 1px solid var(--line-soft); align-items: start; }
+.tw-naglowek { font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--line-gold); padding-top: 0; }
+.tw-potwierdzony { background: rgba(230, 196, 138, 0.07); }
+.tw-nazwa { font-weight: 600; color: var(--text); margin: 0; text-align: left; font-size: 0.92rem; }
+.tw-znaczenie { font-size: 0.76rem; line-height: 1.45; color: var(--muted); margin: 3px 0 0; text-align: left; }
+.tw-etykieta { font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); font-weight: 700; margin: 6px 0 0; text-align: left; }
+.tw-komorka { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.tw-system { display: none; }
+.tw-znacznik { font-size: 1rem; color: var(--muted); line-height: 1; }
+.tw-tak .tw-znacznik { color: var(--gold); }
+.tw-czesciowo .tw-znacznik { color: var(--sand); }
+.tw-opis { font-size: 0.76rem; line-height: 1.4; color: var(--text); overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .tw-naglowek { display: none; }
+  .tw-wiersz { grid-template-columns: 1fr; gap: 6px; padding: 14px 4px; }
+  .tw-komorka { flex-direction: row; align-items: baseline; gap: 8px; }
+  .tw-system { display: inline; font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); width: 92px; flex-shrink: 0; }
+}

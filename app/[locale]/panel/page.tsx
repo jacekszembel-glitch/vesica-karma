@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { DateTime } from "luxon";
 import PorownanieSystemow from "@/components/PorownanieSystemow";
+import TematyWspolne from "@/components/TematyWspolne";
+import { tematyWspolne } from "@/lib/astro/tematy";
 import { buildChart } from "@/lib/astro/chart";
 import { numerology } from "@/lib/astro/numerology";
 import { porownajSystemy, dlonZTekstu, mostyDlonHoroskop, znakiWlasneDoDloni, type DlonWLiczbach } from "@/lib/astro/zgodnosc";
@@ -230,7 +232,7 @@ export default function Page() {
       date: lokalnie.toUTC().toJSDate(), latitude: urodzenie.place.lat, longitude: urodzenie.place.lon, timeKnown: urodzenie.timeKnown,
     });
     const num = numerology(urodzenie.date, urodzenie.name ?? "", "wedyjski", new Date().getFullYear());
-    return { wynik: porownajSystemy(chart, num, dlon), mosty: mostyDlonHoroskop(chart, dlon) };
+    return { wynik: porownajSystemy(chart, num, dlon), mosty: mostyDlonHoroskop(chart, dlon), tematy: tematyWspolne(chart, num, dlon) };
   }, [zlota, urodzenie, dlon]);
 
 
@@ -314,7 +316,11 @@ export default function Page() {
         <>
           <div className="ornament" style={{ margin: "44px 0 26px" }} />
           {porownanie ? (
-            <PorownanieSystemow wynik={porownanie.wynik} mosty={porownanie.mosty} dlonZrodlo={dlon?.zrodlo ?? null} dlonZapisano={dlonZapisano} />
+            <>
+              <PorownanieSystemow wynik={porownanie.wynik} mosty={porownanie.mosty} dlonZrodlo={dlon?.zrodlo ?? null} dlonZapisano={dlonZapisano} />
+              <div className="ornament" style={{ margin: "44px 0 26px" }} />
+              <TematyWspolne tematy={porownanie.tematy} />
+            </>
           ) : (
             <p className="muted" style={{ fontSize: "0.9rem" }}>
               Porównanie trzech systemów potrzebuje danych urodzenia —{" "}

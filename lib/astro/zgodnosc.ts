@@ -90,6 +90,11 @@ export function znakiWlasneDoDloni(wlasne: ZnakWlasny[], odpowiedzi?: ("tak" | "
 
 export type StanLinii = "wyrazna" | "odcinkowa" | "slaba" | "brak";
 export type LiniaMostu = "losu" | "slonca" | "podrozy" | "relacji";
+/** Wszystkie linie zapisywane w bloku danych (mosty używają czterech, wspólne tematy — wszystkich). */
+export type LiniaDloni = LiniaMostu | "serca" | "glowy" | "zycia" | "intuicji" | "merkurego" | "pas_wenus" | "pierscien_salomona" | "marsa";
+export const LINIE_DLONI: LiniaDloni[] = [
+  "losu", "slonca", "podrozy", "relacji", "serca", "glowy", "zycia", "intuicji", "merkurego", "pas_wenus", "pierscien_salomona", "marsa",
+];
 
 /** Zapis dłoni w liczbach — z bloku danych odczytu AI (albo wyłuskany z tekstu). */
 export interface DlonWLiczbach {
@@ -98,7 +103,7 @@ export interface DlonWLiczbach {
   /** „odczyt” = AI podało dane wprost; „tekst” = wyłuskane ze starszego odczytu. */
   zrodlo: "odczyt" | "tekst";
   znaki?: ZnakDloni[];
-  linie?: Partial<Record<LiniaMostu, StanLinii | null>>;
+  linie?: Partial<Record<LiniaDloni, StanLinii | null>>;
   /** Znaki zgłoszone przez osobę przed odczytem, z odpowiedzią AI, czy widzi je na zdjęciach. */
   wlasne?: ZnakDloni[];
   /** Surowe odpowiedzi AI na zgłoszone znaki (kolejność jak przy wysyłce) — scalane w HiromancjaOdczyt. */
@@ -239,7 +244,7 @@ export function rozdzielOdczytDloni(surowy: string): { tekst: string; dane: Dlon
     const znaki = (Array.isArray(d.znaki) ? d.znaki : [])
       .map((z) => znakZDanych(z, "ai")).filter((z): z is ZnakDloni => !!z);
     const linie: DlonWLiczbach["linie"] = {};
-    for (const l of ["losu", "slonca", "podrozy", "relacji"] as LiniaMostu[]) {
+    for (const l of LINIE_DLONI) {
       const v = String(d.linie?.[l]);
       linie[l] = STANY_LINII.includes(v as StanLinii) ? (v as StanLinii) : null;
     }
