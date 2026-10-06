@@ -5,9 +5,9 @@ import { DateTime } from "luxon";
 import PorownanieSystemow from "@/components/PorownanieSystemow";
 import { buildChart } from "@/lib/astro/chart";
 import { numerology } from "@/lib/astro/numerology";
-import { porownajSystemy, dlonZTekstu, type DlonWLiczbach } from "@/lib/astro/zgodnosc";
+import { porownajSystemy, dlonZTekstu, mostyDlonHoroskop, znakiWlasneDoDloni, type DlonWLiczbach } from "@/lib/astro/zgodnosc";
 import { loadBirth, type StoredBirth } from "@/lib/birthStore";
-import { wczytajOdczytDloni } from "@/lib/hiromancjaOdczytStore";
+import { wczytajOdczytDloni, wczytajZnakiWlasne } from "@/lib/hiromancjaOdczytStore";
 import Link from "next/link";
 import ZapisanyOdczyt from "@/components/ZapisanyOdczyt";
 import { wczytajSekcje, type ZapisSekcji } from "@/lib/zapisSekcji";
@@ -214,7 +214,10 @@ export default function Page() {
     setZlota(document.documentElement.hasAttribute(ATRYBUT_ODWROCENIA));
     setUrodzenie(loadBirth());
     const odczyt = wczytajOdczytDloni();
-    setDlon(odczyt ? odczyt.dane ?? dlonZTekstu(odczyt.text) : null);
+    const d = odczyt ? odczyt.dane ?? dlonZTekstu(odczyt.text) : null;
+    // znaki zgłoszone przez osobę już po odczycie (bez odpowiedzi AI) też idą do mostów — ze źródłem „Ty”
+    const wlasne = wczytajZnakiWlasne();
+    setDlon(d && !d.wlasne?.length && wlasne.length ? { ...d, wlasne: znakiWlasneDoDloni(wlasne) } : d);
     setDlonZapisano(odczyt?.savedAt ?? null);
   }, []);
 
@@ -227,7 +230,7 @@ export default function Page() {
       date: lokalnie.toUTC().toJSDate(), latitude: urodzenie.place.lat, longitude: urodzenie.place.lon, timeKnown: urodzenie.timeKnown,
     });
     const num = numerology(urodzenie.date, urodzenie.name ?? "", "wedyjski", new Date().getFullYear());
-    return porownajSystemy(chart, num, dlon);
+    return { wynik: porownajSystemy(chart, num, dlon), mosty: mostyDlonHoroskop(chart, dlon) };
   }, [zlota, urodzenie, dlon]);
 
 
@@ -311,7 +314,7 @@ export default function Page() {
         <>
           <div className="ornament" style={{ margin: "44px 0 26px" }} />
           {porownanie ? (
-            <PorownanieSystemow wynik={porownanie} dlonZrodlo={dlon?.zrodlo ?? null} dlonZapisano={dlonZapisano} />
+            <PorownanieSystemow wynik={porownanie.wynik} mosty={porownanie.mosty} dlonZrodlo={dlon?.zrodlo ?? null} dlonZapisano={dlonZapisano} />
           ) : (
             <p className="muted" style={{ fontSize: "0.9rem" }}>
               Porównanie trzech systemów potrzebuje danych urodzenia —{" "}

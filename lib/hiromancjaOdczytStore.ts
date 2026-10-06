@@ -7,7 +7,24 @@
  * — to jest tylko druga, osobna kopia OSTATNIEGO wyniku dla Karmy.
  */
 
-import type { DlonWLiczbach } from "./astro/zgodnosc";
+import type { DlonWLiczbach, ZnakWlasny } from "./astro/zgodnosc";
+
+const KLUCZ_ZNAKOW = "vk_znaki_wlasne";
+
+/** Znaki, które osoba sama widzi na dłoni — zgłaszane przed odczytem, używane też w mostach na Twojej Karmie. */
+export function wczytajZnakiWlasne(): ZnakWlasny[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const v = JSON.parse(localStorage.getItem(KLUCZ_ZNAKOW) ?? "[]");
+    return Array.isArray(v) ? (v as ZnakWlasny[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function zapiszZnakiWlasne(znaki: ZnakWlasny[]): void {
+  try { localStorage.setItem(KLUCZ_ZNAKOW, JSON.stringify(znaki)); } catch { /* tryb prywatny */ }
+}
 
 const KLUCZ = "vk_hiromancja_odczyt";
 

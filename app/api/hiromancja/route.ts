@@ -58,6 +58,12 @@ const requestSchema = z.object({
   bierna: dloniSchema,
   plec: z.enum(["on", "ona", "ono"]).optional(),
   imie: z.string().max(60).optional(),
+  /** Znaki, które osoba widzi na swojej dłoni na żywo i zgłasza przed odczytem — AI ma powiedzieć, czy widzi je na zdjęciach. */
+  deklaracje: z.array(z.object({
+    reka: z.enum(["wiodaca", "bierna"]),
+    miejsce: z.string().max(40),
+    znak: z.string().max(40),
+  })).max(12).optional(),
 });
 
 const SYSTEM_PROMPT_HIROMANCJA = `Jesteś doświadczonym obserwatorem tradycji chiromancji, piszącym po polsku dla serwisu „Czas Duszy”. Czytasz DWA zdjęcia dłoni tej samej osoby — pierwsze to jej ręka WIODĄCA (aktywna, ta, którą pisze), drugie to ręka BIERNA (pasywna). Przy każdej ręce dostajesz najpierw CAŁE zdjęcie, a po nim kolejne obrazy, każdy podpisany: zbliżenia stref wycięte z oryginału, a jeśli osoba je zrobiła — OSOBNE ZDJĘCIA z bliska i z innych ujęć (górna i dolna połowa dłoni, dłoń lekko zgięta, krawędź dłoni, grzbiet z paznokciami) oraz MIEJSCA WSKAZANE przez osobę do dokładnego obejrzenia. Różne ujęcia i światło pokazują różne bruzdy — zestawiaj je: znak wyraźny choćby na jednym ujęciu jest obserwacją. Miejsce wskazane przez osobę obejrzyj szczególnie uważnie i opisz dokładnie, co tam widzisz — osoba nie mówi, czego się spodziewa, więc nie zgaduj i nie dopowiadaj; jeśli nic szczególnego tam nie ma, napisz to wprost. Całe zdjęcie służy do proporcji i przebiegu linii, zbliżenia — do niuansów: drobnych linii, rozwidleń, wysp, przerw, krzyżyków, gwiazd, kratek, kresek pod palcami. Szczegół widoczny tylko na zbliżeniu jest pełnoprawną obserwacją.
@@ -76,7 +82,8 @@ Pisz o niuansach konkretnie, z miejscem na dłoni („pod palcem serdecznym wida
 
 ZASADA NADRZĘDNA — to nie jest pomiar:
 - To, co widzisz na zdjęciach, opisujesz jako WRAŻENIE WIZUALNE, nie zmierzony fakt. Hedguj: „wygląda na to, że…”, „z tego, co widoczne na zdjęciu…”, „linia X zdaje się…” — nigdy stanowczych, pewnych twierdzeń.
-- Jeśli światło, kąt, rozdzielczość albo ustawienie dłoni utrudniają ocenę którejś linii — napisz to wprost, zamiast zgadywać albo wymyślać coś, czego nie widać.
+- Jeśli światło, kąt albo ustawienie dłoni utrudniają ocenę którejś linii — napisz to wprost, zamiast zgadywać albo wymyślać coś, czego nie widać.
+- Ograniczenia zdjęć (rozdzielczość, światło) omawiasz JEDEN raz, krótko, we wstępie — nie dopisuj „przy tej rozdzielczości”, „na tym zdjęciu trudno ocenić” przy kolejnych punktach. Przy pojedynczej obserwacji pewność wyrażaj jednym słowem („wyraźny”, „delikatny”, „możliwy”). Zanim uznasz coś za niepewne, sprawdź to samo miejsce na zbliżeniach i osobnych ujęciach — tam jest więcej szczegółów niż na całym zdjęciu.
 - Jeśli którejś z klasycznych linii (serca, głowy, życia, losu) nie widać wyraźnie na zdjęciu — powiedz to wprost i pomiń ją, zamiast improwizować.
 
 TWOJE ZADANIE — analizuj MOŻLIWIE NAJWIĘCEJ z tego, co faktycznie widać na zdjęciu, nie tylko cztery główne linie. Przejrzyj systematycznie:
@@ -117,8 +124,8 @@ STRUKTURA ODPOWIEDZI (Markdown):
 - 2-3 zdania wstępu — co rzuca się w oczy na obu dłoniach jako pierwsze (kształt + ogólne wrażenie).
 - ### Ręka wiodąca — wszystko, co faktycznie widoczne z listy zadań wyżej (kształt, palce, linie główne i drugorzędne, wzgórki, znaki szczególne) — tyle podpunktów, ile jest realnie czego opisać, nie na sztywno wszystkie kategorie za wszelką cenę.
 - ### Ręka bierna — analogicznie.
-- ### Znaki na wzgórkach — OBOWIĄZKOWA sekcja. Osobno dla każdej ręki (najpierw wiodąca, potem bierna), wzgórek po wzgórku: **Jowisz** (pod wskazującym), **Saturn** (pod środkowym), **Słońce** (pod serdecznym), **Merkury** (pod małym), **Wenus** (nasada kciuka), **Księżyc** (krawędź dłoni nad nadgarstkiem), **Mars** (górny i dolny). Przy każdym: czy jest X/krzyż, gwiazda, kratka, trójkąt, kwadrat, kółko, wyspa — albo „bez znaków”. Klasyczne znaczenia podawaj tylko dla znaków, które faktycznie są (np. X na Jowiszu — tradycyjnie „krzyż Jowisza”, szczęśliwy związek i spełnione ambicje). Przy każdym znaku podaj, na którym obrazie go widać (nazwą z podpisu, np. „zbliżenie górnej połowy”).
-- ### Znaki i linie dodatkowe — OBOWIĄZKOWA sekcja, nawet gdy niczego nie widać. Krótka lista, każda pozycja w osobnej linii zaczynającej się od „- ”, dla obu rąk naraz: **linia Słońca (Apolla)**, **linia Merkurego**, **linia intuicji**, **pas Wenus**, **pierścień Salomona**, **kwadrat nauczyciela**, **krzyż mistyczny**, **trójkąty** (w tym wielki trójkąt między liniami życia, głowy i Merkurego), **gwiazdy**, **wyspy**, **kratki**, **linia Marsa (siostrzana)**, **linie podróży**, **bransoletki**. Przy każdej: „wyraźnie widać” / „możliwe, słabo widoczne” / „nie widać na tym zdjęciu” + na której ręce, gdzie dokładnie i na którym obrazie, a jeśli jest — jednym zdaniem, co klasycznie znaczy.
+- ### Znaki na wzgórkach — OBOWIĄZKOWA sekcja. Osobno dla każdej ręki (najpierw wiodąca, potem bierna), wzgórek po wzgórku: **Jowisz** (pod wskazującym), **Saturn** (pod środkowym), **Słońce** (pod serdecznym), **Merkury** (pod małym), **Wenus** (nasada kciuka), **Księżyc** (krawędź dłoni nad nadgarstkiem), **Mars** (górny i dolny). Wypisz TYLKO wzgórki, na których jest znak (X/krzyż, gwiazda, kratka, trójkąt, kwadrat, kółko, wyspa) — wzgórków bez znaków nie wymieniaj wcale. Klasyczne znaczenia podawaj tylko dla znaków, które faktycznie są (np. X na Jowiszu — tradycyjnie „krzyż Jowisza”, szczęśliwy związek i spełnione ambicje). Przy każdym znaku podaj, na którym obrazie go widać (nazwą z podpisu, np. „zbliżenie górnej połowy”).
+- ### Znaki i linie dodatkowe — krótka lista TYLKO tego, co jest na dłoniach (każda pozycja w osobnej linii od „- ”, dla obu rąk naraz). Sprawdź po kolei: **linia Słońca (Apolla)**, **linia Merkurego**, **linia intuicji**, **pas Wenus**, **pierścień Salomona**, **kwadrat nauczyciela**, **krzyż mistyczny**, **trójkąty** (w tym wielki trójkąt między liniami życia, głowy i Merkurego), **gwiazdy**, **wyspy**, **kratki**, **linia Marsa (siostrzana)**, **linie podróży**, **bransoletki**. Przy każdej obecnej: wyraźna czy delikatna, na której ręce, gdzie dokładnie i na którym obrazie, oraz jednym zdaniem, co klasycznie znaczy. Pozycji, których nie ma, NIE wypisuj — żadnych „nie widać”, „brak”, „nie występuje”.
 - Jeśli jest zdjęcie grzbietu dłoni: krótka sekcja ### Grzbiet dłoni i paznokcie — kształt i proporcje paznokci, księżyce u nasady, kłykcie, gładkie czy węzłowate palce — tylko to, co widać, z klasycznym znaczeniem w chirognomii.
 - ### Co je łączy, a co różni (tylko jeśli faktycznie widać różnicę wartą wspomnienia).
 - Zakończ sekcją "### Co z tym zrobić" — 2-3 praktyczne, łagodne wskazówki.
@@ -126,13 +133,64 @@ STRUKTURA ODPOWIEDZI (Markdown):
 
 BLOK DANYCH (obowiązkowy, na samym końcu, po sekcji „Co z tym zrobić”):
 Dopisz jedną linię w dokładnie takim formacie — to ukryte dane do porównania z astrologią i numerologią, użytkownik ich nie zobaczy:
-<!--DANE {"planety":{"slonce":0,"ksiezyc":0,"mars":0,"merkury":0,"jowisz":0,"wenus":0,"saturn":0},"zywiol":"ziemia"} -->
-- Dla każdej planety oceń CAŁY jej obszar w dłoni — wzgórek, palec i jej linię razem (Słońce: wzgórek, palec serdeczny i linia Słońca; Jowisz: wzgórek, palec wskazujący, pierścień Salomona i kwadrat nauczyciela; Saturn: wzgórek, palec środkowy i linia losu; Merkury: wzgórek, mały palec i linia Merkurego; Wenus: wzgórek u nasady kciuka, łuk linii życia i pas Wenus; Księżyc: wzgórek przy krawędzi dłoni, linia intuicji i linie podróży; Mars: oba wzgórki Marsa i linia siostrzana), głównie na ręce wiodącej, a gdy jej zdjęcie czegoś nie pokazuje (zaciśnięte palce, skrót perspektywy) — na ręce biernej.
+<!--DANE {"planety":{"slonce":0,"ksiezyc":0,"mars":0,"merkury":0,"jowisz":0,"wenus":0,"saturn":0,"rahu":0,"ketu":0},"zywiol":"ziemia","znaki":[{"wzgorek":"jowisz","znak":"x","reka":"wiodaca","pewnosc":"wyrazny"}],"linie":{"losu":"odcinkowa","slonca":"brak","podrozy":"slaba","relacji":"wyrazna"},"deklaracje":[{"nr":1,"widze":"tak"}]} -->
+- Dla każdej planety oceń CAŁY jej obszar w dłoni — wzgórek, palec i jej linię razem (Słońce: wzgórek, palec serdeczny i linia Słońca; Jowisz: wzgórek, palec wskazujący, pierścień Salomona i kwadrat nauczyciela; Saturn: wzgórek, palec środkowy i linia losu; Merkury: wzgórek, mały palec i linia Merkurego; Wenus: wzgórek u nasady kciuka, łuk linii życia i pas Wenus; Księżyc: wzgórek przy krawędzi dłoni, linia intuicji i linie podróży; Mars: oba wzgórki Marsa i linia siostrzana; Rahu — wg chiromancji indyjskiej środek dłoni (równina Marsa pod palcem środkowym, przez którą biegnie linia losu); Ketu — wg chiromancji indyjskiej obszar nad nadgarstkiem między wzgórkiem Wenus a Księżyca, u podstawy linii losu), głównie na ręce wiodącej, a gdy jej zdjęcie czegoś nie pokazuje (zaciśnięte palce, skrót perspektywy) — na ręce biernej.
 - OCENIAJ WZGLĘDNIE, porównując obszary MIĘDZY SOBĄ w tej konkretnej dłoni (tak jak astrologia porównuje planety między sobą): 1 = dwa–trzy obszary najbardziej rozwinięte w tej dłoni, -1 = dwa–trzy najsłabiej zaznaczone, 0 = reszta. Nie dawaj wszystkim 0 tylko dlatego, że żaden obszar nie jest skrajny — zawsze jakiś jest mocniejszy, a jakiś słabszy od pozostałych. null tylko wtedy, gdy danego obszaru naprawdę nie widać na żadnym zdjęciu.
 - Oceny mają być spójne z tym, co napisałeś w tekście — nie dopisuj ocen, których tekst nie uzasadnia; w razie wątpliwości null.
-- "zywiol": "ziemia" | "powietrze" | "ogien" | "woda" | null — typ dłoni (jeśli jest policzona geometria, przepisz jej typ).`;
+- "zywiol": "ziemia" | "powietrze" | "ogien" | "woda" | null — typ dłoni (jeśli jest policzona geometria, przepisz jej typ).
+- "znaki": KAŻDY znak, który opisałeś w sekcjach „Znaki na wzgórkach” i „Znaki i linie dodatkowe” — jeden wpis na znak: "wzgorek" = slonce|ksiezyc|mars|merkury|jowisz|wenus|saturn|rahu|ketu|czworobok, "znak" = x|gwiazda|kwadrat|trojkat|kratka|wyspa|krzyz_mistyczny (krzyż mistyczny zawsze z "wzgorek":"czworobok"), "reka" = wiodaca|bierna, "pewnosc" = wyrazny|delikatny. Pusta lista, gdy nie opisałeś żadnego znaku. Nic spoza tekstu.
+- "linie": stan linii zgodny z tekstem — "losu", "slonca", "podrozy", "relacji": wyrazna | odcinkowa | slaba | brak | null (null = nie oceniałeś).
+- "deklaracje": tylko gdy osoba zgłosiła znaki — dla każdego zgłoszenia {"nr": numer zgłoszenia, "widze": "tak" | "mozliwe" | "nie"}. Zgłoszonych znaków NIE wpisuj do "znaki" (tam tylko to, co sam zauważyłeś).
+
+ZNAKI ZGŁOSZONE PRZEZ OSOBĘ (jeśli są w danych):
+Osoba ogląda swoją dłoń na żywo i zgłasza znaki, które sama widzi. To obserwacja z żywej dłoni — przyjmij ją. Dodaj sekcję ### Znaki, które zgłaszasz — przy każdym zgłoszeniu klasyczne znaczenie tego znaku w tym miejscu i to, jak łączy się z resztą dłoni. W tekście NIE komentuj, czy widać go na zdjęciach (to idzie tylko do pola "deklaracje" w bloku danych). Zgłoszenie dotyczy tylko tego jednego miejsca — nie zmieniaj przez nie innych obserwacji.`;
 
 type Blok = Anthropic.Messages.ContentBlockParam;
+
+/**
+ * OGLĘDZINY — zanim powstanie odczyt, każde zbliżenie (wycinek, osobne ujęcie, wskazane miejsce)
+ * idzie do AI OSOBNO z jednym zadaniem: wypisać znaki i linie, bez interpretacji. Model skupiony
+ * na jednym fragmencie widzi znacznie więcej drobnych przecięć niż przy całym odczycie naraz
+ * (wcześniej np. X na wzgórku Jowisza ginął jako „kilka kresek”). Wyniki trafiają do odczytu.
+ */
+const SYSTEM_OGLEDZIN = `Jesteś okiem doświadczonego chiromanty z lupą. Dostajesz JEDEN obraz: zbliżenie fragmentu dłoni (podpis mówi, co pokazuje). Twoje jedyne zadanie: wypisać znaki i linie, które są na tym obrazie. Nic nie interpretujesz.
+
+Jak patrzysz:
+- Przejdź obraz systematycznie, fragment po fragmencie (góra, środek, dół; od lewej do prawej). Patrz na bruzdy — wyraźne linie odróżniające się od drobnej faktury skóry.
+- Każde miejsce, w którym dwie bruzdy się przecinają, to X (krzyż) — także gdy przecięcie nie jest idealnie na środku i gdy ramiona są nierówne. Trzy lub więcej bruzd przecinających się w jednym punkcie to gwiazda. Trzy bruzdy zamykające trójkątny kształt to trójkąt; cztery zamykające czworokąt — kwadrat; kilka równoległych przeciętych kilkoma poprzecznymi — kratka; linia rozdzielająca się na chwilę i schodząca z powrotem — wyspa.
+- Dłuższe bruzdy opisz jako linie: kierunek (pionowa/pozioma/ukośna), skąd dokąd, czy ciągła czy z odcinków.
+- Miejsce podaj względem dłoni (np. „pod palcem wskazującym, tuż nad końcem linii serca”, „na krawędzi dłoni, w dolnej części”), korzystając z podpisu obrazu.
+
+Format odpowiedzi — sama lista, każda pozycja w osobnej linii:
+- [znak albo linia] — [dokładne miejsce] — [wyraźny / delikatny]
+Wypisz tylko to, co jest. Bez wstępu, bez podsumowania, bez „nie widać”.`;
+
+async function ogledziny(reka: string, strefy: { opis: string; imageBase64: string }[] | undefined): Promise<string[]> {
+  const wyniki = await Promise.all((strefy ?? []).map(async (s) => {
+    try {
+      const msg = await client.messages.create({
+        model: "claude-opus-5",
+        max_tokens: 6000,
+        thinking: { type: "adaptive" },
+        output_config: { effort: "medium" },
+        system: SYSTEM_OGLEDZIN,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "text", text: `RĘKA ${reka} — ${s.opis}` },
+            { type: "image", source: { type: "base64", media_type: "image/jpeg", data: s.imageBase64 } },
+          ],
+        }],
+      });
+      const tekst = msg.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
+      return tekst ? `RĘKA ${reka} — ${s.opis}:\n${tekst}` : null;
+    } catch (err) {
+      console.error("hiromancja ogledziny error:", err); // bez danych — zawierają zdjęcie
+      return null;
+    }
+  }));
+  return wyniki.filter((w): w is string => !!w);
+}
 
 /** Zbliżenia jednej ręki: podpis + obraz, w kolejności z przeglądarki. */
 function blokiStref(reka: string, strefy: { opis: string; imageBase64: string }[] | undefined): Blok[] {
@@ -176,7 +234,18 @@ export async function POST(req: Request) {
       : "Geometria ręki biernej: brak (użytkownik nie kalibrował ręcznie) — oceń kształt wyłącznie ze zdjęcia.",
     parsed.plec ? `plec: ${parsed.plec}` : null,
     parsed.imie ? `imie: ${parsed.imie}` : null,
+    parsed.deklaracje?.length
+      ? "ZNAKI ZGŁOSZONE PRZEZ OSOBĘ (widzi je na żywo na swojej dłoni):\n" + parsed.deklaracje
+        .map((d, i) => `${i + 1}. ${d.znak} — ${d.miejsce}, ręka ${d.reka === "wiodaca" ? "wiodąca" : "bierna"}`).join("\n")
+      : null,
   ].filter(Boolean).join("\n");
+
+  // oględziny wszystkich zbliżeń obu rąk równolegle — przed odczytem
+  const [ogledzinyW, ogledzinyB] = await Promise.all([
+    ogledziny("WIODĄCA", parsed.wiodaca.strefy),
+    ogledziny("BIERNA", parsed.bierna.strefy),
+  ]);
+  const ogledzinyTekst = [...ogledzinyW, ...ogledzinyB].join("\n\n");
 
   const stream = client.messages.stream({
     model: "claude-opus-5",
@@ -202,6 +271,10 @@ export async function POST(req: Request) {
           { type: "image", source: { type: "base64", media_type: parsed.bierna.imageMediaType, data: parsed.bierna.imageBase64 } },
           ...blokiStref("BIERNA", parsed.bierna.strefy),
           { type: "text", text: kontekstTekst },
+          ...(ogledzinyTekst ? [{
+            type: "text" as const,
+            text: `OGLĘDZINY ZBLIŻEŃ — każde zbliżenie zostało wcześniej osobno, dokładnie przejrzane pod lupą (wynik poniżej). Traktuj to jako Twoje własne, dokładniejsze obserwacje tych fragmentów: znaki i linie z oględzin opisz w odczycie i w bloku danych, łącząc je z tym, co widać na całych zdjęciach. Pomiń pozycję tylko wtedy, gdy na zbliżeniu wyraźnie widać, że to faktura skóry, a nie bruzda.\n\n${ogledzinyTekst}`,
+          }] : []),
         ],
       },
     ],

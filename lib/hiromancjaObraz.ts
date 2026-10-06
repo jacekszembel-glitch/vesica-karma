@@ -15,9 +15,12 @@
 
 /** Długość dłuższego boku, przy której AI ogląda obraz bez własnego pomniejszania. */
 const BOK_GLOWNY = 1568;
-/** Oryginał trzymany w pamięci do wycinania stref (telefony robią 4000+ px). */
-const BOK_ZRODLA = 3600;
-const BOK_STREFY = 1150;
+/** Oryginał do wycinania stref i wskazanych miejsc trzymamy jako zdekodowany obraz (ImageBitmap),
+ *  NIE jako płótno — iPhone nie tworzy płótna większego niż ~16 mln pikseli, a zdjęcie z telefonu
+ *  ma 12–48 mln. Z ImageBitmap wycinamy fragmenty bez kopiowania całości. */
+export type ZrodloObrazu = ImageBitmap;
+/** Wycinki: do 1568 px — tyle AI ogląda bez własnego pomniejszania. */
+const BOK_STREFY = 1568;
 
 export interface Strefa {
   /** Co pokazuje wycinek — trafia do AI jako podpis obrazu. */
@@ -57,7 +60,7 @@ function doCanvas(zrodlo: CanvasImageSource, sw: number, sh: number, maksBok: nu
 const base64Z = (c: HTMLCanvasElement, jakosc: number) => c.toDataURL("image/jpeg", jakosc).split(",")[1] ?? "";
 
 /** Ostrość i jasność na pomniejszonej (1024 px) kopii w skali szarości. */
-function ocenLokalnie(zrodlo: HTMLCanvasElement): OcenaLokalna {
+function ocenLokalnie(zrodlo: ZrodloObrazu | HTMLCanvasElement): OcenaLokalna {
   const c = doCanvas(zrodlo, zrodlo.width, zrodlo.height, 1024);
   const { width: w, height: h } = c;
   const px = c.getContext("2d")!.getImageData(0, 0, w, h).data;
@@ -95,13 +98,11 @@ export interface ZdjecieDloni {
   strefy: Strefa[];
   lokalnie: OcenaLokalna;
   /** Oryginał w pamięci — tylko do ponownego wycięcia stref, nigdy nie wysyłany w całości. */
-  zrodlo: HTMLCanvasElement;
+  zrodlo: ZrodloObrazu;
 }
 
 export async function przygotujZdjecie(file: File): Promise<ZdjecieDloni> {
-  const bitmap = await createImageBitmap(file);
-  const zrodlo = doCanvas(bitmap, bitmap.width, bitmap.height, BOK_ZRODLA);
-  bitmap.close?.();
+  const zrodlo = await createImageBitmap(file);
   const glowny = doCanvas(zrodlo, zrodlo.width, zrodlo.height, BOK_GLOWNY);
   const dataUrl = glowny.toDataURL("image/jpeg", 0.86);
   return {
@@ -116,7 +117,7 @@ export async function przygotujZdjecie(file: File): Promise<ZdjecieDloni> {
 
 const ogranicz = (v: number) => Math.min(1, Math.max(0, v));
 
-function wytnij(zrodlo: HTMLCanvasElement, r: Ramka, opis: string, jakosc = 0.83): Strefa {
+function wytnij(zrodlo: ZrodloObrazu, r: Ramka, opis: string, jakosc = 0.83): Strefa {
   const W = zrodlo.width, H = zrodlo.height;
   const x0 = ogranicz(r[0]) * W, y0 = ogranicz(r[1]) * H, x1 = ogranicz(r[2]) * W, y1 = ogranicz(r[3]) * H;
   const c = doCanvas(zrodlo, W, H, BOK_STREFY, { x: x0, y: y0, w: Math.max(8, x1 - x0), h: Math.max(8, y1 - y0) });
@@ -133,7 +134,7 @@ function poszerz(r: Ramka, m: number): Ramka {
  * Wycinki stref. Z ramkami: górna i dolna połowa dłoni (z zakładką) + palce.
  * Bez ramek: siatka 2×2 środkowej części kadru, też z zakładką.
  */
-export function wytnijStrefy(zrodlo: HTMLCanvasElement, ramki: RamkiDloni | null): Strefa[] {
+export function wytnijStrefy(zrodlo: ZrodloObrazu, ramki: RamkiDloni | null): Strefa[] {
   const d = ramki?.dlon;
   if (d && d[2] - d[0] > 0.1 && d[3] - d[1] > 0.1) {
     const p = poszerz(d, 0.08);
@@ -197,26 +198,26 @@ export interface Ujecie {
   dataUrl: string;
   base64: string;
   lokalnie: OcenaLokalna;
-  zrodlo: HTMLCanvasElement;
 }
 
-const BOK_UJECIA = 1300;
+const BOK_UJECIA = 1568;
 
 export async function przygotujUjecie(file: File, typ: TypUjecia): Promise<Ujecie> {
+  // dodatkowe ujęcie nie potrzebuje oryginału po przygotowaniu — zwalniamy pamięć od razu
   const bitmap = await createImageBitmap(file);
-  const zrodlo = doCanvas(bitmap, bitmap.width, bitmap.height, BOK_ZRODLA);
+  const c = doCanvas(bitmap, bitmap.width, bitmap.height, BOK_UJECIA);
   bitmap.close?.();
-  const c = doCanvas(zrodlo, zrodlo.width, zrodlo.height, BOK_UJECIA);
-  const dataUrl = c.toDataURL("image/jpeg", 0.83);
-  return { typ, dataUrl, base64: dataUrl.split(",")[1] ?? "", lokalnie: ocenLokalnie(zrodlo), zrodlo };
+  const dataUrl = c.toDataURL("image/jpeg", 0.8);
+  return { typ, dataUrl, base64: dataUrl.split(",")[1] ?? "", lokalnie: ocenLokalnie(c) };
 }
 
 /** Miejsce wskazane stuknięciem — punkt w ułamkach (0–1) obrazu. */
 export interface Miejsce { x: number; y: number }
 
 /** Kwadratowy wycinek wokół wskazanego miejsca, z oryginału w pełnej rozdzielczości. */
-export function wytnijMiejsce(zrodlo: HTMLCanvasElement, m: Miejsce, nr: number): Strefa {
-  const bok = 0.22 * Math.min(zrodlo.width, zrodlo.height);
+export function wytnijMiejsce(zrodlo: ZrodloObrazu, m: Miejsce, nr: number): Strefa {
+  // ok. 1/5 krótszego boku — z oryginału 4000×3000 to ~600 px samego miejsca, bez pomniejszania
+  const bok = 0.2 * Math.min(zrodlo.width, zrodlo.height);
   const fx = bok / zrodlo.width, fy = bok / zrodlo.height;
   const r: Ramka = [m.x - fx / 2, m.y - fy / 2, m.x + fx / 2, m.y + fy / 2];
   return wytnij(zrodlo, r, `MIEJSCE WSKAZANE PRZEZ OSOBĘ nr ${nr} — duże zbliżenie z oryginału; osoba prosi o dokładne obejrzenie tego miejsca i nie mówi, czego się spodziewa`, 0.86);

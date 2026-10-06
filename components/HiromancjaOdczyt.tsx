@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import type { TypDloni } from "@/lib/hiromancja";
 import { zapiszOdczytDloni } from "@/lib/hiromancjaOdczytStore";
-import { rozdzielOdczytDloni } from "@/lib/astro/zgodnosc";
+import { rozdzielOdczytDloni, znakiWlasneDoDloni, MIEJSCA_ZNAKOW, RODZAJE_ZNAKOW_NAZWY, type ZnakWlasny } from "@/lib/astro/zgodnosc";
 import ZapalKrag from "./ZapalKrag";
 import { PieczecOdslaniania } from "./Interpretation";
 
@@ -80,11 +80,13 @@ export interface DloniDane {
 interface Props {
   wiodaca: DloniDane;
   bierna: DloniDane;
+  /** Znaki, które osoba widzi na żywo — AI odpowiada, czy widzi je na zdjęciach. */
+  deklaracje?: ZnakWlasny[];
   plec?: "on" | "ona" | "ono";
   imie?: string;
 }
 
-export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props) {
+export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie, deklaracje = [] }: Props) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +104,14 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
       const res = await fetch("/api/hiromancja", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wiodaca, bierna, plec, imie }),
+        body: JSON.stringify({
+          wiodaca, bierna, plec, imie,
+          deklaracje: deklaracje.map((d) => ({
+            reka: d.reka,
+            miejsce: MIEJSCA_ZNAKOW.find((m) => m.id === d.miejsce)?.nazwa ?? d.miejsce,
+            znak: RODZAJE_ZNAKOW_NAZWY.find((z) => z.id === d.znak)?.nazwa ?? d.znak,
+          })),
+        }),
         signal: ctrl.signal,
       });
       if (!res.ok || !res.body) {
@@ -121,6 +130,7 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
       // na końcu odczytu AI dopisuje ukryty blok danych (wzgórki, żywioł) — do porównania systemów, nie do czytania
       const { tekst, dane } = rozdzielOdczytDloni(acc);
       setText(tekst);
+      if (dane && deklaracje.length) dane.wlasne = znakiWlasneDoDloni(deklaracje, dane.odpowiedziNaZgloszone);
       zapiszOdczytDloni(tekst, dane);
       // krąg Chiromancji zapala przycisk ZapalKrag pod odczytem (nie automat)
     } catch (e) {
@@ -128,7 +138,7 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie }: Props)
     } finally {
       setBusy(false);
     }
-  }, [wiodaca, bierna, plec, imie]);
+  }, [wiodaca, bierna, plec, imie, deklaracje]);
 
   const przedOdczytem = !text && !busy;
 

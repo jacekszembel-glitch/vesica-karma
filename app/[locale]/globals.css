@@ -2953,3 +2953,19 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 .hiro-braki ul { margin: 8px 0 0; padding-left: 18px; }
 .hiro-braki li { color: #8c7f6f; }
 .hiro-braki li.ok { color: var(--sand); }
+
+/* Chiromancja: znaki zgłoszone przez osobę (components/ZnakiWlasne.tsx) */
+.zw { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--line-soft); }
+.zw-formularz { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
+.zw-formularz select { width: auto; max-width: 100%; font-size: 0.82rem; padding: 7px 10px; }
+.zw-lista { list-style: none; margin: 14px auto 0; padding: 0; max-width: 560px; display: grid; gap: 6px; }
+.zw-lista li { display: flex; justify-content: space-between; gap: 12px; align-items: center; font-size: 0.84rem; color: var(--sand); border-bottom: 1px solid var(--line-soft); padding: 6px 0; }
+
+/* Twoja Karma: mosty dłoń ↔ horoskop */
+.mosty-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.mosty-lista li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line-soft); }
+.mosty-znak { font-weight: 700; color: var(--muted); text-align: center; }
+.mosty-tak .mosty-znak { color: var(--gold); }
+.mosty-dlon { font-size: 0.9rem; color: var(--text); margin: 0; text-align: left; }
+.mosty-zrodlo { margin-left: 8px; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.mosty-warunek { font-size: 0.78rem; line-height: 1.5; margin: 2px 0 0; text-align: left; }

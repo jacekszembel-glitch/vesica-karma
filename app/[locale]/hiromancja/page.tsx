@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Term from "@/components/Term";
 import HiromancjaZdjecie, { type ZdjecieDane } from "@/components/HiromancjaZdjecie";
 import HiromancjaOdczyt from "@/components/HiromancjaOdczyt";
 import HiromancjaSesja from "@/components/HiromancjaSesja";
+import ZnakiWlasne from "@/components/ZnakiWlasne";
+import { wczytajZnakiWlasne, zapiszZnakiWlasne } from "@/lib/hiromancjaOdczytStore";
+import type { ZnakWlasny } from "@/lib/astro/zgodnosc";
 import { UJECIA, wytnijMiejsce, type Miejsce, type Strefa, type TypUjecia, type Ujecie } from "@/lib/hiromancjaObraz";
 import SekcjaZlota from "@/components/SekcjaZlota";
 import KoloDanychPanel from "@/components/KoloDanychPanel";
@@ -107,11 +110,18 @@ export default function HiromancjaPage() {
   const [zwiniete, setZwiniete] = useState(false);
   const [ujecia, setUjecia] = useState<Record<Reka, Partial<Record<TypUjecia, Ujecie>>>>({ prawa: {}, lewa: {} });
   const [miejsca, setMiejsca] = useState<Record<Reka, Miejsce[]>>({ prawa: [], lewa: [] });
+  const [znakiWlasne, setZnakiWlasne] = useState<ZnakWlasny[]>([]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- hydratacja z localStorage po zamontowaniu
+  useEffect(() => { setZnakiWlasne(wczytajZnakiWlasne()); }, []);
+  const zmienZnakiWlasne = (z: ZnakWlasny[]) => { setZnakiWlasne(z); zapiszZnakiWlasne(z); };
 
   function handleZdjecie(reka: Reka, dane: ZdjecieDane) {
     setZdjecia((z) => {
       // nowe zdjęcie główne (inny plik) — wskazane miejsca dotyczyły starego
-      if (z[reka] && z[reka]!.zrodlo !== dane.zrodlo) setMiejsca((m) => ({ ...m, [reka]: [] }));
+      if (z[reka] && z[reka]!.zrodlo !== dane.zrodlo) {
+        setMiejsca((m) => ({ ...m, [reka]: [] }));
+        z[reka]!.zrodlo.close(); // zwolnij pamięć starego oryginału
+      }
       return { ...z, [reka]: dane };
     });
   }
@@ -246,6 +256,7 @@ export default function HiromancjaPage() {
                 onMiejsca={(m) => setMiejsca((s) => ({ ...s, [r]: m }))} />
             ))}
           </div>
+          <ZnakiWlasne znaki={znakiWlasne} onZmiana={zmienZnakiWlasne} />
       </div>
 
       {/* odczyt dłoni widoczny zawsze — wcześniej pojawiał się dopiero po wgraniu obu zdjęć,
@@ -278,6 +289,7 @@ export default function HiromancjaPage() {
             bierna={doOdczytu(zdjecia[rekaBierna]!, ujecia[rekaBierna], miejsca[rekaBierna])}
             plec={plec}
             imie={imie.trim() || undefined}
+            deklaracje={znakiWlasne}
           />
           </SekcjaZlota>
         </div>

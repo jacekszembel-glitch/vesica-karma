@@ -20,8 +20,12 @@ import type { TypDloni } from "../hiromancja";
  *  - numerologia wedyjska: cyfra 1–9 = planeta; mocna, gdy jej cyfra to Mulank,
  *    Bhagyank, liczba imienia albo powtarza się w dacie (Lo Shu), słaba, gdy
  *    w ogóle jej nie ma;
- *  - chiromancja: wzgórek i palec planety z odczytu dłoni (wypukły/płaski).
- *    Rahu i Ketu nie mają w dłoni klasycznego miejsca — tam brak danych.
+ *  - chiromancja: wzgórek, palec i linia planety z odczytu dłoni (porównane między
+ *    sobą). Rahu i Ketu — wzgórki z chiromancji indyjskiej (Hasta Samudrika):
+ *    Rahu w środku dłoni (równina Marsa), Ketu nad nadgarstkiem między Wenus a Księżycem.
+ *
+ * Do tego MOSTY dłoń ↔ horoskop: konkretny znak w dłoni (X, gwiazda, kwadrat…)
+ * sprawdzony z konkretnym układem planety w horoskopie — patrz mostyDlonHoroskop.
  *
  * Wszystko liczone tutaj, za każdym razem tak samo — żadnej oceny „na oko”.
  * Spójność porównujemy z tym, ile zgodności dałby sam przypadek (ten sam
@@ -35,12 +39,70 @@ export const SYSTEMY_ZGODNOSCI: SystemZgodnosci[] = ["astrologia", "numerologia"
 /** Oceny planet w jednym systemie; `null` = system nie mówi nic o tej planecie. */
 export type OcenyPlanet = Record<PlanetId, Ocena | null>;
 
+/** Miejsce znaku w dłoni: wzgórek planety albo czworobok (między linią serca a głowy). */
+export type MiejsceZnaku = PlanetId | "czworobok";
+export type RodzajZnaku = "x" | "gwiazda" | "kwadrat" | "trojkat" | "kratka" | "wyspa" | "krzyz_mistyczny";
+export type Reka = "wiodaca" | "bierna";
+
+export interface ZnakDloni {
+  miejsce: MiejsceZnaku;
+  znak: RodzajZnaku;
+  reka: Reka;
+  pewnosc: "wyrazny" | "delikatny";
+  /** „ai” = zauważone przez AI na zdjęciach; „osoba” = zgłoszone przez osobę (widzi na żywo). */
+  zrodlo: "ai" | "osoba";
+  /** Przy znaku zgłoszonym przez osobę: czy AI widzi go na zdjęciach. */
+  aiWidzi?: "tak" | "mozliwe" | "nie";
+}
+
+/** Znak, który osoba sama widzi na swojej dłoni i zgłasza przed odczytem. */
+export interface ZnakWlasny { reka: Reka; miejsce: MiejsceZnaku; znak: RodzajZnaku }
+
+export const MIEJSCA_ZNAKOW: { id: MiejsceZnaku; nazwa: string }[] = [
+  { id: "jupiter", nazwa: "wzgórek Jowisza (pod wskazującym)" },
+  { id: "saturn", nazwa: "wzgórek Saturna (pod środkowym)" },
+  { id: "sun", nazwa: "wzgórek Słońca (pod serdecznym)" },
+  { id: "mercury", nazwa: "wzgórek Merkurego (pod małym)" },
+  { id: "venus", nazwa: "wzgórek Wenus (nasada kciuka)" },
+  { id: "moon", nazwa: "wzgórek Księżyca (krawędź dłoni)" },
+  { id: "mars", nazwa: "wzgórek Marsa" },
+  { id: "rahu", nazwa: "środek dłoni (Rahu)" },
+  { id: "ketu", nazwa: "nad nadgarstkiem (Ketu)" },
+  { id: "czworobok", nazwa: "między linią serca a głowy" },
+];
+export const RODZAJE_ZNAKOW_NAZWY: { id: RodzajZnaku; nazwa: string }[] = [
+  { id: "x", nazwa: "X (krzyż)" },
+  { id: "krzyz_mistyczny", nazwa: "krzyż mistyczny" },
+  { id: "gwiazda", nazwa: "gwiazda" },
+  { id: "trojkat", nazwa: "trójkąt" },
+  { id: "kwadrat", nazwa: "kwadrat" },
+  { id: "kratka", nazwa: "kratka" },
+  { id: "wyspa", nazwa: "wyspa" },
+];
+
+/** Zgłoszone znaki → ZnakDloni ze źródłem „osoba” i odpowiedzią AI (jeśli była). */
+export function znakiWlasneDoDloni(wlasne: ZnakWlasny[], odpowiedzi?: ("tak" | "mozliwe" | "nie")[]): ZnakDloni[] {
+  return wlasne.map((w, i) => ({
+    miejsce: w.znak === "krzyz_mistyczny" ? "czworobok" : w.miejsce,
+    znak: w.znak, reka: w.reka, pewnosc: "wyrazny", zrodlo: "osoba", aiWidzi: odpowiedzi?.[i],
+  }));
+}
+
+export type StanLinii = "wyrazna" | "odcinkowa" | "slaba" | "brak";
+export type LiniaMostu = "losu" | "slonca" | "podrozy" | "relacji";
+
 /** Zapis dłoni w liczbach — z bloku danych odczytu AI (albo wyłuskany z tekstu). */
 export interface DlonWLiczbach {
   planety: Partial<Record<PlanetId, Ocena | null>>;
   zywiol: TypDloni | null;
   /** „odczyt” = AI podało dane wprost; „tekst” = wyłuskane ze starszego odczytu. */
   zrodlo: "odczyt" | "tekst";
+  znaki?: ZnakDloni[];
+  linie?: Partial<Record<LiniaMostu, StanLinii | null>>;
+  /** Znaki zgłoszone przez osobę przed odczytem, z odpowiedzią AI, czy widzi je na zdjęciach. */
+  wlasne?: ZnakDloni[];
+  /** Surowe odpowiedzi AI na zgłoszone znaki (kolejność jak przy wysyłce) — scalane w HiromancjaOdczyt. */
+  odpowiedziNaZgloszone?: ("tak" | "mozliwe" | "nie")[];
 }
 
 const CYFRA_PLANETA: Record<number, PlanetId> = {
@@ -60,8 +122,8 @@ export const MIEJSCE_W_DLONI: Record<PlanetId, string | null> = {
   jupiter: "wzgórek i palec wskazujący",
   venus: "wzgórek u nasady kciuka",
   saturn: "wzgórek i palec środkowy",
-  rahu: null,
-  ketu: null,
+  rahu: "środek dłoni (chiromancja indyjska)",
+  ketu: "nad nadgarstkiem, między Wenus a Księżycem (chiromancja indyjska)",
 };
 
 const GODNOSC_WLASNA = new Set(["egzaltacja", "władanie", "mulatrikona"]);
@@ -137,8 +199,23 @@ export function ocenyChiromancji(dlon: DlonWLiczbach | null): OcenyPlanet {
 const ZNACZNIK = "<!--DANE";
 const KLUCZE_PLANET: Record<string, PlanetId> = {
   slonce: "sun", ksiezyc: "moon", mars: "mars", merkury: "mercury",
-  jowisz: "jupiter", wenus: "venus", saturn: "saturn",
+  jowisz: "jupiter", wenus: "venus", saturn: "saturn", rahu: "rahu", ketu: "ketu",
 };
+const RODZAJE_ZNAKOW: RodzajZnaku[] = ["x", "gwiazda", "kwadrat", "trojkat", "kratka", "wyspa", "krzyz_mistyczny"];
+const STANY_LINII: StanLinii[] = ["wyrazna", "odcinkowa", "slaba", "brak"];
+
+/** Znak z bloku danych → ZnakDloni (albo null, gdy niepełny). */
+function znakZDanych(z: Record<string, unknown>, zrodlo: "ai" | "osoba"): ZnakDloni | null {
+  const miejsce = z.wzgorek === "czworobok" ? "czworobok" : KLUCZE_PLANET[String(z.wzgorek)];
+  const znak = String(z.znak) as RodzajZnaku;
+  if (!miejsce || !RODZAJE_ZNAKOW.includes(znak)) return null;
+  return {
+    miejsce, znak,
+    reka: z.reka === "bierna" ? "bierna" : "wiodaca",
+    pewnosc: z.pewnosc === "delikatny" ? "delikatny" : "wyrazny",
+    zrodlo,
+  };
+}
 
 /** Oddziela tekst odczytu od ukrytego bloku danych na końcu (AI dopisuje go po Markdownie). */
 export function rozdzielOdczytDloni(surowy: string): { tekst: string; dane: DlonWLiczbach | null } {
@@ -148,14 +225,31 @@ export function rozdzielOdczytDloni(surowy: string): { tekst: string; dane: Dlon
   const koniec = surowy.indexOf("-->", i);
   const json = surowy.slice(i + ZNACZNIK.length, koniec < 0 ? undefined : koniec).trim();
   try {
-    const d = JSON.parse(json) as { planety?: Record<string, unknown>; zywiol?: unknown };
+    const d = JSON.parse(json) as {
+      planety?: Record<string, unknown>; zywiol?: unknown;
+      znaki?: Record<string, unknown>[]; linie?: Record<string, unknown>;
+      deklaracje?: { nr?: number; widze?: string }[];
+    };
     const planety: Partial<Record<PlanetId, Ocena | null>> = {};
     for (const [k, v] of Object.entries(d.planety ?? {})) {
       const p = KLUCZE_PLANET[k];
       if (p) planety[p] = v === 1 || v === 0 || v === -1 ? v : null;
     }
     const zywiol = ["ziemia", "powietrze", "ogien", "woda"].includes(String(d.zywiol)) ? (d.zywiol as TypDloni) : null;
-    return { tekst, dane: { planety, zywiol, zrodlo: "odczyt" } };
+    const znaki = (Array.isArray(d.znaki) ? d.znaki : [])
+      .map((z) => znakZDanych(z, "ai")).filter((z): z is ZnakDloni => !!z);
+    const linie: DlonWLiczbach["linie"] = {};
+    for (const l of ["losu", "slonca", "podrozy", "relacji"] as LiniaMostu[]) {
+      const v = String(d.linie?.[l]);
+      linie[l] = STANY_LINII.includes(v as StanLinii) ? (v as StanLinii) : null;
+    }
+    const odp = Array.isArray(d.deklaracje) ? d.deklaracje : [];
+    const odpowiedziNaZgloszone: ("tak" | "mozliwe" | "nie")[] = [];
+    for (const o of odp) {
+      const w = o.widze === "tak" || o.widze === "mozliwe" ? o.widze : "nie";
+      if (typeof o.nr === "number" && o.nr >= 1 && o.nr <= 20) odpowiedziNaZgloszone[o.nr - 1] = w;
+    }
+    return { tekst, dane: { planety, zywiol, zrodlo: "odczyt", znaki, linie, odpowiedziNaZgloszone } };
   } catch {
     return { tekst, dane: null };
   }
@@ -297,4 +391,167 @@ export function porownajSystemy(
       ksiezyc: ZYWIOL_RASI[RASIS[chart.moonSign].element],
     },
   };
+}
+
+/* ---------- MOSTY dłoń ↔ horoskop ---------- */
+
+/**
+ * Klasyczne znaczenia znaków w dłoni sprawdzone z układem TEJ planety w horoskopie:
+ *  - X / wyspa na wzgórku = próba, przeszkoda w temacie planety
+ *      ↔ planeta w 6., 8. lub 12. domu, w upadku, spalona albo w znaku ze złoczyńcą;
+ *  - gwiazda = błysk, wyróżnienie ↔ egzaltacja / własny znak / kendra / trikona;
+ *  - kwadrat = ochrona ↔ Jowisz w tym samym znaku albo aspektuje planetę;
+ *  - trójkąt = talent ↔ planeta w 1., 5. albo 9. domu;
+ *  - kratka = rozproszenie ↔ co najmniej dwa złoczyńce (Saturn, Mars, Rahu, Ketu) na planecie;
+ *  - krzyż mistyczny = intuicja, duchowość ↔ Jowisz albo Ketu w 1., 5., 9. lub 12. domu
+ *    albo zajęty 12. dom;
+ * oraz linie: losu ↔ Saturn i 10. dom, Słońca ↔ Słońce i 10./5. dom, podróży ↔ 9./12. dom i Rahu,
+ * relacji ↔ 7. dom i Wenus.
+ * Przy znakach na wzgórkach podajemy też BAZĘ: ile z 9 planet w tym horoskopie spełnia ten sam
+ * warunek — żeby było widać, czy trafienie coś znaczy, czy zdarzyłoby się i tak.
+ */
+
+export interface Most {
+  dlon: string;
+  warunek: string;
+  /** true = horoskop mówi to samo, false = co innego, null = częściowo (linia odcinkowa/słaba) — nie liczone. */
+  potwierdza: boolean | null;
+  /** Ułamek planet spełniających ten sam warunek (0–1) — szansa trafienia przypadkiem; null = nie dotyczy. */
+  baza: number | null;
+  zrodlo: "ai" | "osoba";
+  aiWidzi?: "tak" | "mozliwe" | "nie";
+}
+
+const ZLOCZYNCY: PlanetId[] = ["saturn", "mars", "rahu", "ketu"];
+const NAZWA_ZNAKU: Record<RodzajZnaku, string> = {
+  x: "X (krzyż)", gwiazda: "gwiazda", kwadrat: "kwadrat", trojkat: "trójkąt", kratka: "kratka", wyspa: "wyspa",
+  krzyz_mistyczny: "krzyż mistyczny",
+};
+export const DOPELNIACZ: Record<PlanetId, string> = {
+  sun: "Słońca", moon: "Księżyca", mars: "Marsa", mercury: "Merkurego", jupiter: "Jowisza",
+  venus: "Wenus", saturn: "Saturna", rahu: "Rahu", ketu: "Ketu",
+};
+const MIANOWNIK: Record<PlanetId, string> = {
+  sun: "Słońce", moon: "Księżyc", mars: "Mars", mercury: "Merkury", jupiter: "Jowisz",
+  venus: "Wenus", saturn: "Saturn", rahu: "Rahu", ketu: "Ketu",
+};
+
+type Warunek = (chart: VedicChart, p: PlanetId) => string | null;
+
+const znaneDomy = (chart: VedicChart) => !!chart.angles;
+const wZnaku = (chart: VedicChart, p: PlanetId, z: PlanetId) => p !== z && chart.planets[p].sign === chart.planets[z].sign;
+
+/** Każdy warunek zwraca opis, gdy jest spełniony, albo null. */
+const WARUNKI: Record<"proba" | "blask" | "ochrona" | "talent" | "rozproszenie", { opis: string; test: Warunek }> = {
+  proba: {
+    opis: "6., 8. lub 12. dom, upadek, spalenie albo złoczyńca w tym samym znaku",
+    test: (c, p) => {
+      const pl = c.planets[p];
+      if (znaneDomy(c) && [6, 8, 12].includes(pl.house)) return `${MIANOWNIK[p]} w ${pl.house}. domu`;
+      if (pl.dignity === "upadek") return `${MIANOWNIK[p]} w upadku`;
+      if (pl.combust) return `${MIANOWNIK[p]} spalony przy Słońcu`;
+      const z = ZLOCZYNCY.find((m) => wZnaku(c, p, m));
+      return z ? `${MIANOWNIK[p]} w jednym znaku z: ${MIANOWNIK[z]}` : null;
+    },
+  },
+  blask: {
+    opis: "egzaltacja, własny znak albo dom 1., 4., 5., 7., 9., 10.",
+    test: (c, p) => {
+      const pl = c.planets[p];
+      if (GODNOSC_WLASNA.has(pl.dignity)) return `${MIANOWNIK[p]} — ${pl.dignity}`;
+      if (znaneDomy(c) && [1, 4, 5, 7, 9, 10].includes(pl.house)) return `${MIANOWNIK[p]} w ${pl.house}. domu`;
+      return null;
+    },
+  },
+  ochrona: {
+    opis: "Jowisz w tym samym znaku albo aspekt Jowisza",
+    test: (c, p) => {
+      if (p === "jupiter") return null;
+      if (wZnaku(c, p, "jupiter")) return `Jowisz razem z: ${MIANOWNIK[p]}`;
+      return aspektuje(c, "jupiter", c.planets[p].sign) ? `Jowisz aspektuje: ${MIANOWNIK[p]}` : null;
+    },
+  },
+  talent: {
+    opis: "dom 1., 5. albo 9.",
+    test: (c, p) => (znaneDomy(c) && [1, 5, 9].includes(c.planets[p].house) ? `${MIANOWNIK[p]} w ${c.planets[p].house}. domu` : null),
+  },
+  rozproszenie: {
+    opis: "co najmniej dwa złoczyńce na planecie",
+    test: (c, p) => {
+      const na = ZLOCZYNCY.filter((m) => m !== p && (wZnaku(c, p, m) || ((m === "saturn" || m === "mars") && aspektuje(c, m, c.planets[p].sign))));
+      return na.length >= 2 ? `na: ${MIANOWNIK[p]} wpływają ${na.map((m) => MIANOWNIK[m]).join(", ")}` : null;
+    },
+  },
+};
+
+const ZNAK_WARUNEK: Partial<Record<RodzajZnaku, keyof typeof WARUNKI>> = {
+  x: "proba", wyspa: "proba", gwiazda: "blask", kwadrat: "ochrona", trojkat: "talent", kratka: "rozproszenie",
+};
+
+function bazaWarunku(chart: VedicChart, w: Warunek): number {
+  return PLANET_ORDER.filter((p) => w(chart, p) !== null).length / PLANET_ORDER.length;
+}
+
+function mostKrzyzaMistycznego(c: VedicChart): string | null {
+  if (!znaneDomy(c)) return null;
+  for (const p of ["jupiter", "ketu"] as PlanetId[]) {
+    if ([1, 5, 9, 12].includes(c.planets[p].house)) return `${MIANOWNIK[p]} w ${c.planets[p].house}. domu`;
+  }
+  const w12 = PLANET_ORDER.filter((p) => c.planets[p].house === 12);
+  return w12.length ? `12. dom zajęty: ${w12.map((p) => MIANOWNIK[p]).join(", ")}` : null;
+}
+
+const NAZWA_STANU: Record<StanLinii, string> = { wyrazna: "wyraźna", odcinkowa: "odcinkowa", slaba: "słaba", brak: "brak" };
+
+export function mostyDlonHoroskop(chart: VedicChart, dlon: DlonWLiczbach | null): Most[] {
+  const mosty: Most[] = [];
+  const znaki = [...(dlon?.znaki ?? []), ...(dlon?.wlasne ?? [])];
+  const reka = (z: ZnakDloni) => (z.reka === "wiodaca" ? "ręka wiodąca" : "ręka bierna");
+
+  for (const z of znaki) {
+    if (z.znak === "krzyz_mistyczny") {
+      const w = mostKrzyzaMistycznego(chart);
+      mosty.push({
+        dlon: `krzyż mistyczny — ${reka(z)}${z.pewnosc === "delikatny" ? ", delikatny" : ""}`,
+        warunek: w ?? "Jowisz albo Ketu w 1., 5., 9. lub 12. domu albo zajęty 12. dom — nie ma",
+        potwierdza: !!w, baza: null, zrodlo: z.zrodlo, aiWidzi: z.aiWidzi,
+      });
+      continue;
+    }
+    if (z.miejsce === "czworobok") continue;
+    const klucz = ZNAK_WARUNEK[z.znak];
+    if (!klucz) continue;
+    const W = WARUNKI[klucz];
+    const wynik = W.test(chart, z.miejsce);
+    mosty.push({
+      dlon: `${NAZWA_ZNAKU[z.znak]} na wzgórku ${DOPELNIACZ[z.miejsce]} — ${reka(z)}${z.pewnosc === "delikatny" ? ", delikatny" : ""}`,
+      warunek: wynik ?? `${MIANOWNIK[z.miejsce]}: ${W.opis} — nie ma`,
+      potwierdza: !!wynik,
+      baza: bazaWarunku(chart, W.test),
+      zrodlo: z.zrodlo, aiWidzi: z.aiWidzi,
+    });
+  }
+
+  const linie = dlon?.linie ?? {};
+  const astro = ocenyAstrologii(chart).oceny;
+  const zajety = (d: number) => znaneDomy(chart) && PLANET_ORDER.some((p) => chart.planets[p].house === d);
+  const dodajLinie = (l: LiniaMostu, nazwa: string, horoskop: string | null) => {
+    const stan = linie[l];
+    if (!stan) return;
+    mosty.push({
+      dlon: `linia ${nazwa}: ${NAZWA_STANU[stan]}`,
+      warunek: horoskop ? `w horoskopie: ${horoskop}` : "w horoskopie: temat słabo zaznaczony",
+      // wyraźna ↔ temat mocny w horoskopie, brak ↔ temat słaby; odcinkowa/słaba to „droga z przerwami”,
+      // a nie siła ani jej brak — pokazujemy, ale nie liczymy jako zgodności ani niezgodności
+      potwierdza: stan === "wyrazna" ? !!horoskop : stan === "brak" ? !horoskop : null,
+      baza: null, zrodlo: "ai",
+    });
+  };
+  dodajLinie("losu", "losu", astro.saturn === 1 ? "Saturn wyrazisty" : zajety(10) ? "zajęty 10. dom" : null);
+  dodajLinie("slonca", "Słońca", astro.sun === 1 ? "Słońce wyraziste"
+    : znaneDomy(chart) && [1, 5, 10].includes(chart.planets.sun.house) ? `Słońce w ${chart.planets.sun.house}. domu` : null);
+  dodajLinie("podrozy", "podróży", zajety(9) ? "zajęty 9. dom" : zajety(12) ? "zajęty 12. dom"
+    : znaneDomy(chart) && [1, 9, 12].includes(chart.planets.rahu.house) ? `Rahu w ${chart.planets.rahu.house}. domu` : null);
+  dodajLinie("relacji", "relacji", zajety(7) ? "zajęty 7. dom" : astro.venus === 1 ? "Wenus wyrazista" : null);
+  return mosty;
 }

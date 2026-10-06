@@ -5,7 +5,7 @@ import Link from "next/link";
 import { GRAHAS, type PlanetId } from "@/lib/astro/constants";
 import {
   MIEJSCE_W_DLONI, PLANETA_CYFRA, SYSTEMY_ZGODNOSCI,
-  type Ocena, type PlanetaPorownania, type SystemZgodnosci, type WynikZgodnosci,
+  type Most, type Ocena, type PlanetaPorownania, type SystemZgodnosci, type WynikZgodnosci,
 } from "@/lib/astro/zgodnosc";
 import type { TypDloni } from "@/lib/hiromancja";
 
@@ -94,8 +94,69 @@ function werdykt(w: WynikZgodnosci): { tytul: string; opis: string } {
   };
 }
 
-export default function PorownanieSystemow({ wynik, dlonZrodlo, dlonZapisano }: {
-  wynik: WynikZgodnosci; dlonZrodlo: "odczyt" | "tekst" | null; dlonZapisano: number | null;
+const ZRODLO_ZNAKU: Record<"tak" | "mozliwe" | "nie", string> = {
+  tak: "AI też to widzi na zdjęciach",
+  mozliwe: "AI widzi to możliwie, słabo",
+  nie: "na zdjęciach tego nie widać",
+};
+
+function MostyDloni({ mosty }: { mosty: Most[] }) {
+  const proc = (x: number) => `${Math.round(x * 100)}%`;
+  const zBaza = mosty.filter((m) => m.baza !== null && m.potwierdza !== null);
+  const liczone = mosty.filter((m) => m.potwierdza !== null);
+  const trafione = liczone.filter((m) => m.potwierdza).length;
+  const oczekiwane = zBaza.reduce((s, m) => s + (m.baza ?? 0), 0);
+  const trafioneZBaza = zBaza.filter((m) => m.potwierdza).length;
+  return (
+    <div>
+      <p className="eyebrow" style={{ marginBottom: 8 }}>Mosty: dłoń ↔ horoskop</p>
+      <p className="muted" style={{ fontSize: "0.86rem", lineHeight: 1.65, marginBottom: 14 }}>
+        Każdy znak w dłoni ma klasyczne znaczenie — tu sprawdzamy, czy Twój horoskop mówi to samo
+        o tej samej planecie (np. X na wzgórku Księżyca ↔ Księżyc w trudnym domu).
+      </p>
+      {mosty.length === 0 ? (
+        <p className="muted" style={{ fontSize: "0.84rem" }}>
+          Odczyt dłoni nie zawiera jeszcze znaków ani linii w nowym zapisie — pojawią się po kolejnym odczycie
+          dłoni. Możesz też zgłosić znaki, które widzisz na swojej dłoni, na stronie Chiromancji.
+        </p>
+      ) : (
+        <>
+          <p style={{ fontSize: "0.92rem", lineHeight: 1.6, marginBottom: 12 }}>
+            <strong>Horoskop potwierdza {trafione} z {liczone.length}</strong>
+            {zBaza.length > 0 && (
+              <span className="muted">
+                {" "}· przy znakach na wzgórkach: {trafioneZBaza} z {zBaza.length}, przypadkiem około {oczekiwane.toFixed(1)}
+              </span>
+            )}
+          </p>
+          <ul className="mosty-lista">
+            {mosty.map((m, i) => (
+              <li key={i} className={m.potwierdza ? "mosty-tak" : "mosty-nie"}>
+                <span className="mosty-znak" title={m.potwierdza === null ? "częściowo — nie liczone" : undefined}>
+                  {m.potwierdza ? "✓" : m.potwierdza === null ? "≈" : "–"}
+                </span>
+                <div style={{ minWidth: 0 }}>
+                  <p className="mosty-dlon">
+                    {m.dlon}
+                    <span className="mosty-zrodlo">{m.zrodlo === "osoba" ? "zgłoszone przez Ciebie" : "zauważone przez AI"}</span>
+                  </p>
+                  <p className="muted mosty-warunek">
+                    {m.warunek}
+                    {m.baza !== null && ` · ten sam warunek spełnia ${proc(m.baza)} planet w Twoim horoskopie`}
+                    {m.zrodlo === "osoba" && m.aiWidzi && ` · ${ZRODLO_ZNAKU[m.aiWidzi]}`}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function PorownanieSystemow({ wynik, mosty, dlonZrodlo, dlonZapisano }: {
+  wynik: WynikZgodnosci; mosty: Most[]; dlonZrodlo: "odczyt" | "tekst" | null; dlonZapisano: number | null;
 }) {
   const [aktywna, setAktywna] = useState<PlanetId | null>(null);
   const w = werdykt(wynik);
@@ -228,6 +289,11 @@ export default function PorownanieSystemow({ wynik, dlonZrodlo, dlonZapisano }: 
 
       <div className="ornament" style={{ margin: "30px 0 22px" }} />
 
+      {/* 3b. Mosty dłoń ↔ horoskop — konkretny znak w dłoni sprawdzony z konkretnym układem planety */}
+      <MostyDloni mosty={mosty} />
+
+      <div className="ornament" style={{ margin: "30px 0 22px" }} />
+
       {/* 4. Każdy system na tle dwóch pozostałych */}
       <p className="eyebrow" style={{ marginBottom: 14 }}>Każdy system na tle pozostałych</p>
       <div className="porownanie-paski">
@@ -312,7 +378,8 @@ export default function PorownanieSystemow({ wynik, dlonZrodlo, dlonZapisano }: 
         egzaltacja, bieżąca mahadasza (trzy najwyrazistsze, trzy najmniej);
         numerologia — cyfra planety jako Mulank, Bhagyank, liczba imienia albo powtórzona w dacie
         (mocna), nieobecna w dacie (słaba); chiromancja — wzgórek, palec i linia planety, porównane
-        między sobą w Twojej dłoni. Rahu i Ketu nie mają
+        między sobą w Twojej dłoni; Rahu i Ketu według chiromancji indyjskiej (środek dłoni i obszar nad
+        nadgarstkiem). Rahu i Ketu nie mają
         w dłoni klasycznego miejsca. Nic nie jest tu oceniane „na oko” — wszystko wynika z tych reguł.
       </p>
     </section>
