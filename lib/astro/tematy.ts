@@ -2,6 +2,10 @@ import type { PlanetId } from "./constants";
 import { PLANET_ORDER } from "./constants";
 import type { VedicChart } from "./chart";
 import type { NumerologyResult } from "./numerology";
+import { dziedzinyTalentu, type DziedzinaTalentu } from "./dziedzinyTalentu";
+import { ROZKLADY_TALENTU } from "./srednieTalentu";
+import { procentNizej } from "./srednieBilansu";
+import { jogakaraka } from "./karaki";
 import { ocenyNumerologii, PLANETA_CYFRA, type DlonWLiczbach, type LiniaDloni, type MiejsceZnaku, type RodzajZnaku, type StanLinii } from "./zgodnosc";
 
 /**
@@ -75,6 +79,27 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
   const silna = (p: PlanetId) => GODNOSC_WLASNA.has(chart.planets[p].dignity);
   const wDomach = (p: PlanetId, d: number[]) => domy && d.includes(dom(p));
   const astro = (f: () => Wskazanie | null): Wskazanie => (domy ? f() ?? nie() : brakDanych);
+
+  // Talenty (te same wyliczenia co zakładka Talenty) na tle 20 000 losowych horoskopów:
+  // górne 25% = temat zaznaczony, górne 40% = częściowo. To uczciwsza miara niż samo położenie
+  // planety w domu — łapie np. mocnego Jowisza w nauczaniu, który stoi poza kendrą i trikoną.
+  const NAZWA_TALENTU: Record<DziedzinaTalentu, string> = {
+    muzyka: "muzyka", sztuka: "sztuka", slowo: "słowo", nauczanie: "nauczanie", biznes: "biznes",
+    technika: "technika", uzdrawianie: "uzdrawianie", sport: "sport i ruch", przywodztwo: "przywództwo", duchowosc: "duchowość",
+  };
+  const procentTalentu = new Map<DziedzinaTalentu, number>(
+    (dziedzinyTalentu(chart) ?? []).map((w) => [w.id, procentNizej(w.punkty, ROZKLADY_TALENTU[w.id])]),
+  );
+  const talent = (...ids: DziedzinaTalentu[]): Wskazanie | null => {
+    const najl = ids.map((id) => ({ id, p: procentTalentu.get(id) ?? 0 })).sort((a, b) => b.p - a.p)[0];
+    if (!najl) return null;
+    const opis = `talent: ${NAZWA_TALENTU[najl.id]} — wyżej niż u ${Math.round(najl.p)}% osób`;
+    return najl.p >= 75 ? tak(opis) : najl.p >= 60 ? czesciowo(opis) : null;
+  };
+  // jogakaraka — planeta, która dla tej lagny rządzi jednocześnie kendrą i trikoną (najlepsza w horoskopie)
+  const jk = domy ? jogakaraka(chart.angles!.lagnaSign) : null;
+  const jogakarakaTo = (p: PlanetId): Wskazanie | null =>
+    jk === p ? tak(`${MIANOWNIK[p]} — jogakaraka (władca kendry i trikony)`) : null;
 
   // skupisko: dom z co najmniej trzema planetami
   const skupisko = domy
@@ -152,6 +177,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
           ...(["ketu", "jupiter"] as PlanetId[]).map((p) => (wDomach(p, [1, 5, 9, 12]) ? tak(`${MIANOWNIK[p]} w ${dom(p)}. domu`) : null)),
           wDomach("moon", [8, 12]) ? tak(`Księżyc w ${dom("moon")}. domu`) : null,
           w(12).length ? czesciowo(`12. dom: ${lista(w(12))}`) : null,
+          talent("duchowosc"),
         )),
         dlon: reka(() => najlepsze(znakNa("czworobok", ["krzyz_mistyczny"]), linia("intuicji"), linia("pierscien_salomona"))),
         numerologia: liczby("ketu"),
@@ -162,8 +188,11 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       znaczenie: "Talent do bycia zauważonym — twórczość, scena, dobre imię.",
       wniosek: "Masz w sobie coś, co przyciąga uwagę. Twórczość i bycie widocznym to Twoja naturalna przestrzeń — warto pozwolić się zauważyć.",
       wskazania: {
-        kosmogram: astro(() => wDomach("sun", [1, 5, 9, 10]) ? tak(`Słońce w ${dom("sun")}. domu`)
-          : silna("sun") ? tak(`Słońce — ${chart.planets.sun.dignity}`) : null),
+        kosmogram: astro(() => najlepsze(
+          wDomach("sun", [1, 5, 9, 10]) ? tak(`Słońce w ${dom("sun")}. domu`) : null,
+          silna("sun") ? tak(`Słońce — ${chart.planets.sun.dignity}`) : null,
+          talent("sztuka", "muzyka"),
+        )),
         dlon: reka(() => najlepsze(linia("slonca"), znakNa("sun", ["gwiazda", "trojkat"]), wzgorek("sun"))),
         numerologia: liczby("sun"),
       },
@@ -173,8 +202,11 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       znaczenie: "Potrzeba prowadzenia innych, rozwoju, autorytetu.",
       wniosek: "Masz w sobie potrzebę prowadzenia i rozwoju. Dobrze odnajdujesz się tam, gdzie można uczyć, doradzać albo brać odpowiedzialność za innych.",
       wskazania: {
-        kosmogram: astro(() => wDomach("jupiter", [...KENDRY, 5, 9]) ? tak(`Jowisz w ${dom("jupiter")}. domu`)
-          : silna("jupiter") ? tak(`Jowisz — ${chart.planets.jupiter.dignity}`) : null),
+        kosmogram: astro(() => najlepsze(
+          talent("nauczanie", "przywodztwo"),
+          wDomach("jupiter", [...KENDRY, 5, 9]) ? tak(`Jowisz w ${dom("jupiter")}. domu`) : null,
+          silna("jupiter") ? tak(`Jowisz — ${chart.planets.jupiter.dignity}`) : null,
+        )),
         dlon: reka(() => najlepsze(wzgorek("jupiter"), znakNa("jupiter", ["kwadrat", "gwiazda", "trojkat"]), linia("pierscien_salomona"))),
         numerologia: liczby("jupiter"),
       },
@@ -186,6 +218,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       wskazania: {
         kosmogram: astro(() => najlepsze(
           silna("venus") ? tak(`Wenus — ${chart.planets.venus.dignity}`) : null,
+          jogakarakaTo("venus"),
           w(7).length >= 2 ? tak(`7. dom: ${lista(w(7))}`) : w(7).length === 1 ? czesciowo(`7. dom: ${lista(w(7))}`) : null,
         )),
         dlon: reka(() => najlepsze(linia("relacji"), wzgorek("venus"), znakNa("jupiter", ["x"]), linia("serca"))),
@@ -200,6 +233,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
         kosmogram: astro(() => najlepsze(
           wDomach("mercury", KENDRY) ? tak(`Merkury w ${dom("mercury")}. domu`) : silna("mercury") ? tak(`Merkury — ${chart.planets.mercury.dignity}`) : null,
           w(3).length >= 2 ? tak(`3. dom: ${lista(w(3))}`) : null,
+          talent("slowo", "biznes"),
         )),
         dlon: reka(() => najlepsze(linia("merkurego"), wzgorek("mercury"), linia("glowy"))),
         numerologia: liczby("mercury"),
@@ -210,8 +244,12 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       znaczenie: "Dużo siły życiowej i odwagi do działania.",
       wniosek: "Masz dużo siły życiowej i odwagi do działania. Najlepiej Ci, gdy możesz działać, a nie czekać.",
       wskazania: {
-        kosmogram: astro(() => wDomach("mars", [...KENDRY, 3, 6, 11]) ? tak(`Mars w ${dom("mars")}. domu`)
-          : silna("mars") ? tak(`Mars — ${chart.planets.mars.dignity}`) : null),
+        kosmogram: astro(() => najlepsze(
+          jogakarakaTo("mars"),
+          wDomach("mars", [...KENDRY, 3, 6, 11]) ? tak(`Mars w ${dom("mars")}. domu`) : null,
+          silna("mars") ? tak(`Mars — ${chart.planets.mars.dignity}`) : null,
+          talent("sport"),
+        )),
         dlon: reka(() => najlepsze(linia("marsa"), wzgorek("mars"), linia("zycia"))),
         numerologia: liczby("mars"),
       },
@@ -221,8 +259,12 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       znaczenie: "Rzetelność i wytrwałość — budowanie krok po kroku.",
       wniosek: "Twoją siłą jest wytrwałość. Budujesz krok po kroku — powoli, ale trwale.",
       wskazania: {
-        kosmogram: astro(() => wDomach("saturn", [...KENDRY, 6, 11]) ? tak(`Saturn w ${dom("saturn")}. domu`)
-          : silna("saturn") ? tak(`Saturn — ${chart.planets.saturn.dignity}`) : null),
+        kosmogram: astro(() => najlepsze(
+          jogakarakaTo("saturn"),
+          wDomach("saturn", [...KENDRY, 6, 11]) ? tak(`Saturn w ${dom("saturn")}. domu`) : null,
+          silna("saturn") ? tak(`Saturn — ${chart.planets.saturn.dignity}`) : null,
+          talent("technika"),
+        )),
         dlon: reka(() => najlepsze(wzgorek("saturn"), znakNa("saturn", ["kwadrat", "trojkat"]))),
         numerologia: liczby("saturn"),
       },
