@@ -3069,3 +3069,9 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
   .inw-reka-uklad { grid-template-columns: 1fr; }
   .inw-rysunek { max-width: 190px; margin: 0 auto; }
 }
+
+/* Wspólne tematy: na samym końcu procent zgodności systemów */
+.tw-procent { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 6px 16px; padding: 22px 6px 8px; border-top: 1px solid var(--line-gold); text-align: center; }
+.tw-procent-opis { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sand); font-weight: 700; }
+.tw-procent-liczba { font-family: var(--font-serif); font-size: clamp(2.6rem, 7vw, 3.6rem); line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
+.tw-procent-skad { font-size: 0.8rem; color: var(--muted); }

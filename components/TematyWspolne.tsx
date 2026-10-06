@@ -49,7 +49,9 @@ function Podsumowanie({ tematy }: { tematy: TematWspolny[] }) {
   const pelne = tematy.filter((t) => t.sila === 3).length;
   const trzy = tematy.filter((t) => Object.values(t.wskazania).every((w) => w.stan === "tak" || w.stan === "czesciowo")).length;
   const wsystem = (s: SystemTematu) => tematy.reduce((x, t) => x + (t.wskazania[s].stan === "tak" ? 1 : t.wskazania[s].stan === "czesciowo" ? 0.5 : 0), 0);
+  const procent = max ? Math.round((suma / max) * 100) : 0;
   return (
+    <>
     <div className="tw-wiersz tw-suma" role="row">
       <div className="tw-temat" role="cell">
         <p className="tw-nazwa">Razem — zbieżność systemów</p>
@@ -68,6 +70,13 @@ function Podsumowanie({ tematy }: { tematy: TematWspolny[] }) {
         <span className="tw-pkt-liczba tw-pkt-razem">{punkty(suma)}</span><span className="tw-pkt-max"> / {max}</span>
       </div>
     </div>
+    {/* na samym końcu: punkty jako procent — ile z możliwej zbieżności trzech systemów jest u tej osoby */}
+    <div className="tw-procent" role="row">
+      <span role="cell" className="tw-procent-opis">Zgodność systemów</span>
+      <span role="cell" className="tw-procent-liczba">{procent}%</span>
+      <span role="cell" className="tw-procent-skad">{punkty(suma)} z {max} możliwych punktów</span>
+    </div>
+    </>
   );
 }
 
