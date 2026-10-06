@@ -74,17 +74,26 @@ function lista(nazwy: string[]): string {
 }
 
 
+/**
+ * Zgodność PONAD PRZYPADEK (jak kappa Cohena): 0 = tyle, ile dałby sam przypadek, 1 = pełna zgodność,
+ * poniżej 0 = rzadziej niż przypadek. Surowy odsetek (np. 67%) myli, bo dużą jego część daje los —
+ * a poziom losu zmienia się z rozkładem ocen. Ta liczba od niego nie „pływa”.
+ */
+export function ponadPrzypadek(w: WynikZgodnosci): number {
+  return w.przypadek < 1 ? (w.spojnosc - w.przypadek) / (1 - w.przypadek) : 0;
+}
+
 function werdykt(w: WynikZgodnosci): { tytul: string; opis: string } {
-  const roznica = w.spojnosc - w.przypadek;
-  if (roznica >= 0.12) return {
+  const k = ponadPrzypadek(w);
+  if (k >= 0.3) return {
     tytul: "Obraz wyraźnie spójny",
     opis: "Trzy systemy zgadzają się ze sobą znacznie częściej, niż wynikałoby z przypadku — to, co mówią o Tobie, wzajemnie się potwierdza.",
   };
-  if (roznica >= 0.05) return {
+  if (k >= 0.12) return {
     tytul: "Obraz raczej spójny",
     opis: "Systemy częściej się zgadzają, niż przeczą — rdzeń obrazu się potwierdza, a różnice pokazują miejsca, gdzie warto czytać uważniej.",
   };
-  if (roznica > -0.05) return {
+  if (k > -0.12) return {
     tytul: "Obraz mieszany",
     opis: "Zgodności jest mniej więcej tyle, ile dałby przypadek — każdy system mówi tu własnym głosem. Najcenniejsze są pojedyncze planety, w których jednak się spotykają.",
   };
@@ -195,13 +204,16 @@ export default function PorownanieSystemow({ wynik, mosty, dlonZrodlo, dlonZapis
 
       {/* 1. Spójność na tle przypadku */}
       <div className="porownanie-wynik">
-        <p className="porownanie-liczba">{proc(wynik.spojnosc)}</p>
+        <p className="porownanie-liczba">{Math.round(ponadPrzypadek(wynik) * 100)}%</p>
         <div>
           <p className="porownanie-werdykt">{w.tytul}</p>
           <p className="muted" style={{ fontSize: "0.86rem", lineHeight: 1.6 }}>
-            Średnia zgodność ocen planet między parami systemów ({wynik.par} porównań; ta sama ocena liczy się
-            w całości, sąsiednia w połowie, przeciwna wcale). Sam przypadek dałby około{" "}
-            <strong>{proc(wynik.przypadek)}</strong>. {w.opis}
+            Zgodność ponad przypadek: 0% = tyle, ile dałby sam przypadek, 100% = pełna zgodność. {w.opis}
+          </p>
+          <p className="muted" style={{ fontSize: "0.76rem", lineHeight: 1.5, marginTop: 6 }}>
+            Skąd ta liczba: oceny planet zgadzają się średnio w {proc(wynik.spojnosc)} ({wynik.par} porównań par
+            systemów; ta sama ocena liczy się w całości, sąsiednia w połowie, przeciwna wcale), a sam przypadek
+            dałby około {proc(wynik.przypadek)}.
           </p>
         </div>
       </div>
