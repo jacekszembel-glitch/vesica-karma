@@ -2969,3 +2969,4 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 .mosty-dlon { font-size: 0.9rem; color: var(--text); margin: 0; text-align: left; }
 .mosty-zrodlo { margin-left: 8px; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .mosty-warunek { font-size: 0.78rem; line-height: 1.5; margin: 2px 0 0; text-align: left; }
+.porownanie-odstaje { display: block; font-size: 0.64rem; color: var(--muted); margin-top: 2px; white-space: nowrap; }

@@ -177,6 +177,9 @@ export default function PorownanieSystemow({ wynik, mosty, dlonZrodlo, dlonZapis
   const slabeRdzen = wynik.planety.filter((p) => (p.rodzaj === "zgodnosc3" || p.rodzaj === "zgodnosc2")
     && Object.values(p.oceny).filter((o) => o === -1).length >= 2);
   const roznice = wynik.planety.filter((p) => p.rodzaj === "roznica");
+  // dwa systemy zgodne, trzeci mówi coś przeciwnego (mocna ↔ słaba) — warte jednego zdania
+  const przeciwOdstajace = wynik.planety.filter((p) => p.odstaje && p.oceny[p.odstaje] !== null
+    && Object.values(p.oceny).some((o) => o !== null && Math.abs(o - p.oceny[p.odstaje!]!) === 2));
   const brakDloni = wynik.systemy.chiromancja.par === 0;
 
   const przygas = (p: PlanetId) => (aktywna && aktywna !== p ? 0.28 : 1);
@@ -269,7 +272,10 @@ export default function PorownanieSystemow({ wynik, mosty, dlonZrodlo, dlonZapis
                   <span className="muted porownanie-pod">cyfra {PLANETA_CYFRA[p.planeta]}{MIEJSCE_W_DLONI[p.planeta] ? ` · ${MIEJSCE_W_DLONI[p.planeta]}` : ""}</span>
                 </td>
                 {SYSTEMY_ZGODNOSCI.map((s) => <td key={s} className="srodek"><ZnakOceny o={p.oceny[s]} /></td>)}
-                <td><span className={`porownanie-rodzaj r-${p.rodzaj}`}>{RODZAJ[p.rodzaj]}</span></td>
+                <td>
+                  <span className={`porownanie-rodzaj r-${p.rodzaj}`}>{RODZAJ[p.rodzaj]}</span>
+                  {p.odstaje && <span className="porownanie-odstaje">{NAZWA[p.odstaje].toLowerCase()} inaczej</span>}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -359,7 +365,15 @@ export default function PorownanieSystemow({ wynik, mosty, dlonZrodlo, dlonZapis
             </p>
           );
         })}
-        {!mocneRdzen.length && !slabeRdzen.length && !roznice.length && (
+        {przeciwOdstajace.map((p) => (
+          <p key={`o-${p.planeta}`}>
+            <strong>Jeden system inaczej — {nazwa(p.planeta)}:</strong> {lista(SYSTEMY_ZGODNOSCI.filter((x) => x !== p.odstaje).map((x) => NAZWA[x].toLowerCase()))}{" "}
+            zgodnie widzą ją jako {p.oceny[p.odstaje!] === 1 ? "słabą" : "mocną"}, a {NAZWA[p.odstaje!].toLowerCase()} jako{" "}
+            {p.oceny[p.odstaje!] === 1 ? "mocną" : "słabą"}. Większość mówi jednym głosem — trzeci system
+            pokazuje stronę tej planety, której dwa pozostałe nie podkreślają.
+          </p>
+        ))}
+        {!mocneRdzen.length && !slabeRdzen.length && !roznice.length && !przeciwOdstajace.length && (
           <p>Żadna planeta nie wyróżnia się zgodnie w dwóch systemach — obraz jest rozproszony.</p>
         )}
       </div>

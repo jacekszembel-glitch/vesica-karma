@@ -303,6 +303,8 @@ export interface PlanetaPorownania {
   rodzaj: Rodzaj;
   /** Które systemy uznają planetę za mocną — do diagramu Vesica. */
   mocnaW: SystemZgodnosci[];
+  /** Przy „zgodne ×2” z trzema ocenami: system, który ocenia inaczej niż dwa pozostałe. */
+  odstaje?: SystemZgodnosci;
 }
 
 export interface WynikZgodnosci {
@@ -341,14 +343,20 @@ export function porownajSystemy(
     const znane = Object.values(oceny).filter((o): o is Ocena => o !== null);
     const rozne = new Set(znane);
     let rodzaj: Rodzaj;
+    let odstaje: SystemZgodnosci | undefined;
     if (znane.length < 2) rodzaj = "jeden";
-    else if (rozne.has(1) && rozne.has(-1)) rodzaj = "roznica";
     else if (rozne.size === 1) rodzaj = znane.length === 3 ? "zgodnosc3" : "zgodnosc2";
-    // trzy oceny, dwie równe, trzecia o krok obok (np. mocna, mocna, przeciętna)
-    else if (znane.length === 3) rodzaj = "zgodnosc2";
+    // trzy oceny, dwie równe — większość się zgadza; trzeci system zapisujemy jako odstający
+    // (np. Wenus: astrologia i dłoń „mocna”, numerologia „słaba” → zgodne ×2, numerologia inaczej)
+    else if (znane.length === 3 && rozne.size === 2) {
+      rodzaj = "zgodnosc2";
+      odstaje = SYSTEMY_ZGODNOSCI.find((s) => znane.filter((o) => o === oceny[s]).length === 1);
+    }
+    // wszystkie trzy różne (mocna, przeciętna, słaba) albo dwa systemy przeciwne
+    else if (rozne.has(1) && rozne.has(-1)) rodzaj = "roznica";
     else rodzaj = "mieszane";
     const mocnaW = SYSTEMY_ZGODNOSCI.filter((s) => oceny[s] === 1);
-    return { planeta: p, oceny, rodzaj, mocnaW };
+    return { planeta: p, oceny, rodzaj, mocnaW, odstaje };
   });
 
   // pary systemów: zgodność rzeczywista i oczekiwana z przypadku (iloczyn rozkładów).
