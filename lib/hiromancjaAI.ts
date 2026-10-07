@@ -22,7 +22,7 @@ export const dloniSchema = z.object({
   }).optional(),
   /** Zbliżenia stref dłoni wycięte z oryginału w przeglądarce (lib/hiromancjaObraz.ts). */
   strefy: z.array(z.object({
-    opis: z.string().max(400),
+    opis: z.string().max(1500),
     imageBase64: z.string().min(100).max(1_500_000),
   })).max(14).optional(),
 });

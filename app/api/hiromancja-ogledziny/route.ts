@@ -103,8 +103,11 @@ export async function POST(req: Request) {
   let parsed;
   try {
     parsed = requestSchema.parse(await req.json());
-  } catch {
-    return Response.json({ error: "Nieprawidłowe dane wejściowe" }, { status: 400 });
+  } catch (err) {
+    // na localhost pokaż, które pole nie przeszło sprawdzenia (bez treści zdjęć)
+    const dev = process.env.NODE_ENV === "development" && err instanceof z.ZodError
+      ? ` [dev] ${err.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ").slice(0, 600)}` : "";
+    return Response.json({ error: "Nieprawidłowe dane wejściowe" + dev }, { status: 400 });
   }
 
   // tylko localhost: zdjęcia i odpowiedzi AI do .kalibracji/ (lib/kalibracja.ts)
