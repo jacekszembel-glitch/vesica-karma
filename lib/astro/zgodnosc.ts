@@ -1,3 +1,6 @@
+import { procentNizej } from "./srednieBilansu";
+import { ROZKLADY_WYRAZISTOSCI } from "./rozkladyWyrazistosci";
+import { navamsaChart } from "./varga";
 import type { PlanetId } from "./constants";
 import { PLANET_ORDER, RASIS } from "./constants";
 import type { VedicChart } from "./chart";
@@ -149,7 +152,7 @@ export const MIEJSCE_W_DLONI: Record<PlanetId, string | null> = {
 const GODNOSC_WLASNA = new Set(["egzaltacja", "władanie", "mulatrikona"]);
 
 /** Wyrazistość planety w horoskopie — klasyczne wyznaczniki „kto rządzi tą mapą”. */
-export function wyrazistoscPlanety(chart: VedicChart, p: PlanetId, jogi = wykryteJogiPosortowane(chart)): { punkty: number; powody: string[] } {
+export function wyrazistoscPlanety(chart: VedicChart, p: PlanetId, jogi = wykryteJogiPosortowane(chart), d9: VedicChart | null = null): { punkty: number; powody: string[] } {
   const pl = chart.planets[p];
   const powody: string[] = [];
   let punkty = 0;
@@ -176,6 +179,8 @@ export function wyrazistoscPlanety(chart: VedicChart, p: PlanetId, jogi = wykryt
   if (atmakaraka(chart).planeta === p) dodaj(2, "atmakaraka");
   if (GODNOSC_WLASNA.has(pl.dignity)) dodaj(1.5, pl.dignity);
   if (chart.currentDasha[0]?.lord === p) dodaj(1, "bieżąca mahadasza");
+  // siła w nawamszy (D9) — klasycznie „druga połowa” siły planety; tylko dla mapy głównej
+  if (d9 && GODNOSC_WLASNA.has(d9.planets[p].dignity)) dodaj(1.5, `w D9 ${d9.planets[p].dignity}`);
   // siła planety (godność, układy, aspekty — ta sama ocena co w Predyspozycjach); dodatnia
   // wzmacnia wyrazistość, ujemna ją osłabia
   const sila = ocenaWladcy(chart, p, jogi).punkty;
@@ -184,11 +189,24 @@ export function wyrazistoscPlanety(chart: VedicChart, p: PlanetId, jogi = wykryt
   return { punkty, powody };
 }
 
-export function ocenyAstrologii(chart: VedicChart): { oceny: OcenyPlanet; punkty: Record<PlanetId, number> } {
+/**
+ * Oceny planet w kosmogramie. Mapa główna: wyrazistość planety (z jej siłą w D9) na tle tej samej planety
+ * u 20 000 losowych ludzi — mocna = wyżej niż u 70%, słaba = niżej niż u 30% (opcje.surowe — bez tego, dla
+ * generatora). Wykres dzielony (opcje.varga): jak dawniej, 3 najwyrazistsze w tej mapie = mocne, 3 ostatnie = słabe.
+ * Wcześniej mapa główna też brała sztywno 3 najlepsze — planeta z największą siłą, ale czwarta, wypadała.
+ */
+export function ocenyAstrologii(chart: VedicChart, opcje: { varga?: boolean; surowe?: boolean } = {}): { oceny: OcenyPlanet; punkty: Record<PlanetId, number>; procenty?: Record<PlanetId, number> } {
   const jogi = wykryteJogiPosortowane(chart);
+  const d9 = opcje.varga ? null : navamsaChart(chart);
   const punkty = Object.fromEntries(
-    PLANET_ORDER.map((p) => [p, wyrazistoscPlanety(chart, p, jogi).punkty]),
+    PLANET_ORDER.map((p) => [p, wyrazistoscPlanety(chart, p, jogi, d9).punkty]),
   ) as Record<PlanetId, number>;
+  const rozklady = ROZKLADY_WYRAZISTOSCI;
+  if (!opcje.varga && !opcje.surowe && PLANET_ORDER.every((p) => rozklady[p])) {
+    const procenty = Object.fromEntries(PLANET_ORDER.map((p) => [p, procentNizej(punkty[p], rozklady[p]!)])) as Record<PlanetId, number>;
+    const oceny = Object.fromEntries(PLANET_ORDER.map((p) => [p, procenty[p] >= 70 ? 1 : procenty[p] < 30 ? -1 : 0])) as OcenyPlanet;
+    return { oceny, punkty, procenty };
+  }
   const kolejnosc = [...PLANET_ORDER].sort((a, b) => punkty[b] - punkty[a]);
   const oceny = Object.fromEntries(
     kolejnosc.map((p, i) => [p, i < 3 ? 1 : i >= 6 ? -1 : 0]),
@@ -219,9 +237,13 @@ export function ocenyNumerologii(num: NumerologyResult): { oceny: OcenyPlanet; p
 
 export function ocenyChiromancji(dlon: DlonWLiczbach | null): OcenyPlanet {
   const oceny = {} as OcenyPlanet;
+  // wyraźny znak na wzgórku (na którejkolwiek ręce) podkreśla to miejsce — podnosi ocenę o jeden stopień
+  const znaki = [...(dlon?.znaki ?? []), ...(dlon?.wlasne ?? [])];
   for (const p of PLANET_ORDER) {
     const o = MIEJSCE_W_DLONI[p] ? dlon?.planety[p] : null;
-    oceny[p] = o === 1 || o === 0 || o === -1 ? o : null;
+    if (o !== 1 && o !== 0 && o !== -1) { oceny[p] = null; continue; }
+    const wyrazny = znaki.some((z) => z.miejsce === p && z.pewnosc === "wyrazny");
+    oceny[p] = (wyrazny ? Math.min(1, o + 1) : o) as Ocena;
   }
   return oceny;
 }

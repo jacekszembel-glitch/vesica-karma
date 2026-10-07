@@ -122,7 +122,7 @@ const glosZOceny = (o: number | null | undefined): Glos => (o === 1 ? 1 : o === 
 
 export function mapaPolaczen(chart: VedicChart, d9: VedicChart | null, num: NumerologyResult, dlon: DlonWLiczbach | null, mosty: Most[], teraz = new Date()): MapaPolaczen {
   const a1 = ocenyAstrologii(chart).oceny;
-  const a9 = d9 ? ocenyAstrologii(d9).oceny : null;
+  const a9 = d9 ? ocenyAstrologii(d9, { varga: true }).oceny : null;
   const numer = ocenyNumerologii(num).powody;
   const znaki = [...(dlon?.znaki ?? []), ...(dlon?.wlasne ?? [])];
   const zW = znaki.filter((z) => z.reka === "wiodaca");

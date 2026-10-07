@@ -368,11 +368,13 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       wskazania: {
         kosmogram: astro(() => najlepsze(
           jogakarakaTo("saturn"),
-          wDomach("saturn", [...KENDRY, 6, 11]) ? tak(`Saturn w ${dom("saturn")}. domu`) : null,
+          // 3., 6., 10. i 11. to domy wzrostu (upaćaja) — Saturn działa w nich dobrze; 3. dom to wysiłek i wytrwałość
+          wDomach("saturn", [...KENDRY, 3, 6, 11]) ? tak(`Saturn w ${dom("saturn")}. domu`) : null,
           silna("saturn") ? tak(`Saturn — ${chart.planets.saturn.dignity}`) : null,
           talent("technika"),
         )),
-        dlon: reka(() => najlepsze(wzgorek("saturn"), znakNa("saturn", ["kwadrat", "trojkat"]))),
+        // linia losu to klasycznie „linia Saturna” — praca, obowiązek, droga zawodowa
+        dlon: reka(() => najlepsze(wzgorek("saturn"), znakNa("saturn", ["kwadrat", "trojkat", "kreski"]), linia("losu"))),
         numerologia: liczby("saturn"),
       },
     },
@@ -575,8 +577,8 @@ export const KRYTERIA_TEMATOW: Record<string, Record<SystemTematu, string>> = {
     numerologia: "9 (Mars) wśród Twoich liczb",
   },
   praca: {
-    kosmogram: "Saturn jogakaraka; Saturn w kendrze, 6. albo 11. domu lub w swojej godności; talent: technika",
-    dlon: "wydatny wzgórek Saturna; kwadrat lub trójkąt na nim",
+    kosmogram: "Saturn jogakaraka; Saturn w kendrze, 3., 6. albo 11. domu lub w swojej godności; talent: technika",
+    dlon: "wydatny wzgórek Saturna; kwadrat, trójkąt albo pionowa linia na nim; linia losu (linia Saturna)",
     numerologia: "8 (Saturn) wśród Twoich liczb",
   },
   finanse: {

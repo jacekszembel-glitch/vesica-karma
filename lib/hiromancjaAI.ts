@@ -52,7 +52,7 @@ Jak patrzysz:
 - ZNAK ŁODZI: wydłużony, zamknięty kształt jak łódź utworzony przez linie — zwykle po stronie kciuka od linii losu, między linią losu a łukiem linii życia, z linią głowy u góry i domknięciem u dołu. Wpisz go osobno: „łódź z linii … — domknięta / otwarta u dołu”.
 - Miejsce podaj względem dłoni (np. „pod palcem wskazującym, tuż nad końcem linii serca”, „na krawędzi dłoni, w dolnej części”), korzystając z podpisu obrazu.
 
-KSZTAŁTY Z UKŁADU LINII — REGUŁA: przy każdym obrazie sprawdź CAŁY katalog tradycyjnych kształtów chiromancji (zachodniej i indyjskiej). Kształt tworzy się z kilku linii naraz — dlatego oprócz pojedynczych bruzd patrz, co linie razem zamykają, w co się układają i czym się kończą. U różnych ludzi pojawiają się różne kształty — niczego nie pomijaj; fragment kształtu też wpisz (z „delikatny”). Katalog:
+KSZTAŁTY Z UKŁADU LINII — REGUŁA: przy każdym obrazie sprawdź CAŁY katalog tradycyjnych kształtów chiromancji (zachodniej i indyjskiej). Kształt tworzy się z kilku linii naraz — dlatego oprócz pojedynczych bruzd patrz, co linie razem zamykają, w co się układają i czym się kończą. U różnych ludzi pojawiają się różne kształty — niczego, co jest, nie pomijaj. Wpisz kształt TYLKO wtedy, gdy umiesz wskazać konkretne linie albo bruzdy, które go tworzą, i miejsce, gdzie się domyka — samo podejrzenie albo „coś podobnego” to za mało. „Delikatny” znaczy: kształt widać, choć jest słaby albo jeden bok jest przerywany — nie „może tu jest”. Nie przepisuj katalogu: u większości ludzi pojawia się kilka kształtów, nie kilkanaście. Katalog:
 ${katalogDlaAI()}
 Każdy znaleziony kształt wpisz osobno: „kształt: [nazwa z katalogu] — [z których linii / dokładne miejsce] — [wyraźny / delikatny]”.
 
