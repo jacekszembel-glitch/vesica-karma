@@ -263,6 +263,35 @@ function znakZDanych(z: Record<string, unknown>, zrodlo: "ai" | "osoba"): ZnakDl
   };
 }
 
+/** Linia planety, którą jest pionowa linia na jej wzgórku (np. krótka linia Słońca tylko na wzgórku Słońca). */
+const LINIA_WZGORKA: Partial<Record<PlanetId, LiniaDloni>> = { sun: "slonca", mercury: "merkurego", saturn: "losu" };
+
+/**
+ * Uzgodnienie danych dłoni ze znakami, które są na niej zapisane (od AI albo potwierdzone przez osobę):
+ *  - pionowa linia na wzgórku Słońca / Merkurego / Saturna to krótka linia tej planety — nie „brak”;
+ *  - obszar planety, na którego wzgórku jest znak, nie jest najsłabiej zaznaczony (−1 → 0).
+ * Bez tego ocena AI mogła przeczyć temu, co osoba potwierdziła na swojej dłoni.
+ */
+export function uzgodnijDlon(d: DlonWLiczbach): DlonWLiczbach {
+  const znaki = [...(d.znaki ?? []), ...(d.wlasne ?? [])];
+  const reka = (r: Reka, planety: DlonWLiczbach["planety"], linie: NonNullable<DlonWLiczbach["linie"]>) => {
+    const pl = { ...planety };
+    const li = { ...linie };
+    for (const z of znaki.filter((x) => x.reka === r && x.miejsce !== "czworobok")) {
+      const p = z.miejsce as PlanetId;
+      if (pl[p] === -1) pl[p] = 0;
+      const l = LINIA_WZGORKA[p];
+      if ((z.znak === "kreski" || z.znak === "kreski_drobne") && l && (!li[l] || li[l] === "brak")) li[l] = "slaba";
+    }
+    return { planety: pl, linie: li };
+  };
+  const w = reka("wiodaca", d.planety, d.linie ?? {});
+  return {
+    ...d, planety: w.planety, linie: w.linie,
+    ...(d.bierna ? { bierna: reka("bierna", d.bierna.planety, d.bierna.linie) } : {}),
+  };
+}
+
 /** Oddziela tekst odczytu od ukrytego bloku danych na końcu (AI dopisuje go po Markdownie). */
 export function rozdzielOdczytDloni(surowy: string): { tekst: string; dane: DlonWLiczbach | null } {
   const i = surowy.indexOf(ZNACZNIK);
@@ -305,7 +334,7 @@ export function rozdzielOdczytDloni(surowy: string): { tekst: string; dane: Dlon
       const w = o.widze === "tak" || o.widze === "mozliwe" ? o.widze : "nie";
       if (typeof o.nr === "number" && o.nr >= 1 && o.nr <= 20) odpowiedziNaZgloszone[o.nr - 1] = w;
     }
-    return { tekst, dane: { planety, zywiol, zrodlo: "odczyt", znaki, linie, odpowiedziNaZgloszone, ...(bierna ? { bierna } : {}) } };
+    return { tekst, dane: uzgodnijDlon({ planety, zywiol, zrodlo: "odczyt", znaki, linie, odpowiedziNaZgloszone, ...(bierna ? { bierna } : {}) }) };
   } catch {
     return { tekst, dane: null };
   }

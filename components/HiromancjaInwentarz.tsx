@@ -44,7 +44,7 @@ const OPIS_LINII: Partial<Record<LiniaDloni, string>> = {
   glowy: "Biegnie w poprzek dłoni, od tego samego miejsca co linia życia w stronę krawędzi dłoni.",
   serca: "Najwyższa pozioma linia — pod palcami, od krawędzi dłoni w stronę palca wskazującego lub środkowego.",
   losu: "Pionowa linia przez środek dłoni, od nadgarstka w stronę palca środkowego. Może być w kawałkach.",
-  slonca: "Pionowa linia pod palcem serdecznym — czasem tylko krótki odcinek tuż pod palcem.",
+  slonca: "Pionowa linia pod palcem serdecznym. Liczy się także krótka kreska tylko na wzgórku Słońca, nad linią serca — jeśli taką masz, odpowiedz „Mam”.",
   merkurego: "Ukośna linia od dołu dłoni w stronę małego palca.",
 };
 /** Biernik nazw linii — „Czy masz linię losu?”. */
@@ -365,7 +365,10 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
             ? `${nazwa} — ${stan} (osoba potwierdza; AI: ${STAN[p.ai.stan]}${p.ai.gdzie ? `, ${p.ai.gdzie}` : ""})`
             : `${nazwa} — ${stan} (osoba widzi ją na swojej dłoni; AI jej nie wypisało)`);
         } else if (o === "nie") {
-          brak.push(nazwa);
+          const naWzgorku = odp[`${p.reka}:wzgorek:sun`];
+          if (p.linia === "slonca" && Array.isArray(naWzgorku) && naWzgorku.some((z) => z === "kreski" || z === "kreski_drobne")) {
+            linie.push(`${nazwa} — tylko krótka linia na wzgórku Słońca (osoba zaznaczyła pionową linię przy wzgórku Słońca)`);
+          } else brak.push(nazwa);
         } else if (p.ai) {
           linie.push(`${nazwa} — ${STAN[p.ai.stan]}${p.ai.gdzie ? ` (${p.ai.gdzie})` : ""} — osoba nie jest pewna`);
         }

@@ -13,7 +13,7 @@ import MapaPolaczen from "@/components/MapaPolaczen";
 import { mapaPolaczen } from "@/lib/astro/polaczenia";
 import { buildChart } from "@/lib/astro/chart";
 import { numerology } from "@/lib/astro/numerology";
-import { porownajSystemy, dlonZTekstu, mostyDlonHoroskop, znakiWlasneDoDloni, type DlonWLiczbach } from "@/lib/astro/zgodnosc";
+import { porownajSystemy, dlonZTekstu, mostyDlonHoroskop, znakiWlasneDoDloni, type DlonWLiczbach, uzgodnijDlon } from "@/lib/astro/zgodnosc";
 import { loadBirth, type StoredBirth } from "@/lib/birthStore";
 import { wczytajOdczytDloni, wczytajZnakiWlasne, wczytajKorektyDloni, zapiszKorektyDloni } from "@/lib/hiromancjaOdczytStore";
 import type { PlanetId } from "@/lib/astro/constants";
@@ -235,7 +235,9 @@ export default function Page() {
     const d = odczyt ? odczyt.dane ?? dlonZTekstu(odczyt.text) : null;
     // znaki zgłoszone przez osobę już po odczycie (bez odpowiedzi AI) też idą do mostów — ze źródłem „Ty”
     const wlasne = wczytajZnakiWlasne();
-    setDlon(d && !d.wlasne?.length && wlasne.length ? { ...d, wlasne: znakiWlasneDoDloni(wlasne) } : d);
+    const zWlasnymi = d && !d.wlasne?.length && wlasne.length ? { ...d, wlasne: znakiWlasneDoDloni(wlasne) } : d;
+    // starsze zapisy: uzgodnienie z zapisanymi znakami (pionowa linia na wzgórku = krótka linia planety)
+    setDlon(zWlasnymi ? uzgodnijDlon(zWlasnymi) : null);
     setDlonZapisano(odczyt?.savedAt ?? null);
     setKorekty(wczytajKorektyDloni());
   }, []);
