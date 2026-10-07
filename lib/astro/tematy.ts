@@ -61,7 +61,7 @@ const NAZWA_LINII: Record<LiniaDloni, string> = {
 /** Przysłówkiem — pasuje i do „linia”, i do „linie”, i do „pas”/„pierścień”. */
 const STAN_LINII: Record<StanLinii, string> = { wyrazna: "wyraźnie", odcinkowa: "odcinkami", slaba: "słabo", brak: "brak" };
 const NAZWA_ZNAKU: Record<RodzajZnaku, string> = {
-  x: "X", gwiazda: "gwiazda", kwadrat: "kwadrat", trojkat: "trójkąt", kratka: "kratka", wyspa: "wyspa", kreski: "pionowa linia", kreski_drobne: "drobne pionowe kreski", ryba: "znak ryby", krzyz_mistyczny: "krzyż mistyczny",
+  x: "X", gwiazda: "gwiazda", kwadrat: "kwadrat", trojkat: "trójkąt", kratka: "kratka", wyspa: "wyspa", kreski: "pionowa linia", kreski_drobne: "drobne pionowe kreski", ryba: "znak ryby", lodz: "znak łodzi", krzyz_mistyczny: "krzyż mistyczny",
 };
 const DOPELNIACZ: Record<PlanetId, string> = {
   sun: "Słońca", moon: "Księżyca", mars: "Marsa", mercury: "Merkurego", jupiter: "Jowisza",
@@ -235,7 +235,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
           w(9).length + w(12).length >= 2 ? tak(`9. i 12. dom: ${lista([...w(9), ...w(12)])}`) : null,
           w(9).length + w(12).length === 1 ? czesciowo(`${w(9).length ? "9." : "12."} dom: ${lista([...w(9), ...w(12)])}`) : null,
         )),
-        dlon: reka(() => najlepsze(linia("podrozy"), znakNa("moon"))),
+        dlon: reka(() => najlepsze(linia("podrozy"), znakNa("moon"), znakNa("rahu", ["lodz"]))),
         numerologia: liczby("mercury"),
       },
     },
@@ -346,7 +346,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       wniosek: "Temat pieniędzy i dobrobytu jest u Ciebie wyraźnie zaznaczony. Masz predyspozycje do budowania zasobów — warto z nich świadomie korzystać, zamiast zostawiać je przypadkowi.",
       wskazania: {
         kosmogram: astro(finanse),
-        dlon: reka(() => najlepsze(linia("slonca"), linia("merkurego"), znakNa("czworobok", ["trojkat"]), znakNa("rahu", ["trojkat"]), znakNa("mercury", ["trojkat", "gwiazda"]), ...(["ketu", "moon", "venus", "jupiter", "rahu"] as MiejsceZnaku[]).map((m) => znakNa(m, ["ryba"])))),
+        dlon: reka(() => najlepsze(linia("slonca"), linia("merkurego"), znakNa("czworobok", ["trojkat"]), znakNa("rahu", ["trojkat", "lodz"]), znakNa("mercury", ["trojkat", "gwiazda"]), ...(["ketu", "moon", "venus", "jupiter", "rahu"] as MiejsceZnaku[]).map((m) => znakNa(m, ["ryba"])))),
         numerologia: liczby("venus", "saturn"),
       },
     },
@@ -453,7 +453,7 @@ export const KRYTERIA_TEMATOW: Record<string, Record<SystemTematu, string>> = {
   },
   podroze: {
     kosmogram: "Księżyc lub Rahu w 9. albo 12. domu; planety w 9. i 12. domu",
-    dlon: "linie podróży; znaki na wzgórku Księżyca",
+    dlon: "linie podróży; znaki na wzgórku Księżyca; znak łodzi",
     numerologia: "5 (Merkury) wśród Twoich liczb",
   },
   duchowosc: {

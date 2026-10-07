@@ -135,7 +135,7 @@ function poszerz(r: Ramka, m: number): Ramka {
  * Bez ramek: siatka 2×2 środkowej części kadru, też z zakładką.
  */
 /** Podpis zbliżenia środka dłoni — po nim doOdczytu() rozpoznaje tę strefę i wysyła ją zawsze. */
-export const OPIS_SRODKA = "ZBLIŻENIE — środek dłoni (pełna rozdzielczość): tu linia głowy, linia losu i linia Merkurego (a także linia życia) przecinają się i mogą zamykać TRÓJKĄT — sprawdź, czy trzy linie tworzą zamknięty trójkątny kształt, także gdy któraś jest słaba albo z odcinków; czworobok, krzyż mistyczny, równina Marsa (Rahu)";
+export const OPIS_SRODKA = "ZBLIŻENIE — środek dłoni (pełna rozdzielczość): tu linia głowy, linia losu i linia Merkurego (a także linia życia) przecinają się i mogą zamykać TRÓJKĄT — sprawdź, czy trzy linie tworzą zamknięty trójkątny kształt, także gdy któraś jest słaba albo z odcinków; po stronie kciuka od linii losu — czy linie losu, życia i głowy zamykają wydłużony kształt ŁODZI; czworobok, krzyż mistyczny, równina Marsa (Rahu)";
 
 export function wytnijStrefy(zrodlo: ZrodloObrazu, ramki: RamkiDloni | null): Strefa[] {
   const d = ramki?.dlon;

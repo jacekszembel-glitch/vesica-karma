@@ -34,7 +34,7 @@ const SCHEMAT_INWENTARZA = {
         properties: {
           reka: { type: "string", enum: ["wiodaca", "bierna"] },
           wzgorek: { type: "string", enum: ["jowisz", "saturn", "slonce", "merkury", "wenus", "ksiezyc", "mars_gorny", "mars_dolny", "rahu", "ketu", "czworobok"] },
-          znak: { type: "string", enum: ["x", "gwiazda", "kwadrat", "trojkat", "kratka", "wyspa", "kreski", "kreski_drobne", "ryba", "krzyz_mistyczny"] },
+          znak: { type: "string", enum: ["x", "gwiazda", "kwadrat", "trojkat", "kratka", "wyspa", "kreski", "kreski_drobne", "ryba", "lodz", "krzyz_mistyczny"] },
           pewnosc: { type: "string", enum: ["wyrazny", "delikatny"] },
           gdzie: { type: "string" },
         },
@@ -63,11 +63,12 @@ Zasady:
 - Wypisz wszystko, co widać na zdjęciach albo w oględzinach: znaki na wzgórkach i w czworoboku oraz linie. Rzeczy delikatne też wpisz — z "pewnosc":"delikatny".
 - Każde przecięcie dwóch bruzd na wzgórku to X; trzy i więcej w jednym punkcie — gwiazda; krzyżyk w czworoboku między linią serca a głowy (także utworzony przez linię losu) — krzyż mistyczny; trójkąt między linią głowy a linią losu — trójkąt w czworoboku.
 - TRÓJKĄTY Z LINII GŁÓWNYCH (ważny znak, łatwo go przeoczyć): jeśli linia głowy, linia losu i linia Merkurego przecinają się tak, że zamykają trójkąt w środku dłoni — wpisz "znak":"trojkat", "wzgorek":"rahu" i w "gdzie" napisz, które linie go tworzą. Tak samo trójkąt z linii życia, głowy i Merkurego (wielki trójkąt). Bok z linii słabej albo z wielu krótkich kresek też się liczy — wtedy "pewnosc":"delikatny".
+- ZNAK ŁODZI (ważny, łatwo go przeoczyć): wydłużony, zamknięty kształt jak łódź, utworzony przez linie — zwykle po stronie kciuka od linii losu: z boku linia losu i łuk linii życia, u góry linia głowy, u dołu domknięcie (np. linią Merkurego albo łukiem linii życia przy nadgarstku). Wpisz "znak":"lodz", "wzgorek":"rahu", a w "gdzie" — które linie go tworzą i czy jest domknięty u dołu; niedomknięty u dołu → "pewnosc":"delikatny".
 - Linia złożona z odcinków w jednym kierunku to ta linia ("stan":"odcinkowa"). Linii, których nie ma, nie wpisuj.
 - Nie powtarzaj tego samego znaku dwa razy z różnych zbliżeń tej samej ręki.
 
 Odpowiedz WYŁĄCZNIE jednym obiektem JSON, bez żadnego tekstu przed ani po:
-{"znaki":[{"reka":"wiodaca|bierna","wzgorek":"jowisz|saturn|slonce|merkury|wenus|ksiezyc|mars_gorny|mars_dolny|rahu|ketu|czworobok","znak":"x|gwiazda|kwadrat|trojkat|kratka|wyspa|kreski|kreski_drobne|ryba|krzyz_mistyczny","pewnosc":"wyrazny|delikatny","gdzie":"krótko, dokładne miejsce"}],
+{"znaki":[{"reka":"wiodaca|bierna","wzgorek":"jowisz|saturn|slonce|merkury|wenus|ksiezyc|mars_gorny|mars_dolny|rahu|ketu|czworobok","znak":"x|gwiazda|kwadrat|trojkat|kratka|wyspa|kreski|kreski_drobne|ryba|lodz|krzyz_mistyczny","pewnosc":"wyrazny|delikatny","gdzie":"krótko, dokładne miejsce"}],
  "linie":[{"reka":"wiodaca|bierna","linia":"zycia|glowy|serca|losu|slonca|merkurego|intuicji|podrozy|relacji|pas_wenus|pierscien_salomona|marsa","stan":"wyrazna|odcinkowa|slaba","gdzie":"krótko, przebieg"}]}
 (mars_gorny = wzgórek Marsa przy krawędzi dłoni, pod małym palcem, między linią serca a głowy; mars_dolny = wzgórek Marsa przy kciuku, nad wzgórkiem Wenus, wewnątrz łuku linii życia — zawsze rozróżnij, który; rahu = środek dłoni, ketu = nad nadgarstkiem między Wenus a Księżycem — wg chiromancji indyjskiej; "kreski" = pionowa linia na wzgórku, "kreski_drobne" = kilka małych pionowych kresek pod palcem; "ryba" = znak ryby — wydłużony kształt z dwóch łuków jak rybie ciało, często z ogonem, najczęściej nad nadgarstkiem, na wzgórku Księżyca, Wenus albo pod palcem wskazującym; szukaj go uważnie).`;
 

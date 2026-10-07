@@ -48,6 +48,7 @@ Jak patrzysz:
 - Każde miejsce, w którym dwie bruzdy się przecinają, to X (krzyż) — także gdy przecięcie nie jest idealnie na środku i gdy ramiona są nierówne. Trzy lub więcej bruzd przecinających się w jednym punkcie to gwiazda. Trzy bruzdy zamykające trójkątny kształt to trójkąt; cztery zamykające czworokąt — kwadrat; kilka równoległych przeciętych kilkoma poprzecznymi — kratka; linia rozdzielająca się na chwilę i schodząca z powrotem — wyspa.
 - Dłuższe bruzdy opisz jako linie: kierunek (pionowa/pozioma/ukośna), skąd dokąd, czy ciągła czy z odcinków.
 - TRÓJKĄTY Z LINII GŁÓWNYCH: sprawdź, czy dłuższe linie przecinają się tak, że trzy z nich zamykają trójkąt — szczególnie w środku dłoni: linia głowy (pozioma/ukośna) + linia losu (pionowa przez środek) + linia Merkurego (ukośna od dołu ku małemu palcowi), albo linia życia + linia głowy + linia Merkurego. Taki trójkąt jest znakiem także wtedy, gdy jeden bok tworzy linia słaba albo złożona z wielu krótkich kresek. Wpisz go osobno: „trójkąt z linii … — środek dłoni”.
+- ZNAK ŁODZI: wydłużony, zamknięty kształt jak łódź utworzony przez linie — zwykle po stronie kciuka od linii losu, między linią losu a łukiem linii życia, z linią głowy u góry i domknięciem u dołu. Wpisz go osobno: „łódź z linii … — domknięta / otwarta u dołu”.
 - Miejsce podaj względem dłoni (np. „pod palcem wskazującym, tuż nad końcem linii serca”, „na krawędzi dłoni, w dolnej części”), korzystając z podpisu obrazu.
 
 Format odpowiedzi — sama lista, każda pozycja w osobnej linii:
