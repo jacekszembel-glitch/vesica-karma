@@ -129,15 +129,17 @@ function MostyDloni({ mosty }: { mosty: Most[] }) {
           dłoni. Możesz też zgłosić znaki, które widzisz na swojej dłoni, na stronie Chiromancji.
         </p>
       ) : (
-        <>
-          <p style={{ fontSize: "0.92rem", lineHeight: 1.6, marginBottom: 12 }}>
+        // lista mostów to dane pomocnicze — domyślnie zwinięta, na wierzchu tylko podsumowanie
+        <details className="mosty-rozwin">
+          <summary>
             <strong>Horoskop potwierdza {trafione} z {liczone.length}</strong>
             {zBaza.length > 0 && (
               <span className="muted">
                 {" "}· przy znakach na wzgórkach: {trafioneZBaza} z {zBaza.length}, przypadkiem około {oczekiwane.toFixed(1)}
               </span>
             )}
-          </p>
+            <span className="mosty-pokaz">pokaż wszystkie znaki ({mosty.length})</span>
+          </summary>
           <ul className="mosty-lista">
             {mosty.map((m, i) => (
               <li key={i} className={m.potwierdza ? "mosty-tak" : "mosty-nie"}>
@@ -158,7 +160,7 @@ function MostyDloni({ mosty }: { mosty: Most[] }) {
               </li>
             ))}
           </ul>
-        </>
+        </details>
       )}
     </div>
   );

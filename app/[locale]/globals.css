@@ -3296,3 +3296,11 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
   .sp-kompakt .sp-rodzaj { white-space: normal; font-size: 0.68rem; }
   .sp-kompakt .sp-rozwin { display: inline; }
 }
+/* Mosty dłoń ↔ horoskop — lista zwinięta, na wierzchu podsumowanie */
+.mosty-rozwin > summary { list-style: none; cursor: pointer; font-size: 0.92rem; line-height: 1.6; padding: 6px 0; }
+.mosty-rozwin > summary::-webkit-details-marker { display: none; }
+.mosty-rozwin > summary::before { content: "▸"; display: inline-block; margin-right: 8px; color: var(--gold); transition: transform 0.2s; }
+.mosty-rozwin[open] > summary::before { transform: rotate(90deg); }
+.mosty-pokaz { display: block; font-size: 0.76rem; color: var(--gold); text-decoration: underline; margin: 2px 0 0 18px; }
+.mosty-rozwin[open] .mosty-pokaz { display: none; }
+.mosty-rozwin[open] > summary { margin-bottom: 10px; }
