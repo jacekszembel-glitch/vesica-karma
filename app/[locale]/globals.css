@@ -3223,3 +3223,15 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
   .sp-rozwin { display: inline; }
   .sp-strzalka { margin-right: 3px; }
 }
+/* Tabela 5: Twoja droga (components/TwojaDroga.tsx) */
+.sp-droga2 th { width: 150px; vertical-align: top; color: var(--sand); font-size: 0.66rem; padding-top: 12px; text-align: left; }
+.sp-droga2 td { padding-top: 10px; padding-bottom: 12px; }
+.dr-wynik { font-family: var(--font-serif); font-size: 1.05rem; color: var(--gold); text-align: left; line-height: 1.4; }
+.dr-opis { font-size: 0.86rem; line-height: 1.6; text-align: left; margin-top: 4px; }
+.dr-zrodla { font-size: 0.7rem; color: var(--muted); text-align: left; margin-top: 4px; letter-spacing: 0.02em; }
+.dr-potw { font-family: var(--font-sans); font-size: 0.72rem; color: var(--gold); font-weight: 700; }
+.dr-rozne { font-family: var(--font-sans); font-size: 0.72rem; color: var(--warn); font-weight: 700; }
+@media (max-width: 720px) {
+  .sp-droga2 th, .sp-droga2 td { display: block; width: auto; padding-left: 0; padding-right: 0; }
+  .sp-droga2 th { border-bottom: 0; padding-bottom: 0; }
+}

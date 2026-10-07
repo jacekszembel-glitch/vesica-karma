@@ -8,6 +8,7 @@ import SpojnoscTrzechSystemow from "@/components/SpojnoscTrzechSystemow";
 import { dlonReki, tematyWspolne } from "@/lib/astro/tematy";
 import { navamsaChart } from "@/lib/astro/varga";
 import SpojnoscRak from "@/components/SpojnoscRak";
+import TwojaDroga from "@/components/TwojaDroga";
 import { buildChart } from "@/lib/astro/chart";
 import { numerology } from "@/lib/astro/numerology";
 import { porownajSystemy, dlonZTekstu, mostyDlonHoroskop, znakiWlasneDoDloni, type DlonWLiczbach } from "@/lib/astro/zgodnosc";
@@ -353,6 +354,7 @@ export default function Page() {
               <div className="ornament" style={{ margin: "44px 0 26px" }} />
               <SpojnoscTrzechSystemow tematy={porownanie.tematy} chart={porownanie.chart} />
               <SpojnoscRak d1={porownanie.rak.d1} d9={porownanie.rak.d9} maBierna={!!dlonPoKorekcie?.bierna} />
+              <TwojaDroga chart={porownanie.chart} dlon={dlonPoKorekcie} d1={porownanie.rak.d1} d9={porownanie.rak.d9} />
             </>
           ) : (
             <p className="muted" style={{ fontSize: "0.9rem" }}>
