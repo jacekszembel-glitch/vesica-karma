@@ -58,7 +58,7 @@ const WZGORKI: MiejsceZnaku[] = ["jupiter", "saturn", "sun", "mercury", "mars", 
 const ZNAKI_NA_WZGORKU = RODZAJE_ZNAKOW_NAZWY.filter((z) => z.id !== "krzyz_mistyczny");
 
 /** Dodatek na rysunku dłoni przy pytaniu o cechę linii. */
-export type DodatekRysunku = "rozwidlenie_zycia" | "dlugosc_zycia";
+export type DodatekRysunku = "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy";
 interface CechaLinii {
   id: string;
   pytanie: string;
@@ -84,6 +84,26 @@ const CECHY_LINII: Partial<Record<LiniaDloni, CechaLinii[]>> = {
       opcje: [{ id: "tak", tekst: "Mam to" }, { id: "nie", tekst: "Nie mam" }],
       wynik: { tak: "rozwidlona na końcu (klasycznie: zmiana miejsca zamieszkania)", nie: "bez rozwidlenia na końcu" },
       rysunek: "rozwidlenie_zycia",
+    },
+  ],
+  glowy: [
+    {
+      id: "opadanie", pytanie: "Czy linia głowy opada?",
+      opis: "Zobacz, dokąd biegnie pod koniec. Prosta idzie poziomo w poprzek dłoni; opadająca schodzi w dół, w stronę wzgórka Księżyca przy krawędzi dłoni. Klasycznie: prosta — umysł praktyczny i logiczny, opadająca — wyobraźnia, twórczość i intuicja.",
+      opcje: [{ id: "prosta", tekst: "Prosta" }, { id: "lekko", tekst: "Lekko opada" }, { id: "mocno", tekst: "Mocno opada" }],
+      wynik: {
+        prosta: "prosta, pozioma (klasycznie: umysł praktyczny, logiczny)",
+        lekko: "lekko opadająca (klasycznie: równowaga logiki i wyobraźni)",
+        mocno: "mocno opadająca ku wzgórkowi Księżyca (klasycznie: silna wyobraźnia, twórczość, intuicja)",
+      },
+      rysunek: "opadanie_glowy",
+    },
+    {
+      id: "rozwidlenie", pytanie: "Czy linia głowy rozwidla się na końcu?",
+      opis: "Na końcu linia rozdziela się na dwie odnogi — jedna biegnie dalej prosto, druga schodzi w dół. Klasycznie to „pióro pisarza”: dar słowa, umysł, który widzi sprawy z dwóch stron.",
+      opcje: [{ id: "tak", tekst: "Mam to" }, { id: "nie", tekst: "Nie mam" }],
+      wynik: { tak: "rozwidlona na końcu (klasycznie: „pióro pisarza”, dar słowa)", nie: "bez rozwidlenia na końcu" },
+      rysunek: "rozwidlenie_glowy",
     },
   ],
 };

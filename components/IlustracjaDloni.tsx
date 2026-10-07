@@ -76,6 +76,11 @@ const PUNKTY: { id: MiejsceZnaku; x: number; y: number; podpis: string; podpisDy
 
 /** Rozwidlenie końca linii życia — odnoga w stronę wzgórka Księżyca. */
 const ROZWIDLENIE_ZYCIA = "M 178 336 C 168 352 160 366 150 380";
+/** Rozwidlenie końca linii głowy („pióro pisarza”) — odnoga w dół. */
+const ROZWIDLENIE_GLOWY = "M 114 238 C 104 250 96 262 90 280";
+/** Warianty przebiegu końca linii głowy: prosta i mocno opadająca. */
+const GLOWA_PROSTA = "M 150 214 C 120 220 96 224 74 226";
+const GLOWA_OPADA = "M 150 218 C 126 236 108 262 98 300";
 
 export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne = null, linia = null, dodatek = null, onWybierz, szerokosc = 300 }: {
   /** Lewa dłoń — rysunek w lustrzanym odbiciu. */
@@ -119,6 +124,19 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
             <circle cx={178} cy={336} r={16} className="ilu-obwodka" />
           </>
         )}
+        {dodatek === "rozwidlenie_glowy" && (
+          <>
+            <path d={ROZWIDLENIE_GLOWY} className="ilu-linia-blask" filter="url(#ilu-blask)" />
+            <path d={ROZWIDLENIE_GLOWY} className="ilu-linia-akt" />
+            <circle cx={114} cy={240} r={16} className="ilu-obwodka" />
+          </>
+        )}
+        {dodatek === "opadanie_glowy" && (
+          <>
+            <path d={GLOWA_PROSTA} className="ilu-wariant" />
+            <path d={GLOWA_OPADA} className="ilu-wariant" />
+          </>
+        )}
         {dodatek === "dlugosc_zycia" && (
           <>
             <line x1={160} y1={290} x2={192} y2={290} className="ilu-miara" />
@@ -126,6 +144,13 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
           </>
         )}
       </g>
+      {dodatek === "opadanie_glowy" && (
+        <>
+          <text x={x(72)} y={214} textAnchor="middle" className="ilu-podpis ilu-podpis-miara">prosta</text>
+          <text x={x(64)} y={270} textAnchor="middle" className="ilu-podpis ilu-podpis-miara">lekko</text>
+          <text x={x(64)} y={300} textAnchor="middle" className="ilu-podpis ilu-podpis-miara">mocno</text>
+        </>
+      )}
       {dodatek === "dlugosc_zycia" && (
         <>
           <text x={x(196)} y={294} textAnchor={lewa ? "end" : "start"} className="ilu-podpis ilu-podpis-miara">krótka</text>

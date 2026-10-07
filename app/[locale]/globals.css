@@ -3264,3 +3264,5 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 
 .ilu-zarys { fill: #1d1530; stroke: var(--sand); stroke-width: 2; stroke-linejoin: round; }
 .ilu-staw path { stroke: var(--sand); stroke-width: 0.9; opacity: 0.35; stroke-linecap: round; fill: none; }
+
+.ilu-wariant { fill: none; stroke: var(--sand); stroke-width: 1.8; stroke-dasharray: 5 4; opacity: 0.85; stroke-linecap: round; }
