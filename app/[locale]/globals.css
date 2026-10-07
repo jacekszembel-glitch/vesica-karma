@@ -3287,3 +3287,12 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 .pz-razem-liczba { color: var(--gold); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
 
 .ilu-trojkat { fill: rgba(230, 196, 138, 0.28); stroke: var(--sand); stroke-width: 2.4; stroke-linejoin: round; }
+/* Tabela 1 na telefonie — bez przewijania w bok: rzadkość pod spójnością */
+@media (max-width: 720px) {
+  .sp-kompakt { font-size: 0.74rem; }
+  .sp-kompakt th { font-size: 0.56rem; letter-spacing: 0.02em; padding: 6px 3px; }
+  .sp-kompakt td { padding: 7px 3px; }
+  .sp-kompakt .sp-rzadkosc-th, .sp-kompakt td.sp-rzadkosc { display: none; }
+  .sp-kompakt .sp-rodzaj { white-space: normal; font-size: 0.68rem; }
+  .sp-kompakt .sp-rozwin { display: inline; }
+}

@@ -1,7 +1,8 @@
 "use client";
 
+import { Fragment, useState } from "react";
 import type { VedicChart } from "@/lib/astro/chart";
-import type { TematWspolny, SystemTematu } from "@/lib/astro/tematy";
+import { KRYTERIA_TEMATOW, type TematWspolny, type SystemTematu } from "@/lib/astro/tematy";
 import { droga, spojnosc, SYSTEMY, type RodzajSpojnosci } from "@/lib/astro/spojnosc";
 
 /**
@@ -13,6 +14,35 @@ import { droga, spojnosc, SYSTEMY, type RodzajSpojnosci } from "@/lib/astro/spoj
  */
 
 const NAZWA_SYSTEMU: Record<SystemTematu, string> = { kosmogram: "Kosmogram", dlon: "Dłoń", numerologia: "Numerologia" };
+const PELNA_NAZWA: Record<SystemTematu, string> = { kosmogram: "Astrologia (kosmogram)", dlon: "Chiromancja (dłoń)", numerologia: "Numerologia" };
+
+/** Rozwinięcie wiersza tabeli 1: co w każdym systemie daje znacznik, a przy 0 i „?” — czego szukaliśmy. */
+function Szczegoly({ temat }: { temat: TematWspolny }) {
+  const kryt = KRYTERIA_TEMATOW[temat.id];
+  return (
+    <div className="sp-szczegoly">
+      <p className="sp-szcz-znaczenie">{temat.znaczenie}</p>
+      <ul>
+        {SYSTEMY.map((x) => {
+          const w = temat.wskazania[x];
+          const ma = w.stan === "tak" || w.stan === "czesciowo";
+          return (
+            <li key={x} className={ma ? "sp-szcz-ma" : ""}>
+              <span className="sp-szcz-nazwa">{PELNA_NAZWA[x]}</span>
+              <span className="sp-szcz-znak">{w.stan === "tak" ? "✦" : w.stan === "czesciowo" ? "◐" : w.stan === "nie" ? "0" : "?"}</span>
+              <span className="sp-szcz-tresc">
+                {ma ? (w.dowody ?? [w.opis]).join("; ")
+                  : w.stan === "nie" ? `nic z tego nie występuje: ${kryt?.[x] ?? ""}`
+                    : `brak danych — tu sprawdzamy: ${kryt?.[x] ?? ""}`}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="sp-szcz-uwaga">Skupisko 3+ planet w jednym domu wzmacnia też tematy tego domu.</p>
+    </div>
+  );
+}
 
 /** Kolejność wierszy wg siły zgodności: wszystkie systemy zgodne (na tak i na nie), potem większość, potem rozbieżne. */
 const KOLEJNOSC: RodzajSpojnosci[] = ["zgodne_tak", "zgodne_nie", "dwa_tak", "dwa_nie", "rozbiezne", "za_malo"];
@@ -36,6 +66,12 @@ function rzadkosc(p: number): string {
 const pkt = (x: number) => (Number.isInteger(x) ? String(x) : x.toFixed(1).replace(".", ","));
 
 export default function SpojnoscTrzechSystemow({ tematy, chart }: { tematy: TematWspolny[]; chart: VedicChart }) {
+  const [otwarte, setOtwarte] = useState<Set<string>>(new Set());
+  const przelacz = (id: string) => setOtwarte((o) => {
+    const n = new Set(o);
+    if (n.has(id)) n.delete(id); else n.add(id);
+    return n;
+  });
   const s = spojnosc(tematy);
   const d = droga(chart, s);
   const potwierdzone = s.tematy.filter((t) => t.rodzaj === "zgodne_tak" || t.rodzaj === "dwa_tak")
@@ -60,29 +96,37 @@ export default function SpojnoscTrzechSystemow({ tematy, chart }: { tematy: Tema
         </p>
       </div>
       <div className="sp-tabela-wrap">
-        <table className="sp-tabela">
+        <table className="sp-tabela sp-kompakt">
           <thead>
             <tr>
               <th>Temat</th>
               {SYSTEMY.map((x) => <th key={x} className="srodek">{NAZWA_SYSTEMU[x]}</th>)}
               <th>Spójność</th>
-              <th className="srodek" title="Jak często taki układ ocen wychodzi przypadkiem">Przypadkiem</th>
+              <th className="srodek sp-rzadkosc-th" title="Jak często taki układ ocen wychodzi przypadkiem">Przypadkiem</th>
             </tr>
           </thead>
           <tbody>
             {[...s.tematy].sort((a, b) => KOLEJNOSC.indexOf(a.rodzaj) - KOLEJNOSC.indexOf(b.rodzaj) || a.szansa - b.szansa).map((t) => (
-              <tr key={t.temat.id} className={RODZAJ[t.rodzaj].klasa}>
-                <td>{t.temat.nazwa}</td>
+              <Fragment key={t.temat.id}>
+              <tr className={`${RODZAJ[t.rodzaj].klasa} sp-klik${otwarte.has(t.temat.id) ? " sp-otwarty" : ""}`} onClick={() => przelacz(t.temat.id)}>
+                <td>
+                  <button type="button" className="sp-rozwin" aria-expanded={otwarte.has(t.temat.id)}
+                    onClick={(e) => { e.stopPropagation(); przelacz(t.temat.id); }}>
+                    <span className="sp-strzalka" aria-hidden="true">▸</span>{t.temat.nazwa}
+                  </button>
+                </td>
                 {SYSTEMY.map((x) => <td key={x} className="srodek sp-znak">{znak(t.wartosci[x])}</td>)}
-                <td><span className="sp-rodzaj">{RODZAJ[t.rodzaj].tekst}</span></td>
+                <td><span className="sp-rodzaj">{RODZAJ[t.rodzaj].tekst}</span><span className="sp-rz-tel">{rzadkosc(t.szansa)}</span></td>
                 <td className="srodek sp-rzadkosc">{rzadkosc(t.szansa)}</td>
               </tr>
+              {otwarte.has(t.temat.id) && <tr className="sp-szcz-wiersz"><td colSpan={6}><Szczegoly temat={t.temat} /></td></tr>}
+              </Fragment>
             ))}
           </tbody>
         </table>
       </div>
       <p className="muted porownanie-legenda">
-        ✦ tak · ◐ częściowo · 0 sprawdzone, niezaznaczone · ? brak danych · „Przypadkiem” — jak często taki
+        Kliknij wiersz, żeby zobaczyć, co w każdym systemie daje wynik. ✦ tak · ◐ częściowo · 0 sprawdzone, niezaznaczone · ? brak danych · „Przypadkiem” — jak często taki
         układ ocen wychodzi sam z siebie przy Twoim rozkładzie ocen; im rzadziej, tym mocniejsza zgodność.
       </p>
 
