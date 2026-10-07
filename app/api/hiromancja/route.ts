@@ -45,8 +45,10 @@ const requestSchema = z.object({
   })).max(12).optional(),
   /** Krok 1 (/api/hiromancja-ogledziny): lista znaków i linii, które AI zobaczyło, po sprawdzeniu przez osobę. */
   inwentarz: z.object({
-    znaki: z.array(z.string().max(200)).max(60),
-    linie: z.array(z.string().max(200)).max(60),
+    znaki: z.array(z.string().max(400)).max(60),
+    linie: z.array(z.string().max(400)).max(60),
+    /** Linie, których osoba nie ma (odpowiedź „Nie mam” w przewodniku). */
+    brak: z.array(z.string().max(120)).max(40).optional(),
   }).optional(),
   /** Surowe oględziny zbliżeń z kroku 1 — żeby nie oglądać ich drugi raz. */
   ogledzinyTekst: z.string().max(40_000).optional(),
@@ -181,7 +183,7 @@ export async function POST(req: Request) {
     ogledzinyTekst = [...ogledzinyW, ...ogledzinyB].join("\n\n");
   }
   const inwentarzTekst = parsed.inwentarz
-    ? `INWENTARZ DŁONI — sprawdzony przez osobę. Te znaki i linie AI zauważyło przy oględzinach, a osoba porównała je ze swoją dłonią i potwierdziła (pozycje, których nie ma, usunęła). Opisz WSZYSTKIE w odczycie, w odpowiednich sekcjach, i wpisz je do bloku danych. Nie dopisuj znaków spoza tej listy (poza zgłoszonymi przez osobę).\nZnaki:\n${parsed.inwentarz.znaki.map((z) => "- " + z).join("\n") || "- (brak)"}\nLinie:\n${parsed.inwentarz.linie.map((l) => "- " + l).join("\n") || "- (brak)"}`
+    ? `INWENTARZ DŁONI — sprawdzony przez osobę pytanie po pytaniu: przy każdej linii i każdym wzgórku patrzyła na swoją dłoń i zaznaczyła, co ma. Opisz WSZYSTKIE pozycje w odczycie, w odpowiednich sekcjach, i wpisz je do bloku danych (stan linii taki, jak podała osoba). Pozycje „osoba nie jest pewna” opisz ostrożniej. Nie dopisuj znaków spoza tej listy (poza zgłoszonymi przez osobę).\nZnaki:\n${parsed.inwentarz.znaki.map((z) => "- " + z).join("\n") || "- (brak)"}\nLinie:\n${parsed.inwentarz.linie.map((l) => "- " + l).join("\n") || "- (brak)"}${parsed.inwentarz.brak?.length ? `\nLINIE, KTÓRYCH OSOBA NIE MA (sprawdziła na swojej dłoni) — w bloku danych wpisz "brak", w tekście nie opisuj ich jak obecnych:\n${parsed.inwentarz.brak.map((l) => "- " + l).join("\n")}` : ""}`
     : "";
 
   const stream = client.messages.stream({

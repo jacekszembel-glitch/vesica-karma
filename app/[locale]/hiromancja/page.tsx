@@ -290,7 +290,6 @@ export default function HiromancjaPage() {
               wiodaca={doOdczytu(zdjecia[pismoReka]!, ujecia[pismoReka], miejsca[pismoReka])}
               bierna={doOdczytu(zdjecia[rekaBierna]!, ujecia[rekaBierna], miejsca[rekaBierna])}
               nazwyRak={{ wiodaca: pismoReka, bierna: rekaBierna }}
-              znakiWlasne={znakiWlasne}
               onZnakiWlasne={zmienZnakiWlasne}
               onDalej={setInwentarz}
             />

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import ZnakiWlasne from "./ZnakiWlasne";
+import { useMemo, useState } from "react";
 import IlustracjaDloni from "./IlustracjaDloni";
 import { PieczecOdslaniania } from "./Interpretation";
 import {
@@ -10,9 +9,12 @@ import {
 } from "@/lib/astro/zgodnosc";
 
 /**
- * KROK 1 — „Co AI widzi na Twoich dłoniach”: sama lista znaków i linii (bez interpretacji)
- * z /api/hiromancja-ogledziny. Osoba porównuje ją ze swoją dłonią: usuwa to, czego nie ma,
- * dopisuje brakujące (ZnakiWlasne) i klika „Dalej” — wtedy rusza pełny odczyt z tą listą.
+ * KROK 1 — przewodnik po dłoniach. AI ogląda zdjęcia (/api/hiromancja-ogledziny) i wypisuje
+ * tylko to, co widzi. Potem osoba odpowiada na pytania po kolei: najpierw ręka wiodąca, potem
+ * bierna; przy każdym pytaniu na rysunku świeci linia albo wzgórek, którego dotyczy, a obok
+ * jest to, co zobaczyło AI. Osoba zaznacza „Mam to” — nic nie jest zaznaczone za nią.
+ * Wynik: potwierdzona lista (do pełnego odczytu), linie, których nie ma, i znaki zgłoszone
+ * przez osobę, których AI nie zobaczyło (źródło „Ty”).
  */
 
 type Reka = "wiodaca" | "bierna";
@@ -23,6 +25,8 @@ export interface InwentarzPotwierdzony {
   /** Pozycje jako tekst — tak trafiają do pełnego odczytu. */
   znaki: string[];
   linie: string[];
+  /** Linie, których osoba nie ma. */
+  brak: string[];
   ogledzinyTekst: string;
 }
 
@@ -31,6 +35,39 @@ interface DaneReki { imageBase64: string; imageMediaType: string; strefy?: { opi
 const STAN: Record<LiniaInw["stan"], string> = { wyrazna: "wyraźna", odcinkowa: "odcinkami", slaba: "słaba" };
 const nazwaMiejsca = (m: MiejsceZnaku) => MIEJSCA_ZNAKOW.find((x) => x.id === m)?.nazwa ?? m;
 const nazwaZnaku = (z: RodzajZnaku) => RODZAJE_ZNAKOW_NAZWY.find((x) => x.id === z)?.nazwa ?? z;
+const nazwaReki = (r: Reka) => (r === "wiodaca" ? "ręka wiodąca" : "ręka bierna");
+
+/** Główne linie — pytamy o nie zawsze; inne tylko, gdy AI je wypisało. */
+const LINIE_GLOWNE: LiniaDloni[] = ["zycia", "glowy", "serca", "losu", "slonca", "merkurego"];
+const OPIS_LINII: Partial<Record<LiniaDloni, string>> = {
+  zycia: "Okrąża nasadę kciuka, od brzegu dłoni między kciukiem a palcem wskazującym w stronę nadgarstka.",
+  glowy: "Biegnie w poprzek dłoni, od tego samego miejsca co linia życia w stronę krawędzi dłoni.",
+  serca: "Najwyższa pozioma linia — pod palcami, od krawędzi dłoni w stronę palca wskazującego lub środkowego.",
+  losu: "Pionowa linia przez środek dłoni, od nadgarstka w stronę palca środkowego. Może być w kawałkach.",
+  slonca: "Pionowa linia pod palcem serdecznym — czasem tylko krótki odcinek tuż pod palcem.",
+  merkurego: "Ukośna linia od dołu dłoni w stronę małego palca.",
+};
+/** Biernik nazw linii — „Czy masz linię losu?”. */
+const BIERNIK_LINII: Record<LiniaDloni, string> = {
+  zycia: "linię życia", glowy: "linię głowy", serca: "linię serca", losu: "linię losu", slonca: "linię Słońca",
+  merkurego: "linię Merkurego", intuicji: "linię intuicji", podrozy: "linie podróży", relacji: "linie relacji",
+  pas_wenus: "pas Wenus", pierscien_salomona: "pierścień Salomona", marsa: "linię Marsa (siostrzaną)",
+};
+/** Wzgórki w kolejności pytań. */
+const WZGORKI: MiejsceZnaku[] = ["jupiter", "saturn", "sun", "mercury", "mars", "czworobok", "rahu", "moon", "venus", "ketu"];
+const ZNAKI_NA_WZGORKU = RODZAJE_ZNAKOW_NAZWY.filter((z) => z.id !== "krzyz_mistyczny");
+
+type Pytanie =
+  | { typ: "linia"; reka: Reka; linia: LiniaDloni; ai?: LiniaInw }
+  | { typ: "krzyz"; reka: Reka; ai?: ZnakInw }
+  | { typ: "wzgorek"; reka: Reka; miejsce: MiejsceZnaku; ai: ZnakInw[] };
+type OdpLinii = "wyrazna" | "slaba" | "nie" | "niewiem";
+type OdpKrzyza = "mam" | "nie" | "niewiem";
+/** Odpowiedź przy wzgórku: zaznaczone znaki albo „nie wiem”. */
+type OdpWzgorka = RodzajZnaku[] | "niewiem";
+type Odp = OdpLinii | OdpKrzyza | OdpWzgorka;
+
+const klucz = (p: Pytanie) => `${p.reka}:${p.typ}:${p.typ === "linia" ? p.linia : p.typ === "wzgorek" ? p.miejsce : "krzyz"}`;
 
 function zOdpowiedzi(znaki: unknown[], linie: unknown[]): { znaki: ZnakInw[]; linie: LiniaInw[] } {
   const reka = (r: unknown): Reka => (r === "bierna" ? "bierna" : "wiodaca");
@@ -49,20 +86,38 @@ function zOdpowiedzi(znaki: unknown[], linie: unknown[]): { znaki: ZnakInw[]; li
   return { znaki: zn, linie: li };
 }
 
-export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, znakiWlasne, onZnakiWlasne, onDalej }: {
+function pytania(znaki: ZnakInw[], linie: LiniaInw[]): Pytanie[] {
+  const lista: Pytanie[] = [];
+  for (const reka of ["wiodaca", "bierna"] as Reka[]) {
+    const liReki = linie.filter((l) => l.reka === reka);
+    const dodatkowe = [...new Set(liReki.map((l) => l.linia).filter((l) => !LINIE_GLOWNE.includes(l)))];
+    for (const linia of [...LINIE_GLOWNE, ...dodatkowe]) lista.push({ typ: "linia", reka, linia, ai: liReki.find((l) => l.linia === linia) });
+    lista.push({ typ: "krzyz", reka, ai: znaki.find((z) => z.reka === reka && z.znak === "krzyz_mistyczny") });
+    for (const miejsce of WZGORKI) {
+      lista.push({ typ: "wzgorek", reka, miejsce, ai: znaki.filter((z) => z.reka === reka && z.miejsce === miejsce && z.znak !== "krzyz_mistyczny") });
+    }
+  }
+  return lista;
+}
+
+export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnakiWlasne, onDalej }: {
   wiodaca: DaneReki;
   bierna: DaneReki;
-  /** Np. { wiodaca: "prawa", bierna: "lewa" } — do nagłówków. */
+  /** Np. { wiodaca: "prawa", bierna: "lewa" } — do nagłówków i odbicia rysunku. */
   nazwyRak: Record<Reka, string>;
-  znakiWlasne: ZnakWlasny[];
+  /** Znaki zaznaczone przez osobę, których AI nie zobaczyło — idą do odczytu jako jej obserwacje. */
   onZnakiWlasne: (z: ZnakWlasny[]) => void;
   onDalej: (inw: InwentarzPotwierdzony) => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [blad, setBlad] = useState<string | null>(null);
   const [wynik, setWynik] = useState<{ znaki: ZnakInw[]; linie: LiniaInw[]; ogledzinyTekst: string } | null>(null);
-  // pozycja listy pod kursorem — jej miejsce podświetla się na rysunku dłoni
-  const [najechane, setNajechane] = useState<{ reka: Reka; miejsce: MiejsceZnaku } | null>(null);
+  const [nr, setNr] = useState(0);
+  const [odp, setOdp] = useState<Record<string, Odp>>({});
+  // zaznaczenia przy bieżącym wzgórku, zanim osoba kliknie „Dalej”
+  const [wybrane, setWybrane] = useState<RodzajZnaku[]>([]);
+
+  const lista = useMemo(() => (wynik ? pytania(wynik.znaki, wynik.linie) : []), [wynik]);
 
   async function obejrzyj() {
     setBusy(true); setBlad(null); setWynik(null);
@@ -74,6 +129,7 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, znakiWl
       const j = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(j.error ?? `Nie udało się obejrzeć dłoni (kod ${res.status}).`);
       setWynik({ ...zOdpowiedzi(j.znaki ?? [], j.linie ?? []), ogledzinyTekst: String(j.ogledzinyTekst ?? "") });
+      setNr(0); setOdp({}); setWybrane([]);
     } catch (e) {
       setBlad((e as Error).message);
     } finally {
@@ -81,25 +137,15 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, znakiWl
     }
   }
 
-  function dalej() {
-    if (!wynik) return;
-    const r = (x: Reka) => `ręka ${x === "wiodaca" ? "wiodąca" : "bierna"}`;
-    onDalej({
-      znaki: wynik.znaki.map((z) => `${nazwaZnaku(z.znak)} — ${nazwaMiejsca(z.miejsce)}, ${r(z.reka)}, ${z.pewnosc === "delikatny" ? "delikatny" : "wyraźny"}${z.gdzie ? ` (${z.gdzie})` : ""}`),
-      linie: wynik.linie.map((l) => `${NAZWY_LINII[l.linia]} — ${STAN[l.stan]}, ${r(l.reka)}${l.gdzie ? ` (${l.gdzie})` : ""}`),
-      ogledzinyTekst: wynik.ogledzinyTekst,
-    });
-  }
-
   if (!wynik) {
     return (
       <div style={{ textAlign: "center" }}>
         <p style={{ maxWidth: 520, margin: "0 auto 18px", lineHeight: 1.6 }}>
-          Najpierw AI obejrzy Twoje dłonie i wypisze tylko to, co na nich widzi — znaki i linie, bez
-          interpretacji. Sprawdzisz tę listę ze swoją dłonią i poprawisz ją, zanim powstanie odczyt.
+          Najpierw AI obejrzy Twoje dłonie i zanotuje tylko to, co na nich widzi. Potem przejdziemy
+          razem po dłoni pytanie po pytaniu — na rysunku zobaczysz, gdzie patrzeć.
         </p>
         {busy ? (
-          <PieczecOdslaniania tytul="Oglądam Twoje dłonie…" mysli={["Każde zbliżenie oglądam osobno, pod lupą.", "Szukam znaków na wzgórkach i linii — bez interpretacji.", "Za chwilę zobaczysz listę do sprawdzenia."]} podpis="oględziny trwają około 1–2 minut" />
+          <PieczecOdslaniania tytul="Oglądam Twoje dłonie…" mysli={["Każde zbliżenie oglądam osobno, pod lupą.", "Szukam znaków na wzgórkach i linii — bez interpretacji.", "Za chwilę zaczniemy pytania."]} podpis="oględziny trwają około 1–2 minut" />
         ) : (
           <button className="btn btn-primary" onClick={() => void obejrzyj()} style={{ padding: "14px 36px", fontSize: "1rem" }}>
             {blad ? "Spróbuj ponownie" : "Obejrzyj dłonie"}
@@ -110,68 +156,174 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, znakiWl
     );
   }
 
-  const usunZnak = (i: number) => setWynik({ ...wynik, znaki: wynik.znaki.filter((_, j) => j !== i) });
-  const usunLinie = (i: number) => setWynik({ ...wynik, linie: wynik.linie.filter((_, j) => j !== i) });
+  const koniec = nr >= lista.length;
+
+  function odpowiedz(o: Odp) {
+    const p = lista[nr];
+    setOdp((s) => ({ ...s, [klucz(p)]: o }));
+    const nast = nr + 1;
+    setNr(nast);
+    const np = lista[nast];
+    const poprz = np ? odp[klucz(np)] : undefined;
+    setWybrane(Array.isArray(poprz) ? poprz : []);
+  }
+
+  function cofnij() {
+    const poprz = Math.max(0, nr - 1);
+    setNr(poprz);
+    const o = odp[klucz(lista[poprz])];
+    setWybrane(Array.isArray(o) ? o : []);
+  }
+
+  function zakoncz() {
+    const znaki: string[] = [], linie: string[] = [], brak: string[] = [];
+    const wlasne: ZnakWlasny[] = [];
+    const opisZnaku = (z: ZnakInw, dopisek: string) =>
+      `${nazwaZnaku(z.znak)} — ${nazwaMiejsca(z.miejsce)}, ${nazwaReki(z.reka)}, ${z.pewnosc === "delikatny" ? "delikatny" : "wyraźny"}${z.gdzie ? ` (${z.gdzie})` : ""} — ${dopisek}`;
+    for (const p of lista) {
+      const o = odp[klucz(p)];
+      if (p.typ === "linia") {
+        const nazwa = `${NAZWY_LINII[p.linia]}, ${nazwaReki(p.reka)}`;
+        if (o === "wyrazna" || o === "slaba") {
+          const stan = o === "wyrazna" ? "wyraźna" : "słaba lub odcinkami";
+          linie.push(p.ai
+            ? `${nazwa} — ${stan} (osoba potwierdza; AI: ${STAN[p.ai.stan]}${p.ai.gdzie ? `, ${p.ai.gdzie}` : ""})`
+            : `${nazwa} — ${stan} (osoba widzi ją na swojej dłoni; AI jej nie wypisało)`);
+        } else if (o === "nie") {
+          brak.push(nazwa);
+        } else if (p.ai) {
+          linie.push(`${nazwa} — ${STAN[p.ai.stan]}${p.ai.gdzie ? ` (${p.ai.gdzie})` : ""} — osoba nie jest pewna`);
+        }
+      } else if (p.typ === "krzyz") {
+        if (o === "mam") {
+          if (p.ai) znaki.push(opisZnaku(p.ai, "osoba potwierdza"));
+          else wlasne.push({ reka: p.reka, miejsce: "czworobok", znak: "krzyz_mistyczny" });
+        } else if (o === "niewiem" && p.ai) znaki.push(opisZnaku(p.ai, "osoba nie jest pewna"));
+      } else {
+        if (o === "niewiem") {
+          for (const z of p.ai) znaki.push(opisZnaku(z, "osoba nie jest pewna"));
+        } else if (Array.isArray(o)) {
+          for (const zn of o) {
+            const ai = p.ai.find((z) => z.znak === zn);
+            if (ai) znaki.push(opisZnaku(ai, "osoba potwierdza"));
+            else wlasne.push({ reka: p.reka, miejsce: p.miejsce, znak: zn });
+          }
+        }
+      }
+    }
+    onZnakiWlasne(wlasne.slice(0, 12));
+    onDalej({ znaki, linie, brak, ogledzinyTekst: wynik!.ogledzinyTekst });
+  }
+
+  if (koniec) {
+    const potwierdzone = lista.flatMap((p) => {
+      const o = odp[klucz(p)];
+      const r = nazwaReki(p.reka);
+      if (p.typ === "linia") return o === "wyrazna" || o === "slaba" ? [`${NAZWY_LINII[p.linia]} (${o === "wyrazna" ? "wyraźna" : "słaba"}) — ${r}`] : [];
+      if (p.typ === "krzyz") return o === "mam" ? [`krzyż mistyczny — ${r}`] : [];
+      return Array.isArray(o) ? o.map((z) => `${nazwaZnaku(z)} — ${nazwaMiejsca(p.miejsce)}, ${r}`) : [];
+    });
+    return (
+      <div className="prz">
+        <p className="prz-postep">Gotowe — wszystkie pytania za Tobą</p>
+        <p className="hs-tytul" style={{ textAlign: "center" }}>Na Twoich dłoniach</p>
+        {potwierdzone.length === 0 ? <p className="hs-instrukcja" style={{ textAlign: "center" }}>Nic nie zostało zaznaczone.</p> : (
+          <ul className="prz-podsumowanie">{potwierdzone.map((t) => <li key={t}>{t}</li>)}</ul>
+        )}
+        <div style={{ textAlign: "center", marginTop: 24 }}>
+          <button className="btn btn-primary" onClick={zakoncz} style={{ padding: "14px 36px", fontSize: "1rem" }}>
+            Odczytaj dłonie
+          </button>
+          <p style={{ marginTop: 10 }}>
+            <button type="button" className="hs-usun" onClick={cofnij}>← wróć do pytań</button>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const p = lista[nr];
+  const wRece = lista.filter((q) => q.reka === p.reka);
+  const nrWRece = wRece.indexOf(p) + 1;
+  const pierwszeBiernej = p.reka === "bierna" && nrWRece === 1;
 
   return (
-    <div className="inw">
-      <p className="hs-instrukcja" style={{ textAlign: "center", maxWidth: 560, margin: "0 auto 16px" }}>
-        Porównaj listę ze swoją dłonią. Jeśli czegoś na niej nie masz — kliknij „nie mam”. Czego brakuje — dopisz niżej.
+    <div className="prz">
+      <p className="prz-postep">
+        {p.reka === "wiodaca" ? "Ręka wiodąca" : "Ręka bierna"} ({nazwyRak[p.reka]}) · pytanie {nrWRece} z {wRece.length}
       </p>
-      <div className="inw-rece">
-        {(["wiodaca", "bierna"] as Reka[]).map((reka) => {
-          const zn = wynik.znaki.map((z, i) => ({ z, i })).filter(({ z }) => z.reka === reka);
-          const li = wynik.linie.map((l, i) => ({ l, i })).filter(({ l }) => l.reka === reka);
-          return (
-            <div key={reka} className="inw-reka">
-              <p className="hs-tytul">{reka === "wiodaca" ? "Ręka wiodąca" : "Ręka bierna"} ({nazwyRak[reka]})</p>
-              <div className="inw-reka-uklad">
-              <div className="inw-rysunek">
-                <IlustracjaDloni lewa={nazwyRak[reka] === "lewa"} szerokosc={170}
-                  zaznaczone={zn.map(({ z }) => z.miejsce)}
-                  aktywne={najechane?.reka === reka ? najechane.miejsce : null} />
-              </div>
-              <div className="inw-listy">
-              <p className="inw-grupa">Znaki</p>
-              {zn.length === 0 ? <p className="hs-instrukcja">AI nie zauważyło znaków na tej ręce.</p> : (
-                <ul className="inw-lista">
-                  {zn.map(({ z, i }) => (
-                    <li key={i} onMouseEnter={() => setNajechane({ reka, miejsce: z.miejsce })} onMouseLeave={() => setNajechane(null)}
-                      onClick={() => setNajechane({ reka, miejsce: z.miejsce })}>
-                      <span><strong>{nazwaZnaku(z.znak)}</strong> — {nazwaMiejsca(z.miejsce)}{z.pewnosc === "delikatny" ? ", delikatny" : ""}
-                        {z.gdzie && <small>{z.gdzie}</small>}</span>
-                      <button type="button" className="hs-usun" onClick={() => usunZnak(i)}>nie mam</button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <p className="inw-grupa">Linie</p>
-              {li.length === 0 ? <p className="hs-instrukcja">AI nie wypisało linii na tej ręce.</p> : (
-                <ul className="inw-lista">
-                  {li.map(({ l, i }) => (
-                    <li key={i}>
-                      <span><strong>{NAZWY_LINII[l.linia]}</strong> — {STAN[l.stan]}{l.gdzie && <small>{l.gdzie}</small>}</span>
-                      <button type="button" className="hs-usun" onClick={() => usunLinie(i)}>nie mam</button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <div className="prz-pasek"><span style={{ width: `${(nr / lista.length) * 100}%` }} /></div>
+      {pierwszeBiernej && <p className="prz-zmiana">Ręka wiodąca gotowa. Teraz ręka bierna — {nazwyRak.bierna} dłoń.</p>}
 
-      <ZnakiWlasne znaki={znakiWlasne} onZmiana={onZnakiWlasne} nazwyRak={nazwyRak} />
+      <div className="prz-uklad">
+        <div className="prz-rysunek">
+          <IlustracjaDloni lewa={nazwyRak[p.reka] === "lewa"}
+            linia={p.typ === "linia" ? p.linia : null}
+            aktywne={p.typ === "wzgorek" ? p.miejsce : p.typ === "krzyz" ? "czworobok" : null} />
+          <p className="hs-instrukcja" style={{ textAlign: "center" }}>{nazwyRak[p.reka] === "lewa" ? "Lewa" : "Prawa"} dłoń od wewnątrz</p>
+        </div>
 
-      <div style={{ textAlign: "center", marginTop: 26 }}>
-        <button className="btn btn-primary" onClick={dalej} style={{ padding: "14px 36px", fontSize: "1rem" }}>
-          Dalej — odczytaj dłonie
-        </button>
-        <p className="hs-instrukcja" style={{ textAlign: "center", marginTop: 8 }}>
-          Możesz od razu kliknąć „Dalej” — dopisywanie jest opcjonalne.
-        </p>
+        <div className="prz-pytanie" key={klucz(p)}>
+          {p.typ === "linia" && (
+            <>
+              <h3>Czy masz {BIERNIK_LINII[p.linia]}?</h3>
+              {OPIS_LINII[p.linia] && <p className="prz-opis">{OPIS_LINII[p.linia]}</p>}
+              <p className="prz-ai">{p.ai ? <>AI widzi: <strong>{STAN[p.ai.stan]}</strong>{p.ai.gdzie && ` — ${p.ai.gdzie}`}</> : "AI jej nie wypisało — sprawdź na swojej dłoni."}</p>
+              <div className="prz-odpowiedzi">
+                <button type="button" className="prz-btn prz-btn-mam" onClick={() => odpowiedz("wyrazna")}>Mam — wyraźną</button>
+                <button type="button" className="prz-btn prz-btn-mam" onClick={() => odpowiedz("slaba")}>Mam — słabą lub w kawałkach</button>
+                <button type="button" className="prz-btn" onClick={() => odpowiedz("nie")}>Nie mam</button>
+                <button type="button" className="prz-btn prz-btn-cichy" onClick={() => odpowiedz("niewiem")}>Nie wiem</button>
+              </div>
+            </>
+          )}
+          {p.typ === "krzyz" && (
+            <>
+              <h3>Czy masz krzyż mistyczny?</h3>
+              <p className="prz-opis">Wyraźny X albo krzyżyk w czworoboku — między linią serca a linią głowy, zwykle pod palcem środkowym.</p>
+              <p className="prz-ai">{p.ai ? <>AI widzi: <strong>krzyż mistyczny{p.ai.pewnosc === "delikatny" ? ", delikatny" : ""}</strong>{p.ai.gdzie && ` — ${p.ai.gdzie}`}</> : "AI go nie zauważyło — sprawdź na swojej dłoni."}</p>
+              <div className="prz-odpowiedzi">
+                <button type="button" className="prz-btn prz-btn-mam" onClick={() => odpowiedz("mam")}>Mam to</button>
+                <button type="button" className="prz-btn" onClick={() => odpowiedz("nie")}>Nie mam</button>
+                <button type="button" className="prz-btn prz-btn-cichy" onClick={() => odpowiedz("niewiem")}>Nie wiem</button>
+              </div>
+            </>
+          )}
+          {p.typ === "wzgorek" && (
+            <>
+              <h3>{nazwaMiejsca(p.miejsce).replace(/^./, (c) => c.toUpperCase())}</h3>
+              <p className="prz-opis">Czy widzisz tu któryś z tych znaków? Zaznacz wszystkie, które masz.</p>
+              {p.ai.length > 0 && (
+                <p className="prz-ai">AI widzi: {p.ai.map((z, i) => (
+                  <span key={i}>{i > 0 && "; "}<strong>{nazwaZnaku(z.znak)}</strong>{z.pewnosc === "delikatny" ? " (delikatny)" : ""}{z.gdzie && ` — ${z.gdzie}`}</span>
+                ))}</p>
+              )}
+              <div className="prz-znaki">
+                {ZNAKI_NA_WZGORKU.map((z) => {
+                  const zaz = wybrane.includes(z.id);
+                  const ai = p.ai.some((a) => a.znak === z.id);
+                  return (
+                    <button key={z.id} type="button" className={`prz-znak${zaz ? " prz-znak-zaz" : ""}`} aria-pressed={zaz}
+                      onClick={() => setWybrane((w) => (zaz ? w.filter((x) => x !== z.id) : [...w, z.id]))}>
+                      {zaz ? "✓ " : ""}{z.nazwa}{ai && <span className="prz-znak-ai">AI</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="prz-odpowiedzi">
+                {wybrane.length > 0
+                  ? <button type="button" className="prz-btn prz-btn-mam" onClick={() => odpowiedz(wybrane)}>Mam to — dalej</button>
+                  : <button type="button" className="prz-btn" onClick={() => odpowiedz([])}>Nic tu nie mam</button>}
+                <button type="button" className="prz-btn prz-btn-cichy" onClick={() => odpowiedz("niewiem")}>Nie wiem</button>
+              </div>
+            </>
+          )}
+          {nr > 0 && (
+            <p style={{ marginTop: 14 }}>
+              <button type="button" className="hs-usun" onClick={cofnij}>← poprzednie pytanie</button>
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

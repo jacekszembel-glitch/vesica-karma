@@ -2955,11 +2955,6 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 .hiro-braki li.ok { color: var(--sand); }
 
 /* Chiromancja: znaki zgłoszone przez osobę (components/ZnakiWlasne.tsx) */
-.zw { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--line-soft); }
-.zw-formularz { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
-.zw-formularz select { width: auto; max-width: 100%; font-size: 0.82rem; padding: 7px 10px; }
-.zw-lista { list-style: none; margin: 14px auto 0; padding: 0; max-width: 560px; display: grid; gap: 6px; }
-.zw-lista li { display: flex; justify-content: space-between; gap: 12px; align-items: center; font-size: 0.84rem; color: var(--sand); border-bottom: 1px solid var(--line-soft); padding: 6px 0; }
 
 /* Twoja Karma: mosty dłoń ↔ horoskop */
 .mosty-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
@@ -3044,30 +3039,23 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 @keyframes tw-rozwin { from { opacity: 0.6; } to { opacity: 1; } }
 
 /* Chiromancja, krok 1: lista znaków i linii od AI (components/HiromancjaInwentarz.tsx) */
-.inw-rece { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 28px; text-align: left; }
-.inw-grupa { font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sand); opacity: 0.75; margin: 12px 0 4px; text-align: left; }
-.inw-lista { list-style: none; margin: 0; padding: 0; display: grid; }
-.inw-lista li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 7px 0; border-bottom: 1px solid var(--line-soft); font-size: 0.86rem; color: var(--sand); }
-.inw-lista li small { display: block; font-size: 0.72rem; opacity: 0.75; margin-top: 2px; }
-.inw-lista .hs-usun { white-space: nowrap; flex-shrink: 0; }
 
 /* Ilustracja dłoni (components/IlustracjaDloni.tsx) */
 .ilu-dlon { display: block; max-width: 100%; height: auto; margin: 0 auto; overflow: visible; }
-.ilu-zarys { fill: rgba(230, 196, 138, 0.06); stroke: var(--sand); stroke-width: 1.6; stroke-linejoin: round; }
-.ilu-linia { fill: none; stroke: var(--sand); stroke-width: 1.1; opacity: 0.55; }
-.ilu-linia-los { stroke-dasharray: 4 3; }
+.ilu-obrys { fill: none; stroke: var(--sand); stroke-width: 3.4; stroke-linejoin: round; }
+.ilu-wypelnienie { fill: #1d1530; stroke: none; }
+.ilu-staw line { stroke: var(--sand); stroke-width: 0.9; opacity: 0.35; stroke-linecap: round; }
+.ilu-linia { fill: none; stroke: var(--sand); stroke-width: 1.3; opacity: 0.45; stroke-linecap: round; }
+.ilu-linia-akt { fill: none; stroke: var(--sand); stroke-width: 3.2; stroke-linecap: round; }
+.ilu-linia-blask { fill: none; stroke: var(--sand); stroke-width: 9; opacity: 0.55; stroke-linecap: round; }
+.ilu-poswiata { fill: var(--sand); opacity: 0.45; }
 .ilu-kolo { fill: transparent; stroke: var(--sand); stroke-width: 1; opacity: 0.45; transition: r 0.2s, opacity 0.2s; }
 .ilu-jest .ilu-kolo { opacity: 0.9; stroke-width: 1.4; }
 .ilu-kropka { fill: var(--gold); }
 .ilu-aktywny .ilu-kolo { fill: rgba(230, 196, 138, 0.35); opacity: 1; stroke-width: 2; }
-.ilu-podpis { font-size: 9px; fill: var(--sand); opacity: 0.75; pointer-events: none; }
+.ilu-podpis { font-size: 11px; fill: var(--sand); opacity: 0.75; pointer-events: none; }
 .ilu-aktywny .ilu-podpis { opacity: 1; font-weight: 700; }
-.inw-reka-uklad { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 18px; align-items: start; }
-.inw-lista li { cursor: default; }
-.zw-rysunek { margin: 4px auto 14px; max-width: 260px; }
 @media (max-width: 520px) {
-  .inw-reka-uklad { grid-template-columns: 1fr; }
-  .inw-rysunek { max-width: 190px; margin: 0 auto; }
 }
 
 /* Wspólne tematy: na samym końcu procent zgodności systemów */
@@ -3092,3 +3080,37 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 .pz-korekta:hover, .pz-korekta:focus-visible { border-color: var(--line-gold); }
 .pz-korekta-ty { border-color: var(--gold); }
 .pz-ty { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); line-height: 1; }
+
+/* Przewodnik po dłoniach (components/HiromancjaInwentarz.tsx) */
+.prz { max-width: 860px; margin: 0 auto; }
+.prz-postep { text-align: center; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sand); opacity: 0.85; margin-bottom: 8px; }
+.prz-pasek { height: 3px; background: var(--line-soft); border-radius: 2px; max-width: 420px; margin: 0 auto 18px; overflow: hidden; }
+.prz-pasek span { display: block; height: 100%; background: var(--sand); transition: width 0.3s; }
+.prz-zmiana { text-align: center; color: var(--sand); font-size: 0.9rem; margin-bottom: 14px; }
+.prz-uklad { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 34px; align-items: center; }
+.prz-rysunek .ilu-dlon { width: 100%; max-width: 340px; }
+.prz-pytanie { animation: prz-wejscie 0.35s ease; text-align: left; }
+.prz-pytanie p { text-align: inherit; }
+.prz-pytanie h3 { text-align: inherit; font-size: 1.5rem; color: var(--sand); margin-bottom: 8px; }
+.prz-opis { font-size: 0.92rem; line-height: 1.6; margin-bottom: 10px; }
+.prz-ai { font-size: 0.84rem; line-height: 1.55; color: var(--sand); opacity: 0.85; border-left: 2px solid var(--sand); padding-left: 10px; margin-bottom: 16px; }
+.prz-odpowiedzi { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.prz-btn { font: inherit; font-size: 0.9rem; padding: 10px 18px; border-radius: 999px; border: 1px solid var(--sand); background: transparent; color: var(--sand); cursor: pointer; transition: background 0.2s, color 0.2s; }
+.prz-btn:hover { background: rgba(230, 196, 138, 0.14); }
+.prz-btn-mam { background: var(--sand); color: #1d1530; font-weight: 600; }
+.prz-btn-mam:hover { background: #f0d6a6; }
+.prz-btn-cichy { border-color: transparent; opacity: 0.75; text-decoration: underline; padding-left: 8px; padding-right: 8px; }
+.prz-znaki { display: flex; flex-wrap: wrap; gap: 8px; }
+.prz-znak { font: inherit; font-size: 0.86rem; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line-soft); background: rgba(230, 196, 138, 0.04); color: var(--sand); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.prz-znak-zaz { border-color: var(--sand); background: rgba(230, 196, 138, 0.22); font-weight: 600; }
+.prz-znak-ai { font-size: 0.6rem; letter-spacing: 0.08em; padding: 1px 5px; border-radius: 4px; border: 1px solid var(--sand); opacity: 0.8; }
+.prz-podsumowanie { list-style: none; padding: 0; margin: 10px auto 0; max-width: 520px; display: grid; }
+.prz-podsumowanie li { padding: 7px 0; border-bottom: 1px solid var(--line-soft); color: var(--sand); font-size: 0.9rem; }
+@keyframes prz-wejscie { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (max-width: 720px) {
+  .prz-uklad { grid-template-columns: 1fr; gap: 14px; }
+  .prz-rysunek .ilu-dlon { max-width: 260px; }
+  .prz-pytanie { text-align: center; }
+  .prz-odpowiedzi, .prz-znaki { justify-content: center; }
+  .prz-pytanie .prz-ai { border-left: 0; padding-left: 0; }
+}

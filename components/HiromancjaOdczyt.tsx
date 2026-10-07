@@ -83,7 +83,7 @@ interface Props {
   /** Znaki, które osoba widzi na żywo — AI odpowiada, czy widzi je na zdjęciach. */
   deklaracje?: ZnakWlasny[];
   /** Krok 1: lista znaków i linii sprawdzona przez osobę + surowe oględziny (żeby ich nie powtarzać). */
-  inwentarz?: { znaki: string[]; linie: string[]; ogledzinyTekst: string };
+  inwentarz?: { znaki: string[]; linie: string[]; brak?: string[]; ogledzinyTekst: string };
   /** Odczyt rusza sam (po „Dalej” w kroku 1), bez osobnego przycisku. */
   autoStart?: boolean;
   plec?: "on" | "ona" | "ono";
@@ -111,7 +111,7 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie, deklarac
         body: JSON.stringify({
           wiodaca, bierna, plec, imie,
           ...(inwentarz ? {
-            inwentarz: { znaki: inwentarz.znaki, linie: inwentarz.linie },
+            inwentarz: { znaki: inwentarz.znaki, linie: inwentarz.linie, brak: inwentarz.brak ?? [] },
             ogledzinyTekst: inwentarz.ogledzinyTekst || undefined,
           } : {}),
           deklaracje: deklaracje.map((d) => ({
