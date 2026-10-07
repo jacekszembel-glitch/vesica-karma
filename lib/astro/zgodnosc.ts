@@ -33,8 +33,9 @@ import type { TypDloni } from "../hiromancja";
  */
 
 export type Ocena = 1 | 0 | -1;
-export type SystemZgodnosci = "astrologia" | "numerologia" | "chiromancja";
-export const SYSTEMY_ZGODNOSCI: SystemZgodnosci[] = ["astrologia", "numerologia", "chiromancja"];
+export type SystemZgodnosci = "astrologia" | "chiromancja" | "numerologia";
+/** Stała kolejność we wszystkich tabelach Twojej Karmy: astrologia → chiromancja → numerologia. */
+export const SYSTEMY_ZGODNOSCI: SystemZgodnosci[] = ["astrologia", "chiromancja", "numerologia"];
 
 /** Oceny planet w jednym systemie; `null` = system nie mówi nic o tej planecie. */
 export type OcenyPlanet = Record<PlanetId, Ocena | null>;
@@ -449,7 +450,7 @@ export function porownajSystemy(
   // Przypadek liczony tą samą miarą — porównanie pozostaje uczciwe.
   const zgodnoscOcen = (x: Ocena, y: Ocena) => 1 - Math.abs(x - y) / 2;
   const pary: [SystemZgodnosci, SystemZgodnosci][] = [
-    ["astrologia", "numerologia"], ["astrologia", "chiromancja"], ["numerologia", "chiromancja"],
+    ["astrologia", "chiromancja"], ["astrologia", "numerologia"], ["chiromancja", "numerologia"],
   ];
   const wynikPary = pary.map(([a, b]) => {
     const wspolne = PLANET_ORDER.filter((p) => oc[a][p] !== null && oc[b][p] !== null);

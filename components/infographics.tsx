@@ -300,7 +300,7 @@ export function SceneHiromancja(p: S) {
  */
 export function SceneKarma(p: S) {
   return (
-    <Scene {...p} label="Karma — numerologia, astrologia i chiromancja zbiegające się w jeden odczyt">
+    <Scene {...p} label="Karma — astrologia, chiromancja i numerologia zbiegające się w jeden odczyt">
       <circle cx="76" cy="56" r="27" stroke={G} strokeWidth="1.4" />
       <circle cx="160" cy="38" r="27" stroke={T} strokeWidth="1.4" />
       <circle cx="244" cy="56" r="27" stroke={GD} strokeWidth="1.1" strokeDasharray="2 4" />

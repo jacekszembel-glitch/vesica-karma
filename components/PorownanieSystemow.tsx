@@ -20,7 +20,7 @@ import type { TypDloni } from "@/lib/hiromancja";
  */
 
 const NAZWA: Record<SystemZgodnosci, string> = {
-  astrologia: "Astrologia", numerologia: "Numerologia", chiromancja: "Chiromancja",
+  astrologia: "Astrologia", chiromancja: "Chiromancja", numerologia: "Numerologia",
 };
 const ZYWIOL: Record<TypDloni, string> = { ziemia: "Ziemia", powietrze: "Powietrze", ogien: "Ogień", woda: "Woda" };
 
@@ -209,7 +209,7 @@ export default function PorownanieSystemow({ wynik, mosty, dlonZrodlo, dlonZapis
     <section className="porownanie" style={{ textAlign: "left" }}>
       <h2 className="porownanie-tytul">Zgodność trzech systemów</h2>
       <p className="muted" style={{ fontSize: "0.92rem", lineHeight: 1.75 }}>
-        Astrologia, numerologia i chiromancja mówią wspólnym językiem dziewięciu planet. Każdy system
+        Astrologia, chiromancja i numerologia mówią wspólnym językiem dziewięciu planet. Każdy system
         ocenia każdą planetę jako mocną, przeciętną albo słabą — tu widać, gdzie te oceny się spotykają,
         a gdzie rozchodzą.
       </p>
@@ -314,8 +314,36 @@ export default function PorownanieSystemow({ wynik, mosty, dlonZrodlo, dlonZapis
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr className="pz-razem">
+              <td>Wynik tabeli</td>
+              {SYSTEMY_ZGODNOSCI.map((s) => {
+                const mocne = wynik.planety.filter((p) => p.oceny[s] === 1).length;
+                const zg = wynik.systemy[s].zgodnosc;
+                return (
+                  <td key={s} className="srodek">
+                    <span className="pz-razem-liczba">{zg === null ? "–" : proc(zg)}</span>
+                    <span className="porownanie-pod muted">zgodność z resztą · mocne: {mocne}</span>
+                  </td>
+                );
+              })}
+              <td>
+                <span className="pz-razem-liczba">{proc(wynik.spojnosc)}</span>
+                <span className="porownanie-pod muted">
+                  {(["zgodnosc3", "zgodnosc2", "mieszane", "roznica"] as const)
+                    .map((r) => [RODZAJ[r], wynik.planety.filter((p) => p.rodzaj === r).length] as const)
+                    .filter(([, n]) => n > 0).map(([t, n]) => `${t}: ${n}`).join(" · ")}
+                </span>
+              </td>
+            </tr>
+          </tfoot>
         </table>
       </div>
+      <p className="muted" style={{ fontSize: "0.78rem", marginTop: 8, lineHeight: 1.5 }}>
+        Wynik tabeli: w kolumnach — jak często oceny danego systemu zgadzają się z dwoma pozostałymi i ile planet uznaje
+        za mocne; w ostatniej kolumnie — średnia zgodność ocen wszystkich par ({proc(wynik.spojnosc)}, przypadkiem byłoby
+        {" "}{proc(wynik.przypadek)}) i ile planet ma każdy rodzaj wyniku.
+      </p>
       {onKorekta && (
         <p className="muted" style={{ fontSize: "0.78rem", marginTop: 10, lineHeight: 1.5 }}>
           Znasz swoją dłoń lepiej niż zdjęcie? Kliknij ocenę w kolumnie Chiromancja, żeby ją ustawić samemu

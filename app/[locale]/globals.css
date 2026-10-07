@@ -3278,3 +3278,7 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 
 .ilu-ryba { fill: none; stroke: var(--sand); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .prz-ryba-znaczenia { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 4px; font-size: 0.8rem; line-height: 1.5; color: var(--sand); opacity: 0.9; text-align: left; }
+
+/* Zgodność trzech systemów — wiersz „Wynik tabeli” */
+.pz-razem td { border-top: 1px solid var(--line-gold); border-bottom: 0; padding-top: 12px; font-weight: 700; vertical-align: top; }
+.pz-razem-liczba { color: var(--gold); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
