@@ -33,7 +33,7 @@ const SCHEMAT_INWENTARZA = {
         properties: {
           reka: { type: "string", enum: ["wiodaca", "bierna"] },
           wzgorek: { type: "string", enum: ["jowisz", "saturn", "slonce", "merkury", "wenus", "ksiezyc", "mars", "rahu", "ketu", "czworobok"] },
-          znak: { type: "string", enum: ["x", "gwiazda", "kwadrat", "trojkat", "kratka", "wyspa", "krzyz_mistyczny"] },
+          znak: { type: "string", enum: ["x", "gwiazda", "kwadrat", "trojkat", "kratka", "wyspa", "kreski", "krzyz_mistyczny"] },
           pewnosc: { type: "string", enum: ["wyrazny", "delikatny"] },
           gdzie: { type: "string" },
         },
@@ -65,9 +65,9 @@ Zasady:
 - Nie powtarzaj tego samego znaku dwa razy z różnych zbliżeń tej samej ręki.
 
 Odpowiedz WYŁĄCZNIE jednym obiektem JSON, bez żadnego tekstu przed ani po:
-{"znaki":[{"reka":"wiodaca|bierna","wzgorek":"jowisz|saturn|slonce|merkury|wenus|ksiezyc|mars|rahu|ketu|czworobok","znak":"x|gwiazda|kwadrat|trojkat|kratka|wyspa|krzyz_mistyczny","pewnosc":"wyrazny|delikatny","gdzie":"krótko, dokładne miejsce"}],
+{"znaki":[{"reka":"wiodaca|bierna","wzgorek":"jowisz|saturn|slonce|merkury|wenus|ksiezyc|mars|rahu|ketu|czworobok","znak":"x|gwiazda|kwadrat|trojkat|kratka|wyspa|kreski|krzyz_mistyczny","pewnosc":"wyrazny|delikatny","gdzie":"krótko, dokładne miejsce"}],
  "linie":[{"reka":"wiodaca|bierna","linia":"zycia|glowy|serca|losu|slonca|merkurego|intuicji|podrozy|relacji|pas_wenus|pierscien_salomona|marsa","stan":"wyrazna|odcinkowa|slaba","gdzie":"krótko, przebieg"}]}
-(rahu = środek dłoni, ketu = nad nadgarstkiem między Wenus a Księżycem — wg chiromancji indyjskiej).`;
+(rahu = środek dłoni, ketu = nad nadgarstkiem między Wenus a Księżycem — wg chiromancji indyjskiej; "kreski" = pionowa linia albo pionowe kreski na wzgórku).`;
 
 export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {

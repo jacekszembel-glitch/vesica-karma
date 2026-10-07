@@ -61,7 +61,7 @@ const NAZWA_LINII: Record<LiniaDloni, string> = {
 /** Przysłówkiem — pasuje i do „linia”, i do „linie”, i do „pas”/„pierścień”. */
 const STAN_LINII: Record<StanLinii, string> = { wyrazna: "wyraźnie", odcinkowa: "odcinkami", slaba: "słabo", brak: "brak" };
 const NAZWA_ZNAKU: Record<RodzajZnaku, string> = {
-  x: "X", gwiazda: "gwiazda", kwadrat: "kwadrat", trojkat: "trójkąt", kratka: "kratka", wyspa: "wyspa", krzyz_mistyczny: "krzyż mistyczny",
+  x: "X", gwiazda: "gwiazda", kwadrat: "kwadrat", trojkat: "trójkąt", kratka: "kratka", wyspa: "wyspa", kreski: "pionowa linia", krzyz_mistyczny: "krzyż mistyczny",
 };
 const DOPELNIACZ: Record<PlanetId, string> = {
   sun: "Słońca", moon: "Księżyca", mars: "Marsa", mercury: "Merkurego", jupiter: "Jowisza",
@@ -264,7 +264,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
           silna("sun") ? tak(`Słońce — ${chart.planets.sun.dignity}`) : null,
           talent("sztuka", "muzyka"),
         )),
-        dlon: reka(() => najlepsze(linia("slonca"), znakNa("sun", ["gwiazda", "trojkat"]), wzgorek("sun"))),
+        dlon: reka(() => najlepsze(linia("slonca"), znakNa("sun", ["gwiazda", "trojkat", "kreski"]), wzgorek("sun"))),
         numerologia: liczby("sun"),
       },
     },
