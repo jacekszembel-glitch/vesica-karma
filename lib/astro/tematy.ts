@@ -5,6 +5,7 @@ import type { NumerologyResult } from "./numerology";
 import { dziedzinyTalentu, type DziedzinaTalentu } from "./dziedzinyTalentu";
 import { ROZKLADY_TALENTU } from "./srednieTalentu";
 import { procentNizej, SREDNIE_BILANSU } from "./srednieBilansu";
+import { ROZKLADY_TEMATOW } from "./rozkladyTematow";
 import { ocenaFinansowa } from "./finanseWedyjskie";
 import { jogakaraka } from "./karaki";
 import { ocenyNumerologii, PLANETA_CYFRA, type DlonWLiczbach, type LiniaDloni, type MiejsceZnaku, type RodzajZnaku, type StanLinii } from "./zgodnosc";
@@ -30,6 +31,8 @@ export interface Wskazanie {
   moc?: number;
   /** Wszystkie spełnione warunki tematu w tym systemie (opis = najmocniejszy z nich). */
   dowody?: string[];
+  /** Kosmogram: siła tematu na tle 20 000 losowych horoskopów (0–100) — z niej wynika tak / częściowo / nie. */
+  percentyl?: number;
 }
 export type SystemTematu = "kosmogram" | "dlon" | "numerologia";
 
@@ -98,7 +101,25 @@ export function dlonReki(dlon: DlonWLiczbach | null, reka: "wiodaca" | "bierna")
  * opcje.varga — wykres dzielony (np. D9): bez talentów i bez finansów z zakładki Finanse,
  * bo ich rozkłady „na tle 20 000 horoskopów” policzono dla mapy głównej; finanse z D9 = planety w 2. i 11. domu.
  */
-export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: DlonWLiczbach | null, opcje: { varga?: boolean } = {}): TematWspolny[] {
+/** Opis wskazania kosmogramu z percentylem — do rozwinięć tabel (null = nie dotyczy, użyj zwykłego opisu). */
+export function opisKosmogramu(w: Wskazanie): string | null {
+  if (w.percentyl === undefined) return null;
+  const p = Math.round(w.percentyl);
+  const dowody = (w.dowody ?? [w.opis]).filter(Boolean).join("; ");
+  if (w.stan === "tak" || w.stan === "czesciowo") return `${dowody} — mocniej niż u ${p}% ludzi`;
+  return dowody
+    ? `jest: ${dowody} — ale słabiej niż u większości (mocniej niż u ${p}% ludzi; ◐ od 50%, ✦ od 70%)`
+    : null;
+}
+
+/** Progi tematów w kosmogramie: „tak” = mocniej niż u 70% ludzi, „częściowo” = mocniej niż u 50%. */
+export const PROG_TAK = 70;
+export const PROG_CZESCIOWO = 50;
+
+/**
+ * opcje.surowe — bez przeliczenia na percentyle (tylko dla generatora rozkładów).
+ */
+export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: DlonWLiczbach | null, opcje: { varga?: boolean; surowe?: boolean } = {}): TematWspolny[] {
   /* ---------- kosmogram ---------- */
   const domy = !!chart.angles;
   const w = (d: number) => (domy ? PLANET_ORDER.filter((p) => chart.planets[p].house === d) : []);
@@ -417,6 +438,21 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       t.wskazania.kosmogram = w.stan === "tak" || w.stan === "czesciowo"
         ? { ...w, stan: "tak", moc: (w.moc ?? 0) + (dodatek.moc ?? 0), dowody: [dodatek.opis, ...(w.dowody ?? [w.opis])] }
         : { ...dodatek, dowody: [dodatek.opis] };
+    }
+  }
+
+  // PERCENTYLE: kosmogram zaznaczał tematy u 57–98% ludzi (pomiar 2026-10-07), więc zgodność z dłonią niewiele
+  // znaczyła. Teraz siła tematu (suma wszystkich spełnionych warunków) idzie na tło 20 000 losowych horoskopów —
+  // „tak” ma ok. 30% ludzi z najmocniejszym wskazaniem, „częściowo” kolejne 20%. Dowody zostają do wglądu.
+  if (domy && !opcje.surowe) {
+    const rozklady = opcje.varga ? ROZKLADY_TEMATOW.d9 : ROZKLADY_TEMATOW.d1;
+    for (const t of tematy) {
+      const r = rozklady[t.id];
+      const w = t.wskazania.kosmogram;
+      if (!r || w.stan === "brak_danych" || w.stan === "nie_dotyczy") continue;
+      const p = procentNizej(w.stan === "nie" ? 0 : w.moc ?? 0, r);
+      const stan = w.stan === "nie" ? "nie" : p >= PROG_TAK ? "tak" : p >= PROG_CZESCIOWO ? "czesciowo" : "nie";
+      t.wskazania.kosmogram = { ...w, stan, percentyl: p, dowody: w.dowody ?? (w.opis ? [w.opis] : []) };
     }
   }
 

@@ -2,7 +2,7 @@
 
 import { Fragment, useState } from "react";
 import type { VedicChart } from "@/lib/astro/chart";
-import { KRYTERIA_TEMATOW, type TematWspolny, type SystemTematu } from "@/lib/astro/tematy";
+import { KRYTERIA_TEMATOW, opisKosmogramu, type TematWspolny, type SystemTematu } from "@/lib/astro/tematy";
 import { droga, spojnosc, SYSTEMY, type RodzajSpojnosci } from "@/lib/astro/spojnosc";
 
 /**
@@ -31,9 +31,9 @@ function Szczegoly({ temat }: { temat: TematWspolny }) {
               <span className="sp-szcz-nazwa">{PELNA_NAZWA[x]}</span>
               <span className="sp-szcz-znak">{w.stan === "tak" ? "✦" : w.stan === "czesciowo" ? "◐" : w.stan === "nie" ? "0" : "?"}</span>
               <span className="sp-szcz-tresc">
-                {ma ? (w.dowody ?? [w.opis]).join("; ")
+                {(x === "kosmogram" ? opisKosmogramu(w) : null) ?? (ma ? (w.dowody ?? [w.opis]).join("; ")
                   : w.stan === "nie" ? `nic z tego nie występuje: ${kryt?.[x] ?? ""}`
-                    : `brak danych — tu sprawdzamy: ${kryt?.[x] ?? ""}`}
+                    : `brak danych — tu sprawdzamy: ${kryt?.[x] ?? ""}`)}
               </span>
             </li>
           );

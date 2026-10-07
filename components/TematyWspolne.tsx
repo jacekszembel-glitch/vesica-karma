@@ -173,7 +173,7 @@ export default function TematyWspolne({ tematy }: { tematy: TematWspolny[] }) {
                   <div key={k.id} className={`tw-komorka tw-${w.stan}`} role="cell">
                     <span className="tw-system">{k.nazwa}</span>
                     <span className="tw-znacznik" title={ZNACZNIK[w.stan].tytul}>{ZNACZNIK[w.stan].znak}</span>
-                    {w.opis && <span className="tw-opis">{w.opis}</span>}
+                    {w.opis && <span className="tw-opis">{w.opis}{k.id === "kosmogram" && w.percentyl !== undefined ? ` · mocniej niż u ${Math.round(w.percentyl)}% ludzi` : ""}</span>}
                   </div>
                 );
               })}

@@ -2,7 +2,7 @@
 
 import { Fragment, useState } from "react";
 import { spojnoscRak, KOLUMNY_RAK, type KolumnaRak, type RodzajRak, type WierszRak } from "@/lib/astro/spojnosc";
-import { KRYTERIA_TEMATOW, type TematWspolny, type Wskazanie, type SystemTematu } from "@/lib/astro/tematy";
+import { KRYTERIA_TEMATOW, opisKosmogramu, type TematWspolny, type Wskazanie, type SystemTematu } from "@/lib/astro/tematy";
 
 /**
  * TABELA 4 — „Niebo i dłonie”: ręka wiodąca czytana jak mapa główna (D1), bierna jak nawamsza (D9).
@@ -51,10 +51,10 @@ function Szczegoly({ r, maBierna }: { r: WierszRak; maBierna: boolean }) {
               <span className="sp-szcz-nazwa">{p.nazwa}</span>
               <span className="sp-szcz-znak">{!p.w || st === "brak_danych" || st === "nie_dotyczy" ? "?" : st === "tak" ? "✦" : st === "czesciowo" ? "◐" : p.potwierdza ? "—" : "0"}</span>
               <span className="sp-szcz-tresc">
-                {ma ? (p.w!.dowody ?? [p.w!.opis]).join("; ")
+                {(p.system === "kosmogram" && p.w ? opisKosmogramu(p.w) : null) ?? (ma ? (p.w!.dowody ?? [p.w!.opis]).join("; ")
                   : !p.w || st === "brak_danych" ? `brak danych — tu sprawdzamy: ${kryt?.[p.system] ?? ""}`
                     : p.tylkoZnaki ? `brak znaków; wzgórki i linie tej ręki nie były jeszcze oceniane — sprawdzamy: ${kryt?.[p.system] ?? ""}`
-                      : `nic z tego nie występuje: ${kryt?.[p.system] ?? ""}`}
+                      : `nic z tego nie występuje: ${kryt?.[p.system] ?? ""}`)}
               </span>
             </li>
           );
