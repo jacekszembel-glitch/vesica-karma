@@ -180,6 +180,8 @@ export type RodzajRak = "zgodne_tak" | "wiekszosc_tak" | "zgodne_nie" | "wiekszo
 
 export interface WierszRak {
   temat: TematWspolny;
+  /** Ten sam temat policzony dla D9 i ręki biernej. */
+  temat9?: TematWspolny;
   wartosci: Partial<Record<KolumnaRak, number>>;
   /** Numerologia: 1 / ½ = potwierdza, 0 = nie dokłada, null = brak danych. */
   numerologia: number | null;
@@ -210,7 +212,7 @@ export function spojnoscRak(d1: TematWspolny[], d9: TematWspolny[]): SpojnoscRak
     dodaj("d1", wartosc(t.wskazania.kosmogram.stan));
     dodaj("wiodaca", wartosc(t.wskazania.dlon.stan));
     if (t9) { dodaj("d9", wartosc(t9.wskazania.kosmogram.stan)); dodaj("bierna", wartosc(t9.wskazania.dlon.stan)); }
-    return { temat: t, wartosci: v, numerologia: wartosc(t.wskazania.numerologia.stan) };
+    return { temat: t, temat9: t9, wartosci: v, numerologia: wartosc(t.wskazania.numerologia.stan) };
   });
 
   const rozklad = Object.fromEntries(KOLUMNY_RAK.map((k) => {

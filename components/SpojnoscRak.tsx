@@ -1,7 +1,8 @@
 "use client";
 
-import { spojnoscRak, KOLUMNY_RAK, type KolumnaRak, type RodzajRak } from "@/lib/astro/spojnosc";
-import type { TematWspolny } from "@/lib/astro/tematy";
+import { Fragment, useState } from "react";
+import { spojnoscRak, KOLUMNY_RAK, type KolumnaRak, type RodzajRak, type WierszRak } from "@/lib/astro/spojnosc";
+import { KRYTERIA_TEMATOW, type TematWspolny, type Wskazanie, type SystemTematu } from "@/lib/astro/tematy";
 
 /**
  * TABELA 4 — „Niebo i dłonie”: ręka wiodąca czytana jak mapa główna (D1), bierna jak nawamsza (D9).
@@ -27,6 +28,42 @@ const KOLEJNOSC: RodzajRak[] = ["zgodne_tak", "wiekszosc_tak", "rozbiezne", "wie
 
 const znak = (v: number | undefined | null) => (v === undefined || v === null ? "?" : v === 1 ? "✦" : v === 0.5 ? "◐" : "0");
 const procent = (x: number) => `${Math.round(x * 100)}%`;
+/** Rozwinięcie wiersza: co dokładnie dało wynik w każdej kolumnie, a przy 0 i „?” — czego szukaliśmy. */
+function Szczegoly({ r, maBierna }: { r: WierszRak; maBierna: boolean }) {
+  const kryt = KRYTERIA_TEMATOW[r.temat.id];
+  const pozycje: { nazwa: string; w?: Wskazanie; system: SystemTematu; potwierdza?: boolean; tylkoZnaki?: boolean }[] = [
+    { nazwa: "Astrologia — D1 (mapa główna)", w: r.temat.wskazania.kosmogram, system: "kosmogram" },
+    { nazwa: "Chiromancja — dłoń wiodąca", w: r.temat.wskazania.dlon, system: "dlon" },
+    { nazwa: "Astrologia — D9 (nawamsza)", w: r.temat9?.wskazania.kosmogram, system: "kosmogram" },
+    { nazwa: "Chiromancja — dłoń bierna", w: r.temat9?.wskazania.dlon, system: "dlon", tylkoZnaki: !maBierna },
+    { nazwa: "Numerologia (tylko potwierdza)", w: r.temat.wskazania.numerologia, system: "numerologia", potwierdza: true },
+  ];
+  return (
+    <div className="sp-szczegoly">
+      <p className="sp-szcz-znaczenie">{r.temat.znaczenie}</p>
+      <ul>
+        {pozycje.map((p) => {
+          const st = p.w?.stan;
+          const ma = st === "tak" || st === "czesciowo";
+          return (
+            <li key={p.nazwa} className={ma ? "sp-szcz-ma" : ""}>
+              <span className="sp-szcz-nazwa">{p.nazwa}</span>
+              <span className="sp-szcz-znak">{!p.w || st === "brak_danych" || st === "nie_dotyczy" ? "?" : st === "tak" ? "✦" : st === "czesciowo" ? "◐" : p.potwierdza ? "—" : "0"}</span>
+              <span className="sp-szcz-tresc">
+                {ma ? (p.w!.dowody ?? [p.w!.opis]).join("; ")
+                  : !p.w || st === "brak_danych" ? `brak danych — tu sprawdzamy: ${kryt?.[p.system] ?? ""}`
+                    : p.tylkoZnaki ? `brak znaków; wzgórki i linie tej ręki nie były jeszcze oceniane — sprawdzamy: ${kryt?.[p.system] ?? ""}`
+                      : `nic z tego nie występuje: ${kryt?.[p.system] ?? ""}`}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="sp-szcz-uwaga">Skupisko 3+ planet w jednym domu wzmacnia też tematy tego domu (np. 9. dom: podróże, duchowość, ambicja).</p>
+    </div>
+  );
+}
+
 function rzadkosc(p: number): string {
   if (p >= 0.5) return "często";
   return `1 na ${Math.max(2, Math.round(1 / Math.max(p, 0.0001)))}`;
@@ -39,6 +76,12 @@ export default function SpojnoscRak({ d1, d9, maBierna }: {
   maBierna: boolean;
 }) {
   const s = spojnoscRak(d1, d9);
+  const [otwarte, setOtwarte] = useState<Set<string>>(new Set());
+  const przelacz = (id: string) => setOtwarte((o) => {
+    const n = new Set(o);
+    if (n.has(id)) n.delete(id); else n.add(id);
+    return n;
+  });
   const wiersze = [...s.wiersze].sort((a, b) => KOLEJNOSC.indexOf(a.rodzaj) - KOLEJNOSC.indexOf(b.rodzaj) || b.tak - a.tak || a.szansa - b.szansa);
   const glowne = s.pary.slice(0, 2);
   // punktacja: ✦ = 1, ◐ = ½ w każdej z czterech kolumn; maksimum = liczba ocen z danymi
@@ -93,14 +136,24 @@ export default function SpojnoscRak({ d1, d9, maBierna }: {
           </thead>
           <tbody>
             {wiersze.map((r) => (
-              <tr key={r.temat.id} className={RODZAJ[r.rodzaj].klasa}>
-                <td>{r.temat.nazwa}</td>
+              <Fragment key={r.temat.id}>
+              <tr className={`${RODZAJ[r.rodzaj].klasa} sp-klik${otwarte.has(r.temat.id) ? " sp-otwarty" : ""}`} onClick={() => przelacz(r.temat.id)}>
+                <td>
+                  <button type="button" className="sp-rozwin" aria-expanded={otwarte.has(r.temat.id)}
+                    onClick={(e) => { e.stopPropagation(); przelacz(r.temat.id); }}>
+                    <span className="sp-strzalka" aria-hidden="true">▸</span>{r.temat.nazwa}
+                  </button>
+                </td>
                 {KOLUMNY_RAK.map((k) => <td key={k} className="srodek sp-znak">{znak(r.wartosci[k])}</td>)}
                 <td className="srodek sp-znak sp-num">{r.numerologia ? znak(r.numerologia) : r.numerologia === 0 ? "—" : "?"}</td>
                 <td><span className="sp-rodzaj">{RODZAJ[r.rodzaj].tekst(r.tak, r.n)}</span>{r.numerologia ? <span className="sp-num-potw"> + liczby</span> : null}{r.rodzaj !== "za_malo" && <span className="sp-rz-tel">{rzadkosc(r.szansa)}</span>}</td>
                 <td className="srodek sp-rzadkosc">{r.rodzaj === "za_malo" ? "—" : rzadkosc(r.szansa)}</td>
                 <td className="srodek sp-pkt">{pkt(KOLUMNY_RAK.reduce((a, k) => a + (r.wartosci[k] ?? 0), 0))}<small>/{r.n}</small></td>
               </tr>
+              {otwarte.has(r.temat.id) && (
+                <tr className="sp-szcz-wiersz"><td colSpan={9}><Szczegoly r={r} maBierna={maBierna} /></td></tr>
+              )}
+              </Fragment>
             ))}
           </tbody>
           <tfoot>
@@ -124,7 +177,7 @@ export default function SpojnoscRak({ d1, d9, maBierna }: {
         </p>
       </div>
       <p className="muted porownanie-legenda">
-        ✦ tak · ◐ częściowo · 0 sprawdzone, niezaznaczone · ? brak danych · liczby: ✦/◐ potwierdza, — nie dokłada.
+        Kliknij wiersz, żeby zobaczyć, co dokładnie daje wynik. ✦ tak · ◐ częściowo · 0 sprawdzone, niezaznaczone · ? brak danych · liczby: ✦/◐ potwierdza, — nie dokłada.
         D9 liczony bez talentów (ich rozkład jest policzony dla mapy głównej).
       </p>
       <p className="muted" style={{ fontSize: "0.76rem", lineHeight: 1.6, marginTop: 8, textAlign: "left" }}>

@@ -440,3 +440,65 @@ export function najwazniejszeTematy(tematy: TematWspolny[]): GlosSystemu[] {
     return [{ system: s, temat: t, takze }];
   });
 }
+
+/**
+ * Co dokładnie sprawdzamy przy każdym temacie w każdym systemie — do rozwijanych wierszy tabel,
+ * żeby przy 0 było widać, czego szukaliśmy. Musi zgadzać się z warunkami w tematyWspolne() wyżej.
+ */
+export const KRYTERIA_TEMATOW: Record<string, Record<SystemTematu, string>> = {
+  cel: {
+    kosmogram: "skupisko 3+ planet w jednym domu albo planety w 10. domu",
+    dlon: "linia losu",
+    numerologia: "Bhagyank równy Mulankowi albo liczbie imienia",
+  },
+  podroze: {
+    kosmogram: "Księżyc lub Rahu w 9. albo 12. domu; planety w 9. i 12. domu",
+    dlon: "linie podróży; znaki na wzgórku Księżyca",
+    numerologia: "5 (Merkury) wśród Twoich liczb",
+  },
+  duchowosc: {
+    kosmogram: "Ketu lub Jowisz w 1., 5., 9. albo 12. domu; Księżyc w 8. albo 12.; planety w 12. domu; talent: duchowość",
+    dlon: "krzyż mistyczny; linia intuicji; pierścień Salomona",
+    numerologia: "7 (Ketu) wśród Twoich liczb",
+  },
+  uznanie: {
+    kosmogram: "Słońce w 1., 5., 9. albo 10. domu lub w swojej godności; talent: sztuka, muzyka",
+    dlon: "linia Słońca; gwiazda lub trójkąt na wzgórku Słońca; wydatny wzgórek Słońca",
+    numerologia: "1 (Słońce) wśród Twoich liczb",
+  },
+  ambicja: {
+    kosmogram: "talent: nauczanie, przywództwo; Jowisz w kendrze, 5. albo 9. domu lub w swojej godności",
+    dlon: "wydatny wzgórek Jowisza; kwadrat, gwiazda lub trójkąt na nim; pierścień Salomona",
+    numerologia: "3 (Jowisz) wśród Twoich liczb",
+  },
+  zwiazek: {
+    kosmogram: "Wenus w swojej godności albo jogakaraka; planety w 7. domu",
+    dlon: "linie relacji; wydatny wzgórek Wenus; X na wzgórku Jowisza; linia serca",
+    numerologia: "6 (Wenus) albo 2 (Księżyc) wśród Twoich liczb",
+  },
+  umysl: {
+    kosmogram: "Merkury w kendrze lub w swojej godności; planety w 3. domu; talent: słowo, biznes",
+    dlon: "linia Merkurego; wydatny wzgórek Merkurego; linia głowy",
+    numerologia: "5 (Merkury) wśród Twoich liczb",
+  },
+  energia: {
+    kosmogram: "Mars jogakaraka; Mars w kendrze, 3., 6. albo 11. domu lub w swojej godności; talent: sport",
+    dlon: "linia Marsa (siostrzana); wydatny wzgórek Marsa; linia życia",
+    numerologia: "9 (Mars) wśród Twoich liczb",
+  },
+  praca: {
+    kosmogram: "Saturn jogakaraka; Saturn w kendrze, 6. albo 11. domu lub w swojej godności; talent: technika",
+    dlon: "wydatny wzgórek Saturna; kwadrat lub trójkąt na nim",
+    numerologia: "8 (Saturn) wśród Twoich liczb",
+  },
+  finanse: {
+    kosmogram: "joga bogactwa albo mocny wskaźnik finansów (w D9: planety w 2. i 11. domu)",
+    dlon: "linia Słońca; linia Merkurego; trójkąt w czworoboku; trójkąt lub gwiazda na wzgórku Merkurego",
+    numerologia: "6 (Wenus) albo 8 (Saturn) wśród Twoich liczb",
+  },
+  przemiana: {
+    kosmogram: "planety w 8. domu",
+    dlon: "wyspy na liniach; kratki na wzgórkach",
+    numerologia: "4 (Rahu) wśród Twoich liczb",
+  },
+};

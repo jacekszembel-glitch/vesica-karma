@@ -3195,3 +3195,31 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
   .sp-pkt-razem { font-size: 0.8rem; }
   .sp-razem-opis { font-size: 0.64rem; }
 }
+
+/* Tabela 4: rozwijane wiersze — co daje wynik */
+.sp-klik { cursor: pointer; }
+.sp-klik:hover td { background: rgba(230, 196, 138, 0.1); }
+.sp-rozwin { all: unset; cursor: pointer; display: inline-flex; gap: 6px; align-items: baseline; text-align: left; }
+.sp-rozwin:focus-visible { outline: 1px solid var(--gold); outline-offset: 2px; }
+.sp-strzalka { font-size: 0.7rem; color: var(--gold); transition: transform 0.2s; display: inline-block; }
+.sp-otwarty .sp-strzalka { transform: rotate(90deg); }
+.sp-otwarty td { border-bottom-color: transparent; }
+.sp-szcz-wiersz td { padding: 0 6px 14px; background: rgba(230, 196, 138, 0.06); }
+.sp-szczegoly { animation: sp-rozwin 0.25s ease; }
+.sp-szczegoly ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.sp-szczegoly li { display: grid; grid-template-columns: 190px 18px minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: 0.8rem; line-height: 1.5; color: var(--muted); }
+.sp-szcz-ma { color: var(--text) !important; }
+.sp-szcz-nazwa { color: var(--sand); font-weight: 600; }
+.sp-szcz-znak { color: var(--gold); text-align: center; }
+.sp-szcz-znaczenie { font-size: 0.8rem; font-style: italic; text-align: left; margin: 4px 0 8px; color: var(--muted); }
+.sp-szcz-uwaga { font-size: 0.7rem; text-align: left; margin-top: 8px; color: var(--muted); }
+@keyframes sp-rozwin { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (max-width: 720px) {
+  .sp-szczegoly li { grid-template-columns: 1fr 18px; }
+  .sp-szcz-tresc { grid-column: 1 / -1; }
+}
+.sp-szczegoly, .sp-szczegoly li > * { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 720px) {
+  .sp-rozwin { display: inline; }
+  .sp-strzalka { margin-right: 3px; }
+}
