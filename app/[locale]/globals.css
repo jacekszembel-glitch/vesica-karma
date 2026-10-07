@@ -3275,3 +3275,6 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 
 .prz-etap { text-align: center; font-family: var(--font-serif); font-size: 1.6rem; color: var(--sand); margin: 6px 0 8px; }
 .prz-etap-opis { text-align: center; max-width: 560px; margin: 0 auto; font-size: 0.92rem; line-height: 1.7; }
+
+.ilu-ryba { fill: rgba(230, 196, 138, 0.25); stroke: var(--sand); stroke-width: 2.2; stroke-linejoin: round; }
+.prz-ryba-znaczenia { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 4px; font-size: 0.8rem; line-height: 1.5; color: var(--sand); opacity: 0.9; text-align: left; }

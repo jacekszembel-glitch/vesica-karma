@@ -78,7 +78,7 @@ const NAZWA_LINII: Record<LiniaDloni, string> = {
 };
 const STAN: Record<StanLinii, string> = { wyrazna: "wyraźna", odcinkowa: "odcinkami", slaba: "słaba", brak: "brak" };
 const ZNAK: Record<RodzajZnaku, string> = {
-  x: "X", gwiazda: "gwiazda", kwadrat: "kwadrat", trojkat: "trójkąt", kratka: "kratka", wyspa: "wyspa", kreski: "pionowa linia", kreski_drobne: "drobne pionowe kreski", krzyz_mistyczny: "krzyż mistyczny",
+  x: "X", gwiazda: "gwiazda", kwadrat: "kwadrat", trojkat: "trójkąt", kratka: "kratka", wyspa: "wyspa", kreski: "pionowa linia", kreski_drobne: "drobne pionowe kreski", ryba: "znak ryby", krzyz_mistyczny: "krzyż mistyczny",
 };
 
 /** Głos dłoni dla planety: wzgórek, linia planety i znaki na jej wzgórku (znak = podkreślenie miejsca). */

@@ -65,10 +65,19 @@ const OPIS_MARSA: Record<CzescMarsa, string> = {
   dolny: "Mars dolny leży przy kciuku, nad wzgórkiem Wenus, wewnątrz łuku linii życia. Klasycznie: odwaga fizyczna, siła działania, umiejętność obrony.",
 };
 const nazwaWzgorka = (m: MiejsceZnaku, czesc?: CzescMarsa) => (m === "mars" && czesc ? NAZWA_MARSA[czesc] : nazwaMiejsca(m));
-const ZNAKI_NA_WZGORKU = RODZAJE_ZNAKOW_NAZWY.filter((z) => z.id !== "krzyz_mistyczny");
+// krzyż mistyczny i znak ryby mają osobne pytania
+const ZNAKI_NA_WZGORKU = RODZAJE_ZNAKOW_NAZWY.filter((z) => z.id !== "krzyz_mistyczny" && z.id !== "ryba");
+/** Gdzie bywa znak ryby i co klasycznie znaczy (chiromancja indyjska — matsja). */
+const MIEJSCA_RYBY: { id: string; miejsce: MiejsceZnaku; tekst: string; znaczenie: string }[] = [
+  { id: "nadgarstek", miejsce: "ketu", tekst: "Nad nadgarstkiem", znaczenie: "dobrobyt i zasługa duchowa, szczęście w drugiej połowie życia" },
+  { id: "ksiezyc", miejsce: "moon", tekst: "Na wzgórku Księżyca", znaczenie: "dalekie podróże, życie za granicą, bogata wyobraźnia" },
+  { id: "wenus", miejsce: "venus", tekst: "Na wzgórku Wenus", znaczenie: "szczęście w rodzinie i w miłości, ciepły dom" },
+  { id: "jowisz", miejsce: "jupiter", tekst: "Pod palcem wskazującym", znaczenie: "wiedza, szacunek, rozwój duchowy" },
+  { id: "srodek", miejsce: "rahu", tekst: "W środku dłoni", znaczenie: "szczęśliwy los, pomoc w ważnych chwilach" },
+];
 
 /** Dodatek na rysunku dłoni przy pytaniu o cechę linii. */
-export type DodatekRysunku = "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy" | "koniec_serca" | "koniec_losu" | "start_slonca" | "rozwidlenie_slonca";
+export type DodatekRysunku = "ryba" | "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy" | "koniec_serca" | "koniec_losu" | "start_slonca" | "rozwidlenie_slonca";
 interface CechaLinii {
   id: string;
   pytanie: string;
@@ -200,6 +209,7 @@ type Pytanie =
   | { typ: "linia"; reka: Reka; linia: LiniaDloni; ai?: LiniaInw }
   | { typ: "cecha"; reka: Reka; linia: LiniaDloni; cecha: CechaLinii }
   | { typ: "krzyz"; reka: Reka; ai?: ZnakInw }
+  | { typ: "ryba"; reka: Reka; ai: ZnakInw[] }
   | { typ: "wzgorek"; reka: Reka; miejsce: MiejsceZnaku; czesc?: CzescMarsa; ai: ZnakInw[] };
 type OdpLinii = "wyrazna" | "slaba" | "nie" | "niewiem";
 type OdpKrzyza = "mam" | "nie" | "niewiem";
@@ -242,6 +252,7 @@ function pytania(znaki: ZnakInw[], linie: LiniaInw[]): Pytanie[] {
       for (const cecha of CECHY_LINII[linia] ?? []) lista.push({ typ: "cecha", reka, linia, cecha });
     }
     lista.push({ typ: "krzyz", reka, ai: znaki.find((z) => z.reka === reka && z.znak === "krzyz_mistyczny") });
+    lista.push({ typ: "ryba", reka, ai: znaki.filter((z) => z.reka === reka && z.znak === "ryba") });
     for (const { miejsce, czesc } of WZGORKI) {
       // znak AI na Marsie bez podanej części pokazujemy przy obu Marsach (osoba wskaże, gdzie go ma)
       lista.push({ typ: "wzgorek", reka, miejsce, czesc, ai: znaki.filter((z) => z.reka === reka && z.miejsce === miejsce && z.znak !== "krzyz_mistyczny" && (!czesc || !z.czesc || z.czesc === czesc)) });
@@ -358,6 +369,13 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
         } else if (p.ai) {
           linie.push(`${nazwa} — ${STAN[p.ai.stan]}${p.ai.gdzie ? ` (${p.ai.gdzie})` : ""} — osoba nie jest pewna`);
         }
+      } else if (p.typ === "ryba") {
+        const gdzie = MIEJSCA_RYBY.find((m) => m.id === o);
+        if (gdzie) {
+          const ai = p.ai.find((z) => z.miejsce === gdzie.miejsce) ?? p.ai[0];
+          if (ai) znaki.push(opisZnaku({ ...ai, miejsce: gdzie.miejsce }, `osoba potwierdza (${gdzie.tekst.toLowerCase()})`));
+          else wlasne.push({ reka: p.reka, miejsce: gdzie.miejsce, znak: "ryba" });
+        } else if (o === "niewiem") for (const z of p.ai) znaki.push(opisZnaku(z, "osoba nie jest pewna"));
       } else if (p.typ === "krzyz") {
         if (o === "mam") {
           if (p.ai) znaki.push(opisZnaku(p.ai, "osoba potwierdza"));
@@ -391,6 +409,10 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
         return [`${NAZWY_LINII[p.linia]} (${o === "wyrazna" ? "wyraźna" : "słaba"}${cechy.length ? `; ${cechy.join("; ")}` : ""}) — ${r}`];
       }
       if (p.typ === "krzyz") return o === "mam" ? [`krzyż mistyczny — ${r}`] : [];
+      if (p.typ === "ryba") {
+        const gdzie = MIEJSCA_RYBY.find((m) => m.id === o);
+        return gdzie ? [`znak ryby — ${gdzie.tekst.toLowerCase()}, ${r}`] : [];
+      }
       return Array.isArray(o) ? o.map((z) => `${nazwaZnaku(z)} — ${nazwaWzgorka(p.miejsce, p.czesc)}, ${r}`) : [];
     });
 
@@ -462,7 +484,7 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
         <div className="prz-rysunek">
           <IlustracjaDloni lewa={nazwyRak[p.reka] === "lewa"}
             linia={p.typ === "linia" || p.typ === "cecha" ? p.linia : null}
-            dodatek={p.typ === "cecha" ? p.cecha.rysunek ?? null : null}
+            dodatek={p.typ === "cecha" ? p.cecha.rysunek ?? null : p.typ === "ryba" ? "ryba" : null}
             aktywne={p.typ === "wzgorek" ? p.miejsce : p.typ === "krzyz" ? "czworobok" : null}
             czescMarsa={p.typ === "wzgorek" ? p.czesc ?? null : null} />
           <p className="hs-instrukcja" style={{ textAlign: "center" }}>{nazwyRak[p.reka] === "lewa" ? "Lewa" : "Prawa"} dłoń od wewnątrz</p>
@@ -492,6 +514,29 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
                 ))}
                 <button type="button" className="prz-btn prz-btn-cichy" onClick={() => odpowiedz("niewiem")}>Nie wiem</button>
               </div>
+            </>
+          )}
+          {p.typ === "ryba" && (
+            <>
+              <h3>Czy masz znak ryby?</h3>
+              <p className="prz-opis">
+                Wydłużony kształt z dwóch łuków, jak ciało ryby — często z małym ogonkiem. W chiromancji indyjskiej
+                (matsja) to jeden z najbardziej pomyślnych znaków. Najczęściej leży nad nadgarstkiem, na wzgórku
+                Księżyca albo Wenus. Jeśli go masz — wskaż, gdzie.
+              </p>
+              <p className="prz-ai">{p.ai.length
+                ? <>AI widzi: <strong>znak ryby</strong> — {p.ai.map((z) => `${nazwaMiejsca(z.miejsce)}${z.gdzie ? ` (${z.gdzie})` : ""}`).join("; ")}</>
+                : "AI go nie zauważyło — sprawdź na swojej dłoni."}</p>
+              <div className="prz-odpowiedzi">
+                {MIEJSCA_RYBY.map((m) => (
+                  <button key={m.id} type="button" className="prz-btn prz-btn-mam" title={m.znaczenie} onClick={() => odpowiedz(m.id)}>{m.tekst}</button>
+                ))}
+                <button type="button" className="prz-btn" onClick={() => odpowiedz("nie")}>Nie mam</button>
+                <button type="button" className="prz-btn prz-btn-cichy" onClick={() => odpowiedz("niewiem")}>Nie wiem</button>
+              </div>
+              <ul className="prz-ryba-znaczenia">
+                {MIEJSCA_RYBY.map((m) => <li key={m.id}><strong>{m.tekst}:</strong> {m.znaczenie}</li>)}
+              </ul>
             </>
           )}
           {p.typ === "krzyz" && (

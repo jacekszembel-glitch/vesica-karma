@@ -34,7 +34,7 @@ const SCHEMAT_INWENTARZA = {
         properties: {
           reka: { type: "string", enum: ["wiodaca", "bierna"] },
           wzgorek: { type: "string", enum: ["jowisz", "saturn", "slonce", "merkury", "wenus", "ksiezyc", "mars_gorny", "mars_dolny", "rahu", "ketu", "czworobok"] },
-          znak: { type: "string", enum: ["x", "gwiazda", "kwadrat", "trojkat", "kratka", "wyspa", "kreski", "kreski_drobne", "krzyz_mistyczny"] },
+          znak: { type: "string", enum: ["x", "gwiazda", "kwadrat", "trojkat", "kratka", "wyspa", "kreski", "kreski_drobne", "ryba", "krzyz_mistyczny"] },
           pewnosc: { type: "string", enum: ["wyrazny", "delikatny"] },
           gdzie: { type: "string" },
         },
@@ -66,9 +66,9 @@ Zasady:
 - Nie powtarzaj tego samego znaku dwa razy z różnych zbliżeń tej samej ręki.
 
 Odpowiedz WYŁĄCZNIE jednym obiektem JSON, bez żadnego tekstu przed ani po:
-{"znaki":[{"reka":"wiodaca|bierna","wzgorek":"jowisz|saturn|slonce|merkury|wenus|ksiezyc|mars_gorny|mars_dolny|rahu|ketu|czworobok","znak":"x|gwiazda|kwadrat|trojkat|kratka|wyspa|kreski|kreski_drobne|krzyz_mistyczny","pewnosc":"wyrazny|delikatny","gdzie":"krótko, dokładne miejsce"}],
+{"znaki":[{"reka":"wiodaca|bierna","wzgorek":"jowisz|saturn|slonce|merkury|wenus|ksiezyc|mars_gorny|mars_dolny|rahu|ketu|czworobok","znak":"x|gwiazda|kwadrat|trojkat|kratka|wyspa|kreski|kreski_drobne|ryba|krzyz_mistyczny","pewnosc":"wyrazny|delikatny","gdzie":"krótko, dokładne miejsce"}],
  "linie":[{"reka":"wiodaca|bierna","linia":"zycia|glowy|serca|losu|slonca|merkurego|intuicji|podrozy|relacji|pas_wenus|pierscien_salomona|marsa","stan":"wyrazna|odcinkowa|slaba","gdzie":"krótko, przebieg"}]}
-(mars_gorny = wzgórek Marsa przy krawędzi dłoni, pod małym palcem, między linią serca a głowy; mars_dolny = wzgórek Marsa przy kciuku, nad wzgórkiem Wenus, wewnątrz łuku linii życia — zawsze rozróżnij, który; rahu = środek dłoni, ketu = nad nadgarstkiem między Wenus a Księżycem — wg chiromancji indyjskiej; "kreski" = pionowa linia na wzgórku, "kreski_drobne" = kilka małych pionowych kresek pod palcem).`;
+(mars_gorny = wzgórek Marsa przy krawędzi dłoni, pod małym palcem, między linią serca a głowy; mars_dolny = wzgórek Marsa przy kciuku, nad wzgórkiem Wenus, wewnątrz łuku linii życia — zawsze rozróżnij, który; rahu = środek dłoni, ketu = nad nadgarstkiem między Wenus a Księżycem — wg chiromancji indyjskiej; "kreski" = pionowa linia na wzgórku, "kreski_drobne" = kilka małych pionowych kresek pod palcem; "ryba" = znak ryby — wydłużony kształt z dwóch łuków jak rybie ciało, często z ogonem, najczęściej nad nadgarstkiem, na wzgórku Księżyca, Wenus albo pod palcem wskazującym; szukaj go uważnie).`;
 
 export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {

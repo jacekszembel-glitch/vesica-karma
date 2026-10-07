@@ -61,7 +61,7 @@ const NAZWA_LINII: Record<LiniaDloni, string> = {
 /** Przysłówkiem — pasuje i do „linia”, i do „linie”, i do „pas”/„pierścień”. */
 const STAN_LINII: Record<StanLinii, string> = { wyrazna: "wyraźnie", odcinkowa: "odcinkami", slaba: "słabo", brak: "brak" };
 const NAZWA_ZNAKU: Record<RodzajZnaku, string> = {
-  x: "X", gwiazda: "gwiazda", kwadrat: "kwadrat", trojkat: "trójkąt", kratka: "kratka", wyspa: "wyspa", kreski: "pionowa linia", kreski_drobne: "drobne pionowe kreski", krzyz_mistyczny: "krzyż mistyczny",
+  x: "X", gwiazda: "gwiazda", kwadrat: "kwadrat", trojkat: "trójkąt", kratka: "kratka", wyspa: "wyspa", kreski: "pionowa linia", kreski_drobne: "drobne pionowe kreski", ryba: "znak ryby", krzyz_mistyczny: "krzyż mistyczny",
 };
 const DOPELNIACZ: Record<PlanetId, string> = {
   sun: "Słońca", moon: "Księżyca", mars: "Marsa", mercury: "Merkurego", jupiter: "Jowisza",
@@ -250,7 +250,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
           w(12).length ? czesciowo(`12. dom: ${lista(w(12))}`) : null,
           talent("duchowosc"),
         )),
-        dlon: reka(() => najlepsze(znakNa("czworobok", ["krzyz_mistyczny"]), linia("intuicji"), linia("pierscien_salomona"), znakNa("mercury", ["kreski_drobne"]))),
+        dlon: reka(() => najlepsze(znakNa("czworobok", ["krzyz_mistyczny"]), linia("intuicji"), linia("pierscien_salomona"), znakNa("mercury", ["kreski_drobne"]), znakNa("ketu", ["ryba"]), znakNa("jupiter", ["ryba"]))),
         numerologia: liczby("ketu"),
       },
     },
@@ -346,7 +346,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       wniosek: "Temat pieniędzy i dobrobytu jest u Ciebie wyraźnie zaznaczony. Masz predyspozycje do budowania zasobów — warto z nich świadomie korzystać, zamiast zostawiać je przypadkowi.",
       wskazania: {
         kosmogram: astro(finanse),
-        dlon: reka(() => najlepsze(linia("slonca"), linia("merkurego"), znakNa("czworobok", ["trojkat"]), znakNa("mercury", ["trojkat", "gwiazda"]))),
+        dlon: reka(() => najlepsze(linia("slonca"), linia("merkurego"), znakNa("czworobok", ["trojkat"]), znakNa("mercury", ["trojkat", "gwiazda"]), ...(["ketu", "moon", "venus", "jupiter", "rahu"] as MiejsceZnaku[]).map((m) => znakNa(m, ["ryba"])))),
         numerologia: liczby("venus", "saturn"),
       },
     },
