@@ -9,6 +9,8 @@ import { dlonReki, tematyWspolne } from "@/lib/astro/tematy";
 import { navamsaChart } from "@/lib/astro/varga";
 import SpojnoscRak from "@/components/SpojnoscRak";
 import TwojaDroga from "@/components/TwojaDroga";
+import MapaPolaczen from "@/components/MapaPolaczen";
+import { mapaPolaczen } from "@/lib/astro/polaczenia";
 import { buildChart } from "@/lib/astro/chart";
 import { numerology } from "@/lib/astro/numerology";
 import { porownajSystemy, dlonZTekstu, mostyDlonHoroskop, znakiWlasneDoDloni, type DlonWLiczbach } from "@/lib/astro/zgodnosc";
@@ -254,7 +256,9 @@ export default function Page() {
       date: lokalnie.toUTC().toJSDate(), latitude: urodzenie.place.lat, longitude: urodzenie.place.lon, timeKnown: urodzenie.timeKnown,
     });
     const num = numerology(urodzenie.date, urodzenie.name ?? "", "wedyjski", new Date().getFullYear());
-    return { wynik: porownajSystemy(chart, num, dlonPoKorekcie), mosty: mostyDlonHoroskop(chart, dlonPoKorekcie), tematy: tematyWspolne(chart, num, dlonPoKorekcie), chart,
+    const mosty = mostyDlonHoroskop(chart, dlonPoKorekcie);
+    return { wynik: porownajSystemy(chart, num, dlonPoKorekcie), mosty,
+      mapa: mapaPolaczen(chart, navamsaChart(chart), num, dlonPoKorekcie, mosty), tematy: tematyWspolne(chart, num, dlonPoKorekcie), chart,
       // tabela 4: D1 z ręką wiodącą, D9 z ręką bierną
       rak: (() => {
         const d9 = navamsaChart(chart);
@@ -355,6 +359,8 @@ export default function Page() {
               <SpojnoscTrzechSystemow tematy={porownanie.tematy} chart={porownanie.chart} />
               <SpojnoscRak d1={porownanie.rak.d1} d9={porownanie.rak.d9} maBierna={!!dlonPoKorekcie?.bierna} />
               <TwojaDroga chart={porownanie.chart} dlon={dlonPoKorekcie} d1={porownanie.rak.d1} d9={porownanie.rak.d9} />
+              <div className="ornament" style={{ margin: "44px 0 26px" }} />
+              <MapaPolaczen mapa={porownanie.mapa} />
             </>
           ) : (
             <p className="muted" style={{ fontSize: "0.9rem" }}>
