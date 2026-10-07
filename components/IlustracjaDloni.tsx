@@ -74,6 +74,9 @@ const PUNKTY: { id: MiejsceZnaku; x: number; y: number; podpis: string; podpisDy
   { id: "ketu", x: 142, y: 322, podpis: "Ketu" },
 ];
 
+/** Trójkąt z linii głowy, losu i Merkurego — wierzchołki w punktach przecięć tych linii na rysunku. */
+const TROJKAT_SRODEK = "M 152 221 L 107 244 L 146 318 Z";
+
 /** Znak ryby — pionowo nad nadgarstkiem: dwa łuki schodzą się u głowy i krzyżują przy ogonie, ogon otwarty. */
 const RYBA = "M 142 304 C 129 313 131 328 150 343 M 142 304 C 155 313 153 328 134 343";
 /** Inne miejsca, w których bywa ryba: Księżyc, Wenus, Jowisz, środek dłoni. */
@@ -155,6 +158,15 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
             <path d={ROZWIDLENIE_ZYCIA} className="ilu-linia-blask" filter="url(#ilu-blask)" />
             <path d={ROZWIDLENIE_ZYCIA} className="ilu-linia-akt" />
             <circle cx={175} cy={314} r={16} className="ilu-obwodka" />
+          </>
+        )}
+        {dodatek === "trojkat_srodek" && (
+          <>
+            <path d={LINIE.glowy} className="ilu-linia-kontekst" />
+            <path d={LINIE.losu} className="ilu-linia-kontekst" />
+            <path d={LINIE.merkurego} className="ilu-linia-kontekst" />
+            <path d={TROJKAT_SRODEK} className="ilu-linia-blask" filter="url(#ilu-blask)" />
+            <path d={TROJKAT_SRODEK} className="ilu-trojkat" />
           </>
         )}
         {dodatek === "ryba" && (
@@ -261,13 +273,13 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
         const jest = zaznaczone.includes(p.id);
         const akt = aktywne === p.id && (!p.czesc || !czescMarsa || p.czesc === czescMarsa);
         return (
-          <g key={i} className={`ilu-punkt${jest ? " ilu-jest" : ""}${akt ? " ilu-aktywny" : ""}${(linia || dodatek === "ryba") && !akt ? " ilu-wygaszony" : ""}`}
+          <g key={i} className={`ilu-punkt${jest ? " ilu-jest" : ""}${akt ? " ilu-aktywny" : ""}${(linia || dodatek === "ryba" || dodatek === "trojkat_srodek") && !akt ? " ilu-wygaszony" : ""}`}
             style={{ cursor: onWybierz ? "pointer" : "default" }}
             onClick={onWybierz ? () => onWybierz(p.id) : undefined}>
             {akt && <circle cx={x(p.x)} cy={p.y} r={20} className="ilu-poswiata" filter="url(#ilu-blask)" />}
             <circle cx={x(p.x)} cy={p.y} r={akt ? 14 : 9} className="ilu-kolo" />
             {jest && <circle cx={x(p.x)} cy={p.y} r={4} className="ilu-kropka" />}
-            {!((linia || dodatek === "ryba") && !akt) && <text x={x(p.x)} y={p.y + (p.podpisDy !== undefined ? p.podpisDy - (akt ? 6 : 0) : akt ? 28 : 21)} textAnchor="middle" className="ilu-podpis">{p.podpis}</text>}
+            {!((linia || dodatek === "ryba" || dodatek === "trojkat_srodek") && !akt) && <text x={x(p.x)} y={p.y + (p.podpisDy !== undefined ? p.podpisDy - (akt ? 6 : 0) : akt ? 28 : 21)} textAnchor="middle" className="ilu-podpis">{p.podpis}</text>}
           </g>
         );
       })}

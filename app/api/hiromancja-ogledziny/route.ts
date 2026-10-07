@@ -62,6 +62,7 @@ const SYSTEM_INWENTARZ = `Jesteś okiem doświadczonego chiromanty. Dostajesz zd
 Zasady:
 - Wypisz wszystko, co widać na zdjęciach albo w oględzinach: znaki na wzgórkach i w czworoboku oraz linie. Rzeczy delikatne też wpisz — z "pewnosc":"delikatny".
 - Każde przecięcie dwóch bruzd na wzgórku to X; trzy i więcej w jednym punkcie — gwiazda; krzyżyk w czworoboku między linią serca a głowy (także utworzony przez linię losu) — krzyż mistyczny; trójkąt między linią głowy a linią losu — trójkąt w czworoboku.
+- TRÓJKĄTY Z LINII GŁÓWNYCH (ważny znak, łatwo go przeoczyć): jeśli linia głowy, linia losu i linia Merkurego przecinają się tak, że zamykają trójkąt w środku dłoni — wpisz "znak":"trojkat", "wzgorek":"rahu" i w "gdzie" napisz, które linie go tworzą. Tak samo trójkąt z linii życia, głowy i Merkurego (wielki trójkąt). Bok z linii słabej albo z wielu krótkich kresek też się liczy — wtedy "pewnosc":"delikatny".
 - Linia złożona z odcinków w jednym kierunku to ta linia ("stan":"odcinkowa"). Linii, których nie ma, nie wpisuj.
 - Nie powtarzaj tego samego znaku dwa razy z różnych zbliżeń tej samej ręki.
 

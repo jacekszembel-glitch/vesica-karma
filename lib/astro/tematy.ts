@@ -346,7 +346,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       wniosek: "Temat pieniędzy i dobrobytu jest u Ciebie wyraźnie zaznaczony. Masz predyspozycje do budowania zasobów — warto z nich świadomie korzystać, zamiast zostawiać je przypadkowi.",
       wskazania: {
         kosmogram: astro(finanse),
-        dlon: reka(() => najlepsze(linia("slonca"), linia("merkurego"), znakNa("czworobok", ["trojkat"]), znakNa("mercury", ["trojkat", "gwiazda"]), ...(["ketu", "moon", "venus", "jupiter", "rahu"] as MiejsceZnaku[]).map((m) => znakNa(m, ["ryba"])))),
+        dlon: reka(() => najlepsze(linia("slonca"), linia("merkurego"), znakNa("czworobok", ["trojkat"]), znakNa("rahu", ["trojkat"]), znakNa("mercury", ["trojkat", "gwiazda"]), ...(["ketu", "moon", "venus", "jupiter", "rahu"] as MiejsceZnaku[]).map((m) => znakNa(m, ["ryba"])))),
         numerologia: liczby("venus", "saturn"),
       },
     },
@@ -493,7 +493,7 @@ export const KRYTERIA_TEMATOW: Record<string, Record<SystemTematu, string>> = {
   },
   finanse: {
     kosmogram: "joga bogactwa albo mocny wskaźnik finansów (w D9: planety w 2. i 11. domu)",
-    dlon: "linia Słońca; linia Merkurego; trójkąt w czworoboku; trójkąt lub gwiazda na wzgórku Merkurego",
+    dlon: "linia Słońca; linia Merkurego; trójkąt w czworoboku albo w środku dłoni (z linii głowy, losu i Merkurego); trójkąt lub gwiazda na wzgórku Merkurego; znak ryby",
     numerologia: "6 (Wenus) albo 8 (Saturn) wśród Twoich liczb",
   },
   przemiana: {

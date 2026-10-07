@@ -134,6 +134,9 @@ function poszerz(r: Ramka, m: number): Ramka {
  * Wycinki stref. Z ramkami: górna i dolna połowa dłoni (z zakładką) + palce.
  * Bez ramek: siatka 2×2 środkowej części kadru, też z zakładką.
  */
+/** Podpis zbliżenia środka dłoni — po nim doOdczytu() rozpoznaje tę strefę i wysyła ją zawsze. */
+export const OPIS_SRODKA = "ZBLIŻENIE — środek dłoni (pełna rozdzielczość): tu linia głowy, linia losu i linia Merkurego (a także linia życia) przecinają się i mogą zamykać TRÓJKĄT — sprawdź, czy trzy linie tworzą zamknięty trójkątny kształt, także gdy któraś jest słaba albo z odcinków; czworobok, krzyż mistyczny, równina Marsa (Rahu)";
+
 export function wytnijStrefy(zrodlo: ZrodloObrazu, ramki: RamkiDloni | null): Strefa[] {
   const d = ramki?.dlon;
   if (d && d[2] - d[0] > 0.1 && d[3] - d[1] > 0.1) {
@@ -146,6 +149,8 @@ export function wytnijStrefy(zrodlo: ZrodloObrazu, ramki: RamkiDloni | null): St
     const strefy = [
       wytnij(zrodlo, przyPalcach, "ZBLIŻENIE — część dłoni przy palcach: wzgórki pod palcami (Jowisz, Saturn, Słońce, Merkury), linia serca, początek linii głowy, kreski pod palcami, ewentualny pierścień Salomona i pas Wenus"),
       wytnij(zrodlo, przyNadgarstku, "ZBLIŻENIE — część dłoni przy nadgarstku: linia życia i jej koniec, wzgórek Wenus (nasada kciuka), wzgórek Księżyca (krawędź dłoni), początek linii losu, bransoletki na nadgarstku"),
+      wytnij(zrodlo, palceWyzej ? [p[0] + (p[2] - p[0]) * 0.12, p[1] + h * 0.28, p[2] - (p[2] - p[0]) * 0.12, p[1] + h * 0.78]
+        : [p[0] + (p[2] - p[0]) * 0.12, p[1] + h * 0.22, p[2] - (p[2] - p[0]) * 0.12, p[1] + h * 0.72], OPIS_SRODKA, 0.86),
     ];
     if (ramki?.palce && ramki.palce[2] - ramki.palce[0] > 0.05) {
       strefy.push(wytnij(zrodlo, poszerz(ramki.palce, 0.06), "ZBLIŻENIE — palce: długości względem siebie (wskazujący vs serdeczny), człony, czubki, kciuk, paznokcie"));
@@ -153,11 +158,11 @@ export function wytnijStrefy(zrodlo: ZrodloObrazu, ramki: RamkiDloni | null): St
     return strefy;
   }
   const nazwy = ["lewa górna", "prawa górna", "lewa dolna", "prawa dolna"];
-  return [0, 1, 2, 3].map((i) => {
+  return [wytnij(zrodlo, [0.24, 0.26, 0.76, 0.78], OPIS_SRODKA, 0.86), ...[0, 1, 2, 3].map((i) => {
     const kol = i % 2, rzad = Math.floor(i / 2);
     const x0 = 0.06 + kol * 0.4, y0 = 0.06 + rzad * 0.4;
     return wytnij(zrodlo, [x0, y0, x0 + 0.48, y0 + 0.48], `ZBLIŻENIE — ${nazwy[i]} ćwiartka zdjęcia (pełna rozdzielczość, do drobnych linii i znaków)`, 0.8);
-  });
+  })];
 }
 
 /* ---------- sesja zdjęć: dodatkowe ujęcia i wskazane miejsca ---------- */

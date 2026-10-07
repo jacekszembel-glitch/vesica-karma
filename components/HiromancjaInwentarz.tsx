@@ -67,6 +67,14 @@ const OPIS_MARSA: Record<CzescMarsa, string> = {
 const nazwaWzgorka = (m: MiejsceZnaku, czesc?: CzescMarsa) => (m === "mars" && czesc ? NAZWA_MARSA[czesc] : nazwaMiejsca(m));
 // krzyż mistyczny i znak ryby mają osobne pytania
 const ZNAKI_NA_WZGORKU = RODZAJE_ZNAKOW_NAZWY.filter((z) => z.id !== "krzyz_mistyczny" && z.id !== "ryba");
+/** Trójkąty z linii głównych w środku dłoni i ich klasyczne znaczenie. */
+const TROJKATY: { id: string; tekst: string; opis: string; znaczenie: string }[] = [
+  { id: "glowa_los_merkury", tekst: "Głowy + losu + Merkurego", opis: "środek dłoni — trójkąt z linii głowy, losu i Merkurego",
+    znaczenie: "tzw. trójkąt pieniędzy: dobrobyt i sukces dzięki własnej pracy i umysłowi — im wyraźniej zamknięty, tym pewniejsze zasoby" },
+  { id: "zycie_glowa_merkury", tekst: "Życia + głowy + Merkurego", opis: "środek dłoni — wielki trójkąt z linii życia, głowy i Merkurego",
+    znaczenie: "wielki trójkąt: szerokie horyzonty, hojność, szczęście w życiu" },
+];
+
 /** Gdzie bywa znak ryby i co klasycznie znaczy (chiromancja indyjska — matsja). */
 const MIEJSCA_RYBY: { id: string; miejsce: MiejsceZnaku; tekst: string; znaczenie: string }[] = [
   { id: "nadgarstek", miejsce: "ketu", tekst: "Nad nadgarstkiem", znaczenie: "dobrobyt i zasługa duchowa, szczęście w drugiej połowie życia" },
@@ -77,7 +85,7 @@ const MIEJSCA_RYBY: { id: string; miejsce: MiejsceZnaku; tekst: string; znaczeni
 ];
 
 /** Dodatek na rysunku dłoni przy pytaniu o cechę linii. */
-export type DodatekRysunku = "ryba" | "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy" | "koniec_serca" | "koniec_losu" | "start_slonca" | "rozwidlenie_slonca";
+export type DodatekRysunku = "trojkat_srodek" | "ryba" | "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy" | "koniec_serca" | "koniec_losu" | "start_slonca" | "rozwidlenie_slonca";
 interface CechaLinii {
   id: string;
   pytanie: string;
@@ -210,6 +218,7 @@ type Pytanie =
   | { typ: "cecha"; reka: Reka; linia: LiniaDloni; cecha: CechaLinii }
   | { typ: "krzyz"; reka: Reka; ai?: ZnakInw }
   | { typ: "ryba"; reka: Reka; ai: ZnakInw[] }
+  | { typ: "trojkat"; reka: Reka; ai: ZnakInw[] }
   | { typ: "wzgorek"; reka: Reka; miejsce: MiejsceZnaku; czesc?: CzescMarsa; ai: ZnakInw[] };
 type OdpLinii = "wyrazna" | "slaba" | "nie" | "niewiem";
 type OdpKrzyza = "mam" | "nie" | "niewiem";
@@ -253,6 +262,7 @@ function pytania(znaki: ZnakInw[], linie: LiniaInw[]): Pytanie[] {
     }
     lista.push({ typ: "krzyz", reka, ai: znaki.find((z) => z.reka === reka && z.znak === "krzyz_mistyczny") });
     lista.push({ typ: "ryba", reka, ai: znaki.filter((z) => z.reka === reka && z.znak === "ryba") });
+    lista.push({ typ: "trojkat", reka, ai: znaki.filter((z) => z.reka === reka && z.znak === "trojkat" && z.miejsce === "rahu") });
     for (const { miejsce, czesc } of WZGORKI) {
       // znak AI na Marsie bez podanej części pokazujemy przy obu Marsach (osoba wskaże, gdzie go ma)
       lista.push({ typ: "wzgorek", reka, miejsce, czesc, ai: znaki.filter((z) => z.reka === reka && z.miejsce === miejsce && z.znak !== "krzyz_mistyczny" && (!czesc || !z.czesc || z.czesc === czesc)) });
@@ -372,6 +382,15 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
         } else if (p.ai) {
           linie.push(`${nazwa} — ${STAN[p.ai.stan]}${p.ai.gdzie ? ` (${p.ai.gdzie})` : ""} — osoba nie jest pewna`);
         }
+      } else if (p.typ === "trojkat") {
+        const wybrane = o === "oba" ? TROJKATY : TROJKATY.filter((t) => t.id === o);
+        if (wybrane.length) {
+          for (const t of wybrane) {
+            const ai = p.ai.find((z) => !uzyteAI.has(z));
+            if (ai) { uzyteAI.add(ai); znaki.push(opisZnaku(ai, `osoba potwierdza: ${t.opis}`)); }
+            else wlasne.push({ reka: p.reka, miejsce: "rahu", znak: "trojkat", opis: t.opis });
+          }
+        } else if (o === "niewiem") for (const z of p.ai) znaki.push(opisZnaku(z, "osoba nie jest pewna"));
       } else if (p.typ === "ryba") {
         const gdzie = MIEJSCA_RYBY.find((m) => m.id === o);
         if (gdzie) {
@@ -412,6 +431,10 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
         return [`${NAZWY_LINII[p.linia]} (${o === "wyrazna" ? "wyraźna" : "słaba"}${cechy.length ? `; ${cechy.join("; ")}` : ""}) — ${r}`];
       }
       if (p.typ === "krzyz") return o === "mam" ? [`krzyż mistyczny — ${r}`] : [];
+      if (p.typ === "trojkat") {
+        const wybrane = o === "oba" ? TROJKATY : TROJKATY.filter((t) => t.id === o);
+        return wybrane.map((t) => `trójkąt — ${t.opis}, ${r}`);
+      }
       if (p.typ === "ryba") {
         const gdzie = MIEJSCA_RYBY.find((m) => m.id === o);
         return gdzie ? [`znak ryby — ${gdzie.tekst.toLowerCase()}, ${r}`] : [];
@@ -487,7 +510,7 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
         <div className="prz-rysunek">
           <IlustracjaDloni lewa={nazwyRak[p.reka] === "lewa"}
             linia={p.typ === "linia" || p.typ === "cecha" ? p.linia : null}
-            dodatek={p.typ === "cecha" ? p.cecha.rysunek ?? null : p.typ === "ryba" ? "ryba" : null}
+            dodatek={p.typ === "cecha" ? p.cecha.rysunek ?? null : p.typ === "ryba" ? "ryba" : p.typ === "trojkat" ? "trojkat_srodek" : null}
             aktywne={p.typ === "wzgorek" ? p.miejsce : p.typ === "krzyz" ? "czworobok" : null}
             czescMarsa={p.typ === "wzgorek" ? p.czesc ?? null : null} />
           <p className="hs-instrukcja" style={{ textAlign: "center" }}>{nazwyRak[p.reka] === "lewa" ? "Lewa" : "Prawa"} dłoń od wewnątrz</p>
@@ -517,6 +540,30 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
                 ))}
                 <button type="button" className="prz-btn prz-btn-cichy" onClick={() => odpowiedz("niewiem")}>Nie wiem</button>
               </div>
+            </>
+          )}
+          {p.typ === "trojkat" && (
+            <>
+              <h3>Czy linie tworzą trójkąt w środku dłoni?</h3>
+              <p className="prz-opis">
+                Spójrz na środek dłoni: linia głowy, pionowa linia losu i ukośna linia Merkurego (od dołu w stronę małego
+                palca) mogą się przecinać tak, że zamykają trójkąt. Liczy się także wtedy, gdy jeden bok jest słaby albo
+                złożony z wielu krótkich kresek. W chiromancji to ważny znak.
+              </p>
+              <p className="prz-ai">{p.ai.length
+                ? <>AI widzi: <strong>trójkąt</strong> — {p.ai.map((z) => z.gdzie || "środek dłoni").join("; ")}</>
+                : "AI go nie zauważyło — sprawdź na swojej dłoni."}</p>
+              <div className="prz-odpowiedzi">
+                {TROJKATY.map((t) => (
+                  <button key={t.id} type="button" className="prz-btn prz-btn-mam" onClick={() => odpowiedz(t.id)}>{t.tekst}</button>
+                ))}
+                <button type="button" className="prz-btn prz-btn-mam" onClick={() => odpowiedz("oba")}>Oba</button>
+                <button type="button" className="prz-btn" onClick={() => odpowiedz("nie")}>Nie mam</button>
+                <button type="button" className="prz-btn prz-btn-cichy" onClick={() => odpowiedz("niewiem")}>Nie wiem</button>
+              </div>
+              <ul className="prz-ryba-znaczenia">
+                {TROJKATY.map((t) => <li key={t.id}><strong>{t.tekst}:</strong> {t.znaczenie}</li>)}
+              </ul>
             </>
           )}
           {p.typ === "ryba" && (

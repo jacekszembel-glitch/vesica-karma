@@ -65,7 +65,7 @@ export const NAZWA_MARSA: Record<CzescMarsa, string> = {
   dolny: "wzgórek Marsa dolny (przy kciuku)",
   gorny: "wzgórek Marsa górny (przy krawędzi dłoni)",
 };
-export interface ZnakWlasny { reka: Reka; miejsce: MiejsceZnaku; znak: RodzajZnaku; czesc?: CzescMarsa }
+export interface ZnakWlasny { reka: Reka; miejsce: MiejsceZnaku; znak: RodzajZnaku; czesc?: CzescMarsa; /** Dokładniej, gdzie (np. które linie tworzą trójkąt). */ opis?: string }
 
 export const MIEJSCA_ZNAKOW: { id: MiejsceZnaku; nazwa: string }[] = [
   { id: "jupiter", nazwa: "wzgórek Jowisza (pod wskazującym)" },

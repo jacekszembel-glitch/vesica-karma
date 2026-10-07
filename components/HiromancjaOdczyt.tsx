@@ -116,7 +116,7 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie, deklarac
           } : {}),
           deklaracje: deklaracje.map((d) => ({
             reka: d.reka,
-            miejsce: d.miejsce === "mars" && d.czesc ? NAZWA_MARSA[d.czesc] : MIEJSCA_ZNAKOW.find((m) => m.id === d.miejsce)?.nazwa ?? d.miejsce,
+            miejsce: d.opis ?? (d.miejsce === "mars" && d.czesc ? NAZWA_MARSA[d.czesc] : MIEJSCA_ZNAKOW.find((m) => m.id === d.miejsce)?.nazwa ?? d.miejsce),
             znak: RODZAJE_ZNAKOW_NAZWY.find((z) => z.id === d.znak)?.nazwa ?? d.znak,
           })),
         }),

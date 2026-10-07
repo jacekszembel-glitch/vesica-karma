@@ -3282,3 +3282,5 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 /* Zgodność trzech systemów — wiersz „Wynik tabeli” */
 .pz-razem td { border-top: 1px solid var(--line-gold); border-bottom: 0; padding-top: 12px; font-weight: 700; vertical-align: top; }
 .pz-razem-liczba { color: var(--gold); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+
+.ilu-trojkat { fill: rgba(230, 196, 138, 0.28); stroke: var(--sand); stroke-width: 2.4; stroke-linejoin: round; }

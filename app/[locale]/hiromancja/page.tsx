@@ -8,7 +8,7 @@ import HiromancjaSesja from "@/components/HiromancjaSesja";
 import HiromancjaInwentarz, { type InwentarzPotwierdzony } from "@/components/HiromancjaInwentarz";
 import { wczytajZnakiWlasne, zapiszZnakiWlasne } from "@/lib/hiromancjaOdczytStore";
 import type { ZnakWlasny } from "@/lib/astro/zgodnosc";
-import { UJECIA, wytnijMiejsce, type Miejsce, type Strefa, type TypUjecia, type Ujecie } from "@/lib/hiromancjaObraz";
+import { UJECIA, wytnijMiejsce, type Miejsce, type Strefa, type TypUjecia, type Ujecie, OPIS_SRODKA } from "@/lib/hiromancjaObraz";
 import SekcjaZlota from "@/components/SekcjaZlota";
 import KoloDanychPanel from "@/components/KoloDanychPanel";
 import ZapisanyOdczyt, { useZapisSekcji } from "@/components/ZapisanyOdczyt";
@@ -59,7 +59,10 @@ function doOdczytu(z: ZdjecieDane, ujecia: Partial<Record<TypUjecia, Ujecie>>, m
   const wskazane = miejsca.map((m, i) => wytnijMiejsce(z.zrodlo, m, i + 1));
   const osobne: Strefa[] = UJECIA.filter((u) => ujecia[u.typ]).map((u) => ({ opis: u.opisDlaAI, base64: ujecia[u.typ]!.base64 }));
   const saZblizenia = !!(ujecia.gora || ujecia.dol);
-  const kolejka = [...wskazane, ...osobne, ...(saZblizenia ? [] : z.strefy)];
+  // środek dłoni (trójkąty z linii głównych) — zawsze; własne zbliżenia dzielą dłoń na górę i dół i tniją go na pół
+  const srodek = z.strefy.filter((s) => s.opis === OPIS_SRODKA);
+  const reszta = z.strefy.filter((s) => s.opis !== OPIS_SRODKA);
+  const kolejka = [...wskazane, ...srodek, ...osobne, ...(saZblizenia ? [] : reszta)];
   let suma = z.base64.length;
   const strefy = kolejka.filter((s) => (suma += s.base64.length) <= LIMIT_ZNAKOW_NA_REKE);
   return {
