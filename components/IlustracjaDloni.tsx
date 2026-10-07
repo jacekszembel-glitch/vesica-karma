@@ -74,8 +74,8 @@ const PUNKTY: { id: MiejsceZnaku; x: number; y: number; podpis: string; podpisDy
   { id: "ketu", x: 142, y: 322, podpis: "Ketu" },
 ];
 
-/** Znak ryby — kształt pokazowy nad nadgarstkiem (ciało z dwóch łuków i ogon). */
-const RYBA = "M 124 330 C 132 320 152 320 160 330 C 152 340 132 340 124 330 Z M 160 330 L 169 322 L 168 338 Z";
+/** Znak ryby — pionowo nad nadgarstkiem: dwa łuki schodzą się u głowy i krzyżują przy ogonie, ogon otwarty. */
+const RYBA = "M 142 304 C 129 313 131 328 150 343 M 142 304 C 155 313 153 328 134 343";
 /** Inne miejsca, w których bywa ryba: Księżyc, Wenus, Jowisz, środek dłoni. */
 const MIEJSCA_RYBY_RYS: [number, number][] = [[94, 298], [200, 294], [198, 170], [140, 262]];
 
