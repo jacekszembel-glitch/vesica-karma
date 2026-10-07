@@ -259,6 +259,8 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
   const [odp, setOdp] = useState<Record<string, Odp>>({});
   // zaznaczenia przy bieżącym wzgórku, zanim osoba kliknie „Dalej”
   const [wybrane, setWybrane] = useState<RodzajZnaku[]>([]);
+  // ekran przejścia: ręka wiodąca opisana, zanim zaczną się pytania o bierną
+  const [wiodacaZamknieta, setWiodacaZamknieta] = useState(false);
 
   const wszystkie = useMemo(() => (wynik ? pytania(wynik.znaki, wynik.linie) : []), [wynik]);
   const lista = widoczne(wszystkie, odp);
@@ -314,6 +316,7 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
   }
 
   function cofnij() {
+    if (lista[Math.max(0, nr - 1)]?.reka === "wiodaca") setWiodacaZamknieta(false);
     const poprz = Math.max(0, nr - 1);
     setNr(poprz);
     const o = odp[klucz(lista[poprz])];
@@ -363,8 +366,8 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
     onDalej({ znaki, linie, brak, ogledzinyTekst: wynik!.ogledzinyTekst });
   }
 
-  if (koniec) {
-    const potwierdzone = lista.flatMap((p) => {
+  /** To, co osoba zaznaczyła — do podsumowań (całości albo jednej ręki). */
+  const potwierdzoneDla = (reka?: Reka) => lista.filter((p) => !reka || p.reka === reka).flatMap((p) => {
       const o = odp[klucz(p)];
       const r = nazwaReki(p.reka);
       if (p.typ === "cecha") return [];
@@ -377,9 +380,13 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
       if (p.typ === "krzyz") return o === "mam" ? [`krzyż mistyczny — ${r}`] : [];
       return Array.isArray(o) ? o.map((z) => `${nazwaZnaku(z)} — ${nazwaMiejsca(p.miejsce)}, ${r}`) : [];
     });
+
+  if (koniec) {
+    const potwierdzone = potwierdzoneDla();
     return (
       <div className="prz">
-        <p className="prz-postep">Gotowe — wszystkie pytania za Tobą</p>
+        <p className="prz-postep">Obie dłonie opisane</p>
+        <p className="prz-etap">Gotowe — przeszliśmy razem obie dłonie</p>
         <p className="hs-tytul" style={{ textAlign: "center" }}>Na Twoich dłoniach</p>
         {potwierdzone.length === 0 ? <p className="hs-instrukcja" style={{ textAlign: "center" }}>Nic nie zostało zaznaczone.</p> : (
           <ul className="prz-podsumowanie">{potwierdzone.map((t) => <li key={t}>{t}</li>)}</ul>
@@ -399,7 +406,37 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
   const p = lista[nr];
   const wRece = lista.filter((q) => q.reka === p.reka);
   const nrWRece = wRece.indexOf(p) + 1;
-  const pierwszeBiernej = p.reka === "bierna" && nrWRece === 1;
+
+  // koniec ręki wiodącej — wyraźne zamknięcie, zanim zaczną się pytania o bierną
+  if (p.reka === "bierna" && nrWRece === 1 && !wiodacaZamknieta) {
+    const wiodace = potwierdzoneDla("wiodaca").map((t) => t.replace(/ — ręka wiodąca$/, "").replace(/, ręka wiodąca$/, ""));
+    return (
+      <div className="prz">
+        <p className="prz-postep">Ręka wiodąca ({nazwyRak.wiodaca}) · opisana</p>
+        <div className="prz-pasek"><span style={{ width: `${(nr / lista.length) * 100}%` }} /></div>
+        <p className="prz-etap">✦ Ręka wiodąca opisana</p>
+        <p className="prz-etap-opis">
+          Twoja ręka wiodąca — {nazwyRak.wiodaca}, ta, którą piszesz — jest już cała przejrzana. Pokazuje to, co
+          świadomie budujesz i robisz ze swoim życiem. Teraz przejdziemy w ten sam sposób przez rękę bierną
+          ({nazwyRak.bierna}): ona mówi o tym, z czym przychodzisz na świat — o wrodzonym potencjale.
+        </p>
+        {wiodace.length > 0 && (
+          <>
+            <p className="hs-tytul" style={{ textAlign: "center", marginTop: 18 }}>Na ręce wiodącej</p>
+            <ul className="prz-podsumowanie">{wiodace.map((t) => <li key={t}>{t}</li>)}</ul>
+          </>
+        )}
+        <div style={{ textAlign: "center", marginTop: 24 }}>
+          <button className="btn btn-primary" onClick={() => setWiodacaZamknieta(true)} style={{ padding: "14px 36px", fontSize: "1rem" }}>
+            Przejdź do ręki biernej
+          </button>
+          <p style={{ marginTop: 10 }}>
+            <button type="button" className="hs-usun" onClick={cofnij}>← wróć do ostatniego pytania</button>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="prz">
@@ -407,7 +444,6 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
         {p.reka === "wiodaca" ? "Ręka wiodąca" : "Ręka bierna"} ({nazwyRak[p.reka]}) · pytanie {nrWRece} z {wRece.length}
       </p>
       <div className="prz-pasek"><span style={{ width: `${(nr / lista.length) * 100}%` }} /></div>
-      {pierwszeBiernej && <p className="prz-zmiana">Ręka wiodąca gotowa. Teraz ręka bierna — {nazwyRak.bierna} dłoń.</p>}
 
       <div className="prz-uklad">
         <div className="prz-rysunek">

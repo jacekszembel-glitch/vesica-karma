@@ -41,8 +41,9 @@ export type OcenyPlanet = Record<PlanetId, Ocena | null>;
 
 /** Miejsce znaku w dłoni: wzgórek planety albo czworobok (między linią serca a głowy). */
 export type MiejsceZnaku = PlanetId | "czworobok";
-/** „kreski” = pionowa linia albo kilka pionowych kresek na wzgórku (np. krótka linia Słońca tylko na wzgórku). */
-export type RodzajZnaku = "x" | "gwiazda" | "kwadrat" | "trojkat" | "kratka" | "wyspa" | "kreski" | "krzyz_mistyczny";
+/** „kreski” = pionowa linia na wzgórku (np. krótka linia Słońca tylko na wzgórku);
+ *  „kreski_drobne” = kilka małych pionowych kresek pod palcem (np. na Merkurym — klasyczny znak uzdrowiciela). */
+export type RodzajZnaku = "x" | "gwiazda" | "kwadrat" | "trojkat" | "kratka" | "wyspa" | "kreski" | "kreski_drobne" | "krzyz_mistyczny";
 export type Reka = "wiodaca" | "bierna";
 
 export interface ZnakDloni {
@@ -80,6 +81,7 @@ export const RODZAJE_ZNAKOW_NAZWY: { id: RodzajZnaku; nazwa: string }[] = [
   { id: "kratka", nazwa: "kratka" },
   { id: "wyspa", nazwa: "wyspa" },
   { id: "kreski", nazwa: "pionowa linia" },
+  { id: "kreski_drobne", nazwa: "kilka drobnych pionowych kresek" },
 ];
 
 /** Zgłoszone znaki → ZnakDloni ze źródłem „osoba” i odpowiedzią AI (jeśli była). */
@@ -222,7 +224,7 @@ const KLUCZE_PLANET: Record<string, PlanetId> = {
   slonce: "sun", ksiezyc: "moon", mars: "mars", merkury: "mercury",
   jowisz: "jupiter", wenus: "venus", saturn: "saturn", rahu: "rahu", ketu: "ketu",
 };
-const RODZAJE_ZNAKOW: RodzajZnaku[] = ["x", "gwiazda", "kwadrat", "trojkat", "kratka", "wyspa", "kreski", "krzyz_mistyczny"];
+const RODZAJE_ZNAKOW: RodzajZnaku[] = ["x", "gwiazda", "kwadrat", "trojkat", "kratka", "wyspa", "kreski", "kreski_drobne", "krzyz_mistyczny"];
 const STANY_LINII: StanLinii[] = ["wyrazna", "odcinkowa", "slaba", "brak"];
 
 /** Klucz z odpowiedzi AI („jowisz”, „czworobok”…) → miejsce znaku. */
@@ -475,7 +477,7 @@ export interface Most {
 const ZLOCZYNCY: PlanetId[] = ["saturn", "mars", "rahu", "ketu"];
 const NAZWA_ZNAKU: Record<RodzajZnaku, string> = {
   x: "X (krzyż)", gwiazda: "gwiazda", kwadrat: "kwadrat", trojkat: "trójkąt", kratka: "kratka", wyspa: "wyspa",
-  kreski: "pionowa linia", krzyz_mistyczny: "krzyż mistyczny",
+  kreski: "pionowa linia", kreski_drobne: "drobne pionowe kreski", krzyz_mistyczny: "krzyż mistyczny",
 };
 export const DOPELNIACZ: Record<PlanetId, string> = {
   sun: "Słońca", moon: "Księżyca", mars: "Marsa", mercury: "Merkurego", jupiter: "Jowisza",
@@ -535,7 +537,7 @@ const WARUNKI: Record<"proba" | "blask" | "ochrona" | "talent" | "rozproszenie",
 };
 
 const ZNAK_WARUNEK: Partial<Record<RodzajZnaku, keyof typeof WARUNKI>> = {
-  x: "proba", wyspa: "proba", gwiazda: "blask", kwadrat: "ochrona", trojkat: "talent", kreski: "talent", kratka: "rozproszenie",
+  x: "proba", wyspa: "proba", gwiazda: "blask", kwadrat: "ochrona", trojkat: "talent", kreski: "talent", kreski_drobne: "talent", kratka: "rozproszenie",
 };
 
 function bazaWarunku(chart: VedicChart, w: Warunek): number {

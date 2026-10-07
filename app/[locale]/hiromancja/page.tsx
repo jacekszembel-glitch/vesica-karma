@@ -80,27 +80,6 @@ const IKONA_DLONI: Record<Reka, string> = {
   prawa: "/brand/dlon-prawa-duza.png",
 };
 
-function SekcjaDloni({ reka, dominujaca }: { reka: Reka; dominujaca: boolean }) {
-  const nazwa = reka === "prawa" ? "PRAWA DŁOŃ" : "LEWA DŁOŃ";
-  return (
-    <div style={{ maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
-      {/* duże złote koło z grubym pierścieniem i dłonią wypełniającą środek — wzór chiromancja-3/4.jpg */}
-      <div className="dlon-kolo dlon-kolo-duze">
-        <img src={IKONA_DLONI[reka]} alt="" />
-      </div>
-      <p style={{ marginTop: 18, marginBottom: 0, fontWeight: 700, fontSize: "1.05rem", color: "var(--sand)", letterSpacing: "0.02em" }}>
-        {nazwa} — {dominujaca ? "dominująca" : "bierna"}
-      </p>
-      <p style={{ marginTop: 12, lineHeight: 1.6, color: "var(--sand)" }}>
-        Tak jak w astrologii wedyjskiej D1 pokazuje przejawione życie, a D9 wrodzoną naturę — ta dłoń{" "}
-        {dominujaca
-          ? <><strong>dominująca</strong> (ta, którą piszesz) pokazuje, co świadomie zrobiłeś/aś ze sobą.</>
-          : <><strong>bierna</strong> pokazuje wrodzony potencjał i talenty, z którymi się urodziłeś/aś.</>}
-      </p>
-
-    </div>
-  );
-}
 
 export default function HiromancjaPage() {
   const [pismoReka, setPismoReka] = useState<Reka>("prawa");
@@ -340,16 +319,6 @@ export default function HiromancjaPage() {
           </SekcjaZlota>
         </div>
       )}
-
-      <div className="skrot-hero-linia" />
-
-      <div style={{ display: "grid", gap: 40, marginTop: 40 }}>
-        <SekcjaDloni reka="lewa" dominujaca={pismoReka === "lewa"} />
-
-        <div className="skrot-hero-linia" style={{ width: "100%", margin: 0 }} />
-
-        <SekcjaDloni reka="prawa" dominujaca={pismoReka === "prawa"} />
-      </div>
 
     </div>
   );
