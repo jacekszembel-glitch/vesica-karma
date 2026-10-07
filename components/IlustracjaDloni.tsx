@@ -19,8 +19,8 @@ const W = 300;
  * nisko, z kłębu Wenus, i powrót do nadgarstka.
  */
 const ZARYS = [
-  "M 96 392",
-  "C 84 360 70 322 68 280", "C 66 238 69 202 76 180", // krawędź dłoni (wzgórek Księżyca)
+  "M 92 350",
+  "C 80 330 70 306 68 280", "C 66 238 69 202 76 180", // krawędź dłoni (wzgórek Księżyca)
   "C 73 160 70 132 70 114", "C 70 99 80 92 89 93", "C 98 94 102 103 102 114", "L 103 149", // mały palec
   "C 104 154 106 154 107 149", // fałd
   "L 108 66", "C 108 51 118 44 126 44", "C 136 44 142 52 142 66", "L 143 141", // serdeczny
@@ -30,8 +30,8 @@ const ZARYS = [
   "L 192 75", "C 193 63 201 56 209 57", "C 218 58 225 66 224 78", "L 224 158", // wskazujący
   "C 225 178 229 194 236 203", // fałd między wskazującym a kciukiem
   "C 248 190 260 174 270 162", "C 278 152 292 154 294 167", "C 296 180 288 196 280 210", // kciuk
-  "C 268 236 256 266 248 294", "C 240 322 228 352 216 392", // kłąb kciuka (Wenus) do nadgarstka
-  "C 180 398 130 398 96 392 Z",
+  "C 268 236 256 264 248 290", "C 242 312 234 332 224 350", // kłąb kciuka (Wenus) do nadgarstka
+  "C 182 357 132 357 92 350 Z",
 ].join(" ");
 /** Zgięcia stawów palców i kciuka. */
 const STAWY = [
@@ -46,16 +46,16 @@ const STAWY = [
 const LINIE: Record<LiniaDloni, string> = {
   serca: "M 70 194 C 108 186 150 184 182 160",
   glowy: "M 222 198 C 182 208 132 224 84 258",
-  zycia: "M 222 200 C 180 234 166 300 186 382",
-  losu: "M 146 382 C 147 304 152 232 160 170",
+  zycia: "M 222 200 C 182 232 168 290 182 346",
+  losu: "M 146 346 C 147 290 152 232 160 170",
   slonca: "M 134 300 C 129 252 126 212 124 176",
-  merkurego: "M 154 352 C 128 292 106 232 92 184",
-  intuicji: "M 100 344 C 72 304 76 234 96 200",
-  podrozy: "M 68 300 L 90 296 M 68 318 L 90 315",
+  merkurego: "M 152 338 C 128 284 106 230 92 184",
+  intuicji: "M 100 330 C 74 296 76 234 96 200",
+  podrozy: "M 70 294 L 90 291 M 73 310 L 91 308",
   relacji: "M 70 178 L 88 176 M 71 172 L 85 171",
   pas_wenus: "M 104 162 C 126 178 160 176 178 154",
   pierscien_salomona: "M 182 158 C 192 174 210 174 218 160",
-  marsa: "M 210 218 C 186 248 180 292 194 352",
+  marsa: "M 210 218 C 188 246 182 288 192 334",
 };
 const LINIE_STALE: LiniaDloni[] = ["serca", "glowy", "zycia", "losu"];
 
@@ -68,14 +68,14 @@ const PUNKTY: { id: MiejsceZnaku; x: number; y: number; podpis: string; podpisDy
   { id: "mars", x: 84, y: 232, podpis: "Mars" },
   { id: "mars", x: 206, y: 222, podpis: "Mars" },
   { id: "czworobok", x: 146, y: 208, podpis: "czworobok" },
-  { id: "rahu", x: 140, y: 268, podpis: "Rahu" },
-  { id: "moon", x: 94, y: 316, podpis: "Księżyc" },
-  { id: "venus", x: 200, y: 312, podpis: "Wenus" },
-  { id: "ketu", x: 142, y: 354, podpis: "Ketu" },
+  { id: "rahu", x: 140, y: 262, podpis: "Rahu" },
+  { id: "moon", x: 94, y: 298, podpis: "Księżyc" },
+  { id: "venus", x: 200, y: 294, podpis: "Wenus" },
+  { id: "ketu", x: 142, y: 322, podpis: "Ketu" },
 ];
 
 /** Rozwidlenie końca linii życia — odnoga w stronę wzgórka Księżyca. */
-const ROZWIDLENIE_ZYCIA = "M 178 336 C 168 352 160 366 150 380";
+const ROZWIDLENIE_ZYCIA = "M 175 314 C 166 326 158 336 150 346";
 /** Rozwidlenie końca linii głowy („pióro pisarza”) — odnoga w dół. */
 const ROZWIDLENIE_GLOWY = "M 114 238 C 104 250 96 262 90 280";
 /** Możliwe końce linii serca: pod Saturnem, między palcami, pod Jowiszem, przy krawędzi dłoni. */
@@ -93,14 +93,14 @@ const LOS_JOWISZ = "M 156 198 C 166 186 182 178 198 172";
 /** Możliwe początki linii Słońca (koniec zawsze pod palcem serdecznym). */
 const STARTY_SLONCA: { x: number; y: number; podpis: string }[] = [
   { x: 125, y: 182, podpis: "tylko na wzgórku" }, { x: 128, y: 232, podpis: "od linii głowy" },
-  { x: 134, y: 300, podpis: "od środka" }, { x: 140, y: 372, podpis: "od dołu" },
+  { x: 134, y: 290, podpis: "od środka" }, { x: 138, y: 342, podpis: "od dołu" },
 ];
-const SLONCE_DOL = "M 134 300 C 136 324 138 348 140 372";
+const SLONCE_DOL = "M 134 300 C 135 314 136 328 138 342";
 /** Rozwidlenia krótkiej linii Słońca na wzgórku: górne (pod palcem) i dolne (nad linią serca). */
 const SLONCE_NA_WZGORKU = "M 125 178 L 124 168";
 const SLONCE_WIDELEC_GORA = "M 124 168 L 117 153 M 124 168 L 131 153";
 const SLONCE_WIDELEC_DOL = "M 125 178 L 118 187 M 125 178 L 132 187";
-const SLONCE_KSIEZYC = "M 100 318 C 112 306 124 300 133 296";
+const SLONCE_KSIEZYC = "M 100 300 C 112 294 124 292 133 290";
 /** Przedłużenie linii losu aż pod palec środkowy (wzgórek Saturna). */
 const LOS_SATURN = "M 160 170 C 161 162 162 156 162 150";
 /** Warianty przebiegu końca linii głowy: prosta i mocno opadająca. */
@@ -125,7 +125,7 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
   const x = (v: number) => (lewa ? W - v : v);
   const lustro = lewa ? `translate(${W} 0) scale(-1 1)` : undefined;
   return (
-    <svg viewBox="20 14 280 380" width={szerokosc} className="ilu-dlon" role="img"
+    <svg viewBox="20 14 280 348" width={szerokosc} className="ilu-dlon" role="img"
       aria-label={`${lewa ? "Lewa" : "Prawa"} dłoń od wewnątrz — wzgórki i linie`}>
       <defs>
         <filter id="ilu-blask" x="-50%" y="-50%" width="200%" height="200%">
@@ -147,7 +147,7 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
           <>
             <path d={ROZWIDLENIE_ZYCIA} className="ilu-linia-blask" filter="url(#ilu-blask)" />
             <path d={ROZWIDLENIE_ZYCIA} className="ilu-linia-akt" />
-            <circle cx={178} cy={336} r={16} className="ilu-obwodka" />
+            <circle cx={175} cy={314} r={16} className="ilu-obwodka" />
           </>
         )}
         {dodatek === "rozwidlenie_glowy" && (
@@ -173,7 +173,7 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
             <path d={SLONCE_DOL} className="ilu-wariant" />
             <path d={SLONCE_KSIEZYC} className="ilu-wariant" />
             {STARTY_SLONCA.map((k) => <circle key={k.podpis} cx={k.x} cy={k.y} r={4} className="ilu-koniec" />)}
-            <circle cx={100} cy={318} r={4} className="ilu-koniec" />
+            <circle cx={100} cy={300} r={4} className="ilu-koniec" />
           </>
         )}
         {dodatek === "koniec_losu" && (
@@ -200,8 +200,8 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
         )}
         {dodatek === "dlugosc_zycia" && (
           <>
-            <line x1={160} y1={290} x2={192} y2={290} className="ilu-miara" />
-            <line x1={170} y1={382} x2={202} y2={382} className="ilu-miara" />
+            <line x1={160} y1={276} x2={192} y2={276} className="ilu-miara" />
+            <line x1={166} y1={346} x2={198} y2={346} className="ilu-miara" />
           </>
         )}
       </g>
@@ -216,7 +216,7 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
           {STARTY_SLONCA.map((k) => (
             <text key={k.podpis} x={x(k.x + 9)} y={k.y + 4} textAnchor={lewa ? "end" : "start"} className="ilu-podpis ilu-podpis-miara">{k.podpis}</text>
           ))}
-          <text x={x(96)} y={336} textAnchor="middle" className="ilu-podpis ilu-podpis-miara">od Księżyca</text>
+          <text x={x(96)} y={318} textAnchor="middle" className="ilu-podpis ilu-podpis-miara">od Księżyca</text>
         </>
       )}
       {dodatek === "koniec_losu" && (
@@ -239,8 +239,8 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
       )}
       {dodatek === "dlugosc_zycia" && (
         <>
-          <text x={x(196)} y={294} textAnchor={lewa ? "end" : "start"} className="ilu-podpis ilu-podpis-miara">krótka</text>
-          <text x={x(206)} y={386} textAnchor={lewa ? "end" : "start"} className="ilu-podpis ilu-podpis-miara">długa</text>
+          <text x={x(196)} y={280} textAnchor={lewa ? "end" : "start"} className="ilu-podpis ilu-podpis-miara">krótka</text>
+          <text x={x(202)} y={350} textAnchor={lewa ? "end" : "start"} className="ilu-podpis ilu-podpis-miara">długa</text>
         </>
       )}
       {PUNKTY.map((p, i) => {
