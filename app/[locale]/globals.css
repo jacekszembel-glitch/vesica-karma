@@ -3114,3 +3114,38 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
   .prz-odpowiedzi, .prz-znaki { justify-content: center; }
   .prz-pytanie .prz-ai { border-left: 0; padding-left: 0; }
 }
+
+/* Spójność trzech systemów (components/SpojnoscTrzechSystemow.tsx) — wersja robocza */
+.sp-krok { display: flex; align-items: center; gap: 12px; font-size: 1.35rem; color: var(--sand); margin: 34px 0 12px; padding-top: 18px; border-top: 1px solid var(--line-gold); text-align: left; }
+.sp-krok span { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--gold); color: var(--gold); font-size: 0.95rem; flex: none; }
+.sp-wynik { margin-bottom: 12px; }
+.sp-wynik p { text-align: left; font-size: 0.9rem; line-height: 1.6; }
+.sp-wynik strong { font-size: 1.4rem; color: var(--gold); }
+.sp-tabela-wrap { overflow-x: auto; }
+.sp-tabela { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.sp-tabela th { font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; text-align: left; padding: 8px; border-bottom: 1px solid var(--line-gold); }
+.sp-tabela td { padding: 9px 8px; border-bottom: 1px solid var(--line-soft); vertical-align: top; color: var(--text); }
+.sp-tabela .srodek { text-align: center; }
+.sp-znak { color: var(--gold); font-size: 1rem; }
+.sp-rodzaj { font-size: 0.74rem; letter-spacing: 0.04em; white-space: nowrap; }
+.sp-tak .sp-rodzaj { color: var(--gold); font-weight: 700; }
+.sp-dwa-tak .sp-rodzaj { color: var(--sand); font-weight: 600; }
+.sp-nie .sp-rodzaj, .sp-dwa-nie .sp-rodzaj { color: var(--muted); font-weight: 600; }
+.sp-rozb .sp-rodzaj { color: var(--warn); }
+.sp-tak td { background: rgba(230, 196, 138, 0.07); }
+.sp-rzadkosc { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--sand); }
+.sp-sila { min-width: 120px; }
+.sp-sila-tor { display: block; height: 7px; border-radius: 4px; background: var(--line-soft); overflow: hidden; margin-top: 6px; }
+.sp-sila-tor span { display: block; height: 100%; background: var(--gold); }
+.sp-sila-liczba { display: block; font-size: 0.78rem; color: var(--gold); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.sp-dowody, .sp-talenty { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 0.84rem; line-height: 1.5; }
+.sp-nie-os { font-size: 0.86rem; line-height: 1.6; margin-top: 14px; text-align: left; }
+.sp-droga th { width: 130px; vertical-align: top; color: var(--sand); font-size: 0.7rem; padding-top: 12px; }
+.sp-droga td p { text-align: left; font-size: 0.9rem; line-height: 1.65; }
+.sp-kierunek { font-family: var(--font-serif); font-size: 1.15rem !important; color: var(--gold); margin-bottom: 4px; }
+.sp-potw { color: var(--gold); font-size: 0.8rem; }
+.sp-tylko { color: var(--muted); font-size: 0.8rem; }
+@media (max-width: 720px) {
+  .sp-tabela { font-size: 0.8rem; }
+  .sp-droga th { width: 84px; }
+}

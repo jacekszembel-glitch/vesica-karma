@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DateTime } from "luxon";
 import PorownanieSystemow from "@/components/PorownanieSystemow";
 import TematyWspolne from "@/components/TematyWspolne";
+import SpojnoscTrzechSystemow from "@/components/SpojnoscTrzechSystemow";
 import { tematyWspolne } from "@/lib/astro/tematy";
 import { buildChart } from "@/lib/astro/chart";
 import { numerology } from "@/lib/astro/numerology";
@@ -250,7 +251,7 @@ export default function Page() {
       date: lokalnie.toUTC().toJSDate(), latitude: urodzenie.place.lat, longitude: urodzenie.place.lon, timeKnown: urodzenie.timeKnown,
     });
     const num = numerology(urodzenie.date, urodzenie.name ?? "", "wedyjski", new Date().getFullYear());
-    return { wynik: porownajSystemy(chart, num, dlonPoKorekcie), mosty: mostyDlonHoroskop(chart, dlonPoKorekcie), tematy: tematyWspolne(chart, num, dlonPoKorekcie) };
+    return { wynik: porownajSystemy(chart, num, dlonPoKorekcie), mosty: mostyDlonHoroskop(chart, dlonPoKorekcie), tematy: tematyWspolne(chart, num, dlonPoKorekcie), chart };
   }, [zlota, urodzenie, dlonPoKorekcie]);
 
 
@@ -339,6 +340,8 @@ export default function Page() {
                 korekty={korekty} onKorekta={zmienKorekte} ocenyAI={dlon?.planety ?? {}} />
               <div className="ornament" style={{ margin: "44px 0 26px" }} />
               <TematyWspolne tematy={porownanie.tematy} />
+              <div className="ornament" style={{ margin: "44px 0 26px" }} />
+              <SpojnoscTrzechSystemow tematy={porownanie.tematy} chart={porownanie.chart} />
             </>
           ) : (
             <p className="muted" style={{ fontSize: "0.9rem" }}>
