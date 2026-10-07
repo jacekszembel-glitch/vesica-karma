@@ -3304,3 +3304,11 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 .mosty-pokaz { display: block; font-size: 0.76rem; color: var(--gold); text-decoration: underline; margin: 2px 0 0 18px; }
 .mosty-rozwin[open] .mosty-pokaz { display: none; }
 .mosty-rozwin[open] > summary { margin-bottom: 10px; }
+
+.sp-razem-wiersz td { border-top: 1px solid var(--line-gold); border-bottom: 0; font-weight: 700; padding-top: 10px; }
+@media (max-width: 720px) { .sp-kompakt tfoot td.sp-rzadkosc { display: none; } }
+.sp-kompakt th { letter-spacing: 0.06em; padding: 8px 5px; }
+.sp-kompakt td { padding: 9px 5px; }
+.sp-kompakt td:first-child { padding-left: 0; }
+@media (max-width: 720px) { .sp-kompakt th { padding: 6px 3px; } .sp-kompakt td { padding: 7px 3px; } }
+@media (max-width: 720px) { .sp-kompakt .sp-pkt { font-size: 0.7rem; } .sp-kompakt .sp-pkt small { font-size: 0.56rem; } .sp-kompakt .sp-razem-opis { font-size: 0.6rem; } .sp-kompakt th { letter-spacing: 0; } }

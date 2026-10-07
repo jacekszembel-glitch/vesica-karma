@@ -74,6 +74,11 @@ export default function SpojnoscTrzechSystemow({ tematy, chart }: { tematy: Tema
   });
   const s = spojnosc(tematy);
   const d = droga(chart, s);
+  // punktacja tabeli 1: ✦ = 1, ◐ = ½ w każdym systemie; maksimum = oceny z danymi
+  const punktySystemu = (x: SystemTematu) => s.tematy.reduce((a, t) => a + (t.wartosci[x] ?? 0), 0);
+  const maxSystemu = (x: SystemTematu) => s.tematy.filter((t) => t.wartosci[x] !== undefined).length;
+  const punktyRazem = SYSTEMY.reduce((a, x) => a + punktySystemu(x), 0);
+  const maxRazem = SYSTEMY.reduce((a, x) => a + maxSystemu(x), 0);
   const potwierdzone = s.tematy.filter((t) => t.rodzaj === "zgodne_tak" || t.rodzaj === "dwa_tak")
     .sort((a, b) => b.temat.sila - a.temat.sila || a.szansa - b.szansa);
 
@@ -103,6 +108,7 @@ export default function SpojnoscTrzechSystemow({ tematy, chart }: { tematy: Tema
               {SYSTEMY.map((x) => <th key={x} className="srodek">{NAZWA_SYSTEMU[x]}</th>)}
               <th>Spójność</th>
               <th className="srodek sp-rzadkosc-th" title="Jak często taki układ ocen wychodzi przypadkiem">Przypadkiem</th>
+              <th className="srodek">Pkt</th>
             </tr>
           </thead>
           <tbody>
@@ -118,12 +124,31 @@ export default function SpojnoscTrzechSystemow({ tematy, chart }: { tematy: Tema
                 {SYSTEMY.map((x) => <td key={x} className="srodek sp-znak">{znak(t.wartosci[x])}</td>)}
                 <td><span className="sp-rodzaj">{RODZAJ[t.rodzaj].tekst}</span><span className="sp-rz-tel">{rzadkosc(t.szansa)}</span></td>
                 <td className="srodek sp-rzadkosc">{rzadkosc(t.szansa)}</td>
+                <td className="srodek sp-pkt">{pkt(SYSTEMY.reduce((a, x) => a + (t.wartosci[x] ?? 0), 0))}<small>/{SYSTEMY.filter((x) => t.wartosci[x] !== undefined).length}</small></td>
               </tr>
-              {otwarte.has(t.temat.id) && <tr className="sp-szcz-wiersz"><td colSpan={6}><Szczegoly temat={t.temat} /></td></tr>}
+              {otwarte.has(t.temat.id) && <tr className="sp-szcz-wiersz"><td colSpan={7}><Szczegoly temat={t.temat} /></td></tr>}
               </Fragment>
             ))}
           </tbody>
+          <tfoot>
+            <tr className="sp-razem-wiersz">
+              <td>Razem</td>
+              {SYSTEMY.map((x) => <td key={x} className="srodek sp-pkt">{pkt(punktySystemu(x))}<small>/{maxSystemu(x)}</small></td>)}
+              <td className="sp-razem-opis">{s.ile.zgodne_tak + s.ile.zgodne_nie} z {s.tematy.length} zgodne ×3</td>
+              <td className="sp-rzadkosc" />
+              <td className="srodek sp-pkt sp-pkt-razem">{pkt(punktyRazem)}<small>/{maxRazem}</small></td>
+            </tr>
+          </tfoot>
         </table>
+      </div>
+      <div className="sp-podsumowanie">
+        <p className="sp-podsumowanie-liczba">{maxRazem ? Math.round((punktyRazem / maxRazem) * 100) : 0}%</p>
+        <p>
+          Systemy zebrały <strong>{pkt(punktyRazem)} z {maxRazem}</strong> możliwych punktów (✦ = 1, ◐ = ½; maksimum = liczba
+          ocen z danymi, bez „?”). Kosmogram {pkt(punktySystemu("kosmogram"))}/{maxSystemu("kosmogram")}, dłoń {pkt(punktySystemu("dlon"))}/{maxSystemu("dlon")},
+          {" "}numerologia {pkt(punktySystemu("numerologia"))}/{maxSystemu("numerologia")}. Zgodne we wszystkich trzech: {s.ile.zgodne_tak} na tak
+          i {s.ile.zgodne_nie} na nie.
+        </p>
       </div>
       <p className="muted porownanie-legenda">
         Kliknij wiersz, żeby zobaczyć, co w każdym systemie daje wynik. ✦ tak · ◐ częściowo · 0 sprawdzone, niezaznaczone · ? brak danych · „Przypadkiem” — jak często taki
