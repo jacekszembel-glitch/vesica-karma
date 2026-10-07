@@ -23,7 +23,7 @@ const KOLUMNY: { id: SystemTematu; nazwa: string }[] = [
 const ZNACZNIK: Record<StanWskazania, { znak: string; tytul: string }> = {
   tak: { znak: "✦", tytul: "wyraźnie zaznaczone" },
   czesciowo: { znak: "◐", tytul: "częściowo" },
-  nie: { znak: "·", tytul: "niezaznaczone" },
+  nie: { znak: "0", tytul: "sprawdzone — niezaznaczone (0 pkt)" },
   nie_dotyczy: { znak: "—", tytul: "ten system nie mówi o tym temacie" },
   brak_danych: { znak: "?", tytul: "brak danych" },
 };
@@ -189,7 +189,7 @@ export default function TematyWspolne({ tematy }: { tematy: TematWspolny[] }) {
         <Podsumowanie tematy={tematy} />
       </div>
       <p className="muted porownanie-legenda" style={{ marginTop: 12 }}>
-        ✦ wyraźnie zaznaczone (1 pkt) · ◐ częściowo (½ pkt) · · niezaznaczone (0) · ? brak danych
+        ✦ wyraźnie zaznaczone (1 pkt) · ◐ częściowo (½ pkt) · 0 sprawdzone, niezaznaczone · ? brak danych
       </p>
       <p className="muted" style={{ fontSize: "0.74rem", marginTop: 10, lineHeight: 1.6 }}>
         Pojedyncze wskazanie zdarza się często — każdy horoskop i każda dłoń coś podkreśla. Znaczenie
