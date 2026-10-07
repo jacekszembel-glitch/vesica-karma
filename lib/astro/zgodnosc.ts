@@ -58,7 +58,13 @@ export interface ZnakDloni {
 }
 
 /** Znak, który osoba sama widzi na swojej dłoni i zgłasza przed odczytem. */
-export interface ZnakWlasny { reka: Reka; miejsce: MiejsceZnaku; znak: RodzajZnaku }
+/** Dwa wzgórki Marsa: dolny (przy kciuku, nad Wenus) i górny (przy krawędzi dłoni, pod Merkurym). */
+export type CzescMarsa = "dolny" | "gorny";
+export const NAZWA_MARSA: Record<CzescMarsa, string> = {
+  dolny: "wzgórek Marsa dolny (przy kciuku)",
+  gorny: "wzgórek Marsa górny (przy krawędzi dłoni)",
+};
+export interface ZnakWlasny { reka: Reka; miejsce: MiejsceZnaku; znak: RodzajZnaku; czesc?: CzescMarsa }
 
 export const MIEJSCA_ZNAKOW: { id: MiejsceZnaku; nazwa: string }[] = [
   { id: "jupiter", nazwa: "wzgórek Jowisza (pod wskazującym)" },
@@ -221,13 +227,18 @@ export function ocenyChiromancji(dlon: DlonWLiczbach | null): OcenyPlanet {
 
 const ZNACZNIK = "<!--DANE";
 const KLUCZE_PLANET: Record<string, PlanetId> = {
-  slonce: "sun", ksiezyc: "moon", mars: "mars", merkury: "mercury",
+  slonce: "sun", ksiezyc: "moon", mars: "mars", mars_dolny: "mars", mars_gorny: "mars", merkury: "mercury",
   jowisz: "jupiter", wenus: "venus", saturn: "saturn", rahu: "rahu", ketu: "ketu",
 };
 const RODZAJE_ZNAKOW: RodzajZnaku[] = ["x", "gwiazda", "kwadrat", "trojkat", "kratka", "wyspa", "kreski", "kreski_drobne", "krzyz_mistyczny"];
 const STANY_LINII: StanLinii[] = ["wyrazna", "odcinkowa", "slaba", "brak"];
 
 /** Klucz z odpowiedzi AI („jowisz”, „czworobok”…) → miejsce znaku. */
+/** Który Mars — z klucza AI („mars_dolny” / „mars_gorny”); przy samym „mars” — nie wiadomo. */
+export function czescMarsaZKlucza(k: string): CzescMarsa | undefined {
+  return k === "mars_dolny" ? "dolny" : k === "mars_gorny" ? "gorny" : undefined;
+}
+
 export function miejsceZKlucza(k: string): MiejsceZnaku | null {
   return k === "czworobok" ? "czworobok" : KLUCZE_PLANET[k] ?? null;
 }

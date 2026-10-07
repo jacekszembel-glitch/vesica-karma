@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { TypDloni } from "@/lib/hiromancja";
 import { zapiszOdczytDloni } from "@/lib/hiromancjaOdczytStore";
-import { rozdzielOdczytDloni, znakiWlasneDoDloni, MIEJSCA_ZNAKOW, RODZAJE_ZNAKOW_NAZWY, type ZnakWlasny } from "@/lib/astro/zgodnosc";
+import { rozdzielOdczytDloni, znakiWlasneDoDloni, MIEJSCA_ZNAKOW, NAZWA_MARSA, RODZAJE_ZNAKOW_NAZWY, type ZnakWlasny } from "@/lib/astro/zgodnosc";
 import ZapalKrag from "./ZapalKrag";
 import { PieczecOdslaniania } from "./Interpretation";
 
@@ -116,7 +116,7 @@ export default function HiromancjaOdczyt({ wiodaca, bierna, plec, imie, deklarac
           } : {}),
           deklaracje: deklaracje.map((d) => ({
             reka: d.reka,
-            miejsce: MIEJSCA_ZNAKOW.find((m) => m.id === d.miejsce)?.nazwa ?? d.miejsce,
+            miejsce: d.miejsce === "mars" && d.czesc ? NAZWA_MARSA[d.czesc] : MIEJSCA_ZNAKOW.find((m) => m.id === d.miejsce)?.nazwa ?? d.miejsce,
             znak: RODZAJE_ZNAKOW_NAZWY.find((z) => z.id === d.znak)?.nazwa ?? d.znak,
           })),
         }),

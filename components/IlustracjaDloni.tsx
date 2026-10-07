@@ -1,6 +1,6 @@
 "use client";
 
-import type { LiniaDloni, MiejsceZnaku } from "@/lib/astro/zgodnosc";
+import type { CzescMarsa, LiniaDloni, MiejsceZnaku } from "@/lib/astro/zgodnosc";
 import type { DodatekRysunku } from "./HiromancjaInwentarz";
 
 /**
@@ -60,13 +60,13 @@ const LINIE: Record<LiniaDloni, string> = {
 const LINIE_STALE: LiniaDloni[] = ["serca", "glowy", "zycia", "losu"];
 
 /** Wzgórki (prawa dłoń). */
-const PUNKTY: { id: MiejsceZnaku; x: number; y: number; podpis: string; podpisDy?: number }[] = [
+const PUNKTY: { id: MiejsceZnaku; x: number; y: number; podpis: string; podpisDy?: number; czesc?: CzescMarsa }[] = [
   { id: "jupiter", x: 198, y: 170, podpis: "Jowisz", podpisDy: -15 },
   { id: "saturn", x: 161, y: 166, podpis: "Saturn", podpisDy: -15 },
   { id: "sun", x: 124, y: 168, podpis: "Słońce", podpisDy: -15 },
   { id: "mercury", x: 90, y: 176, podpis: "Merkury", podpisDy: -15 },
-  { id: "mars", x: 84, y: 232, podpis: "Mars" },
-  { id: "mars", x: 206, y: 222, podpis: "Mars" },
+  { id: "mars", x: 84, y: 232, podpis: "Mars górny", czesc: "gorny" },
+  { id: "mars", x: 206, y: 222, podpis: "Mars dolny", czesc: "dolny" },
   { id: "czworobok", x: 146, y: 208, podpis: "czworobok" },
   { id: "rahu", x: 140, y: 262, podpis: "Rahu" },
   { id: "moon", x: 94, y: 298, podpis: "Księżyc" },
@@ -107,13 +107,15 @@ const LOS_SATURN = "M 160 170 C 161 162 162 156 162 150";
 const GLOWA_PROSTA = "M 150 214 C 120 220 96 224 74 226";
 const GLOWA_OPADA = "M 150 218 C 126 236 108 262 98 300";
 
-export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne = null, linia = null, dodatek = null, onWybierz, szerokosc = 300 }: {
+export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne = null, czescMarsa = null, linia = null, dodatek = null, onWybierz, szerokosc = 300 }: {
   /** Lewa dłoń — rysunek w lustrzanym odbiciu. */
   lewa?: boolean;
   /** Miejsca ze znakami — złote kropki. */
   zaznaczone?: MiejsceZnaku[];
   /** Miejsce, o które pytamy — świeci. */
   aktywne?: MiejsceZnaku | null;
+  /** Przy Marsie: który z dwóch wzgórków świeci (bez tego — oba). */
+  czescMarsa?: CzescMarsa | null;
   /** Linia, o którą pytamy — świeci. */
   linia?: LiniaDloni | null;
   /** Szczegół linii, o który pytamy (rozwidlenie, długość). */
@@ -245,7 +247,7 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
       )}
       {PUNKTY.map((p, i) => {
         const jest = zaznaczone.includes(p.id);
-        const akt = aktywne === p.id;
+        const akt = aktywne === p.id && (!p.czesc || !czescMarsa || p.czesc === czescMarsa);
         return (
           <g key={i} className={`ilu-punkt${jest ? " ilu-jest" : ""}${akt ? " ilu-aktywny" : ""}${linia && !akt ? " ilu-wygaszony" : ""}`}
             style={{ cursor: onWybierz ? "pointer" : "default" }}

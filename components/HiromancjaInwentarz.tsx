@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import IlustracjaDloni from "./IlustracjaDloni";
 import { PieczecOdslaniania } from "./Interpretation";
 import {
-  MIEJSCA_ZNAKOW, NAZWY_LINII, RODZAJE_ZNAKOW_NAZWY, miejsceZKlucza,
-  type LiniaDloni, type MiejsceZnaku, type RodzajZnaku, type ZnakWlasny,
+  MIEJSCA_ZNAKOW, NAZWA_MARSA, czescMarsaZKlucza, NAZWY_LINII, RODZAJE_ZNAKOW_NAZWY, miejsceZKlucza,
+  type LiniaDloni, type CzescMarsa, type MiejsceZnaku, type RodzajZnaku, type ZnakWlasny,
 } from "@/lib/astro/zgodnosc";
 
 /**
@@ -18,7 +18,7 @@ import {
  */
 
 type Reka = "wiodaca" | "bierna";
-interface ZnakInw { reka: Reka; miejsce: MiejsceZnaku; znak: RodzajZnaku; pewnosc: "wyrazny" | "delikatny"; gdzie: string }
+interface ZnakInw { reka: Reka; miejsce: MiejsceZnaku; znak: RodzajZnaku; pewnosc: "wyrazny" | "delikatny"; gdzie: string; czesc?: CzescMarsa }
 interface LiniaInw { reka: Reka; linia: LiniaDloni; stan: "wyrazna" | "odcinkowa" | "slaba"; gdzie: string }
 
 export interface InwentarzPotwierdzony {
@@ -54,7 +54,17 @@ const BIERNIK_LINII: Record<LiniaDloni, string> = {
   pas_wenus: "pas Wenus", pierscien_salomona: "pierścień Salomona", marsa: "linię Marsa (siostrzaną)",
 };
 /** Wzgórki w kolejności pytań. */
-const WZGORKI: MiejsceZnaku[] = ["jupiter", "saturn", "sun", "mercury", "mars", "czworobok", "rahu", "moon", "venus", "ketu"];
+/** Wzgórki w kolejności pytań; Mars dwa razy — górny (przy krawędzi) i dolny (przy kciuku) znaczą co innego. */
+const WZGORKI: { miejsce: MiejsceZnaku; czesc?: CzescMarsa }[] = [
+  { miejsce: "jupiter" }, { miejsce: "saturn" }, { miejsce: "sun" }, { miejsce: "mercury" }, { miejsce: "mars", czesc: "gorny" },
+  { miejsce: "czworobok" }, { miejsce: "rahu" }, { miejsce: "mars", czesc: "dolny" }, { miejsce: "moon" }, { miejsce: "venus" }, { miejsce: "ketu" },
+];
+/** Co znaczy każdy z Marsów — pokazywane przy pytaniu. */
+const OPIS_MARSA: Record<CzescMarsa, string> = {
+  gorny: "Mars górny leży przy krawędzi dłoni, pod małym palcem, między linią serca a linią głowy. Klasycznie: odwaga moralna, wytrwałość, opanowanie pod presją.",
+  dolny: "Mars dolny leży przy kciuku, nad wzgórkiem Wenus, wewnątrz łuku linii życia. Klasycznie: odwaga fizyczna, siła działania, umiejętność obrony.",
+};
+const nazwaWzgorka = (m: MiejsceZnaku, czesc?: CzescMarsa) => (m === "mars" && czesc ? NAZWA_MARSA[czesc] : nazwaMiejsca(m));
 const ZNAKI_NA_WZGORKU = RODZAJE_ZNAKOW_NAZWY.filter((z) => z.id !== "krzyz_mistyczny");
 
 /** Dodatek na rysunku dłoni przy pytaniu o cechę linii. */
@@ -190,7 +200,7 @@ type Pytanie =
   | { typ: "linia"; reka: Reka; linia: LiniaDloni; ai?: LiniaInw }
   | { typ: "cecha"; reka: Reka; linia: LiniaDloni; cecha: CechaLinii }
   | { typ: "krzyz"; reka: Reka; ai?: ZnakInw }
-  | { typ: "wzgorek"; reka: Reka; miejsce: MiejsceZnaku; ai: ZnakInw[] };
+  | { typ: "wzgorek"; reka: Reka; miejsce: MiejsceZnaku; czesc?: CzescMarsa; ai: ZnakInw[] };
 type OdpLinii = "wyrazna" | "slaba" | "nie" | "niewiem";
 type OdpKrzyza = "mam" | "nie" | "niewiem";
 /** Odpowiedź przy wzgórku: zaznaczone znaki albo „nie wiem”. */
@@ -198,7 +208,7 @@ type OdpWzgorka = RodzajZnaku[] | "niewiem";
 /** Odpowiedź na cechę linii: id opcji albo „niewiem”. */
 type Odp = OdpLinii | OdpKrzyza | OdpWzgorka | string;
 
-const klucz = (p: Pytanie) => `${p.reka}:${p.typ}:${p.typ === "linia" ? p.linia : p.typ === "cecha" ? `${p.linia}:${p.cecha.id}` : p.typ === "wzgorek" ? p.miejsce : "krzyz"}`;
+const klucz = (p: Pytanie) => `${p.reka}:${p.typ}:${p.typ === "linia" ? p.linia : p.typ === "cecha" ? `${p.linia}:${p.cecha.id}` : p.typ === "wzgorek" ? `${p.miejsce}${p.czesc ? `_${p.czesc}` : ""}` : "krzyz"}`;
 const kluczLinii = (reka: Reka, linia: LiniaDloni) => `${reka}:linia:${linia}`;
 const maLinie = (o: Odp | undefined) => o === "wyrazna" || o === "slaba";
 /** Pytania widoczne przy danych odpowiedziach — cechy linii tylko, gdy osoba linię ma. */
@@ -211,7 +221,7 @@ function zOdpowiedzi(znaki: unknown[], linie: unknown[]): { znaki: ZnakInw[]; li
     const z = x as Record<string, string>;
     const miejsce = miejsceZKlucza(String(z.wzgorek));
     const znak = RODZAJE_ZNAKOW_NAZWY.find((r) => r.id === z.znak)?.id;
-    return miejsce && znak ? [{ reka: reka(z.reka), miejsce, znak, pewnosc: z.pewnosc === "delikatny" ? "delikatny" as const : "wyrazny" as const, gdzie: String(z.gdzie ?? "") }] : [];
+    return miejsce && znak ? [{ reka: reka(z.reka), miejsce, znak, pewnosc: z.pewnosc === "delikatny" ? "delikatny" as const : "wyrazny" as const, gdzie: String(z.gdzie ?? ""), czesc: czescMarsaZKlucza(String(z.wzgorek)) }] : [];
   });
   const li = linie.flatMap((x) => {
     const l = x as Record<string, string>;
@@ -232,8 +242,9 @@ function pytania(znaki: ZnakInw[], linie: LiniaInw[]): Pytanie[] {
       for (const cecha of CECHY_LINII[linia] ?? []) lista.push({ typ: "cecha", reka, linia, cecha });
     }
     lista.push({ typ: "krzyz", reka, ai: znaki.find((z) => z.reka === reka && z.znak === "krzyz_mistyczny") });
-    for (const miejsce of WZGORKI) {
-      lista.push({ typ: "wzgorek", reka, miejsce, ai: znaki.filter((z) => z.reka === reka && z.miejsce === miejsce && z.znak !== "krzyz_mistyczny") });
+    for (const { miejsce, czesc } of WZGORKI) {
+      // znak AI na Marsie bez podanej części pokazujemy przy obu Marsach (osoba wskaże, gdzie go ma)
+      lista.push({ typ: "wzgorek", reka, miejsce, czesc, ai: znaki.filter((z) => z.reka === reka && z.miejsce === miejsce && z.znak !== "krzyz_mistyczny" && (!czesc || !z.czesc || z.czesc === czesc)) });
     }
   }
   return lista;
@@ -326,8 +337,10 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
   function zakoncz() {
     const znaki: string[] = [], linie: string[] = [], brak: string[] = [];
     const wlasne: ZnakWlasny[] = [];
+    // znak AI na Marsie bez części jest pytany przy obu Marsach — liczymy go raz
+    const uzyteAI = new Set<ZnakInw>();
     const opisZnaku = (z: ZnakInw, dopisek: string) =>
-      `${nazwaZnaku(z.znak)} — ${nazwaMiejsca(z.miejsce)}, ${nazwaReki(z.reka)}, ${z.pewnosc === "delikatny" ? "delikatny" : "wyraźny"}${z.gdzie ? ` (${z.gdzie})` : ""} — ${dopisek}`;
+      `${nazwaZnaku(z.znak)} — ${nazwaWzgorka(z.miejsce, z.czesc)}, ${nazwaReki(z.reka)}, ${z.pewnosc === "delikatny" ? "delikatny" : "wyraźny"}${z.gdzie ? ` (${z.gdzie})` : ""} — ${dopisek}`;
     for (const p of lista) {
       const o = odp[klucz(p)];
       if (p.typ === "cecha") continue; // dopisywane do opisu linii niżej
@@ -352,12 +365,12 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
         } else if (o === "niewiem" && p.ai) znaki.push(opisZnaku(p.ai, "osoba nie jest pewna"));
       } else {
         if (o === "niewiem") {
-          for (const z of p.ai) znaki.push(opisZnaku(z, "osoba nie jest pewna"));
+          for (const z of p.ai) if (!uzyteAI.has(z)) { uzyteAI.add(z); znaki.push(opisZnaku(z, "osoba nie jest pewna")); }
         } else if (Array.isArray(o)) {
           for (const zn of o) {
             const ai = p.ai.find((z) => z.znak === zn);
-            if (ai) znaki.push(opisZnaku(ai, "osoba potwierdza"));
-            else wlasne.push({ reka: p.reka, miejsce: p.miejsce, znak: zn });
+            if (ai && !uzyteAI.has(ai)) { uzyteAI.add(ai); znaki.push(opisZnaku({ ...ai, czesc: ai.czesc ?? p.czesc }, "osoba potwierdza")); }
+            else if (!ai) wlasne.push({ reka: p.reka, miejsce: p.miejsce, znak: zn, ...(p.czesc ? { czesc: p.czesc } : {}) });
           }
         }
       }
@@ -378,7 +391,7 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
         return [`${NAZWY_LINII[p.linia]} (${o === "wyrazna" ? "wyraźna" : "słaba"}${cechy.length ? `; ${cechy.join("; ")}` : ""}) — ${r}`];
       }
       if (p.typ === "krzyz") return o === "mam" ? [`krzyż mistyczny — ${r}`] : [];
-      return Array.isArray(o) ? o.map((z) => `${nazwaZnaku(z)} — ${nazwaMiejsca(p.miejsce)}, ${r}`) : [];
+      return Array.isArray(o) ? o.map((z) => `${nazwaZnaku(z)} — ${nazwaWzgorka(p.miejsce, p.czesc)}, ${r}`) : [];
     });
 
   if (koniec) {
@@ -450,7 +463,8 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
           <IlustracjaDloni lewa={nazwyRak[p.reka] === "lewa"}
             linia={p.typ === "linia" || p.typ === "cecha" ? p.linia : null}
             dodatek={p.typ === "cecha" ? p.cecha.rysunek ?? null : null}
-            aktywne={p.typ === "wzgorek" ? p.miejsce : p.typ === "krzyz" ? "czworobok" : null} />
+            aktywne={p.typ === "wzgorek" ? p.miejsce : p.typ === "krzyz" ? "czworobok" : null}
+            czescMarsa={p.typ === "wzgorek" ? p.czesc ?? null : null} />
           <p className="hs-instrukcja" style={{ textAlign: "center" }}>{nazwyRak[p.reka] === "lewa" ? "Lewa" : "Prawa"} dłoń od wewnątrz</p>
         </div>
 
@@ -494,7 +508,8 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
           )}
           {p.typ === "wzgorek" && (
             <>
-              <h3>{nazwaMiejsca(p.miejsce).replace(/^./, (c) => c.toUpperCase())}</h3>
+              <h3>{nazwaWzgorka(p.miejsce, p.czesc).replace(/^./, (c) => c.toUpperCase())}</h3>
+              {p.czesc && <p className="prz-opis">{OPIS_MARSA[p.czesc]}</p>}
               <p className="prz-opis">Czy widzisz tu któryś z tych znaków? Zaznacz wszystkie, które masz.</p>
               {p.ai.length > 0 && (
                 <p className="prz-ai">AI widzi: {p.ai.map((z, i) => (
