@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { folderKalibracji, zapiszTekst, zapiszZdjecia } from "@/lib/kalibracja";
 import { z } from "zod";
 import { checkRate, clientIp } from "@/lib/ratelimit";
 import { dloniSchema, blokiReki, ogledziny } from "@/lib/hiromancjaAI";
@@ -218,6 +219,13 @@ export async function POST(req: Request) {
     ],
   });
 
+  // tylko localhost: zdjęcia, lista potwierdzona przez osobę i pełny odczyt do .kalibracji/
+  const kal = folderKalibracji("odczyt");
+  zapiszZdjecia(kal, "wiodaca", parsed.wiodaca);
+  zapiszZdjecia(kal, "bierna", parsed.bierna);
+  zapiszTekst(kal, "wejscie.json", JSON.stringify({ inwentarz: parsed.inwentarz, deklaracje: parsed.deklaracje, plec: parsed.plec }, null, 2));
+  let calyOdczyt = "";
+
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
@@ -225,8 +233,10 @@ export async function POST(req: Request) {
         for await (const event of stream) {
           if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
             controller.enqueue(encoder.encode(event.delta.text));
+            if (kal) calyOdczyt += event.delta.text;
           }
         }
+        zapiszTekst(kal, "odczyt.md", calyOdczyt);
       } catch (err) {
         controller.enqueue(encoder.encode("\n\n_Przerwano generowanie odczytu. Spróbuj ponownie._"));
         console.error("hiromancja stream error:", err); // NIGDY nie logować `parsed` — zawiera zdjęcie

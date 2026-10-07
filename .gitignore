@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# kalibracja AI chiromancji — zdjęcia dłoni i odpowiedzi AI z localhost (lib/kalibracja.ts)
+/.kalibracja/

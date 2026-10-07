@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { checkRate, clientIp } from "@/lib/ratelimit";
 import { dloniSchema, blokiReki, ogledziny } from "@/lib/hiromancjaAI";
+import { folderKalibracji, zapiszTekst, zapiszZdjecia } from "@/lib/kalibracja";
 
 /**
  * KROK 1 CHIROMANCJI — „co AI widzi”: oględziny każdego zbliżenia osobno, a potem jedno
@@ -86,6 +87,11 @@ export async function POST(req: Request) {
     return Response.json({ error: "Nieprawidłowe dane wejściowe" }, { status: 400 });
   }
 
+  // tylko localhost: zdjęcia i odpowiedzi AI do .kalibracji/ (lib/kalibracja.ts)
+  const kal = folderKalibracji("ogledziny");
+  zapiszZdjecia(kal, "wiodaca", parsed.wiodaca);
+  zapiszZdjecia(kal, "bierna", parsed.bierna);
+
   try {
     const [w, b] = await Promise.all([
       ogledziny(client, "WIODĄCA", parsed.wiodaca.strefy),
@@ -116,6 +122,8 @@ export async function POST(req: Request) {
       // np. zdjęcie bez dłoni albo urwana odpowiedź — pusta lista zamiast błędu; osoba może dopisać sama
       console.error("hiromancja-ogledziny: odpowiedź bez JSON, stop_reason =", msg.stop_reason);
     }
+    zapiszTekst(kal, "ogledziny_zblizen.txt", ogledzinyTekst);
+    zapiszTekst(kal, "lista_ai.json", JSON.stringify(wynik, null, 2));
     return Response.json(
       { znaki: Array.isArray(wynik.znaki) ? wynik.znaki : [], linie: Array.isArray(wynik.linie) ? wynik.linie : [], ogledzinyTekst },
       { headers: { "Cache-Control": "no-store" } },
