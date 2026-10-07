@@ -134,8 +134,23 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
   // finansów (władca 2./11. domu, karaka bogactwa…) mocniejsza niż u 75% / 60% osób.
   const finanse = (): Wskazanie | null => {
     if (opcje.varga) {
+      // wykres dzielony (D9): klasyczne wskaźniki pieniędzy w samej mapie — władcy 2. i 11. domu,
+      // karaki bogactwa (Jowisz, Wenus) i planety w domach pieniędzy; bez rozkładów z mapy głównej
+      if (!domy) return null;
+      const wladca = (d: number) => RASIS[(chart.angles!.lagnaSign + d - 1) % 12].lord;
+      const dobreMiejsce = (p: PlanetId) => [1, 4, 5, 7, 9, 10].includes(dom(p));
+      const wskazania: (Wskazanie | null)[] = [2, 11].map((d) => {
+        const p = wladca(d);
+        if (silna(p)) return tak(`władca ${d}. domu (${MIANOWNIK[p]}) — ${chart.planets[p].dignity}, w ${dom(p)}. domu`);
+        if (dobreMiejsce(p)) return czesciowo(`władca ${d}. domu (${MIANOWNIK[p]}) w ${dom(p)}. domu`);
+        return null;
+      });
+      for (const p of ["jupiter", "venus"] as PlanetId[]) {
+        if (silna(p)) wskazania.push(tak(`${MIANOWNIK[p]} (wskaźnik bogactwa) — ${chart.planets[p].dignity}`));
+      }
       const ps = [...w(2), ...w(11)];
-      return ps.length >= 2 ? tak(`2. i 11. dom: ${lista(ps)}`) : ps.length === 1 ? czesciowo(`${w(2).length ? "2." : "11."} dom: ${lista(ps)}`) : null;
+      wskazania.push(ps.length >= 2 ? tak(`2. i 11. dom: ${lista(ps)}`) : ps.length === 1 ? czesciowo(`${w(2).length ? "2." : "11."} dom: ${lista(ps)}`) : null);
+      return najlepsze(...wskazania);
     }
     const fin = ocenaFinansowa(chart);
     const dhana = fin.dhanaJogi[0];
@@ -492,7 +507,7 @@ export const KRYTERIA_TEMATOW: Record<string, Record<SystemTematu, string>> = {
     numerologia: "8 (Saturn) wśród Twoich liczb",
   },
   finanse: {
-    kosmogram: "joga bogactwa albo mocny wskaźnik finansów (w D9: planety w 2. i 11. domu)",
+    kosmogram: "joga bogactwa albo mocny wskaźnik finansów (w D9: władca 2. lub 11. domu we własnej godności albo w kendrze/trikonie, Jowisz lub Wenus we własnej godności, planety w 2. i 11. domu)",
     dlon: "linia Słońca; linia Merkurego; trójkąt w czworoboku albo w środku dłoni (z linii głowy, losu i Merkurego); trójkąt lub gwiazda na wzgórku Merkurego; znak ryby",
     numerologia: "6 (Wenus) albo 8 (Saturn) wśród Twoich liczb",
   },
