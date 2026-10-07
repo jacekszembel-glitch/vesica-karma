@@ -3149,3 +3149,13 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
   .sp-tabela { font-size: 0.8rem; }
   .sp-droga th { width: 84px; }
 }
+
+/* Tabela 4: niebo i dłonie (components/SpojnoscRak.tsx) */
+.sp-pod { display: block; font-size: 0.58rem; letter-spacing: 0.06em; text-transform: none; font-weight: 400; opacity: 0.8; margin-top: 2px; }
+.sp-pary { display: grid; gap: 6px; margin: 12px 0; }
+.sp-pary p { text-align: left; font-size: 0.9rem; line-height: 1.6; }
+.sp-pary strong { color: var(--gold); font-size: 1.2rem; }
+.sp-para-nazwa { display: inline-block; min-width: 190px; color: var(--sand); font-weight: 600; }
+.sp-uwaga { font-size: 0.82rem; line-height: 1.6; text-align: left; border-left: 2px solid var(--warn); padding-left: 10px; margin: 10px 0 14px; }
+.sp-num { opacity: 0.8; }
+.sp-num-potw { font-size: 0.7rem; color: var(--gold); }

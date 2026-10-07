@@ -85,7 +85,20 @@ function najlepsze(...w: (Wskazanie | null)[]): Wskazanie | null {
   };
 }
 
-export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: DlonWLiczbach | null): TematWspolny[] {
+/** Dłoń jednej ręki: wiodąca = planety i linie z głównego bloku, bierna = blok „bierna” (starsze odczyty go nie mają). */
+export function dlonReki(dlon: DlonWLiczbach | null, reka: "wiodaca" | "bierna"): DlonWLiczbach | null {
+  if (!dlon) return null;
+  const tej = <T extends { reka: string }>(l?: T[]) => (l ?? []).filter((z) => z.reka === reka);
+  return reka === "wiodaca"
+    ? { ...dlon, znaki: tej(dlon.znaki), wlasne: tej(dlon.wlasne), bierna: undefined }
+    : { planety: dlon.bierna?.planety ?? {}, linie: dlon.bierna?.linie ?? {}, zywiol: dlon.zywiol, zrodlo: dlon.zrodlo, znaki: tej(dlon.znaki), wlasne: tej(dlon.wlasne) };
+}
+
+/**
+ * opcje.varga — wykres dzielony (np. D9): bez talentów i bez finansów z zakładki Finanse,
+ * bo ich rozkłady „na tle 20 000 horoskopów” policzono dla mapy głównej; finanse z D9 = planety w 2. i 11. domu.
+ */
+export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: DlonWLiczbach | null, opcje: { varga?: boolean } = {}): TematWspolny[] {
   /* ---------- kosmogram ---------- */
   const domy = !!chart.angles;
   const w = (d: number) => (domy ? PLANET_ORDER.filter((p) => chart.planets[p].house === d) : []);
@@ -106,6 +119,7 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     (dziedzinyTalentu(chart) ?? []).map((w) => [w.id, procentNizej(w.punkty, ROZKLADY_TALENTU[w.id])]),
   );
   const talent = (...ids: DziedzinaTalentu[]): Wskazanie | null => {
+    if (opcje.varga) return null;
     const najl = ids.map((id) => ({ id, p: procentTalentu.get(id) ?? 0 })).sort((a, b) => b.p - a.p)[0];
     if (!najl) return null;
     const opis = `talent: ${NAZWA_TALENTU[najl.id]} — wyżej niż u ${Math.round(najl.p)}% osób`;
@@ -119,6 +133,10 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
   // Finanse — te same wyliczenia co zakładka Finanse: joga bogactwa (dhana) albo planeta-wskaźnik
   // finansów (władca 2./11. domu, karaka bogactwa…) mocniejsza niż u 75% / 60% osób.
   const finanse = (): Wskazanie | null => {
+    if (opcje.varga) {
+      const ps = [...w(2), ...w(11)];
+      return ps.length >= 2 ? tak(`2. i 11. dom: ${lista(ps)}`) : ps.length === 1 ? czesciowo(`${w(2).length ? "2." : "11."} dom: ${lista(ps)}`) : null;
+    }
     const fin = ocenaFinansowa(chart);
     const dhana = fin.dhanaJogi[0];
     const czynniki = fin.planety.map((f) => {
@@ -147,13 +165,17 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
   const linie = dlon?.linie ?? {};
   const znaki = [...(dlon?.znaki ?? []), ...(dlon?.wlasne ?? [])];
   const maDane = !!dlon && (Object.keys(linie).length > 0 || znaki.length > 0 || Object.keys(dlon.planety).length > 0);
+  // czy któryś ze sprawdzanych wskaźników dłoni w ogóle miał dane — inaczej temat to „brak danych”, nie 0
+  let sprawdzono = false;
   const linia = (l: LiniaDloni): Wskazanie | null => {
     const s = linie[l];
+    if (s) sprawdzono = true;
     if (s === "wyrazna") return tak(`${NAZWA_LINII[l]} — wyraźnie`);
     if (s === "odcinkowa" || s === "slaba") return czesciowo(`${NAZWA_LINII[l]} — ${STAN_LINII[s]}`);
     return null;
   };
   const znakNa = (m: MiejsceZnaku, rodzaje?: RodzajZnaku[]): Wskazanie | null => {
+    if (dlon?.znaki) sprawdzono = true;
     const wszystkie = znaki.filter((x) => x.miejsce === m && (!rodzaje || rodzaje.includes(x.znak)));
     if (!wszystkie.length) return null;
     const z = wszystkie.find((x) => x.pewnosc === "wyrazny") ?? wszystkie[0];
@@ -163,9 +185,16 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     const moc = wszystkie.reduce((s, x) => s + (x.pewnosc === "wyrazny" ? 2 : 1), 0);
     return z.pewnosc === "delikatny" ? czesciowo(opis + ", delikatny", moc) : tak(opis, moc);
   };
-  const wzgorek = (p: PlanetId): Wskazanie | null =>
-    dlon?.planety[p] === 1 ? tak(`wydatny wzgórek ${DOPELNIACZ[p]}`, 1.5) : null;
-  const reka = (f: () => Wskazanie | null): Wskazanie => (maDane ? f() ?? nie() : brakDanych);
+  const wzgorek = (p: PlanetId): Wskazanie | null => {
+    if (dlon?.planety[p] != null) sprawdzono = true;
+    return dlon?.planety[p] === 1 ? tak(`wydatny wzgórek ${DOPELNIACZ[p]}`, 1.5) : null;
+  };
+  const reka = (f: () => Wskazanie | null): Wskazanie => {
+    if (!maDane) return brakDanych;
+    sprawdzono = false;
+    const w = f();
+    return w ?? (sprawdzono ? nie() : brakDanych);
+  };
 
   /* ---------- numerologia ---------- */
   const powody = ocenyNumerologii(num).powody;
@@ -328,7 +357,8 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
       wskazania: {
         kosmogram: astro(() => w(8).length >= 2 ? tak(`8. dom: ${lista(w(8))}`) : w(8).length === 1 ? czesciowo(`8. dom: ${lista(w(8))}`) : null),
         dlon: reka(() => najlepsze(
-          znaki.some((z) => z.znak === "wyspa") ? tak("wyspy na liniach") : null,
+          // znakNa z pustą listą rodzajów tylko zaznacza, że znaki tej ręki były sprawdzane
+          znakNa("czworobok", []) ?? (znaki.some((z) => z.znak === "wyspa") ? tak("wyspy na liniach") : null),
           znaki.some((z) => z.znak === "kratka") ? czesciowo("kratki na wzgórkach") : null,
         )),
         // 4 = Rahu — w numerologii wedyjskiej liczba nagłych zmian i przewrotów

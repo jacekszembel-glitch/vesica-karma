@@ -5,7 +5,9 @@ import { DateTime } from "luxon";
 import PorownanieSystemow from "@/components/PorownanieSystemow";
 import TematyWspolne from "@/components/TematyWspolne";
 import SpojnoscTrzechSystemow from "@/components/SpojnoscTrzechSystemow";
-import { tematyWspolne } from "@/lib/astro/tematy";
+import { dlonReki, tematyWspolne } from "@/lib/astro/tematy";
+import { navamsaChart } from "@/lib/astro/varga";
+import SpojnoscRak from "@/components/SpojnoscRak";
 import { buildChart } from "@/lib/astro/chart";
 import { numerology } from "@/lib/astro/numerology";
 import { porownajSystemy, dlonZTekstu, mostyDlonHoroskop, znakiWlasneDoDloni, type DlonWLiczbach } from "@/lib/astro/zgodnosc";
@@ -251,7 +253,15 @@ export default function Page() {
       date: lokalnie.toUTC().toJSDate(), latitude: urodzenie.place.lat, longitude: urodzenie.place.lon, timeKnown: urodzenie.timeKnown,
     });
     const num = numerology(urodzenie.date, urodzenie.name ?? "", "wedyjski", new Date().getFullYear());
-    return { wynik: porownajSystemy(chart, num, dlonPoKorekcie), mosty: mostyDlonHoroskop(chart, dlonPoKorekcie), tematy: tematyWspolne(chart, num, dlonPoKorekcie), chart };
+    return { wynik: porownajSystemy(chart, num, dlonPoKorekcie), mosty: mostyDlonHoroskop(chart, dlonPoKorekcie), tematy: tematyWspolne(chart, num, dlonPoKorekcie), chart,
+      // tabela 4: D1 z ręką wiodącą, D9 z ręką bierną
+      rak: (() => {
+        const d9 = navamsaChart(chart);
+        return {
+          d1: tematyWspolne(chart, num, dlonReki(dlonPoKorekcie, "wiodaca")),
+          d9: d9 ? tematyWspolne(d9, num, dlonReki(dlonPoKorekcie, "bierna"), { varga: true }) : [],
+        };
+      })() };
   }, [zlota, urodzenie, dlonPoKorekcie]);
 
 
@@ -342,6 +352,7 @@ export default function Page() {
               <TematyWspolne tematy={porownanie.tematy} />
               <div className="ornament" style={{ margin: "44px 0 26px" }} />
               <SpojnoscTrzechSystemow tematy={porownanie.tematy} chart={porownanie.chart} />
+              <SpojnoscRak d1={porownanie.rak.d1} d9={porownanie.rak.d9} maBierna={!!dlonPoKorekcie?.bierna} />
             </>
           ) : (
             <p className="muted" style={{ fontSize: "0.9rem" }}>

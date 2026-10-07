@@ -165,3 +165,86 @@ export function droga(chart: VedicChart, s: Spojnosc): Droga {
     nieOs: s.tematy.filter((t) => t.rodzaj === "zgodne_nie").map((t) => t.temat),
   };
 }
+
+/* ---------- tabela 4: D1 + ręka wiodąca, D9 + ręka bierna ---------- */
+
+/**
+ * Wiodąca dłoń czyta się jak mapa główna (D1), bierna jak nawamsza (D9). Głosują cztery kolumny
+ * (D1, dłoń wiodąca, D9, dłoń bierna); numerologia tylko POTWIERDZA — jej „tak” dodaje pewności,
+ * a jej 0 nie liczy się jako niezgoda. Powód (ten sam dla każdego): numerologia ma trzy–cztery
+ * liczby na jedenaście tematów, więc jej 0 znaczy „nie wśród Twoich liczb”, a nie „tego nie ma”.
+ */
+export type KolumnaRak = "d1" | "wiodaca" | "d9" | "bierna";
+export const KOLUMNY_RAK: KolumnaRak[] = ["d1", "wiodaca", "d9", "bierna"];
+export type RodzajRak = "zgodne_tak" | "wiekszosc_tak" | "zgodne_nie" | "wiekszosc_nie" | "rozbiezne" | "za_malo";
+
+export interface WierszRak {
+  temat: TematWspolny;
+  wartosci: Partial<Record<KolumnaRak, number>>;
+  /** Numerologia: 1 / ½ = potwierdza, 0 = nie dokłada, null = brak danych. */
+  numerologia: number | null;
+  rodzaj: RodzajRak;
+  /** Ile kolumn mówi „tak” (z ilu, które mają dane). */
+  tak: number;
+  n: number;
+  szansa: number;
+}
+export interface ParaRak { a: KolumnaRak; b: KolumnaRak; obserwowana: number; przypadek: number; kappa: number; n: number }
+export interface SpojnoscRak {
+  wiersze: WierszRak[];
+  obserwowana: number;
+  przypadek: number;
+  kappa: number;
+  /** Zgodność par: D1↔wiodąca i D9↔bierna (główne), D1↔D9 i wiodąca↔bierna (wewnątrz systemu). */
+  pary: ParaRak[];
+}
+
+const kappaZ = (obs: number, prz: number) => (prz < 1 ? (obs - prz) / (1 - prz) : 0);
+
+export function spojnoscRak(d1: TematWspolny[], d9: TematWspolny[]): SpojnoscRak {
+  const zD9 = new Map(d9.map((t) => [t.id, t]));
+  const surowe = d1.map((t) => {
+    const t9 = zD9.get(t.id);
+    const v: Partial<Record<KolumnaRak, number>> = {};
+    const dodaj = (k: KolumnaRak, x: number | null) => { if (x !== null) v[k] = x; };
+    dodaj("d1", wartosc(t.wskazania.kosmogram.stan));
+    dodaj("wiodaca", wartosc(t.wskazania.dlon.stan));
+    if (t9) { dodaj("d9", wartosc(t9.wskazania.kosmogram.stan)); dodaj("bierna", wartosc(t9.wskazania.dlon.stan)); }
+    return { temat: t, wartosci: v, numerologia: wartosc(t.wskazania.numerologia.stan) };
+  });
+
+  const rozklad = Object.fromEntries(KOLUMNY_RAK.map((k) => {
+    const v = surowe.map((r) => r.wartosci[k]).filter((x): x is number => x !== undefined);
+    return [k, WARTOSCI.map((w) => (v.length ? v.filter((x) => x === w).length / v.length : 0))];
+  })) as Record<KolumnaRak, number[]>;
+  const przypadekPary = (a: KolumnaRak, b: KolumnaRak) =>
+    WARTOSCI.reduce((s, x, i) => s + WARTOSCI.reduce((s2, y, j) => s2 + rozklad[a][i] * rozklad[b][j] * (1 - Math.abs(x - y)), 0), 0);
+
+  const PARY: [KolumnaRak, KolumnaRak][] = [["d1", "wiodaca"], ["d9", "bierna"], ["d1", "d9"], ["wiodaca", "bierna"]];
+  const pary: ParaRak[] = PARY.map(([a, b]) => {
+    const wsp = surowe.filter((r) => r.wartosci[a] !== undefined && r.wartosci[b] !== undefined);
+    const obserwowana = wsp.length ? wsp.reduce((s, r) => s + 1 - Math.abs(r.wartosci[a]! - r.wartosci[b]!), 0) / wsp.length : 0;
+    const przypadek = przypadekPary(a, b);
+    return { a, b, obserwowana, przypadek, kappa: wsp.length ? kappaZ(obserwowana, przypadek) : 0, n: wsp.length };
+  });
+
+  let sumaObs = 0, sumaPrz = 0, ile = 0;
+  const wiersze = surowe.map((r): WierszRak => {
+    const kol = KOLUMNY_RAK.filter((k) => r.wartosci[k] !== undefined);
+    if (kol.length < 2) return { ...r, rodzaj: "za_malo", tak: 0, n: kol.length, szansa: 1 };
+    const pr: [KolumnaRak, KolumnaRak][] = [];
+    for (let i = 0; i < kol.length; i++) for (let j = i + 1; j < kol.length; j++) pr.push([kol[i], kol[j]]);
+    sumaObs += pr.reduce((s, [a, b]) => s + 1 - Math.abs(r.wartosci[a]! - r.wartosci[b]!), 0) / pr.length;
+    sumaPrz += pr.reduce((s, [a, b]) => s + przypadekPary(a, b), 0) / pr.length;
+    ile++;
+    const tak = kol.filter((k) => r.wartosci[k]! > 0).length;
+    const zero = kol.length - tak;
+    const rodzaj: RodzajRak = tak === kol.length ? "zgodne_tak" : zero === kol.length ? "zgodne_nie"
+      : tak > zero ? "wiekszosc_tak" : zero > tak ? "wiekszosc_nie" : "rozbiezne";
+    const szansa = kol.reduce((s, k) => s * rozklad[k][WARTOSCI.indexOf(r.wartosci[k]!)], 1);
+    return { ...r, rodzaj, tak, n: kol.length, szansa };
+  });
+  const obserwowana = ile ? sumaObs / ile : 0;
+  const przypadek = ile ? sumaPrz / ile : 0;
+  return { wiersze, obserwowana, przypadek, kappa: kappaZ(obserwowana, przypadek), pary };
+}

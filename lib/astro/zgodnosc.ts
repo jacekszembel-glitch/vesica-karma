@@ -108,6 +108,8 @@ export interface DlonWLiczbach {
   wlasne?: ZnakDloni[];
   /** Surowe odpowiedzi AI na zgłoszone znaki (kolejność jak przy wysyłce) — scalane w HiromancjaOdczyt. */
   odpowiedziNaZgloszone?: ("tak" | "mozliwe" | "nie")[];
+  /** Ręka bierna osobno (planety i linie powyżej = ręka wiodąca) — od odczytów z 2026-10-07; starsze jej nie mają. */
+  bierna?: { planety: Partial<Record<PlanetId, Ocena | null>>; linie: Partial<Record<LiniaDloni, StanLinii | null>> };
 }
 
 const CYFRA_PLANETA: Record<number, PlanetId> = {
@@ -257,27 +259,37 @@ export function rozdzielOdczytDloni(surowy: string): { tekst: string; dane: Dlon
       planety?: Record<string, unknown>; zywiol?: unknown;
       znaki?: Record<string, unknown>[]; linie?: Record<string, unknown>;
       deklaracje?: { nr?: number; widze?: string }[];
+      bierna?: { planety?: Record<string, unknown>; linie?: Record<string, unknown> };
     };
-    const planety: Partial<Record<PlanetId, Ocena | null>> = {};
-    for (const [k, v] of Object.entries(d.planety ?? {})) {
-      const p = KLUCZE_PLANET[k];
-      if (p) planety[p] = v === 1 || v === 0 || v === -1 ? v : null;
-    }
+    const planetyZ = (src?: Record<string, unknown>) => {
+      const out: Partial<Record<PlanetId, Ocena | null>> = {};
+      for (const [k, v] of Object.entries(src ?? {})) {
+        const p = KLUCZE_PLANET[k];
+        if (p) out[p] = v === 1 || v === 0 || v === -1 ? v : null;
+      }
+      return out;
+    };
+    const linieZ = (src?: Record<string, unknown>) => {
+      const out: Partial<Record<LiniaDloni, StanLinii | null>> = {};
+      for (const l of LINIE_DLONI) {
+        const v = String(src?.[l]);
+        out[l] = STANY_LINII.includes(v as StanLinii) ? (v as StanLinii) : null;
+      }
+      return out;
+    };
+    const planety = planetyZ(d.planety);
     const zywiol = ["ziemia", "powietrze", "ogien", "woda"].includes(String(d.zywiol)) ? (d.zywiol as TypDloni) : null;
     const znaki = (Array.isArray(d.znaki) ? d.znaki : [])
       .map((z) => znakZDanych(z, "ai")).filter((z): z is ZnakDloni => !!z);
-    const linie: DlonWLiczbach["linie"] = {};
-    for (const l of LINIE_DLONI) {
-      const v = String(d.linie?.[l]);
-      linie[l] = STANY_LINII.includes(v as StanLinii) ? (v as StanLinii) : null;
-    }
+    const linie = linieZ(d.linie);
+    const bierna = d.bierna && typeof d.bierna === "object" ? { planety: planetyZ(d.bierna.planety), linie: linieZ(d.bierna.linie) } : undefined;
     const odp = Array.isArray(d.deklaracje) ? d.deklaracje : [];
     const odpowiedziNaZgloszone: ("tak" | "mozliwe" | "nie")[] = [];
     for (const o of odp) {
       const w = o.widze === "tak" || o.widze === "mozliwe" ? o.widze : "nie";
       if (typeof o.nr === "number" && o.nr >= 1 && o.nr <= 20) odpowiedziNaZgloszone[o.nr - 1] = w;
     }
-    return { tekst, dane: { planety, zywiol, zrodlo: "odczyt", znaki, linie, odpowiedziNaZgloszone } };
+    return { tekst, dane: { planety, zywiol, zrodlo: "odczyt", znaki, linie, odpowiedziNaZgloszone, ...(bierna ? { bierna } : {}) } };
   } catch {
     return { tekst, dane: null };
   }
