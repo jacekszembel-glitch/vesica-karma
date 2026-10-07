@@ -58,7 +58,7 @@ const WZGORKI: MiejsceZnaku[] = ["jupiter", "saturn", "sun", "mercury", "mars", 
 const ZNAKI_NA_WZGORKU = RODZAJE_ZNAKOW_NAZWY.filter((z) => z.id !== "krzyz_mistyczny");
 
 /** Dodatek na rysunku dłoni przy pytaniu o cechę linii. */
-export type DodatekRysunku = "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy" | "koniec_serca" | "koniec_losu" | "start_slonca";
+export type DodatekRysunku = "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy" | "koniec_serca" | "koniec_losu" | "start_slonca" | "rozwidlenie_slonca";
 interface CechaLinii {
   id: string;
   pytanie: string;
@@ -145,6 +145,23 @@ const CECHY_LINII: Partial<Record<LiniaDloni, CechaLinii[]>> = {
         ksiezyc: "zaczyna się od wzgórka Księżyca (klasycznie: uznanie dzięki innym ludziom, publiczności, wyobraźni)",
       },
       rysunek: "start_slonca",
+    },
+    {
+      id: "rozwidlenie", pytanie: "Czy linia Słońca się rozwidla?",
+      opis: "Przyjrzyj się obu końcom linii na wzgórku Słońca: górnemu, tuż pod palcem serdecznym, i dolnemu, nad linią serca. Rozwidlenie to miejsce, w którym linia rozdziela się na dwie (czasem trzy) odnogi.",
+      opcje: [
+        { id: "gora", tekst: "U góry, pod palcem" },
+        { id: "dol", tekst: "U dołu, nad linią serca" },
+        { id: "oba", tekst: "Na obu końcach" },
+        { id: "nie", tekst: "Nie rozwidla się" },
+      ],
+      wynik: {
+        gora: "rozwidlona u góry, pod palcem serdecznym (klasycznie: talent rozwija się w kilku kierunkach naraz; trzy odnogi — tzw. trójząb — to znak wyjątkowego uznania)",
+        dol: "rozwidlona u dołu, nad linią serca (klasycznie: talent czerpie z dwóch źródeł — dwie drogi prowadzą do tego samego uznania)",
+        oba: "rozwidlona na obu końcach (klasycznie: talent z dwóch źródeł, rozwijany w kilku kierunkach)",
+        nie: "bez rozwidleń",
+      },
+      rysunek: "rozwidlenie_slonca",
     },
   ],
   glowy: [

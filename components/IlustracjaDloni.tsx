@@ -96,6 +96,10 @@ const STARTY_SLONCA: { x: number; y: number; podpis: string }[] = [
   { x: 134, y: 300, podpis: "od środka" }, { x: 140, y: 372, podpis: "od dołu" },
 ];
 const SLONCE_DOL = "M 134 300 C 136 324 138 348 140 372";
+/** Rozwidlenia krótkiej linii Słońca na wzgórku: górne (pod palcem) i dolne (nad linią serca). */
+const SLONCE_NA_WZGORKU = "M 125 178 L 124 168";
+const SLONCE_WIDELEC_GORA = "M 124 168 L 117 153 M 124 168 L 131 153";
+const SLONCE_WIDELEC_DOL = "M 125 178 L 118 187 M 125 178 L 132 187";
 const SLONCE_KSIEZYC = "M 100 318 C 112 306 124 300 133 296";
 /** Przedłużenie linii losu aż pod palec środkowy (wzgórek Saturna). */
 const LOS_SATURN = "M 160 170 C 161 162 162 156 162 150";
@@ -134,8 +138,9 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
         {LINIE_STALE.filter((l) => l !== linia).map((l) => <path key={l} d={LINIE[l]} className="ilu-linia" />)}
         {linia && (
           <>
-            <path d={LINIE[linia]} className="ilu-linia-blask" filter="url(#ilu-blask)" />
-            <path d={LINIE[linia]} className="ilu-linia-akt" />
+            {/* przy rozwidleniach linii Słońca świeci tylko jej odcinek na wzgórku */}
+            <path d={dodatek === "rozwidlenie_slonca" ? SLONCE_NA_WZGORKU : LINIE[linia]} className="ilu-linia-blask" filter="url(#ilu-blask)" />
+            <path d={dodatek === "rozwidlenie_slonca" ? SLONCE_NA_WZGORKU : LINIE[linia]} className="ilu-linia-akt" />
           </>
         )}
         {dodatek === "rozwidlenie_zycia" && (
@@ -150,6 +155,15 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
             <path d={ROZWIDLENIE_GLOWY} className="ilu-linia-blask" filter="url(#ilu-blask)" />
             <path d={ROZWIDLENIE_GLOWY} className="ilu-linia-akt" />
             <circle cx={114} cy={240} r={16} className="ilu-obwodka" />
+          </>
+        )}
+        {dodatek === "rozwidlenie_slonca" && (
+          <>
+            <path d={LINIE.serca} className="ilu-linia-kontekst" />
+            <path d={SLONCE_WIDELEC_GORA} className="ilu-linia-blask" filter="url(#ilu-blask)" />
+            <path d={SLONCE_WIDELEC_GORA} className="ilu-linia-akt ilu-widelec" />
+            <path d={SLONCE_WIDELEC_DOL} className="ilu-linia-blask" filter="url(#ilu-blask)" />
+            <path d={SLONCE_WIDELEC_DOL} className="ilu-linia-akt ilu-widelec" />
           </>
         )}
         {dodatek === "start_slonca" && (
@@ -191,6 +205,12 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
           </>
         )}
       </g>
+      {dodatek === "rozwidlenie_slonca" && (
+        <>
+          <text x={x(140)} y={156} textAnchor={lewa ? "end" : "start"} className="ilu-podpis ilu-podpis-miara">u góry</text>
+          <text x={x(140)} y={190} textAnchor={lewa ? "end" : "start"} className="ilu-podpis ilu-podpis-miara">u dołu</text>
+        </>
+      )}
       {dodatek === "start_slonca" && (
         <>
           {STARTY_SLONCA.map((k) => (
