@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { checkRate, clientIp } from "@/lib/ratelimit";
 import { dloniSchema, blokiReki, ogledziny } from "@/lib/hiromancjaAI";
+import { ID_KSZTALTOW, katalogDlaAI } from "@/lib/hiromancjaKsztalty";
 import { folderKalibracji, zapiszTekst, zapiszZdjecia } from "@/lib/kalibracja";
 
 /**
@@ -23,7 +24,7 @@ const requestSchema = z.object({ wiodaca: dloniSchema, bierna: dloniSchema });
 const SCHEMAT_INWENTARZA = {
   type: "object",
   additionalProperties: false,
-  required: ["znaki", "linie"],
+  required: ["znaki", "linie", "ksztalty"],
   properties: {
     znaki: {
       type: "array",
@@ -54,6 +55,20 @@ const SCHEMAT_INWENTARZA = {
         },
       },
     },
+    ksztalty: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["reka", "ksztalt", "pewnosc", "gdzie"],
+        properties: {
+          reka: { type: "string", enum: ["wiodaca", "bierna"] },
+          ksztalt: { type: "string", enum: ID_KSZTALTOW },
+          pewnosc: { type: "string", enum: ["wyrazny", "delikatny"] },
+          gdzie: { type: "string" },
+        },
+      },
+    },
   },
 };
 
@@ -66,6 +81,9 @@ Zasady:
 - ZNAK ŁODZI (ważny, łatwo go przeoczyć): wydłużony, zamknięty kształt jak łódź, utworzony przez linie — zwykle po stronie kciuka od linii losu: z boku linia losu i łuk linii życia, u góry linia głowy, u dołu domknięcie (np. linią Merkurego albo łukiem linii życia przy nadgarstku). Wpisz "znak":"lodz", "wzgorek":"rahu", a w "gdzie" — które linie go tworzą i czy jest domknięty u dołu; niedomknięty u dołu → "pewnosc":"delikatny".
 - Linia złożona z odcinków w jednym kierunku to ta linia ("stan":"odcinkowa"). Linii, których nie ma, nie wpisuj.
 - Nie powtarzaj tego samego znaku dwa razy z różnych zbliżeń tej samej ręki.
+- KSZTAŁTY Z UKŁADU LINII (reguła, zawsze): przejdź cały katalog tradycyjnych kształtów poniżej — na obu rękach osobno — i każdy, który jest (choćby niewyraźnie albo tylko z częściowym domknięciem), wpisz do "ksztalty" ("ksztalt" = id z katalogu, w "gdzie" — z których linii powstaje i gdzie leży). Trójkąty, łódź, ryba i krzyż mistyczny idą też do "znaki" jak dotąd. U różnych ludzi pojawiają się różne kształty — niczego nie pomijaj.
+Katalog kształtów:
+${katalogDlaAI()}
 
 Odpowiedz WYŁĄCZNIE jednym obiektem JSON, bez żadnego tekstu przed ani po:
 {"znaki":[{"reka":"wiodaca|bierna","wzgorek":"jowisz|saturn|slonce|merkury|wenus|ksiezyc|mars_gorny|mars_dolny|rahu|ketu|czworobok","znak":"x|gwiazda|kwadrat|trojkat|kratka|wyspa|kreski|kreski_drobne|ryba|lodz|krzyz_mistyczny","pewnosc":"wyrazny|delikatny","gdzie":"krótko, dokładne miejsce"}],
@@ -117,7 +135,7 @@ export async function POST(req: Request) {
       }],
     });
     const tekst = msg.content.filter((x) => x.type === "text").map((x) => x.text).join("");
-    let wynik: { znaki?: unknown[]; linie?: unknown[] } = {};
+    let wynik: { znaki?: unknown[]; linie?: unknown[]; ksztalty?: unknown[] } = {};
     try {
       wynik = JSON.parse(tekst.slice(tekst.indexOf("{"), tekst.lastIndexOf("}") + 1));
     } catch {
@@ -127,7 +145,7 @@ export async function POST(req: Request) {
     zapiszTekst(kal, "ogledziny_zblizen.txt", ogledzinyTekst);
     zapiszTekst(kal, "lista_ai.json", JSON.stringify(wynik, null, 2));
     return Response.json(
-      { znaki: Array.isArray(wynik.znaki) ? wynik.znaki : [], linie: Array.isArray(wynik.linie) ? wynik.linie : [], ogledzinyTekst },
+      { znaki: Array.isArray(wynik.znaki) ? wynik.znaki : [], linie: Array.isArray(wynik.linie) ? wynik.linie : [], ksztalty: Array.isArray(wynik.ksztalty) ? wynik.ksztalty : [], ogledzinyTekst },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (err) {

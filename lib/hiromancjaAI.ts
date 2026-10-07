@@ -1,5 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
+import { katalogDlaAI } from "./hiromancjaKsztalty";
 
 /**
  * Wspólne dla /api/hiromancja-ogledziny (krok 1: co AI widzi) i /api/hiromancja (krok 2: odczyt):
@@ -50,6 +51,10 @@ Jak patrzysz:
 - TRÓJKĄTY Z LINII GŁÓWNYCH: sprawdź, czy dłuższe linie przecinają się tak, że trzy z nich zamykają trójkąt — szczególnie w środku dłoni: linia głowy (pozioma/ukośna) + linia losu (pionowa przez środek) + linia Merkurego (ukośna od dołu ku małemu palcowi), albo linia życia + linia głowy + linia Merkurego. Taki trójkąt jest znakiem także wtedy, gdy jeden bok tworzy linia słaba albo złożona z wielu krótkich kresek. Wpisz go osobno: „trójkąt z linii … — środek dłoni”.
 - ZNAK ŁODZI: wydłużony, zamknięty kształt jak łódź utworzony przez linie — zwykle po stronie kciuka od linii losu, między linią losu a łukiem linii życia, z linią głowy u góry i domknięciem u dołu. Wpisz go osobno: „łódź z linii … — domknięta / otwarta u dołu”.
 - Miejsce podaj względem dłoni (np. „pod palcem wskazującym, tuż nad końcem linii serca”, „na krawędzi dłoni, w dolnej części”), korzystając z podpisu obrazu.
+
+KSZTAŁTY Z UKŁADU LINII — REGUŁA: przy każdym obrazie sprawdź CAŁY katalog tradycyjnych kształtów chiromancji (zachodniej i indyjskiej). Kształt tworzy się z kilku linii naraz — dlatego oprócz pojedynczych bruzd patrz, co linie razem zamykają, w co się układają i czym się kończą. U różnych ludzi pojawiają się różne kształty — niczego nie pomijaj; fragment kształtu też wpisz (z „delikatny”). Katalog:
+${katalogDlaAI()}
+Każdy znaleziony kształt wpisz osobno: „kształt: [nazwa z katalogu] — [z których linii / dokładne miejsce] — [wyraźny / delikatny]”.
 
 Format odpowiedzi — sama lista, każda pozycja w osobnej linii:
 - [znak albo linia] — [dokładne miejsce] — [wyraźny / delikatny]

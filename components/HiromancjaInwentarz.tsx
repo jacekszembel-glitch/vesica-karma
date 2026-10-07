@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import IlustracjaDloni from "./IlustracjaDloni";
+import { KSZTALTY, OSOBNE_PYTANIA } from "@/lib/hiromancjaKsztalty";
 import { PieczecOdslaniania } from "./Interpretation";
 import {
   MIEJSCA_ZNAKOW, NAZWA_MARSA, czescMarsaZKlucza, NAZWY_LINII, RODZAJE_ZNAKOW_NAZWY, miejsceZKlucza,
@@ -225,11 +226,12 @@ type Pytanie =
   | { typ: "ryba"; reka: Reka; ai: ZnakInw[] }
   | { typ: "trojkat"; reka: Reka; ai: ZnakInw[] }
   | { typ: "lodz"; reka: Reka; ai: ZnakInw[] }
+  | { typ: "ksztalty"; reka: Reka; ai: KsztaltInw[] }
   | { typ: "wzgorek"; reka: Reka; miejsce: MiejsceZnaku; czesc?: CzescMarsa; ai: ZnakInw[] };
 type OdpLinii = "wyrazna" | "slaba" | "nie" | "niewiem";
 type OdpKrzyza = "mam" | "nie" | "niewiem";
 /** Odpowiedź przy wzgórku: zaznaczone znaki albo „nie wiem”. */
-type OdpWzgorka = RodzajZnaku[] | "niewiem";
+type OdpWzgorka = string[] | "niewiem";
 /** Odpowiedź na cechę linii: id opcji albo „niewiem”. */
 type Odp = OdpLinii | OdpKrzyza | OdpWzgorka | string;
 
@@ -240,7 +242,9 @@ const maLinie = (o: Odp | undefined) => o === "wyrazna" || o === "slaba";
 const widoczne = (lista: Pytanie[], odp: Record<string, Odp>) =>
   lista.filter((q) => q.typ !== "cecha" || maLinie(odp[kluczLinii(q.reka, q.linia)]));
 
-function zOdpowiedzi(znaki: unknown[], linie: unknown[]): { znaki: ZnakInw[]; linie: LiniaInw[] } {
+interface KsztaltInw { reka: Reka; ksztalt: string; pewnosc: "wyrazny" | "delikatny"; gdzie: string }
+
+function zOdpowiedzi(znaki: unknown[], linie: unknown[], ksztalty: unknown[] = []): { znaki: ZnakInw[]; linie: LiniaInw[]; ksztalty: KsztaltInw[] } {
   const reka = (r: unknown): Reka => (r === "bierna" ? "bierna" : "wiodaca");
   const zn = znaki.flatMap((x) => {
     const z = x as Record<string, string>;
@@ -254,10 +258,15 @@ function zOdpowiedzi(znaki: unknown[], linie: unknown[]): { znaki: ZnakInw[]; li
     const stan = l.stan === "odcinkowa" || l.stan === "slaba" ? l.stan : "wyrazna";
     return NAZWY_LINII[linia] ? [{ reka: reka(l.reka), linia, stan: stan as LiniaInw["stan"], gdzie: String(l.gdzie ?? "") }] : [];
   });
-  return { znaki: zn, linie: li };
+  const ks = ksztalty.flatMap((x) => {
+    const k = x as Record<string, string>;
+    return KSZTALTY.some((d) => d.id === k.ksztalt)
+      ? [{ reka: reka(k.reka), ksztalt: k.ksztalt, pewnosc: k.pewnosc === "delikatny" ? "delikatny" as const : "wyrazny" as const, gdzie: String(k.gdzie ?? "") }] : [];
+  });
+  return { znaki: zn, linie: li, ksztalty: ks };
 }
 
-function pytania(znaki: ZnakInw[], linie: LiniaInw[]): Pytanie[] {
+function pytania(znaki: ZnakInw[], linie: LiniaInw[], ksztalty: KsztaltInw[]): Pytanie[] {
   const lista: Pytanie[] = [];
   for (const reka of ["wiodaca", "bierna"] as Reka[]) {
     const liReki = linie.filter((l) => l.reka === reka);
@@ -274,6 +283,8 @@ function pytania(znaki: ZnakInw[], linie: LiniaInw[]): Pytanie[] {
       // znak AI na Marsie bez podanej części pokazujemy przy obu Marsach (osoba wskaże, gdzie go ma)
       lista.push({ typ: "wzgorek", reka, miejsce, czesc, ai: znaki.filter((z) => z.reka === reka && z.miejsce === miejsce && z.znak !== "krzyz_mistyczny" && (!czesc || !z.czesc || z.czesc === czesc)) });
     }
+    // na koniec ręki: tradycyjne kształty z układu linii (te bez osobnych pytań)
+    lista.push({ typ: "ksztalty", reka, ai: ksztalty.filter((k) => k.reka === reka && !OSOBNE_PYTANIA.has(k.ksztalt)) });
   }
   return lista;
 }
@@ -287,21 +298,23 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
   onZnakiWlasne: (z: ZnakWlasny[]) => void;
   onDalej: (inw: InwentarzPotwierdzony) => void;
   /** Tylko localhost (?przewodnik): gotowe znaleziska AI — przewodnik bez zdjęć i bez płatnych oględzin. */
-  testowe?: { znaki: unknown[]; linie: unknown[] };
+  testowe?: { znaki: unknown[]; linie: unknown[]; ksztalty?: unknown[] };
 }) {
   const [busy, setBusy] = useState(false);
   const [blad, setBlad] = useState<string | null>(null);
-  const [wynik, setWynik] = useState<{ znaki: ZnakInw[]; linie: LiniaInw[]; ogledzinyTekst: string } | null>(
-    () => (testowe ? { ...zOdpowiedzi(testowe.znaki, testowe.linie), ogledzinyTekst: "" } : null),
+  const [wynik, setWynik] = useState<{ znaki: ZnakInw[]; linie: LiniaInw[]; ksztalty: KsztaltInw[]; ogledzinyTekst: string } | null>(
+    () => (testowe ? { ...zOdpowiedzi(testowe.znaki, testowe.linie, testowe.ksztalty), ogledzinyTekst: "" } : null),
   );
   const [nr, setNr] = useState(0);
   const [odp, setOdp] = useState<Record<string, Odp>>({});
   // zaznaczenia przy bieżącym wzgórku, zanim osoba kliknie „Dalej”
-  const [wybrane, setWybrane] = useState<RodzajZnaku[]>([]);
+  const [wybrane, setWybrane] = useState<string[]>([]);
+  // pytanie o kształty: czy pokazać cały katalog (nie tylko to, co zauważyło AI)
+  const [calyKatalog, setCalyKatalog] = useState(false);
   // ekran przejścia: ręka wiodąca opisana, zanim zaczną się pytania o bierną
   const [wiodacaZamknieta, setWiodacaZamknieta] = useState(false);
 
-  const wszystkie = useMemo(() => (wynik ? pytania(wynik.znaki, wynik.linie) : []), [wynik]);
+  const wszystkie = useMemo(() => (wynik ? pytania(wynik.znaki, wynik.linie, wynik.ksztalty) : []), [wynik]);
   const lista = widoczne(wszystkie, odp);
 
   async function obejrzyj() {
@@ -313,7 +326,7 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
       });
       const j = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(j.error ?? `Nie udało się obejrzeć dłoni (kod ${res.status}).`);
-      setWynik({ ...zOdpowiedzi(j.znaki ?? [], j.linie ?? []), ogledzinyTekst: String(j.ogledzinyTekst ?? "") });
+      setWynik({ ...zOdpowiedzi(j.znaki ?? [], j.linie ?? [], j.ksztalty ?? []), ogledzinyTekst: String(j.ogledzinyTekst ?? "") });
       setNr(0); setOdp({}); setWybrane([]);
     } catch (e) {
       setBlad((e as Error).message);
@@ -411,6 +424,18 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
           if (ai) znaki.push(opisZnaku({ ...ai, miejsce: gdzie.miejsce }, `osoba potwierdza (${gdzie.tekst.toLowerCase()})`));
           else wlasne.push({ reka: p.reka, miejsce: gdzie.miejsce, znak: "ryba" });
         } else if (o === "niewiem") for (const z of p.ai) znaki.push(opisZnaku(z, "osoba nie jest pewna"));
+      } else if (p.typ === "ksztalty") {
+        const nazwaK = (id: string) => KSZTALTY.find((k) => k.id === id)?.nazwa ?? id;
+        if (o === "niewiem") {
+          for (const k of p.ai) znaki.push(`kształt: ${nazwaK(k.ksztalt)} — ${nazwaReki(p.reka)}${k.gdzie ? ` (${k.gdzie})` : ""} — osoba nie jest pewna`);
+        } else if (Array.isArray(o)) {
+          for (const id of o) {
+            const ai = p.ai.find((k) => k.ksztalt === id);
+            znaki.push(ai
+              ? `kształt: ${nazwaK(id)} — ${nazwaReki(p.reka)}, ${ai.pewnosc === "delikatny" ? "delikatny" : "wyraźny"}${ai.gdzie ? ` (${ai.gdzie})` : ""} — osoba potwierdza`
+              : `kształt: ${nazwaK(id)} — ${nazwaReki(p.reka)} — osoba widzi go na swojej dłoni; AI go nie wypisało`);
+          }
+        }
       } else if (p.typ === "krzyz") {
         if (o === "mam") {
           if (p.ai) znaki.push(opisZnaku(p.ai, "osoba potwierdza"));
@@ -420,7 +445,7 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
         if (o === "niewiem") {
           for (const z of p.ai) if (!uzyteAI.has(z)) { uzyteAI.add(z); znaki.push(opisZnaku(z, "osoba nie jest pewna")); }
         } else if (Array.isArray(o)) {
-          for (const zn of o) {
+          for (const zn of o as RodzajZnaku[]) {
             const ai = p.ai.find((z) => z.znak === zn);
             if (ai && !uzyteAI.has(ai)) { uzyteAI.add(ai); znaki.push(opisZnaku({ ...ai, czesc: ai.czesc ?? p.czesc }, "osoba potwierdza")); }
             else if (!ai) wlasne.push({ reka: p.reka, miejsce: p.miejsce, znak: zn, ...(p.czesc ? { czesc: p.czesc } : {}) });
@@ -456,7 +481,8 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
         const gdzie = MIEJSCA_RYBY.find((m) => m.id === o);
         return gdzie ? [`znak ryby — ${gdzie.tekst.toLowerCase()}, ${r}`] : [];
       }
-      return Array.isArray(o) ? o.map((z) => `${nazwaZnaku(z)} — ${nazwaWzgorka(p.miejsce, p.czesc)}, ${r}`) : [];
+      if (p.typ === "ksztalty") return Array.isArray(o) ? o.map((id) => `kształt: ${KSZTALTY.find((k) => k.id === id)?.nazwa ?? id} — ${r}`) : [];
+      return Array.isArray(o) ? o.map((z) => `${nazwaZnaku(z as RodzajZnaku)} — ${nazwaWzgorka(p.miejsce, p.czesc)}, ${r}`) : [];
     });
 
   if (koniec) {
@@ -559,6 +585,51 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
               </div>
             </>
           )}
+          {p.typ === "ksztalty" && (() => {
+            const aiIds = new Set(p.ai.map((k) => k.ksztalt));
+            const pokaz = KSZTALTY.filter((k) => !OSOBNE_PYTANIA.has(k.id) && (calyKatalog || aiIds.has(k.id) || wybrane.includes(k.id)));
+            return (
+              <>
+                <h3>Kształty z układu linii</h3>
+                <p className="prz-opis">
+                  Linie razem potrafią tworzyć tradycyjne kształty — literę M, trójząb, pierścienie pod palcami, znaki
+                  z chiromancji indyjskiej i inne. Zaznacz wszystkie, które masz na tej ręce. Najedź na kształt, żeby
+                  zobaczyć, jak wygląda.
+                </p>
+                <p className="prz-ai">{p.ai.length
+                  ? <>AI widzi: {p.ai.map((k, i) => <span key={i}>{i > 0 && "; "}<strong>{KSZTALTY.find((d) => d.id === k.ksztalt)?.nazwa}</strong>{k.gdzie && ` — ${k.gdzie}`}</span>)}</>
+                  : "AI nie zauważyło innych kształtów — sprawdź katalog niżej."}</p>
+                <div className="prz-znaki">
+                  {pokaz.map((k) => {
+                    const zaz = wybrane.includes(k.id);
+                    return (
+                      <button key={k.id} type="button" className={`prz-znak${zaz ? " prz-znak-zaz" : ""}`} aria-pressed={zaz}
+                        title={`${k.wyglad} — klasycznie: ${k.znaczenie}`}
+                        onClick={() => setWybrane((w) => (zaz ? w.filter((x) => x !== k.id) : [...w, k.id]))}>
+                        {zaz ? "✓ " : ""}{k.nazwa}{aiIds.has(k.id) && <span className="prz-znak-ai">AI</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                {!calyKatalog && (
+                  <p style={{ marginTop: 10 }}>
+                    <button type="button" className="hs-usun" onClick={() => setCalyKatalog(true)}>pokaż cały katalog kształtów ({KSZTALTY.length - OSOBNE_PYTANIA.size})</button>
+                  </p>
+                )}
+                <div className="prz-odpowiedzi">
+                  {wybrane.length > 0
+                    ? <button type="button" className="prz-btn prz-btn-mam" onClick={() => { setCalyKatalog(false); odpowiedz(wybrane); }}>Mam to — dalej</button>
+                    : <button type="button" className="prz-btn" onClick={() => { setCalyKatalog(false); odpowiedz([]); }}>Nie mam żadnego</button>}
+                  <button type="button" className="prz-btn prz-btn-cichy" onClick={() => { setCalyKatalog(false); odpowiedz("niewiem"); }}>Nie wiem</button>
+                </div>
+                {wybrane.length > 0 && (
+                  <ul className="prz-ryba-znaczenia">
+                    {KSZTALTY.filter((k) => wybrane.includes(k.id)).map((k) => <li key={k.id}><strong>{k.nazwa}:</strong> {k.znaczenie}</li>)}
+                  </ul>
+                )}
+              </>
+            );
+          })()}
           {p.typ === "lodz" && (
             <>
               <h3>Czy linie tworzą znak łodzi?</h3>

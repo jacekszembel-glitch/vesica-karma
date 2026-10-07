@@ -339,4 +339,8 @@ const PRZYKLAD_OGLEDZIN = {
     { reka: "wiodaca", linia: "losu", stan: "odcinkowa", gdzie: "od środka dłoni" },
     { reka: "bierna", linia: "serca", stan: "wyrazna", gdzie: "" },
   ],
+  ksztalty: [
+    { reka: "wiodaca", ksztalt: "litera_m", pewnosc: "wyrazny", gdzie: "linie życia, głowy, serca i losu" },
+    { reka: "wiodaca", ksztalt: "pierscien_salomona", pewnosc: "delikatny", gdzie: "łuk pod palcem wskazującym" },
+  ],
 };
