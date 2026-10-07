@@ -58,7 +58,7 @@ const WZGORKI: MiejsceZnaku[] = ["jupiter", "saturn", "sun", "mercury", "mars", 
 const ZNAKI_NA_WZGORKU = RODZAJE_ZNAKOW_NAZWY.filter((z) => z.id !== "krzyz_mistyczny");
 
 /** Dodatek na rysunku dłoni przy pytaniu o cechę linii. */
-export type DodatekRysunku = "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy" | "koniec_serca";
+export type DodatekRysunku = "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy" | "koniec_serca" | "koniec_losu";
 interface CechaLinii {
   id: string;
   pytanie: string;
@@ -103,6 +103,27 @@ const CECHY_LINII: Partial<Record<LiniaDloni, CechaLinii[]>> = {
         krawedz: "biegnie przez całą dłoń do jej krawędzi (klasycznie: bardzo silne zaangażowanie uczuciowe)",
       },
       rysunek: "koniec_serca",
+    },
+  ],
+  losu: [
+    {
+      id: "koniec", pytanie: "Gdzie kończy się linia losu?",
+      opis: "Linia losu biegnie od dołu dłoni w górę, w stronę palca środkowego. Nie u wszystkich dochodzi do końca — zobacz, gdzie się zatrzymuje. W chiromancji jej wysokość odpowiada okresom życia: linia głowy to mniej więcej 35. rok, linia serca — około 50.",
+      opcje: [
+        { id: "glowa", tekst: "Na linii głowy" },
+        { id: "miedzy", tekst: "Między linią głowy a serca" },
+        { id: "serce", tekst: "Na linii serca" },
+        { id: "saturn", tekst: "Dochodzi pod palec środkowy" },
+        { id: "jowisz", tekst: "Skręca pod palec wskazujący" },
+      ],
+      wynik: {
+        glowa: "kończy się na linii głowy (klasycznie: wyraźnie prowadzona droga do ok. 35. roku życia, potem kierunek wyznacza własna decyzja)",
+        miedzy: "kończy się między linią głowy a serca (klasycznie: droga prowadzona mniej więcej do 35.–50. roku życia, później życie bardziej z wyboru niż z przeznaczenia)",
+        serce: "kończy się na linii serca (klasycznie: droga prowadzona do ok. 50. roku życia; uczucia i relacje mogą zmienić jej bieg)",
+        saturn: "dochodzi do wzgórka Saturna (klasycznie: wyraźna droga i obowiązek przez całe życie, aż do późnych lat)",
+        jowisz: "skręca w stronę wzgórka Jowisza (klasycznie: ambicja, osiąganie celów, uznanie)",
+      },
+      rysunek: "koniec_losu",
     },
   ],
   glowy: [

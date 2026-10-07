@@ -84,6 +84,14 @@ const KONCE_SERCA: { x: number; y: number; podpis: string; dy: number }[] = [
   { x: 204, y: 174, podpis: "Jowisz", dy: 17 }, { x: 224, y: 184, podpis: "krawędź", dy: -10 },
 ];
 const SERCE_DALEJ = "M 182 160 C 196 168 212 174 224 184";
+/** Możliwe końce linii losu: na linii głowy, między głową a sercem, na linii serca, pod Saturnem; odnoga do Jowisza. */
+const KONCE_LOSU: { y: number; x: number; podpis: string }[] = [
+  { x: 152, y: 221, podpis: "na linii głowy" }, { x: 155, y: 198, podpis: "między" },
+  { x: 158, y: 175, podpis: "na linii serca" }, { x: 162, y: 150, podpis: "pod środkowym" },
+];
+const LOS_JOWISZ = "M 156 198 C 166 186 182 178 198 172";
+/** Przedłużenie linii losu aż pod palec środkowy (wzgórek Saturna). */
+const LOS_SATURN = "M 160 170 C 161 162 162 156 162 150";
 /** Warianty przebiegu końca linii głowy: prosta i mocno opadająca. */
 const GLOWA_PROSTA = "M 150 214 C 120 220 96 224 74 226";
 const GLOWA_OPADA = "M 150 218 C 126 236 108 262 98 300";
@@ -137,6 +145,16 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
             <circle cx={114} cy={240} r={16} className="ilu-obwodka" />
           </>
         )}
+        {dodatek === "koniec_losu" && (
+          <>
+            <path d={LINIE.glowy} className="ilu-linia-kontekst" />
+            <path d={LINIE.serca} className="ilu-linia-kontekst" />
+            <path d={LOS_JOWISZ} className="ilu-wariant" />
+            <path d={LOS_SATURN} className="ilu-wariant" />
+            {KONCE_LOSU.map((k) => <circle key={k.podpis} cx={k.x} cy={k.y} r={4} className="ilu-koniec" />)}
+            <circle cx={198} cy={172} r={4} className="ilu-koniec" />
+          </>
+        )}
         {dodatek === "koniec_serca" && (
           <>
             <path d={SERCE_DALEJ} className="ilu-wariant" />
@@ -156,6 +174,14 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
           </>
         )}
       </g>
+      {dodatek === "koniec_losu" && (
+        <>
+          {KONCE_LOSU.map((k) => (
+            <text key={k.podpis} x={x(k.x - 9)} y={k.y + 4} textAnchor={lewa ? "start" : "end"} className="ilu-podpis ilu-podpis-miara">{k.podpis}</text>
+          ))}
+          <text x={x(206)} y={168} textAnchor={lewa ? "end" : "start"} className="ilu-podpis ilu-podpis-miara">do Jowisza</text>
+        </>
+      )}
       {dodatek === "koniec_serca" && KONCE_SERCA.map((k) => (
         <text key={k.podpis} x={x(k.x + (k.podpis === "krawędź" ? 10 : 0))} y={k.y + k.dy} textAnchor="middle" className="ilu-podpis ilu-podpis-miara">{k.podpis}</text>
       ))}

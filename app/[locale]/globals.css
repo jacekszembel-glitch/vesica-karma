@@ -3269,3 +3269,4 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 
 .ilu-koniec { fill: var(--sand); stroke: #1d1530; stroke-width: 1.5; }
 .ilu-wygaszony { opacity: 0.35; }
+.ilu-linia-kontekst { fill: none; stroke: var(--sand); stroke-width: 1.8; opacity: 0.85; stroke-linecap: round; }
