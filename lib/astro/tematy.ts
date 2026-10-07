@@ -382,6 +382,28 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     },
   ];
 
+  // REGUŁA: pusty dom nie znaczy słabego tematu. Każdy temat sprawdza też WŁADCĘ swojego domu
+  // (we własnej godności → tak) i swoją KARAKĘ (we własnej godności → tak). Samo położenie w kendrze/trikonie
+  // nie wystarcza — zmierzone na 1000 losowych horoskopach, zaznaczało temat prawie u wszystkich.
+  // Działa w D1 i w D9 — tak u każdej osoby łapiemy przypadki, w których temat niesie władca, nie lokator domu.
+  if (domy) {
+    const wladcaDomu = (d: number) => RASIS[(chart.angles!.lagnaSign + d - 1) % 12].lord;
+    for (const t of tematy) {
+      if (opcje.varga && t.id === "finanse") continue; // D9: finanse mają już własną ocenę władców i karak
+      const def = DOMY_TEMATOW[t.id];
+      if (!def) continue;
+      const dodatkowe: (Wskazanie | null)[] = def.domy.map((d) => {
+        const p = wladcaDomu(d);
+        if (silna(p)) return tak(`władca ${d}. domu (${MIANOWNIK[p]}) — ${chart.planets[p].dignity}, w ${dom(p)}. domu`);
+        return null;
+      });
+      for (const k of def.karaki) if (silna(k)) dodatkowe.push(tak(`${MIANOWNIK[k]} (karaka tematu) — ${chart.planets[k].dignity}`));
+      const w = t.wskazania.kosmogram;
+      const razem = najlepsze(w.stan === "tak" || w.stan === "czesciowo" ? w : null, ...dodatkowe);
+      if (razem) t.wskazania.kosmogram = razem;
+    }
+  }
+
   // Skupisko (3+ planety w jednym domu) wzmacnia też tematy TEGO domu — klasyczne znaczenia domów.
   const DOM_TEMATY: Record<number, string[]> = {
     1: ["energia"], 2: ["finanse"], 3: ["umysl"], 5: ["uznanie"], 6: ["praca"], 7: ["zwiazek"],
@@ -460,6 +482,21 @@ export function najwazniejszeTematy(tematy: TematWspolny[]): GlosSystemu[] {
  * Co dokładnie sprawdzamy przy każdym temacie w każdym systemie — do rozwijanych wierszy tabel,
  * żeby przy 0 było widać, czego szukaliśmy. Musi zgadzać się z warunkami w tematyWspolne() wyżej.
  */
+/** Domy i karaki każdego tematu — do reguły „pusty dom ≠ słaby temat” (władca domu i karaka też się liczą). */
+export const DOMY_TEMATOW: Record<string, { domy: number[]; karaki: PlanetId[] }> = {
+  cel: { domy: [10], karaki: ["sun"] },
+  podroze: { domy: [9, 12], karaki: ["rahu"] },
+  duchowosc: { domy: [9, 12], karaki: ["jupiter", "ketu"] },
+  uznanie: { domy: [5, 10], karaki: ["sun"] },
+  ambicja: { domy: [9, 10], karaki: ["jupiter"] },
+  zwiazek: { domy: [7], karaki: ["venus"] },
+  umysl: { domy: [3, 5], karaki: ["mercury"] },
+  energia: { domy: [1, 3], karaki: ["mars"] },
+  praca: { domy: [6, 10], karaki: ["saturn"] },
+  finanse: { domy: [2, 11], karaki: ["jupiter", "venus"] },
+  przemiana: { domy: [8], karaki: [] },
+};
+
 export const KRYTERIA_TEMATOW: Record<string, Record<SystemTematu, string>> = {
   cel: {
     kosmogram: "skupisko 3+ planet w jednym domu albo planety w 10. domu",
@@ -517,3 +554,12 @@ export const KRYTERIA_TEMATOW: Record<string, Record<SystemTematu, string>> = {
     numerologia: "4 (Rahu) wśród Twoich liczb",
   },
 };
+
+// reguła „pusty dom ≠ słaby temat” — dopisana do opisu kryteriów kosmogramu
+for (const [id, def] of Object.entries(DOMY_TEMATOW)) {
+  const k = KRYTERIA_TEMATOW[id];
+  if (!k) continue;
+  const domy = def.domy.map((d) => `${d}.`).join(" i ");
+  const karaki = def.karaki.length ? `; karaka ${def.karaki.map((p) => ({ sun: "Słońce", moon: "Księżyc", mars: "Mars", mercury: "Merkury", jupiter: "Jowisz", venus: "Wenus", saturn: "Saturn", rahu: "Rahu", ketu: "Ketu" })[p]).join(" lub ")} we własnej godności` : "";
+  k.kosmogram += `; władca ${domy} domu we własnej godności${karaki}`;
+}
