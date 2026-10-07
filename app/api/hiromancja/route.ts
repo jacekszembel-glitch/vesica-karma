@@ -41,18 +41,19 @@ const requestSchema = z.object({
   /** Znaki, które osoba widzi na swojej dłoni na żywo i zgłasza przed odczytem — AI ma powiedzieć, czy widzi je na zdjęciach. */
   deklaracje: z.array(z.object({
     reka: z.enum(["wiodaca", "bierna"]),
-    miejsce: z.string().max(40),
-    znak: z.string().max(40),
-  })).max(12).optional(),
+    miejsce: z.string().max(120),
+    znak: z.string().max(80),
+  })).max(30).optional(),
   /** Krok 1 (/api/hiromancja-ogledziny): lista znaków i linii, które AI zobaczyło, po sprawdzeniu przez osobę. */
   inwentarz: z.object({
-    znaki: z.array(z.string().max(400)).max(60),
-    linie: z.array(z.string().max(400)).max(60),
+    // opisy z przewodnika bywają długie (cechy linii z klasycznym znaczeniem + przebieg wg AI)
+    znaki: z.array(z.string().max(1500)).max(80),
+    linie: z.array(z.string().max(2000)).max(80),
     /** Linie, których osoba nie ma (odpowiedź „Nie mam” w przewodniku). */
-    brak: z.array(z.string().max(120)).max(40).optional(),
+    brak: z.array(z.string().max(200)).max(40).optional(),
   }).optional(),
   /** Surowe oględziny zbliżeń z kroku 1 — żeby nie oglądać ich drugi raz. */
-  ogledzinyTekst: z.string().max(40_000).optional(),
+  ogledzinyTekst: z.string().max(150_000).optional(),
 });
 
 const SYSTEM_PROMPT_HIROMANCJA = `Jesteś doświadczonym obserwatorem tradycji chiromancji, piszącym po polsku dla serwisu „Czas Duszy”. Czytasz DWA zdjęcia dłoni tej samej osoby — pierwsze to jej ręka WIODĄCA (aktywna, ta, którą pisze), drugie to ręka BIERNA (pasywna). Przy każdej ręce dostajesz najpierw CAŁE zdjęcie, a po nim kolejne obrazy, każdy podpisany: zbliżenia stref wycięte z oryginału, a jeśli osoba je zrobiła — OSOBNE ZDJĘCIA z bliska i z innych ujęć (górna i dolna połowa dłoni, dłoń lekko zgięta, krawędź dłoni, grzbiet z paznokciami) oraz MIEJSCA WSKAZANE przez osobę do dokładnego obejrzenia. Różne ujęcia i światło pokazują różne bruzdy — zestawiaj je: znak wyraźny choćby na jednym ujęciu jest obserwacją. Miejsce wskazane przez osobę obejrzyj szczególnie uważnie i opisz dokładnie, co tam widzisz — osoba nie mówi, czego się spodziewa, więc nie zgaduj i nie dopowiadaj; jeśli nic szczególnego tam nie ma, napisz to wprost. Całe zdjęcie służy do proporcji i przebiegu linii, zbliżenia — do niuansów: drobnych linii, rozwidleń, wysp, przerw, krzyżyków, gwiazd, kratek, kresek pod palcami. Szczegół widoczny tylko na zbliżeniu jest pełnoprawną obserwacją.
@@ -155,8 +156,11 @@ export async function POST(req: Request) {
   let parsed;
   try {
     parsed = requestSchema.parse(await req.json());
-  } catch {
-    return new Response(JSON.stringify({ error: "Nieprawidłowe dane wejściowe" }), { status: 400 });
+  } catch (err) {
+    // na localhost pokaż, które pole nie przeszło sprawdzenia (bez treści zdjęć)
+    const dev = process.env.NODE_ENV === "development" && err instanceof z.ZodError
+      ? ` [dev] ${err.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ").slice(0, 600)}` : "";
+    return new Response(JSON.stringify({ error: "Nieprawidłowe dane wejściowe" + dev }), { status: 400 });
   }
 
   const kontekstTekst = [
