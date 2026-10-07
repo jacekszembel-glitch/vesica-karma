@@ -58,7 +58,7 @@ const WZGORKI: MiejsceZnaku[] = ["jupiter", "saturn", "sun", "mercury", "mars", 
 const ZNAKI_NA_WZGORKU = RODZAJE_ZNAKOW_NAZWY.filter((z) => z.id !== "krzyz_mistyczny");
 
 /** Dodatek na rysunku dłoni przy pytaniu o cechę linii. */
-export type DodatekRysunku = "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy";
+export type DodatekRysunku = "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy" | "koniec_serca";
 interface CechaLinii {
   id: string;
   pytanie: string;
@@ -84,6 +84,25 @@ const CECHY_LINII: Partial<Record<LiniaDloni, CechaLinii[]>> = {
       opcje: [{ id: "tak", tekst: "Mam to" }, { id: "nie", tekst: "Nie mam" }],
       wynik: { tak: "rozwidlona na końcu (klasycznie: zmiana miejsca zamieszkania)", nie: "bez rozwidlenia na końcu" },
       rysunek: "rozwidlenie_zycia",
+    },
+  ],
+  serca: [
+    {
+      id: "koniec", pytanie: "Gdzie kończy się linia serca?",
+      opis: "Linia serca zaczyna się przy krawędzi dłoni pod małym palcem. Zobacz, dokąd dochodzi: nie u wszystkich biegnie przez całą dłoń — czasem kończy się już pod palcem środkowym (wzgórek Saturna).",
+      opcje: [
+        { id: "saturn", tekst: "Pod palcem środkowym" },
+        { id: "miedzy", tekst: "Między środkowym a wskazującym" },
+        { id: "jowisz", tekst: "Pod palcem wskazującym" },
+        { id: "krawedz", tekst: "Przez całą dłoń" },
+      ],
+      wynik: {
+        saturn: "krótka, kończy się pod wzgórkiem Saturna (klasycznie: uczucia praktyczne, bardziej skupione na sobie, namiętność)",
+        miedzy: "kończy się między palcem środkowym a wskazującym (klasycznie: równowaga serca i rozsądku)",
+        jowisz: "kończy się pod wzgórkiem Jowisza (klasycznie: idealizm w miłości, wysokie wymagania wobec uczuć)",
+        krawedz: "biegnie przez całą dłoń do jej krawędzi (klasycznie: bardzo silne zaangażowanie uczuciowe)",
+      },
+      rysunek: "koniec_serca",
     },
   ],
   glowy: [

@@ -78,6 +78,12 @@ const PUNKTY: { id: MiejsceZnaku; x: number; y: number; podpis: string; podpisDy
 const ROZWIDLENIE_ZYCIA = "M 178 336 C 168 352 160 366 150 380";
 /** Rozwidlenie końca linii głowy („pióro pisarza”) — odnoga w dół. */
 const ROZWIDLENIE_GLOWY = "M 114 238 C 104 250 96 262 90 280";
+/** Możliwe końce linii serca: pod Saturnem, między palcami, pod Jowiszem, przy krawędzi dłoni. */
+const KONCE_SERCA: { x: number; y: number; podpis: string; dy: number }[] = [
+  { x: 160, y: 180, podpis: "Saturn", dy: 17 }, { x: 182, y: 160, podpis: "między", dy: -9 },
+  { x: 204, y: 174, podpis: "Jowisz", dy: 17 }, { x: 224, y: 184, podpis: "krawędź", dy: -10 },
+];
+const SERCE_DALEJ = "M 182 160 C 196 168 212 174 224 184";
 /** Warianty przebiegu końca linii głowy: prosta i mocno opadająca. */
 const GLOWA_PROSTA = "M 150 214 C 120 220 96 224 74 226";
 const GLOWA_OPADA = "M 150 218 C 126 236 108 262 98 300";
@@ -131,6 +137,12 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
             <circle cx={114} cy={240} r={16} className="ilu-obwodka" />
           </>
         )}
+        {dodatek === "koniec_serca" && (
+          <>
+            <path d={SERCE_DALEJ} className="ilu-wariant" />
+            {KONCE_SERCA.map((k) => <circle key={k.podpis} cx={k.x} cy={k.y} r={4} className="ilu-koniec" />)}
+          </>
+        )}
         {dodatek === "opadanie_glowy" && (
           <>
             <path d={GLOWA_PROSTA} className="ilu-wariant" />
@@ -144,6 +156,9 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
           </>
         )}
       </g>
+      {dodatek === "koniec_serca" && KONCE_SERCA.map((k) => (
+        <text key={k.podpis} x={x(k.x + (k.podpis === "krawędź" ? 10 : 0))} y={k.y + k.dy} textAnchor="middle" className="ilu-podpis ilu-podpis-miara">{k.podpis}</text>
+      ))}
       {dodatek === "opadanie_glowy" && (
         <>
           <text x={x(72)} y={214} textAnchor="middle" className="ilu-podpis ilu-podpis-miara">prosta</text>
@@ -161,13 +176,13 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
         const jest = zaznaczone.includes(p.id);
         const akt = aktywne === p.id;
         return (
-          <g key={i} className={`ilu-punkt${jest ? " ilu-jest" : ""}${akt ? " ilu-aktywny" : ""}`}
+          <g key={i} className={`ilu-punkt${jest ? " ilu-jest" : ""}${akt ? " ilu-aktywny" : ""}${linia && !akt ? " ilu-wygaszony" : ""}`}
             style={{ cursor: onWybierz ? "pointer" : "default" }}
             onClick={onWybierz ? () => onWybierz(p.id) : undefined}>
             {akt && <circle cx={x(p.x)} cy={p.y} r={20} className="ilu-poswiata" filter="url(#ilu-blask)" />}
             <circle cx={x(p.x)} cy={p.y} r={akt ? 14 : 9} className="ilu-kolo" />
             {jest && <circle cx={x(p.x)} cy={p.y} r={4} className="ilu-kropka" />}
-            <text x={x(p.x)} y={p.y + (p.podpisDy !== undefined ? p.podpisDy - (akt ? 6 : 0) : akt ? 28 : 21)} textAnchor="middle" className="ilu-podpis">{p.podpis}</text>
+            {!(linia && !akt) && <text x={x(p.x)} y={p.y + (p.podpisDy !== undefined ? p.podpisDy - (akt ? 6 : 0) : akt ? 28 : 21)} textAnchor="middle" className="ilu-podpis">{p.podpis}</text>}
           </g>
         );
       })}
