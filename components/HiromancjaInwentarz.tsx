@@ -58,7 +58,7 @@ const WZGORKI: MiejsceZnaku[] = ["jupiter", "saturn", "sun", "mercury", "mars", 
 const ZNAKI_NA_WZGORKU = RODZAJE_ZNAKOW_NAZWY.filter((z) => z.id !== "krzyz_mistyczny");
 
 /** Dodatek na rysunku dłoni przy pytaniu o cechę linii. */
-export type DodatekRysunku = "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy" | "koniec_serca" | "koniec_losu";
+export type DodatekRysunku = "rozwidlenie_zycia" | "dlugosc_zycia" | "rozwidlenie_glowy" | "opadanie_glowy" | "koniec_serca" | "koniec_losu" | "start_slonca";
 interface CechaLinii {
   id: string;
   pytanie: string;
@@ -124,6 +124,27 @@ const CECHY_LINII: Partial<Record<LiniaDloni, CechaLinii[]>> = {
         jowisz: "skręca w stronę wzgórka Jowisza (klasycznie: ambicja, osiąganie celów, uznanie)",
       },
       rysunek: "koniec_losu",
+    },
+  ],
+  slonca: [
+    {
+      id: "start", pytanie: "Skąd zaczyna się linia Słońca?",
+      opis: "Linia Słońca zawsze dochodzi pod palec serdeczny (wzgórek Słońca), ale u każdego zaczyna się gdzie indziej — czasem to tylko krótka kreska nad linią serca. Zobacz, skąd startuje.",
+      opcje: [
+        { id: "wzgorek", tekst: "Tylko na wzgórku Słońca" },
+        { id: "glowa", tekst: "Od linii głowy" },
+        { id: "srodek", tekst: "Od środka dłoni" },
+        { id: "dol", tekst: "Od dołu dłoni, przy nadgarstku" },
+        { id: "ksiezyc", tekst: "Od wzgórka Księżyca" },
+      ],
+      wynik: {
+        wzgorek: "tylko krótka linia na wzgórku Słońca, nad linią serca (klasycznie: uznanie i satysfakcja z własnej twórczości w dojrzałych latach)",
+        glowa: "zaczyna się od linii głowy (klasycznie: sukces dzięki własnemu umysłowi i wysiłkowi, mniej więcej od średniego wieku)",
+        srodek: "zaczyna się w środku dłoni (klasycznie: uznanie przychodzi z czasem, po drodze własnej pracy)",
+        dol: "długa, od dołu dłoni (klasycznie: talent i uznanie towarzyszą przez całe życie)",
+        ksiezyc: "zaczyna się od wzgórka Księżyca (klasycznie: uznanie dzięki innym ludziom, publiczności, wyobraźni)",
+      },
+      rysunek: "start_slonca",
     },
   ],
   glowy: [

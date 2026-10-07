@@ -90,6 +90,13 @@ const KONCE_LOSU: { y: number; x: number; podpis: string }[] = [
   { x: 158, y: 175, podpis: "na linii serca" }, { x: 162, y: 150, podpis: "pod środkowym" },
 ];
 const LOS_JOWISZ = "M 156 198 C 166 186 182 178 198 172";
+/** Możliwe początki linii Słońca (koniec zawsze pod palcem serdecznym). */
+const STARTY_SLONCA: { x: number; y: number; podpis: string }[] = [
+  { x: 125, y: 182, podpis: "tylko na wzgórku" }, { x: 128, y: 232, podpis: "od linii głowy" },
+  { x: 134, y: 300, podpis: "od środka" }, { x: 140, y: 372, podpis: "od dołu" },
+];
+const SLONCE_DOL = "M 134 300 C 136 324 138 348 140 372";
+const SLONCE_KSIEZYC = "M 100 318 C 112 306 124 300 133 296";
 /** Przedłużenie linii losu aż pod palec środkowy (wzgórek Saturna). */
 const LOS_SATURN = "M 160 170 C 161 162 162 156 162 150";
 /** Warianty przebiegu końca linii głowy: prosta i mocno opadająca. */
@@ -145,6 +152,16 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
             <circle cx={114} cy={240} r={16} className="ilu-obwodka" />
           </>
         )}
+        {dodatek === "start_slonca" && (
+          <>
+            <path d={LINIE.glowy} className="ilu-linia-kontekst" />
+            <path d={LINIE.serca} className="ilu-linia-kontekst" />
+            <path d={SLONCE_DOL} className="ilu-wariant" />
+            <path d={SLONCE_KSIEZYC} className="ilu-wariant" />
+            {STARTY_SLONCA.map((k) => <circle key={k.podpis} cx={k.x} cy={k.y} r={4} className="ilu-koniec" />)}
+            <circle cx={100} cy={318} r={4} className="ilu-koniec" />
+          </>
+        )}
         {dodatek === "koniec_losu" && (
           <>
             <path d={LINIE.glowy} className="ilu-linia-kontekst" />
@@ -174,6 +191,14 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
           </>
         )}
       </g>
+      {dodatek === "start_slonca" && (
+        <>
+          {STARTY_SLONCA.map((k) => (
+            <text key={k.podpis} x={x(k.x + 9)} y={k.y + 4} textAnchor={lewa ? "end" : "start"} className="ilu-podpis ilu-podpis-miara">{k.podpis}</text>
+          ))}
+          <text x={x(96)} y={336} textAnchor="middle" className="ilu-podpis ilu-podpis-miara">od Księżyca</text>
+        </>
+      )}
       {dodatek === "koniec_losu" && (
         <>
           {KONCE_LOSU.map((k) => (
