@@ -18,6 +18,10 @@ export const ATRYBUT_ODWROCENIA = "data-odwrocone";
 /** Skrypt do <head> — ustawia tryb przed pierwszym malowaniem (bez mignięcia fioletu).
  *  Na localhost dodatkowo: ?reset w adresie czyści postęp (do testów od zera). */
 export const SKRYPT_ODWROCENIA =
+  // tylko na localhost: ?trojkat-lodz — dopisuje do znaków osoby trójkąt i łódź w środku dłoni na obu rękach
+  // (podgląd, jak te znaki zmieniają Twoją Karmę, bez nowego odczytu dłoni); działa razem z ?zlota, więc stoi
+  // przed nim — ?zlota czyści adres
+  `try{var h6=location.hostname;if((h6==="localhost"||h6==="127.0.0.1")&&/[?&]trojkat-lodz(=|&|$)/.test(location.search)){var zw=JSON.parse(localStorage.getItem("vk_znaki_wlasne")||"[]");[["wiodaca","trojkat","środek dłoni — trójkąt z linii głowy, losu i Merkurego"],["bierna","trojkat","środek dłoni — trójkąt z linii głowy, losu i Merkurego"],["wiodaca","lodz","środek dłoni po stronie kciuka — łódź z linii losu, życia i głowy, niedomknięta u dołu przy nadgarstku"],["bierna","lodz","środek dłoni po stronie kciuka — łódź z linii losu, życia i głowy, domknięta u dołu"]].forEach(function(n){if(!zw.some(function(z){return z.reka===n[0]&&z.znak===n[1]&&z.miejsce==="rahu"}))zw.push({reka:n[0],miejsce:"rahu",znak:n[1],opis:n[2]})});localStorage.setItem("vk_znaki_wlasne",JSON.stringify(zw))}}catch(e){}` +
   // tylko na localhost: adres z ?reset czyści cały postęp Koła (vk_*) — test „od pierwszego kroku”
   `try{var h=location.hostname;if((h==="localhost"||h==="127.0.0.1")&&/[?&]reset(=|&|$)/.test(location.search)){Object.keys(localStorage).filter(function(k){return k.indexOf("vk_")===0}).forEach(function(k){localStorage.removeItem(k)});history.replaceState(null,"",location.pathname)}}catch(e){}`+
   // tylko na localhost: ?komplet — od zera, ale z trzema ukończonymi sekcjami (test fali złota)

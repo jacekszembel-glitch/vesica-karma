@@ -235,7 +235,9 @@ export default function Page() {
     const d = odczyt ? odczyt.dane ?? dlonZTekstu(odczyt.text) : null;
     // znaki zgłoszone przez osobę już po odczycie (bez odpowiedzi AI) też idą do mostów — ze źródłem „Ty”
     const wlasne = wczytajZnakiWlasne();
-    const zWlasnymi = d && !d.wlasne?.length && wlasne.length ? { ...d, wlasne: znakiWlasneDoDloni(wlasne) } : d;
+    const juz = new Set((d?.wlasne ?? []).map((z) => `${z.reka}|${z.miejsce}|${z.znak}`));
+    const nowe = wlasne.filter((z) => !juz.has(`${z.reka}|${z.znak === "krzyz_mistyczny" ? "czworobok" : z.miejsce}|${z.znak}`));
+    const zWlasnymi = d && nowe.length ? { ...d, wlasne: [...(d.wlasne ?? []), ...znakiWlasneDoDloni(nowe)] } : d;
     // starsze zapisy: uzgodnienie z zapisanymi znakami (pionowa linia na wzgórku = krótka linia planety)
     setDlon(zWlasnymi ? uzgodnijDlon(zWlasnymi) : null);
     setDlonZapisano(odczyt?.savedAt ?? null);
