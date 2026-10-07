@@ -3130,7 +3130,10 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 .sp-rodzaj { font-size: 0.74rem; letter-spacing: 0.04em; white-space: nowrap; }
 .sp-tak .sp-rodzaj { color: var(--gold); font-weight: 700; }
 .sp-dwa-tak .sp-rodzaj { color: var(--sand); font-weight: 600; }
-.sp-nie .sp-rodzaj, .sp-dwa-nie .sp-rodzaj { color: var(--muted); font-weight: 600; }
+/* zgodność „na nie” to też zgodność — wyróżniona jak „na tak”, innym odcieniem */
+.sp-nie .sp-rodzaj { color: var(--sand); font-weight: 700; }
+.sp-nie td { background: rgba(230, 196, 138, 0.04); }
+.sp-dwa-nie .sp-rodzaj { color: var(--muted); font-weight: 600; }
 .sp-rozb .sp-rodzaj { color: var(--warn); }
 .sp-tak td { background: rgba(230, 196, 138, 0.07); }
 .sp-rzadkosc { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--sand); }

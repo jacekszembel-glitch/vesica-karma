@@ -14,10 +14,13 @@ import { droga, spojnosc, SYSTEMY, type RodzajSpojnosci } from "@/lib/astro/spoj
 
 const NAZWA_SYSTEMU: Record<SystemTematu, string> = { kosmogram: "Kosmogram", dlon: "Dłoń", numerologia: "Numerologia" };
 
+/** Kolejność wierszy wg siły zgodności: wszystkie systemy zgodne (na tak i na nie), potem większość, potem rozbieżne. */
+const KOLEJNOSC: RodzajSpojnosci[] = ["zgodne_tak", "zgodne_nie", "dwa_tak", "dwa_nie", "rozbiezne", "za_malo"];
+
 const RODZAJ: Record<RodzajSpojnosci, { tekst: string; klasa: string }> = {
-  zgodne_tak: { tekst: "zgodne — tak", klasa: "sp-tak" },
+  zgodne_tak: { tekst: "zgodne ×3 — tak", klasa: "sp-tak" },
   dwa_tak: { tekst: "2 z 3 — tak", klasa: "sp-dwa-tak" },
-  zgodne_nie: { tekst: "zgodne — nie", klasa: "sp-nie" },
+  zgodne_nie: { tekst: "zgodne ×3 — nie", klasa: "sp-nie" },
   dwa_nie: { tekst: "2 z 3 — nie", klasa: "sp-dwa-nie" },
   rozbiezne: { tekst: "rozbieżne", klasa: "sp-rozb" },
   za_malo: { tekst: "za mało danych", klasa: "sp-rozb" },
@@ -67,7 +70,7 @@ export default function SpojnoscTrzechSystemow({ tematy, chart }: { tematy: Tema
             </tr>
           </thead>
           <tbody>
-            {s.tematy.map((t) => (
+            {[...s.tematy].sort((a, b) => KOLEJNOSC.indexOf(a.rodzaj) - KOLEJNOSC.indexOf(b.rodzaj) || a.szansa - b.szansa).map((t) => (
               <tr key={t.temat.id} className={RODZAJ[t.rodzaj].klasa}>
                 <td>{t.temat.nazwa}</td>
                 {SYSTEMY.map((x) => <td key={x} className="srodek sp-znak">{znak(t.wartosci[x])}</td>)}

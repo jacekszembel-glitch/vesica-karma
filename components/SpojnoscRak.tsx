@@ -17,14 +17,15 @@ const POD: Record<KolumnaRak, string> = { d1: "mapa", wiodaca: "dłoń", d9: "na
 const pkt = (x: number) => (Number.isInteger(x) ? String(x) : x.toFixed(1).replace(".", ","));
 
 const RODZAJ: Record<RodzajRak, { tekst: (t: number, n: number) => string; klasa: string }> = {
-  zgodne_tak: { tekst: () => "zgodne — tak", klasa: "sp-tak" },
+  zgodne_tak: { tekst: (_t, n) => `zgodne ×${n} — tak`, klasa: "sp-tak" },
   wiekszosc_tak: { tekst: (t, n) => `${t} z ${n} — tak`, klasa: "sp-dwa-tak" },
-  zgodne_nie: { tekst: () => "zgodne — nie", klasa: "sp-nie" },
+  zgodne_nie: { tekst: (_t, n) => `zgodne ×${n} — nie`, klasa: "sp-nie" },
   wiekszosc_nie: { tekst: (t, n) => `${n - t} z ${n} — nie`, klasa: "sp-dwa-nie" },
   rozbiezne: { tekst: (t, n) => `${t} z ${n} — po równo`, klasa: "sp-rozb" },
   za_malo: { tekst: () => "za mało danych", klasa: "sp-rozb" },
 };
-const KOLEJNOSC: RodzajRak[] = ["zgodne_tak", "wiekszosc_tak", "rozbiezne", "wiekszosc_nie", "zgodne_nie", "za_malo"];
+/** Wg siły zgodności: wszystkie zgodne (na tak i na nie), potem większość, potem po równo. */
+const KOLEJNOSC: RodzajRak[] = ["zgodne_tak", "zgodne_nie", "wiekszosc_tak", "wiekszosc_nie", "rozbiezne", "za_malo"];
 
 const znak = (v: number | undefined | null) => (v === undefined || v === null ? "?" : v === 1 ? "✦" : v === 0.5 ? "◐" : "0");
 const procent = (x: number) => `${Math.round(x * 100)}%`;
