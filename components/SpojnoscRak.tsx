@@ -10,7 +10,10 @@ import type { TematWspolny } from "@/lib/astro/tematy";
  */
 
 const NAZWA: Record<KolumnaRak, string> = { d1: "D1", wiodaca: "Dłoń wiodąca", d9: "D9", bierna: "Dłoń bierna" };
-const POD: Record<KolumnaRak, string> = { d1: "mapa główna", wiodaca: "jak D1", d9: "nawamsza", bierna: "jak D9" };
+/** Krótkie nagłówki kolumn — tabela musi zmieścić się w 640 px Twojej Karmy. */
+const KROTKO: Record<KolumnaRak, string> = { d1: "D1", wiodaca: "Wiodąca", d9: "D9", bierna: "Bierna" };
+const POD: Record<KolumnaRak, string> = { d1: "mapa", wiodaca: "dłoń", d9: "nawamsza", bierna: "dłoń" };
+const pkt = (x: number) => (Number.isInteger(x) ? String(x) : x.toFixed(1).replace(".", ","));
 
 const RODZAJ: Record<RodzajRak, { tekst: (t: number, n: number) => string; klasa: string }> = {
   zgodne_tak: { tekst: () => "zgodne — tak", klasa: "sp-tak" },
@@ -38,6 +41,13 @@ export default function SpojnoscRak({ d1, d9, maBierna }: {
   const s = spojnoscRak(d1, d9);
   const wiersze = [...s.wiersze].sort((a, b) => KOLEJNOSC.indexOf(a.rodzaj) - KOLEJNOSC.indexOf(b.rodzaj) || b.tak - a.tak || a.szansa - b.szansa);
   const glowne = s.pary.slice(0, 2);
+  // punktacja: ✦ = 1, ◐ = ½ w każdej z czterech kolumn; maksimum = liczba ocen z danymi
+  const sumaKol = (k: KolumnaRak) => s.wiersze.reduce((a, r) => a + (r.wartosci[k] ?? 0), 0);
+  const maxKol = (k: KolumnaRak) => s.wiersze.filter((r) => r.wartosci[k] !== undefined).length;
+  const punktyRazem = KOLUMNY_RAK.reduce((a, k) => a + sumaKol(k), 0);
+  const maxRazem = KOLUMNY_RAK.reduce((a, k) => a + maxKol(k), 0);
+  const potwierdzenLiczb = s.wiersze.filter((r) => r.numerologia).length;
+  const zgodnychTak = s.wiersze.filter((r) => r.rodzaj === "zgodne_tak" || r.rodzaj === "wiekszosc_tak").length;
   const wewnatrz = s.pary.slice(2);
 
   return (
@@ -70,14 +80,15 @@ export default function SpojnoscRak({ d1, d9, maBierna }: {
       )}
 
       <div className="sp-tabela-wrap">
-        <table className="sp-tabela">
+        <table className="sp-tabela sp-waska">
           <thead>
             <tr>
               <th>Temat</th>
-              {KOLUMNY_RAK.map((k) => <th key={k} className="srodek">{NAZWA[k]}<span className="sp-pod">{POD[k]}</span></th>)}
-              <th className="srodek">Numerologia<span className="sp-pod">potwierdza</span></th>
+              {KOLUMNY_RAK.map((k) => <th key={k} className="srodek">{KROTKO[k]}<span className="sp-pod">{POD[k]}</span></th>)}
+              <th className="srodek">Liczby<span className="sp-pod">potwierdza</span></th>
               <th>Spójność</th>
-              <th className="srodek">Przypadkiem</th>
+              <th className="srodek" title="Jak często taki układ ocen wyszedłby przypadkiem">Rzadkość</th>
+              <th className="srodek">Pkt</th>
             </tr>
           </thead>
           <tbody>
@@ -86,16 +97,40 @@ export default function SpojnoscRak({ d1, d9, maBierna }: {
                 <td>{r.temat.nazwa}</td>
                 {KOLUMNY_RAK.map((k) => <td key={k} className="srodek sp-znak">{znak(r.wartosci[k])}</td>)}
                 <td className="srodek sp-znak sp-num">{r.numerologia ? znak(r.numerologia) : r.numerologia === 0 ? "—" : "?"}</td>
-                <td><span className="sp-rodzaj">{RODZAJ[r.rodzaj].tekst(r.tak, r.n)}</span>{r.numerologia ? <span className="sp-num-potw"> + liczby</span> : null}</td>
+                <td><span className="sp-rodzaj">{RODZAJ[r.rodzaj].tekst(r.tak, r.n)}</span>{r.numerologia ? <span className="sp-num-potw"> + liczby</span> : null}{r.rodzaj !== "za_malo" && <span className="sp-rz-tel">{rzadkosc(r.szansa)}</span>}</td>
                 <td className="srodek sp-rzadkosc">{r.rodzaj === "za_malo" ? "—" : rzadkosc(r.szansa)}</td>
+                <td className="srodek sp-pkt">{pkt(KOLUMNY_RAK.reduce((a, k) => a + (r.wartosci[k] ?? 0), 0))}<small>/{r.n}</small></td>
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr>
+              <td>Razem</td>
+              {KOLUMNY_RAK.map((k) => <td key={k} className="srodek sp-pkt">{pkt(sumaKol(k))}<small>/{maxKol(k)}</small></td>)}
+              <td className="srodek sp-pkt">+{potwierdzenLiczb}</td>
+              <td className="sp-razem-opis">{zgodnychTak} z {s.wiersze.length} tematów na tak</td>
+              <td className="sp-rzadkosc" />
+              <td className="srodek sp-pkt sp-pkt-razem">{pkt(punktyRazem)}<small>/{maxRazem}</small></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
+      <div className="sp-podsumowanie">
+        <p className="sp-podsumowanie-liczba">{maxRazem ? Math.round((punktyRazem / maxRazem) * 100) : 0}%</p>
+        <p>
+          Systemy zebrały <strong>{pkt(punktyRazem)} z {maxRazem}</strong> możliwych punktów
+          (✦ = 1, ◐ = ½ w każdej z czterech kolumn; maksimum = liczba ocen z danymi, bez „?”).
+          {" "}Numerologia potwierdziła {potwierdzenLiczb} {potwierdzenLiczb === 1 ? "temat" : potwierdzenLiczb >= 2 && potwierdzenLiczb <= 4 ? "tematy" : "tematów"} — to premia, nie część wyniku.
+        </p>
+      </div>
       <p className="muted porownanie-legenda">
-        ✦ tak · ◐ częściowo · 0 sprawdzone, niezaznaczone · ? brak danych · numerologia: ✦/◐ potwierdza, — nie dokłada.
+        ✦ tak · ◐ częściowo · 0 sprawdzone, niezaznaczone · ? brak danych · liczby: ✦/◐ potwierdza, — nie dokłada.
         D9 liczony bez talentów (ich rozkład jest policzony dla mapy głównej).
+      </p>
+      <p className="muted" style={{ fontSize: "0.76rem", lineHeight: 1.6, marginTop: 8, textAlign: "left" }}>
+        <strong>Rzadkość, np. „1 na 7”</strong> — gdyby systemy oceniały tematy losowo (każdy z tą samą liczbą ✦, ◐ i 0,
+        jaką ma u Ciebie), taki układ ocen w wierszu wychodziłby mniej więcej raz na 7 tematów. Im większa
+        liczba, tym trudniej o przypadek, więc tym mocniejsza zgodność. „Często” = przypadkiem co drugi raz albo częściej.
       </p>
     </section>
   );

@@ -3159,3 +3159,39 @@ html[data-odwrocone]:not(.vk-fala) .kk-blik-krag {
 .sp-uwaga { font-size: 0.82rem; line-height: 1.6; text-align: left; border-left: 2px solid var(--warn); padding-left: 10px; margin: 10px 0 14px; }
 .sp-num { opacity: 0.8; }
 .sp-num-potw { font-size: 0.7rem; color: var(--gold); }
+
+/* Tabela 4 — wąska, żeby zmieścić się w 640 px Twojej Karmy */
+.sp-tabela-wrap { max-width: 100%; min-width: 0; }
+.sp-waska { font-size: 0.8rem; table-layout: auto; }
+.sp-waska th { font-size: 0.56rem; letter-spacing: 0.06em; padding: 6px 4px; }
+.sp-waska td { padding: 7px 4px; }
+.sp-waska td:first-child { min-width: 112px; }
+.sp-waska .sp-rodzaj { white-space: normal; font-size: 0.7rem; line-height: 1.3; display: inline-block; }
+.sp-waska .sp-rzadkosc { white-space: normal; font-size: 0.74rem; }
+.sp-pkt { color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sp-pkt small { font-size: 0.66rem; color: var(--muted); }
+.sp-waska tfoot td { border-top: 1px solid var(--line-gold); border-bottom: 0; font-weight: 700; padding-top: 10px; }
+.sp-razem-opis { font-size: 0.72rem; color: var(--sand); }
+.sp-pkt-razem { font-size: 0.95rem; }
+.sp-podsumowanie { display: flex; align-items: center; gap: 18px; margin: 16px 0 10px; }
+.sp-podsumowanie p { text-align: left; font-size: 0.88rem; line-height: 1.6; }
+.sp-podsumowanie .sp-podsumowanie-liczba { font-family: var(--font-serif); font-size: 2.6rem; color: var(--gold); line-height: 1; flex: none; }
+@media (max-width: 720px) {
+  .sp-waska td:first-child { min-width: 92px; }
+  .sp-waska .sp-pod { display: none; }
+}
+.sp-rz-tel { display: none; }
+@media (max-width: 720px) {
+  .sp-waska th:nth-last-child(2), .sp-waska td.sp-rzadkosc { display: none; }
+  .sp-rz-tel { display: block; font-size: 0.66rem; color: var(--sand); margin-top: 3px; }
+  .sp-waska td, .sp-waska th { padding-left: 3px; padding-right: 3px; }
+}
+@media (max-width: 720px) {
+  .sp-waska { font-size: 0.74rem; }
+  .sp-waska td:first-child { min-width: 80px; }
+  .sp-waska th { letter-spacing: 0.02em; }
+}
+@media (max-width: 720px) {
+  .sp-pkt-razem { font-size: 0.8rem; }
+  .sp-razem-opis { font-size: 0.64rem; }
+}
