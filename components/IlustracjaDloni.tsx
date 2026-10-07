@@ -1,28 +1,46 @@
 "use client";
 
 import type { LiniaDloni, MiejsceZnaku } from "@/lib/astro/zgodnosc";
+import type { DodatekRysunku } from "./HiromancjaInwentarz";
 
 /**
  * ILUSTRACJA DŁONI — wnętrze dłoni z wzgórkami i liniami; w przewodniku świeci to miejsce
  * albo ta linia, o którą akurat pytamy. Rysunek to PRAWA dłoń od wnętrza (mały palec po lewej,
  * kciuk po prawej) — lewą odbijamy w poziomie, podpisy zostają nieodwrócone.
- * Kontur: palce, dłoń i kciuk jako osobne kształty — najpierw grubym obrysem, potem samym
- * wypełnieniem na wierzchu, więc wewnętrzne styki znikają i zostaje jeden czysty zarys.
  * Mars ma dwa wzgórki (górny przy krawędzi, dolny przy kciuku) — oba świecą jako „Mars”.
  * Rahu i Ketu według chiromancji indyjskiej: Rahu w środku dłoni, Ketu nad nadgarstkiem.
  */
 
 const W = 300;
 
-/** Kształty dłoni (prawa, viewBox 300×400). */
-const PALCE = [
-  { x: 74, y: 78, w: 30, h: 92, obrot: -9 }, // mały
-  { x: 108, y: 40, w: 33, h: 120, obrot: -3 }, // serdeczny
-  { x: 145, y: 26, w: 35, h: 132, obrot: 0 }, // środkowy
-  { x: 184, y: 48, w: 33, h: 116, obrot: 5 }, // wskazujący
+/**
+ * Zarys prawej dłoni od wnętrza (viewBox 300×400) — jedna ciągła linia: krawędź dłoni od nadgarstka,
+ * cztery zwężające się palce z zaokrąglonymi opuszkami i fałdami między nimi, kciuk wyrastający
+ * nisko, z kłębu Wenus, i powrót do nadgarstka.
+ */
+const ZARYS = [
+  "M 96 392",
+  "C 84 360 70 322 68 280", "C 66 238 69 202 76 180", // krawędź dłoni (wzgórek Księżyca)
+  "C 73 160 70 132 70 114", "C 70 99 80 92 89 93", "C 98 94 102 103 102 114", "L 103 149", // mały palec
+  "C 104 154 106 154 107 149", // fałd
+  "L 108 66", "C 108 51 118 44 126 44", "C 136 44 142 52 142 66", "L 143 141", // serdeczny
+  "C 144 146 146 146 147 141",
+  "L 148 46", "C 148 33 157 26 166 26", "C 175 26 183 33 183 46", "L 184 141", // środkowy
+  "C 185 146 188 146 189 141",
+  "L 192 75", "C 193 63 201 56 209 57", "C 218 58 225 66 224 78", "L 224 158", // wskazujący
+  "C 225 178 229 194 236 203", // fałd między wskazującym a kciukiem
+  "C 248 190 260 174 270 162", "C 278 152 292 154 294 167", "C 296 180 288 196 280 210", // kciuk
+  "C 268 236 256 266 248 294", "C 240 322 228 352 216 392", // kłąb kciuka (Wenus) do nadgarstka
+  "C 180 398 130 398 96 392 Z",
+].join(" ");
+/** Zgięcia stawów palców i kciuka. */
+const STAWY = [
+  "M 74 120 L 100 118", "M 73 137 L 101 135",
+  "M 109 82 L 141 82", "M 109 112 L 142 112",
+  "M 149 70 L 182 70", "M 149 105 L 183 105",
+  "M 193 92 L 224 92", "M 192 120 L 224 120",
+  "M 262 186 L 282 202",
 ];
-const DLON = "M 76 150 Q 74 140 88 138 L 212 136 Q 228 138 226 156 L 226 240 C 224 300 210 344 198 384 L 92 386 C 78 344 66 300 66 250 C 66 210 70 176 76 150 Z";
-const KCIUK = { cx: 250, cy: 252, w: 40, h: 140, obrot: 34 };
 
 /** Linie (prawa dłoń). */
 const LINIE: Record<LiniaDloni, string> = {
@@ -56,21 +74,10 @@ const PUNKTY: { id: MiejsceZnaku; x: number; y: number; podpis: string; podpisDy
   { id: "ketu", x: 142, y: 354, podpis: "Ketu" },
 ];
 
-function Ksztalty() {
-  return (
-    <>
-      {PALCE.map((p, i) => (
-        <rect key={i} x={p.x} y={p.y} width={p.w} height={p.h} rx={p.w / 2}
-          transform={`rotate(${p.obrot} ${p.x + p.w / 2} ${p.y + p.h})`} />
-      ))}
-      <rect x={KCIUK.cx - KCIUK.w / 2} y={KCIUK.cy - KCIUK.h / 2} width={KCIUK.w} height={KCIUK.h} rx={KCIUK.w / 2}
-        transform={`rotate(${KCIUK.obrot} ${KCIUK.cx} ${KCIUK.cy})`} />
-      <path d={DLON} />
-    </>
-  );
-}
+/** Rozwidlenie końca linii życia — odnoga w stronę wzgórka Księżyca. */
+const ROZWIDLENIE_ZYCIA = "M 178 336 C 168 352 160 366 150 380";
 
-export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne = null, linia = null, onWybierz, szerokosc = 300 }: {
+export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne = null, linia = null, dodatek = null, onWybierz, szerokosc = 300 }: {
   /** Lewa dłoń — rysunek w lustrzanym odbiciu. */
   lewa?: boolean;
   /** Miejsca ze znakami — złote kropki. */
@@ -79,6 +86,8 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
   aktywne?: MiejsceZnaku | null;
   /** Linia, o którą pytamy — świeci. */
   linia?: LiniaDloni | null;
+  /** Szczegół linii, o który pytamy (rozwidlenie, długość). */
+  dodatek?: DodatekRysunku | null;
   /** Kliknięcie w miejsce na rysunku. */
   onWybierz?: (m: MiejsceZnaku) => void;
   szerokosc?: number;
@@ -94,15 +103,8 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
         </filter>
       </defs>
       <g transform={lustro}>
-        {/* zarys: gruby obrys pod spodem, wypełnienie na wierzchu chowa wewnętrzne styki */}
-        <g className="ilu-obrys"><Ksztalty /></g>
-        <g className="ilu-wypelnienie"><Ksztalty /></g>
-        {/* zgięcia stawów palców */}
-        {PALCE.map((p, i) => (
-          <g key={i} transform={`rotate(${p.obrot} ${p.x + p.w / 2} ${p.y + p.h})`} className="ilu-staw">
-            {[0.36, 0.62].map((f) => <line key={f} x1={p.x + 7} y1={p.y + p.h * f} x2={p.x + p.w - 7} y2={p.y + p.h * f} />)}
-          </g>
-        ))}
+        <path d={ZARYS} className="ilu-zarys" />
+        <g className="ilu-staw">{STAWY.map((d) => <path key={d} d={d} />)}</g>
         {LINIE_STALE.filter((l) => l !== linia).map((l) => <path key={l} d={LINIE[l]} className="ilu-linia" />)}
         {linia && (
           <>
@@ -110,7 +112,26 @@ export default function IlustracjaDloni({ lewa = false, zaznaczone = [], aktywne
             <path d={LINIE[linia]} className="ilu-linia-akt" />
           </>
         )}
+        {dodatek === "rozwidlenie_zycia" && (
+          <>
+            <path d={ROZWIDLENIE_ZYCIA} className="ilu-linia-blask" filter="url(#ilu-blask)" />
+            <path d={ROZWIDLENIE_ZYCIA} className="ilu-linia-akt" />
+            <circle cx={178} cy={336} r={16} className="ilu-obwodka" />
+          </>
+        )}
+        {dodatek === "dlugosc_zycia" && (
+          <>
+            <line x1={160} y1={290} x2={192} y2={290} className="ilu-miara" />
+            <line x1={170} y1={382} x2={202} y2={382} className="ilu-miara" />
+          </>
+        )}
       </g>
+      {dodatek === "dlugosc_zycia" && (
+        <>
+          <text x={x(196)} y={294} textAnchor={lewa ? "end" : "start"} className="ilu-podpis ilu-podpis-miara">krótka</text>
+          <text x={x(206)} y={386} textAnchor={lewa ? "end" : "start"} className="ilu-podpis ilu-podpis-miara">długa</text>
+        </>
+      )}
       {PUNKTY.map((p, i) => {
         const jest = zaznaczone.includes(p.id);
         const akt = aktywne === p.id;

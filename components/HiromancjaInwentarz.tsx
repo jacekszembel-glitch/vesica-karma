@@ -57,17 +57,55 @@ const BIERNIK_LINII: Record<LiniaDloni, string> = {
 const WZGORKI: MiejsceZnaku[] = ["jupiter", "saturn", "sun", "mercury", "mars", "czworobok", "rahu", "moon", "venus", "ketu"];
 const ZNAKI_NA_WZGORKU = RODZAJE_ZNAKOW_NAZWY.filter((z) => z.id !== "krzyz_mistyczny");
 
+/** Dodatek na rysunku dłoni przy pytaniu o cechę linii. */
+export type DodatekRysunku = "rozwidlenie_zycia" | "dlugosc_zycia";
+interface CechaLinii {
+  id: string;
+  pytanie: string;
+  opis: string;
+  opcje: { id: string; tekst: string }[];
+  /** Jak opisać odpowiedź w liście dla odczytu. */
+  wynik: Record<string, string>;
+  rysunek?: DodatekRysunku;
+}
+/** Pytania dodatkowe o linię — zadawane tylko, gdy osoba ją ma. Kolejne cechy dopisujemy tutaj. */
+const CECHY_LINII: Partial<Record<LiniaDloni, CechaLinii[]>> = {
+  zycia: [
+    {
+      id: "dlugosc", pytanie: "Jak długa jest linia życia?",
+      opis: "Zobacz, gdzie się kończy. Długa schodzi aż do nadgarstka i okrąża całą nasadę kciuka; krótka kończy się mniej więcej w połowie dłoni.",
+      opcje: [{ id: "dluga", tekst: "Długa" }, { id: "srednia", tekst: "Średnia" }, { id: "krotka", tekst: "Krótka" }],
+      wynik: { dluga: "długa", srednia: "średniej długości", krotka: "krótka" },
+      rysunek: "dlugosc_zycia",
+    },
+    {
+      id: "rozwidlenie", pytanie: "Czy linia życia rozwidla się na końcu?",
+      opis: "Przy nadgarstku linia rozdziela się na dwie odnogi — jedna często odchodzi w stronę wzgórka Księżyca. Klasycznie to znak zmiany miejsca zamieszkania, życia z dala od miejsca urodzenia.",
+      opcje: [{ id: "tak", tekst: "Mam to" }, { id: "nie", tekst: "Nie mam" }],
+      wynik: { tak: "rozwidlona na końcu (klasycznie: zmiana miejsca zamieszkania)", nie: "bez rozwidlenia na końcu" },
+      rysunek: "rozwidlenie_zycia",
+    },
+  ],
+};
+
 type Pytanie =
   | { typ: "linia"; reka: Reka; linia: LiniaDloni; ai?: LiniaInw }
+  | { typ: "cecha"; reka: Reka; linia: LiniaDloni; cecha: CechaLinii }
   | { typ: "krzyz"; reka: Reka; ai?: ZnakInw }
   | { typ: "wzgorek"; reka: Reka; miejsce: MiejsceZnaku; ai: ZnakInw[] };
 type OdpLinii = "wyrazna" | "slaba" | "nie" | "niewiem";
 type OdpKrzyza = "mam" | "nie" | "niewiem";
 /** Odpowiedź przy wzgórku: zaznaczone znaki albo „nie wiem”. */
 type OdpWzgorka = RodzajZnaku[] | "niewiem";
-type Odp = OdpLinii | OdpKrzyza | OdpWzgorka;
+/** Odpowiedź na cechę linii: id opcji albo „niewiem”. */
+type Odp = OdpLinii | OdpKrzyza | OdpWzgorka | string;
 
-const klucz = (p: Pytanie) => `${p.reka}:${p.typ}:${p.typ === "linia" ? p.linia : p.typ === "wzgorek" ? p.miejsce : "krzyz"}`;
+const klucz = (p: Pytanie) => `${p.reka}:${p.typ}:${p.typ === "linia" ? p.linia : p.typ === "cecha" ? `${p.linia}:${p.cecha.id}` : p.typ === "wzgorek" ? p.miejsce : "krzyz"}`;
+const kluczLinii = (reka: Reka, linia: LiniaDloni) => `${reka}:linia:${linia}`;
+const maLinie = (o: Odp | undefined) => o === "wyrazna" || o === "slaba";
+/** Pytania widoczne przy danych odpowiedziach — cechy linii tylko, gdy osoba linię ma. */
+const widoczne = (lista: Pytanie[], odp: Record<string, Odp>) =>
+  lista.filter((q) => q.typ !== "cecha" || maLinie(odp[kluczLinii(q.reka, q.linia)]));
 
 function zOdpowiedzi(znaki: unknown[], linie: unknown[]): { znaki: ZnakInw[]; linie: LiniaInw[] } {
   const reka = (r: unknown): Reka => (r === "bierna" ? "bierna" : "wiodaca");
@@ -91,7 +129,10 @@ function pytania(znaki: ZnakInw[], linie: LiniaInw[]): Pytanie[] {
   for (const reka of ["wiodaca", "bierna"] as Reka[]) {
     const liReki = linie.filter((l) => l.reka === reka);
     const dodatkowe = [...new Set(liReki.map((l) => l.linia).filter((l) => !LINIE_GLOWNE.includes(l)))];
-    for (const linia of [...LINIE_GLOWNE, ...dodatkowe]) lista.push({ typ: "linia", reka, linia, ai: liReki.find((l) => l.linia === linia) });
+    for (const linia of [...LINIE_GLOWNE, ...dodatkowe]) {
+      lista.push({ typ: "linia", reka, linia, ai: liReki.find((l) => l.linia === linia) });
+      for (const cecha of CECHY_LINII[linia] ?? []) lista.push({ typ: "cecha", reka, linia, cecha });
+    }
     lista.push({ typ: "krzyz", reka, ai: znaki.find((z) => z.reka === reka && z.znak === "krzyz_mistyczny") });
     for (const miejsce of WZGORKI) {
       lista.push({ typ: "wzgorek", reka, miejsce, ai: znaki.filter((z) => z.reka === reka && z.miejsce === miejsce && z.znak !== "krzyz_mistyczny") });
@@ -121,7 +162,8 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
   // zaznaczenia przy bieżącym wzgórku, zanim osoba kliknie „Dalej”
   const [wybrane, setWybrane] = useState<RodzajZnaku[]>([]);
 
-  const lista = useMemo(() => (wynik ? pytania(wynik.znaki, wynik.linie) : []), [wynik]);
+  const wszystkie = useMemo(() => (wynik ? pytania(wynik.znaki, wynik.linie) : []), [wynik]);
+  const lista = widoczne(wszystkie, odp);
 
   async function obejrzyj() {
     setBusy(true); setBlad(null); setWynik(null);
@@ -164,10 +206,11 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
 
   function odpowiedz(o: Odp) {
     const p = lista[nr];
-    setOdp((s) => ({ ...s, [klucz(p)]: o }));
+    const nowe = { ...odp, [klucz(p)]: o };
+    setOdp(nowe);
     const nast = nr + 1;
     setNr(nast);
-    const np = lista[nast];
+    const np = widoczne(wszystkie, nowe)[nast];
     const poprz = np ? odp[klucz(np)] : undefined;
     setWybrane(Array.isArray(poprz) ? poprz : []);
   }
@@ -186,10 +229,13 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
       `${nazwaZnaku(z.znak)} — ${nazwaMiejsca(z.miejsce)}, ${nazwaReki(z.reka)}, ${z.pewnosc === "delikatny" ? "delikatny" : "wyraźny"}${z.gdzie ? ` (${z.gdzie})` : ""} — ${dopisek}`;
     for (const p of lista) {
       const o = odp[klucz(p)];
+      if (p.typ === "cecha") continue; // dopisywane do opisu linii niżej
       if (p.typ === "linia") {
         const nazwa = `${NAZWY_LINII[p.linia]}, ${nazwaReki(p.reka)}`;
         if (o === "wyrazna" || o === "slaba") {
-          const stan = o === "wyrazna" ? "wyraźna" : "słaba lub odcinkami";
+          const cechy = lista.filter((q): q is Extract<Pytanie, { typ: "cecha" }> => q.typ === "cecha" && q.reka === p.reka && q.linia === p.linia)
+            .map((q) => q.cecha.wynik[String(odp[klucz(q)])]).filter(Boolean);
+          const stan = (o === "wyrazna" ? "wyraźna" : "słaba lub odcinkami") + (cechy.length ? `; ${cechy.join("; ")}` : "");
           linie.push(p.ai
             ? `${nazwa} — ${stan} (osoba potwierdza; AI: ${STAN[p.ai.stan]}${p.ai.gdzie ? `, ${p.ai.gdzie}` : ""})`
             : `${nazwa} — ${stan} (osoba widzi ją na swojej dłoni; AI jej nie wypisało)`);
@@ -223,7 +269,13 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
     const potwierdzone = lista.flatMap((p) => {
       const o = odp[klucz(p)];
       const r = nazwaReki(p.reka);
-      if (p.typ === "linia") return o === "wyrazna" || o === "slaba" ? [`${NAZWY_LINII[p.linia]} (${o === "wyrazna" ? "wyraźna" : "słaba"}) — ${r}`] : [];
+      if (p.typ === "cecha") return [];
+      if (p.typ === "linia") {
+        if (!maLinie(o)) return [];
+        const cechy = lista.filter((q): q is Extract<Pytanie, { typ: "cecha" }> => q.typ === "cecha" && q.reka === p.reka && q.linia === p.linia)
+          .map((q) => q.cecha.wynik[String(odp[klucz(q)])]).filter(Boolean);
+        return [`${NAZWY_LINII[p.linia]} (${o === "wyrazna" ? "wyraźna" : "słaba"}${cechy.length ? `; ${cechy.join("; ")}` : ""}) — ${r}`];
+      }
       if (p.typ === "krzyz") return o === "mam" ? [`krzyż mistyczny — ${r}`] : [];
       return Array.isArray(o) ? o.map((z) => `${nazwaZnaku(z)} — ${nazwaMiejsca(p.miejsce)}, ${r}`) : [];
     });
@@ -262,7 +314,8 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
       <div className="prz-uklad">
         <div className="prz-rysunek">
           <IlustracjaDloni lewa={nazwyRak[p.reka] === "lewa"}
-            linia={p.typ === "linia" ? p.linia : null}
+            linia={p.typ === "linia" || p.typ === "cecha" ? p.linia : null}
+            dodatek={p.typ === "cecha" ? p.cecha.rysunek ?? null : null}
             aktywne={p.typ === "wzgorek" ? p.miejsce : p.typ === "krzyz" ? "czworobok" : null} />
           <p className="hs-instrukcja" style={{ textAlign: "center" }}>{nazwyRak[p.reka] === "lewa" ? "Lewa" : "Prawa"} dłoń od wewnątrz</p>
         </div>
@@ -277,6 +330,18 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
                 <button type="button" className="prz-btn prz-btn-mam" onClick={() => odpowiedz("wyrazna")}>Mam — wyraźną</button>
                 <button type="button" className="prz-btn prz-btn-mam" onClick={() => odpowiedz("slaba")}>Mam — słabą lub w kawałkach</button>
                 <button type="button" className="prz-btn" onClick={() => odpowiedz("nie")}>Nie mam</button>
+                <button type="button" className="prz-btn prz-btn-cichy" onClick={() => odpowiedz("niewiem")}>Nie wiem</button>
+              </div>
+            </>
+          )}
+          {p.typ === "cecha" && (
+            <>
+              <h3>{p.cecha.pytanie}</h3>
+              <p className="prz-opis">{p.cecha.opis}</p>
+              <div className="prz-odpowiedzi">
+                {p.cecha.opcje.map((op) => (
+                  <button key={op.id} type="button" className={`prz-btn${op.id !== "nie" ? " prz-btn-mam" : ""}`} onClick={() => odpowiedz(op.id)}>{op.tekst}</button>
+                ))}
                 <button type="button" className="prz-btn prz-btn-cichy" onClick={() => odpowiedz("niewiem")}>Nie wiem</button>
               </div>
             </>
