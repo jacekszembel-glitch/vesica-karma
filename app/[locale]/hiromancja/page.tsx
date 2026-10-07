@@ -113,6 +113,16 @@ export default function HiromancjaPage() {
   const [znakiWlasne, setZnakiWlasne] = useState<ZnakWlasny[]>([]);
   // eslint-disable-next-line react-hooks/set-state-in-effect -- hydratacja z localStorage po zamontowaniu
   useEffect(() => { setZnakiWlasne(wczytajZnakiWlasne()); }, []);
+  // tylko localhost: ?przewodnik — od razu przewodnik po dłoniach z przykładowymi znaleziskami AI
+  const [przewodnikTest, setPrzewodnikTest] = useState(false);
+  useEffect(() => {
+    const h = location.hostname;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- tryb testowy czytany z adresu po zamontowaniu
+    if ((h === "localhost" || h === "127.0.0.1") && /[?&]przewodnik(=|&|$)/.test(location.search)) setPrzewodnikTest(true);
+  }, []);
+  useEffect(() => {
+    if (przewodnikTest) document.getElementById("przewodnik-test")?.scrollIntoView({ block: "start" });
+  }, [przewodnikTest]);
   const zmienZnakiWlasne = (z: ZnakWlasny[]) => { setZnakiWlasne(z); zapiszZnakiWlasne(z); };
   // krok 1 (co AI widzi) → „Dalej” → krok 2 (odczyt z tą listą)
   const [inwentarz, setInwentarz] = useState<InwentarzPotwierdzony | null>(null);
@@ -211,6 +221,21 @@ export default function HiromancjaPage() {
           wgrane, TAUPE = jeszcze nie), pod nim płaski złoty przycisk i podpis stanu.
           Dominującą rękę pokazuje przełącznik wyżej, nie kolor koła. */}
       {/* jak zrobić zdjęcie, na którym widać niuanse — od tego zależy jakość odczytu */}
+      {przewodnikTest && (
+        <div id="przewodnik-test" className="sekcja-zlota-ai" style={{ marginBottom: 40 }}>
+          <SekcjaZlota tytul="Krok 1 — co widać na Twoich dłoniach (test)">
+            <HiromancjaInwentarz
+              wiodaca={{ imageBase64: "", imageMediaType: "image/jpeg" }}
+              bierna={{ imageBase64: "", imageMediaType: "image/jpeg" }}
+              nazwyRak={{ wiodaca: pismoReka, bierna: rekaBierna }}
+              onZnakiWlasne={() => {}}
+              onDalej={() => setPrzewodnikTest(false)}
+              testowe={PRZYKLAD_OGLEDZIN}
+            />
+          </SekcjaZlota>
+        </div>
+      )}
+
       <div className="dlon-wskazowki">
         <p className="eyebrow" style={{ marginBottom: 8, color: "var(--sand)" }}>Jak zrobić dobre zdjęcie</p>
         <ul>
@@ -329,3 +354,17 @@ export default function HiromancjaPage() {
     </div>
   );
 }
+
+/** Tylko do testu przewodnika na localhost (?przewodnik) — przykładowe znaleziska AI, nie czyjaś dłoń. */
+const PRZYKLAD_OGLEDZIN = {
+  znaki: [
+    { reka: "wiodaca", wzgorek: "jowisz", znak: "x", pewnosc: "wyrazny", gdzie: "duży krzyż pod palcem wskazującym" },
+    { reka: "wiodaca", wzgorek: "czworobok", znak: "krzyz_mistyczny", pewnosc: "delikatny", gdzie: "między linią serca a głowy" },
+    { reka: "bierna", wzgorek: "ksiezyc", znak: "x", pewnosc: "wyrazny", gdzie: "na krawędzi dłoni" },
+  ],
+  linie: [
+    { reka: "wiodaca", linia: "zycia", stan: "wyrazna", gdzie: "długa, głęboka" },
+    { reka: "wiodaca", linia: "losu", stan: "odcinkowa", gdzie: "od środka dłoni" },
+    { reka: "bierna", linia: "serca", stan: "wyrazna", gdzie: "" },
+  ],
+};

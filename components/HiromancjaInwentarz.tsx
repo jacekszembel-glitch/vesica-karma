@@ -100,7 +100,7 @@ function pytania(znaki: ZnakInw[], linie: LiniaInw[]): Pytanie[] {
   return lista;
 }
 
-export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnakiWlasne, onDalej }: {
+export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnakiWlasne, onDalej, testowe }: {
   wiodaca: DaneReki;
   bierna: DaneReki;
   /** Np. { wiodaca: "prawa", bierna: "lewa" } — do nagłówków i odbicia rysunku. */
@@ -108,10 +108,14 @@ export default function HiromancjaInwentarz({ wiodaca, bierna, nazwyRak, onZnaki
   /** Znaki zaznaczone przez osobę, których AI nie zobaczyło — idą do odczytu jako jej obserwacje. */
   onZnakiWlasne: (z: ZnakWlasny[]) => void;
   onDalej: (inw: InwentarzPotwierdzony) => void;
+  /** Tylko localhost (?przewodnik): gotowe znaleziska AI — przewodnik bez zdjęć i bez płatnych oględzin. */
+  testowe?: { znaki: unknown[]; linie: unknown[] };
 }) {
   const [busy, setBusy] = useState(false);
   const [blad, setBlad] = useState<string | null>(null);
-  const [wynik, setWynik] = useState<{ znaki: ZnakInw[]; linie: LiniaInw[]; ogledzinyTekst: string } | null>(null);
+  const [wynik, setWynik] = useState<{ znaki: ZnakInw[]; linie: LiniaInw[]; ogledzinyTekst: string } | null>(
+    () => (testowe ? { ...zOdpowiedzi(testowe.znaki, testowe.linie), ogledzinyTekst: "" } : null),
+  );
   const [nr, setNr] = useState(0);
   const [odp, setOdp] = useState<Record<string, Odp>>({});
   // zaznaczenia przy bieżącym wzgórku, zanim osoba kliknie „Dalej”
