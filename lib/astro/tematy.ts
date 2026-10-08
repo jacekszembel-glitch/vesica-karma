@@ -94,7 +94,7 @@ export function dlonReki(dlon: DlonWLiczbach | null, reka: "wiodaca" | "bierna")
   const tej = <T extends { reka: string }>(l?: T[]) => (l ?? []).filter((z) => z.reka === reka);
   return reka === "wiodaca"
     ? { ...dlon, znaki: tej(dlon.znaki), wlasne: tej(dlon.wlasne), bierna: undefined }
-    : { planety: dlon.bierna?.planety ?? {}, linie: dlon.bierna?.linie ?? {}, zywiol: dlon.zywiol, zrodlo: dlon.zrodlo, znaki: tej(dlon.znaki), wlasne: tej(dlon.wlasne) };
+    : { planety: dlon.bierna?.planety ?? {}, linie: dlon.bierna?.linie ?? {}, glowa: dlon.bierna?.glowa ?? null, zywiol: dlon.zywiol, zrodlo: dlon.zrodlo, znaki: tej(dlon.znaki), wlasne: tej(dlon.wlasne) };
 }
 
 /**
@@ -220,6 +220,10 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
     const opis = `${NAZWA_ZNAKU[z.znak]}${gdzie}${z.zrodlo === "osoba" ? " (zgłoszony przez Ciebie)" : ""}${ile}`;
     const moc = wszystkie.reduce((s, x) => s + (x.pewnosc === "wyrazny" ? 2 : 1), 0);
     return z.pewnosc === "delikatny" ? czesciowo(opis + ", delikatny", moc) : tak(opis, moc);
+  };
+  const glowaProsta = (): Wskazanie | null => {
+    if (dlon?.glowa) sprawdzono = true;
+    return dlon?.glowa === "prosta" ? tak("linia głowy prosta — umysł praktyczny i stały") : null;
   };
   const wzgorek = (p: PlanetId): Wskazanie | null => {
     if (dlon?.planety[p] != null) sprawdzono = true;
@@ -373,8 +377,9 @@ export function tematyWspolne(chart: VedicChart, num: NumerologyResult, dlon: Dl
           silna("saturn") ? tak(`Saturn — ${chart.planets.saturn.dignity}`) : null,
           talent("technika"),
         )),
-        // linia losu to klasycznie „linia Saturna” — praca, obowiązek, droga zawodowa
-        dlon: reka(() => najlepsze(wzgorek("saturn"), znakNa("saturn", ["kwadrat", "trojkat", "kreski"]), linia("losu"))),
+        // linia losu NIE: mówi o kierunku drogi, nie o wytrwałości, i liczy się już w „Celu” (bez podwójnego głosu).
+        // Wytrwałość: wzgórek i znaki Saturna oraz prosta linia głowy (umysł praktyczny, stały)
+        dlon: reka(() => najlepsze(wzgorek("saturn"), znakNa("saturn", ["kwadrat", "trojkat", "kreski"]), glowaProsta())),
         numerologia: liczby("saturn"),
       },
     },
@@ -578,7 +583,7 @@ export const KRYTERIA_TEMATOW: Record<string, Record<SystemTematu, string>> = {
   },
   praca: {
     kosmogram: "Saturn jogakaraka; Saturn w kendrze, 3., 6. albo 11. domu lub w swojej godności; talent: technika",
-    dlon: "wydatny wzgórek Saturna; kwadrat, trójkąt albo pionowa linia na nim; linia losu (linia Saturna)",
+    dlon: "wydatny wzgórek Saturna; kwadrat, trójkąt albo pionowa linia na nim; prosta linia głowy",
     numerologia: "8 (Saturn) wśród Twoich liczb",
   },
   finanse: {

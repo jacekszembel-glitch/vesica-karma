@@ -113,6 +113,8 @@ export const LINIE_DLONI: LiniaDloni[] = [
 ];
 
 /** Zapis dłoni w liczbach — z bloku danych odczytu AI (albo wyłuskany z tekstu). */
+export type KsztaltGlowy = "prosta" | "lekko" | "mocno";
+
 export interface DlonWLiczbach {
   planety: Partial<Record<PlanetId, Ocena | null>>;
   zywiol: TypDloni | null;
@@ -125,7 +127,9 @@ export interface DlonWLiczbach {
   /** Surowe odpowiedzi AI na zgłoszone znaki (kolejność jak przy wysyłce) — scalane w HiromancjaOdczyt. */
   odpowiedziNaZgloszone?: ("tak" | "mozliwe" | "nie")[];
   /** Ręka bierna osobno (planety i linie powyżej = ręka wiodąca) — od odczytów z 2026-10-07; starsze jej nie mają. */
-  bierna?: { planety: Partial<Record<PlanetId, Ocena | null>>; linie: Partial<Record<LiniaDloni, StanLinii | null>> };
+  bierna?: { planety: Partial<Record<PlanetId, Ocena | null>>; linie: Partial<Record<LiniaDloni, StanLinii | null>>; glowa?: KsztaltGlowy | null };
+  /** Przebieg linii głowy ręki wiodącej (z przewodnika: prosta / lekko / mocno opada). */
+  glowa?: KsztaltGlowy | null;
 }
 
 const CYFRA_PLANETA: Record<number, PlanetId> = {
@@ -328,7 +332,8 @@ export function rozdzielOdczytDloni(surowy: string): { tekst: string; dane: Dlon
       planety?: Record<string, unknown>; zywiol?: unknown;
       znaki?: Record<string, unknown>[]; linie?: Record<string, unknown>;
       deklaracje?: { nr?: number; widze?: string }[];
-      bierna?: { planety?: Record<string, unknown>; linie?: Record<string, unknown> };
+      bierna?: { planety?: Record<string, unknown>; linie?: Record<string, unknown>; glowa?: unknown };
+      glowa?: unknown;
     };
     const planetyZ = (src?: Record<string, unknown>) => {
       const out: Partial<Record<PlanetId, Ocena | null>> = {};
@@ -351,14 +356,16 @@ export function rozdzielOdczytDloni(surowy: string): { tekst: string; dane: Dlon
     const znaki = (Array.isArray(d.znaki) ? d.znaki : [])
       .map((z) => znakZDanych(z, "ai")).filter((z): z is ZnakDloni => !!z);
     const linie = linieZ(d.linie);
-    const bierna = d.bierna && typeof d.bierna === "object" ? { planety: planetyZ(d.bierna.planety), linie: linieZ(d.bierna.linie) } : undefined;
+    const glowaZ = (v: unknown): KsztaltGlowy | null => (v === "prosta" || v === "lekko" || v === "mocno" ? v : null);
+    const bierna = d.bierna && typeof d.bierna === "object" ? { planety: planetyZ(d.bierna.planety), linie: linieZ(d.bierna.linie), glowa: glowaZ(d.bierna.glowa) } : undefined;
+    const glowa = glowaZ(d.glowa);
     const odp = Array.isArray(d.deklaracje) ? d.deklaracje : [];
     const odpowiedziNaZgloszone: ("tak" | "mozliwe" | "nie")[] = [];
     for (const o of odp) {
       const w = o.widze === "tak" || o.widze === "mozliwe" ? o.widze : "nie";
       if (typeof o.nr === "number" && o.nr >= 1 && o.nr <= 20) odpowiedziNaZgloszone[o.nr - 1] = w;
     }
-    return { tekst, dane: uzgodnijDlon({ planety, zywiol, zrodlo: "odczyt", znaki, linie, odpowiedziNaZgloszone, ...(bierna ? { bierna } : {}) }) };
+    return { tekst, dane: uzgodnijDlon({ planety, zywiol, zrodlo: "odczyt", znaki, linie, odpowiedziNaZgloszone, glowa, ...(bierna ? { bierna } : {}) }) };
   } catch {
     return { tekst, dane: null };
   }
