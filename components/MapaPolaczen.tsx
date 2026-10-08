@@ -107,6 +107,10 @@ export default function MapaPolaczen({ mapa }: { mapa: Mapa }) {
     return n;
   });
   const wg = [...mapa.planety].sort((a, b) => b.sila - a.sila);
+  // wiersz wyróżniamy wg mocniejszego z dwóch spotkań: na wierzchu (D1 ↔ wiodąca) albo w głębi (D9 ↔ bierna)
+  const SILA_RODZAJU: RodzajPolaczenia[] = ["laczy", "czesciowo", "tylko_niebo", "tylko_dlon", "w_tle", "brak_danych"];
+  const mocniejsze = (p: PlanetaMapy): RodzajPolaczenia =>
+    SILA_RODZAJU.indexOf(p.polaczenie9) < SILA_RODZAJU.indexOf(p.polaczenie) && laczy(p.polaczenie9) ? p.polaczenie9 : p.polaczenie;
   // najpierw połączenia D1 ↔ ręka wiodąca (to, co budujesz), potem tylko w głębi (D9 ↔ ręka bierna)
   const naWierzchu = wg.filter((p) => laczy(p.polaczenie));
   const wGlebi = wg.filter((p) => !laczy(p.polaczenie) && laczy(p.polaczenie9));
@@ -147,7 +151,7 @@ export default function MapaPolaczen({ mapa }: { mapa: Mapa }) {
           <tbody>
             {wg.map((p) => (
               <Fragment key={p.planeta}>
-                <tr className={`sp-klik ${RODZAJ[p.polaczenie].klasa}${otwarte.has(p.planeta) ? " sp-otwarty" : ""}`} onClick={() => przelacz(p.planeta)}>
+                <tr className={`sp-klik ${RODZAJ[mocniejsze(p)].klasa}${otwarte.has(p.planeta) ? " sp-otwarty" : ""}`} onClick={() => przelacz(p.planeta)}>
                   <td>
                     <button type="button" className="sp-rozwin" aria-expanded={otwarte.has(p.planeta)}
                       onClick={(e) => { e.stopPropagation(); przelacz(p.planeta); }}>
@@ -160,8 +164,18 @@ export default function MapaPolaczen({ mapa }: { mapa: Mapa }) {
                   <td className="srodek sp-znak">{znak(p.niebo9.glos)}</td>
                   <td className="srodek sp-znak">{znak(p.bierna.glos)}</td>
                   <td>
-                    <span className="sp-rodzaj mp-rodzaj">{RODZAJ[p.polaczenie].tekst}</span>
-                    {laczy(p.polaczenie9) && <span className="mp-d9"> + w głębi (D9)</span>}
+                    {/* pełne spotkanie w głębi (D9 ↔ ręka bierna) liczy się tak samo jak na wierzchu */}
+                    {p.polaczenie9 === "laczy" && p.polaczenie !== "laczy" ? (
+                      <>
+                        <span className="sp-rodzaj mp-rodzaj">łączy się w głębi (D9 ↔ bierna)</span>
+                        <span className="mp-d9"> · na wierzchu: {RODZAJ[p.polaczenie].tekst}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="sp-rodzaj mp-rodzaj">{RODZAJ[p.polaczenie].tekst}</span>
+                        {laczy(p.polaczenie9) && <span className="mp-d9"> + w głębi (D9{p.polaczenie9 === "laczy" ? ", w pełni" : ""})</span>}
+                      </>
+                    )}
                     {p.liczby.glos > 0 && <span className="sp-num-potw"> + liczby</span>}
                   </td>
                 </tr>
